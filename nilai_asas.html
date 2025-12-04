@@ -95,7 +95,7 @@
     font-size: 14px;
   }
 
-  /* ----------- DASHBOARD CARD ----------- */
+  /* ----------- DASHBOARD ----------- */
 
   #dashboardBox {
     display: none;
@@ -113,6 +113,14 @@
     font-size: 18px;
     margin-top: 4px;
     text-align: left;
+  }
+
+  /* NILAI BESAR */
+  .nilai-besar {
+    font-size: 70px !important;
+    font-weight: bold;
+    text-align: center !important;
+    margin-top: 10px;
   }
 
   .red { color: red; font-weight: bold; }
@@ -139,7 +147,7 @@
 
 <main class="page-center">
 
-  <!-- ================= LOGIN PAGE ================= -->
+  <!-- ================= LOGIN ================= -->
   <div class="login-card" id="loginBox">
 
     <img src="assets/logo.png" alt="Logo Sekolah" class="logo" />
@@ -187,7 +195,7 @@
 
   </div>
 
-  <!-- ================= DASHBOARD (VERTIKAL) ================= -->
+  <!-- ================= DASHBOARD ================= -->
   <div class="dashboard-card" id="dashboardBox">
 
     <h1 class="title">Nilai Kamu</h1>
@@ -199,7 +207,7 @@
     <div id="kelasOut" class="item-value"></div>
 
     <div class="item-title">NILAI :</div>
-    <div id="nilai" class="item-value"></div>
+    <div id="nilai" class="item-value nilai-besar"></div>
 
     <div class="item-title">MOTIVASI :</div>
     <div id="motivasi" class="item-value"></div>
@@ -248,11 +256,11 @@ async function login() {
       return;
     }
 
-    // ---- SWITCH TO DASHBOARD ----
+    // SWITCH TO DASHBOARD
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("dashboardBox").style.display = "block";
 
-    // OUTPUT DATA
+    // OUTPUT
     document.getElementById("nama").innerText = siswa[1].toUpperCase();
     document.getElementById("kelasOut").innerText = siswa[2].toUpperCase();
 
@@ -260,6 +268,7 @@ async function login() {
     const kkm = Number(siswa[5]);
 
     const nilaiEl = document.getElementById("nilai");
+    nilaiEl.classList.remove("red", "green");
     nilaiEl.classList.add(nilai < kkm ? "red" : "green");
     nilaiEl.innerText = nilai;
 
@@ -280,4 +289,3 @@ function logout() {
 
 </body>
 </html>
-
