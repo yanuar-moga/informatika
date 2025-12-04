@@ -117,7 +117,6 @@
     margin-top: 10px;
     filter: blur(12px);
     transition: 0.3s;
-    position: relative;
   }
 
   .nilai-clear { filter: blur(0) !important; }
@@ -139,19 +138,19 @@
     background: #b83228;
   }
 
-  /* ================== STIKER ASLI (AUTO SIZE + FADE IN + SHAKE) ================== */
+  /* ================== STIKER ASLI (SHAKE + FADE) ================== */
   #stikerNilai {
     position: absolute;
-    top: 188px;
+    top: 190px;
     left: 50%;
     transform: translateX(-50%);
-    width: 250px; /* ini nanti diubah otomatis oleh JS */
+    width: 180px;   /* akan auto override dari JS */
     height: auto;
     cursor: pointer;
     z-index: 50;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.6s ease;
+    transition: opacity 0.4s ease;
     animation: shake 1.2s infinite ease-in-out;
   }
 
@@ -167,6 +166,7 @@
     75%  { transform: translateX(calc(-50% + 6px)) rotate(3deg); }
     100% { transform: translateX(-50%) rotate(0deg); }
   }
+
 </style>
 </head>
 
@@ -178,7 +178,7 @@
   <div class="login-card" id="loginBox">
 
     <img src="assets/logo.png" alt="Logo Sekolah" class="logo" />
-    <h1 class="title">NILAI ASAS INFORMATIKA </h1>
+    <h1 class="title">Nilai ASAS Informatika</h1>
 
     <form id="loginForm" class="form" onsubmit="event.preventDefault(); login();">
 
@@ -226,7 +226,7 @@
   <div class="dashboard-card" id="dashboardBox">
 
     <!-- STIKER BESAR -->
-    <img id="stikerNilai" />
+    <img id="stikerNilai" class="hidden" />
 
     <h1 class="title">Nilai Kamu</h1>
 
@@ -302,23 +302,21 @@ async function login() {
     const nilai = Number(siswa[4]);
     const kkm = Number(siswa[5]);
 
-    nilaiEl = document.getElementById("nilai");
+    const nilaiEl = document.getElementById("nilai");
     nilaiEl.classList.remove("red", "green");
     nilaiEl.classList.add(nilai < kkm ? "red" : "green");
     nilaiEl.innerText = nilai;
 
     /* ================== AUTO SIZE STIKER ================== */
-    const nilaiWidth = nilaiEl.offsetWidth;
-    const stikerSize = nilaiWidth + 60; // menutupi nilai dengan aman
+    const nilaiHeight = nilaiEl.offsetHeight;
+    const stikerSize = nilaiHeight * 1.2;
+
     const stikerImg = document.getElementById("stikerNilai");
-
-    const stiker = pilihStiker(nilai);
-    stikerImg.src = "assets/" + stiker;
-
+    stikerImg.src = "assets/" + pilihStiker(nilai);
     stikerImg.style.width = stikerSize + "px";
     stikerImg.classList.add("show");
 
-    document.getElementById("nilai").classList.remove("nilai-clear");
+    nilaiEl.classList.remove("nilai-clear");
 
     motivasi.innerText = siswa[6].toUpperCase();
     remidi.innerText = siswa[8].toUpperCase();
@@ -330,15 +328,15 @@ async function login() {
 
 /* ================= INTERAKSI STIKER ================= */
 const stikerImg = document.getElementById("stikerNilai");
-const nilaiBox = document.getElementById("nilai");
+const nilaiBox  = document.getElementById("nilai");
 
 stikerImg.addEventListener("click", () => {
-  stikerImg.classList.remove("show"); // fade out
+  stikerImg.classList.remove("show");
   nilaiBox.classList.add("nilai-clear");
 });
 
 nilaiBox.addEventListener("click", () => {
-  stikerImg.classList.add("show"); // fade in
+  stikerImg.classList.add("show");
   nilaiBox.classList.remove("nilai-clear");
 });
 
