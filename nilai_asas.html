@@ -3,47 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rekap Nilai – Sinkronisasi Google Sheet</title>
+<title>Portal Nilai Siswa</title>
 
 <style>
   body {
     font-family: Arial, sans-serif;
-    background: #f3f6fa;
+    background: #edf1f7;
     margin: 0;
-    padding: 20px;
+    padding: 0;
   }
 
-  .container {
-    max-width: 1100px;
-    margin: auto;
-    background: #fff;
+  .login-box, .dashboard {
+    max-width: 400px;
+    margin: 100px auto;
+    background: white;
     padding: 25px;
     border-radius: 15px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
   }
 
   h2 {
-    margin-top: 0;
     text-align: center;
+    margin-bottom: 20px;
   }
 
-  select, input {
-    padding: 8px 10px;
+  input, button {
     width: 100%;
-    margin-bottom: 15px;
+    padding: 10px;
+    margin-top: 10px;
     border-radius: 8px;
-    border: 1px solid #ccc;
+    border: 1px solid #bbb;
+    font-size: 16px;
+  }
+
+  button {
+    background: #4e73df;
+    color: white;
+    cursor: pointer;
+    margin-top: 15px;
+  }
+
+  button:hover {
+    background: #3b5cc3;
   }
 
   table {
     width: 100%;
+    margin-top: 20px;
     border-collapse: collapse;
-    margin-top: 15px;
   }
 
   th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
+    border: 1px solid #ccc;
+    padding: 10px;
     text-align: center;
   }
 
@@ -51,112 +63,105 @@
     background: #4e73df;
     color: white;
   }
+
+  .error {
+    color: red;
+    margin-top: 10px;
+    text-align: center;
+  }
 </style>
 </head>
 
 <body>
-<div class="container">
-  <h2>📊 Rekap Nilai – Sinkronisasi Google Sheet</h2>
 
-  <label><b>Pilih Google Sheet:</b></label>
-  <select id="sheetSelector">
-    <option value="17GeYfdyiD8IrTePPPu0maRl8V3MKk4zJ">Default Sheet</option>
-    <option value="1V4VE4qFv0YCC8wEFKdPMPRvvcyFwcLyIfgE8gdCScyw">Informatika</option>
-    <option value="1gvxBUDSkXQ7iCasCw197CAn3eZWXmFISgtIANlEzA20">IPS</option>
-  </select>
+<!-- ================= LOGIN FORM ================= -->
+<div class="login-box" id="loginBox">
+  <h2>Login Portal Nilai</h2>
 
-  <button onclick="loadSheet()">Muat Data</button>
+  <input id="username" type="text" placeholder="Masukkan NISN">
+  <input id="password" type="password" placeholder="Masukkan Password">
 
-  <div id="loading" style="margin-top:10px; display:none;">Loading data...</div>
+  <button onclick="login()">Login</button>
 
-  <table id="dataTable">
+  <div id="loginError" class="error"></div>
+</div>
+
+<!-- ================= DASHBOARD ================= -->
+<div class="dashboard" id="dashboard" style="display:none;">
+  <h2>Nilai Kamu</h2>
+  
+  <table id="resultTable">
     <thead>
       <tr>
         <th>NISN</th>
-        <th>Name</th>
-        <th>Class</th>
-        <th>Subject</th>
-        <th>Score</th>
+        <th>Nama</th>
+        <th>Kelas</th>
+        <th>Mapel</th>
+        <th>Nilai</th>
         <th>KKM</th>
-        <th>Motivation</th>
-        <th>Emoticon</th>
-        <th>Remediation</th>
+        <th>Motivasi</th>
+        <th>Emoji</th>
+        <th>Remidi</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
 
+  <button onclick="logout()">Logout</button>
 </div>
 
 <script>
-  const DEFAULT_SHEET_ID = "17GeYfdyiD8IrTePPPu0maRl8V3MKk4zJ";
+const SHEET_ID = "17GeYfdyiD8IrTePPPu0maRl8V3MKk4zJ";
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
 
-  const HEADERS = [
-    "NISN",
-    "Name",
-    "Class",
-    "Subject",
-    "Score",
-    "KKM",
-    "Motivation",
-    "Emoticon",
-    "Remediation"
-  ];
-
-  function mapColumns(headerRow) {
-    const map = {};
-    headerRow.forEach((h, i) => {
-      map[h.trim()] = i;
-    });
-    return map;
+async function login() {
+  const nisn = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+  
+  if (password !== "asas2025") {
+    document.getElementById("loginError").innerText = "Password salah!";
+    return;
   }
 
-  async function loadSheet() {
-    document.getElementById("loading").style.display = "block";
+  const res = await fetch(SHEET_URL);
+  const text = await res.text();
+  const json = JSON.parse(text.substring(47, text.length - 2));
 
-    const sheetId = document.getElementById("sheetSelector").value || DEFAULT_SHEET_ID;
+  const rows = json.table.rows.map(r => r.c.map(c => (c ? c.v : "")));
 
-    const url =
-      `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+  // Cari siswa berdasarkan NISN
+  const student = rows.find(r => String(r[0]) === nisn);
 
-    try {
-      const res = await fetch(url);
-      const text = await res.text();
-
-      const json = JSON.parse(text.substring(47, text.length - 2));
-      const rows = json.table.rows.map(r => r.c.map(c => (c ? c.v : "")));
-
-      // Header mapping
-      const col = mapColumns(HEADERS);
-
-      const tbody = document.querySelector("#dataTable tbody");
-      tbody.innerHTML = "";
-
-      rows.forEach(row => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${row[col["NISN"]]}</td>
-          <td>${row[col["Name"]]}</td>
-          <td>${row[col["Class"]]}</td>
-          <td>${row[col["Subject"]]}</td>
-          <td>${row[col["Score"]]}</td>
-          <td>${row[col["KKM"]]}</td>
-          <td>${row[col["Motivation"]]}</td>
-          <td>${row[col["Emoticon"]]}</td>
-          <td>${row[col["Remediation"]]}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-    } catch (e) {
-      alert("Gagal memuat data. Pastikan sheet dipublikasikan ke web.");
-    }
-
-    document.getElementById("loading").style.display = "none";
+  if (!student) {
+    document.getElementById("loginError").innerText = "NISN tidak ditemukan!";
+    return;
   }
 
-  // Auto-load default sheet saat halaman dibuka
-  loadSheet();
+  // Tampilkan dashboard
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("dashboard").style.display = "block";
+
+  // Masukkan data ke tabel
+  const tbody = document.querySelector("#resultTable tbody");
+  tbody.innerHTML = `
+    <tr>
+      <td>${student[0]}</td>
+      <td>${student[1]}</td>
+      <td>${student[2]}</td>
+      <td>${student[3]}</td>
+      <td>${student[4]}</td>
+      <td>${student[5]}</td>
+      <td>${student[6]}</td>
+      <td>${student[7]}</td>
+      <td>${student[8]}</td>
+    </tr>
+  `;
+}
+
+function logout() {
+  document.getElementById("dashboard").style.display = "none";
+  document.getElementById("loginBox").style.display = "block";
+}
 </script>
 
 </body>
