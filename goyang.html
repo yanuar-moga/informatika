@@ -39,12 +39,69 @@
     margin-bottom: 20px;
   }
 
+  .form { text-align: left; }
+
+  .field {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .label-text {
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+
+  input, select {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #bbb;
+    font-size: 16px;
+  }
+
+  .show-pass {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 15px;
+    font-size: 14px;
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 10px;
+    background: #4e73df;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .btn-primary:hover {
+    background: #3b5cc3;
+  }
+
+  .footer {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #666;
+  }
+
+  .error {
+    color: red;
+    margin-top: 10px;
+    font-size: 14px;
+  }
+
+  #dashboardBox { display: none; }
+
   .item-title {
     font-weight: bold;
     margin-top: 18px;
     font-size: 15px;
-    text-align: left;
     color: #444;
+    text-align: left;
   }
 
   .item-value {
@@ -53,17 +110,17 @@
     text-align: left;
   }
 
-  /* ====== Nilai ====== */
   .nilai-besar {
     font-size: 70px !important;
     font-weight: bold;
     text-align: center !important;
     margin-top: 10px;
     filter: blur(12px);
-    transition: 0.25s;
+    transition: 0.3s;
+    position: relative;
   }
-  .nilai-clear { filter: blur(0) !important; }
 
+  .nilai-clear { filter: blur(0) !important; }
   .red { color: red; font-weight: bold; }
   .green { color: green; font-weight: bold; }
 
@@ -78,21 +135,29 @@
     cursor: pointer;
   }
 
-  /* ================== STIKER = AUTO FIT NILAI ================== */
+  .logout-btn:hover {
+    background: #b83228;
+  }
+
+  /* ================== STIKER ASLI (AUTO SIZE + FADE IN + SHAKE) ================== */
   #stikerNilai {
     position: absolute;
+    top: 188px;
     left: 50%;
     transform: translateX(-50%);
+    width: 250px; /* ini nanti diubah otomatis oleh JS */
+    height: auto;
     cursor: pointer;
-    z-index: 10;
-    opacity: 1;
-    transition: 0.25s ease;
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
     animation: shake 1.2s infinite ease-in-out;
   }
 
-  #stikerNilai.hidden {
-    opacity: 0;
-    pointer-events: none;
+  #stikerNilai.show {
+    opacity: 1;
+    pointer-events: auto;
   }
 
   @keyframes shake {
@@ -109,11 +174,11 @@
 
 <main class="page-center">
 
-  <!-- LOGIN -->
+  <!-- ================= LOGIN ================= -->
   <div class="login-card" id="loginBox">
 
     <img src="assets/logo.png" alt="Logo Sekolah" class="logo" />
-    <h1 class="title">Portal Nilai ASAS 2025</h1>
+    <h1 class="title">NILAI ASAS INFORMATIKA </h1>
 
     <form id="loginForm" class="form" onsubmit="event.preventDefault(); login();">
 
@@ -143,18 +208,25 @@
         </select>
       </label>
 
+      <div class="show-pass">
+        <input type="checkbox" id="showPassword" />
+        <label for="showPassword">Tampilkan Password</label>
+      </div>
+
       <button type="submit" class="btn-primary">Masuk</button>
+
     </form>
 
     <div id="loginError" class="error"></div>
     <div class="footer">© 2025 MB All Rights Reserved</div>
+
   </div>
 
-  <!-- DASHBOARD -->
+  <!-- ================= DASHBOARD ================= -->
   <div class="dashboard-card" id="dashboardBox">
 
     <!-- STIKER BESAR -->
-    <img id="stikerNilai" class="hidden" />
+    <img id="stikerNilai" />
 
     <h1 class="title">Nilai Kamu</h1>
 
@@ -196,11 +268,11 @@ function pilihStiker(nilai) {
   return "11.jpg";
 }
 
-/* ================ LOGIN + LOAD NILAI ================ */
+/* ================= LOGIN ================= */
 async function login() {
   const nisn = username.value.trim();
   const pass = password.value.trim();
-  const kelas = kelas.value;
+  const kelas = document.getElementById("kelas").value;
 
   if (pass !== "asas2025") {
     loginError.innerText = "Password salah!";
@@ -230,55 +302,51 @@ async function login() {
     const nilai = Number(siswa[4]);
     const kkm = Number(siswa[5]);
 
-    const nilaiBox = document.getElementById("nilai");
-    nilaiBox.classList.remove("red", "green");
-    nilaiBox.classList.add(nilai < kkm ? "red" : "green");
-    nilaiBox.innerText = nilai;
+    nilaiEl = document.getElementById("nilai");
+    nilaiEl.classList.remove("red", "green");
+    nilaiEl.classList.add(nilai < kkm ? "red" : "green");
+    nilaiEl.innerText = nilai;
+
+    /* ================== AUTO SIZE STIKER ================== */
+    const nilaiWidth = nilaiEl.offsetWidth;
+    const stikerSize = nilaiWidth + 60; // menutupi nilai dengan aman
+    const stikerImg = document.getElementById("stikerNilai");
+
+    const stiker = pilihStiker(nilai);
+    stikerImg.src = "assets/" + stiker;
+
+    stikerImg.style.width = stikerSize + "px";
+    stikerImg.classList.add("show");
+
+    document.getElementById("nilai").classList.remove("nilai-clear");
 
     motivasi.innerText = siswa[6].toUpperCase();
     remidi.innerText = siswa[8].toUpperCase();
 
-    /* ====== PASANG STIKER DI ATAS NILAI ====== */
-    const stiker = pilihStiker(nilai);
-    const stikerImg = document.getElementById("stikerNilai");
-
-    stikerImg.src = "assets/" + stiker;
-
-    setTimeout(() => {
-      const rect = nilaiBox.getBoundingClientRect();
-      const cardRect = dashboardBox.getBoundingClientRect();
-
-      const height = rect.height * 1.35;
-
-      stikerImg.style.width = height + "px";
-
-      const topPos = rect.top - cardRect.top - (height * 0.10);
-      stikerImg.style.top = topPos + "px";
-
-      stikerImg.classList.remove("hidden");
-    }, 100);
-
-  } catch (err) {
+  } catch (e) {
     loginError.innerText = "Gagal memuat data!";
   }
 }
 
-/* ================ INTERAKSI STIKER ================ */
-stikerNilai.addEventListener("click", () => {
-  stikerNilai.classList.add("hidden");
-  nilai.classList.add("nilai-clear");
+/* ================= INTERAKSI STIKER ================= */
+const stikerImg = document.getElementById("stikerNilai");
+const nilaiBox = document.getElementById("nilai");
+
+stikerImg.addEventListener("click", () => {
+  stikerImg.classList.remove("show"); // fade out
+  nilaiBox.classList.add("nilai-clear");
 });
 
-nilai.addEventListener("click", () => {
-  stikerNilai.classList.remove("hidden");
-  nilai.classList.remove("nilai-clear");
+nilaiBox.addEventListener("click", () => {
+  stikerImg.classList.add("show"); // fade in
+  nilaiBox.classList.remove("nilai-clear");
 });
 
-/* ================ LOGOUT ================ */
+/* ================= LOGOUT ================= */
 function logout() {
   dashboardBox.style.display = "none";
   loginBox.style.display = "block";
-  stikerNilai.classList.add("hidden");
+  stikerImg.classList.remove("show");
 }
 </script>
 
