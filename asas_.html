@@ -39,9 +39,7 @@
     margin-bottom: 20px;
   }
 
-  .form {
-    text-align: left;
-  }
+  .form { text-align: left; }
 
   .field {
     margin-bottom: 15px;
@@ -121,10 +119,7 @@
     transition: 0.3s;
   }
 
-  .nilai-clear {
-    filter: blur(0px) !important;
-  }
-
+  .nilai-clear { filter: blur(0) !important; }
   .red { color: red; font-weight: bold; }
   .green { color: green; font-weight: bold; }
 
@@ -143,25 +138,31 @@
     background: #b83228;
   }
 
-  /* ========== STIKER BESAR ========== */
+  /* ================== STIKER ASLI ================== */
   #stikerNilai {
     position: absolute;
-    top: 215px;
+    top: 190px;
     left: 50%;
     transform: translateX(-50%);
-    width: 180px;
-    height: 180px;
-    border-radius: 50%;
+    width: 260px;   /* lebih besar untuk menutup nilai */
+    height: auto;
     cursor: pointer;
     z-index: 50;
     opacity: 1;
     transition: 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+    animation: float 2.5s ease-in-out infinite;
   }
 
   #stikerNilai.hidden {
     opacity: 0;
     pointer-events: none;
+  }
+
+  /* ============== ANIMASI FLOATING STIKER ============== */
+  @keyframes float {
+    0%   { transform: translateX(-50%) translateY(0px); }
+    50%  { transform: translateX(-50%) translateY(-12px); }
+    100% { transform: translateX(-50%) translateY(0px); }
   }
 
 </style>
@@ -175,7 +176,7 @@
   <div class="login-card" id="loginBox">
 
     <img src="assets/logo.png" alt="Logo Sekolah" class="logo" />
-    <h1 class="title">Nilai ASAS INFORMATIKA KELAS 7 2025</h1>
+    <h1 class="title">Nilai ASAS INFORMATIKA</h1>
 
     <form id="loginForm" class="form" onsubmit="event.preventDefault(); login();">
 
@@ -216,7 +217,6 @@
 
     <div id="loginError" class="error"></div>
     <div class="footer">© 2025 MB All Rights Reserved</div>
-
   </div>
 
   <!-- ================= DASHBOARD ================= -->
@@ -276,7 +276,6 @@ async function login() {
     return;
   }
 
-  /* FIX DI SINI → URL SUDAH BENAR */
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${kelas}&tqx=out:json`;
 
   try {
@@ -325,11 +324,13 @@ async function login() {
 const stikerImg = document.getElementById("stikerNilai");
 const nilaiBox = document.getElementById("nilai");
 
+// Hilangkan stiker = buka nilai
 stikerImg.addEventListener("click", () => {
   stikerImg.classList.add("hidden");
   nilaiBox.classList.add("nilai-clear");
 });
 
+// Klik nilai = tutup lagi
 nilaiBox.addEventListener("click", () => {
   stikerImg.classList.remove("hidden");
   nilaiBox.classList.remove("nilai-clear");
@@ -345,4 +346,3 @@ function logout() {
 
 </body>
 </html>
-
