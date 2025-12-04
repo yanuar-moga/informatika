@@ -19,7 +19,7 @@
     height: 100vh;
   }
 
-  .login-card, .dashboard {
+  .login-card, .dashboard-card {
     background: white;
     width: 360px;
     padding: 25px;
@@ -89,30 +89,37 @@
     color: #666;
   }
 
-  /* Dashboard */
-  #dashboard {
+  .error {
+    color: red;
+    margin-top: 10px;
+    font-size: 14px;
+  }
+
+  /* ----------- DASHBOARD CARD ----------- */
+
+  #dashboardBox {
     display: none;
   }
 
-  table {
-    width: 100%;
-    margin-top: 20px;
-    border-collapse: collapse;
+  .item-title {
+    font-weight: bold;
+    margin-top: 18px;
+    font-size: 15px;
+    color: #444;
+    text-align: left;
   }
 
-  th, td {
-    border: 1px solid #ccc;
-    padding: 8px;
-    font-size: 13px;
+  .item-value {
+    font-size: 18px;
+    margin-top: 4px;
+    text-align: left;
   }
 
-  th {
-    background: #4e73df;
-    color: white;
-  }
+  .red { color: red; font-weight: bold; }
+  .green { color: green; font-weight: bold; }
 
   .logout-btn {
-    margin-top: 15px;
+    margin-top: 25px;
     padding: 10px;
     width: 100%;
     border-radius: 8px;
@@ -125,13 +132,6 @@
   .logout-btn:hover {
     background: #b83228;
   }
-
-  .error {
-    color: red;
-    margin-top: 10px;
-    font-size: 14px;
-  }
-
 </style>
 </head>
 
@@ -187,27 +187,25 @@
 
   </div>
 
-  <!-- ================= DASHBOARD ================= -->
-  <div class="login-card" id="dashboard">
+  <!-- ================= DASHBOARD (VERTIKAL) ================= -->
+  <div class="dashboard-card" id="dashboardBox">
 
     <h1 class="title">Nilai Kamu</h1>
 
-    <table id="resultTable">
-      <thead>
-        <tr>
-          <th>NISN</th>
-          <th>Nama</th>
-          <th>Kelas</th>
-          <th>Mapel</th>
-          <th>Nilai</th>
-          <th>KKM</th>
-          <th>Motivasi</th>
-          <th>Emoji</th>
-          <th>Remidi</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <div class="item-title">NAMA :</div>
+    <div id="nama" class="item-value"></div>
+
+    <div class="item-title">KELAS :</div>
+    <div id="kelasOut" class="item-value"></div>
+
+    <div class="item-title">NILAI :</div>
+    <div id="nilai" class="item-value"></div>
+
+    <div class="item-title">MOTIVASI :</div>
+    <div id="motivasi" class="item-value"></div>
+
+    <div class="item-title">REMEDI :</div>
+    <div id="remidi" class="item-value"></div>
 
     <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
@@ -217,7 +215,7 @@
 <script>
 const SHEET_ID = "17GeYfdyiD8IrTePPPu0maRl8V3MKk4zJ";
 
-// Show/Hide password
+// Show password toggle
 document.getElementById("showPassword").addEventListener("change", function () {
   const p = document.getElementById("password");
   p.type = this.checked ? "text" : "password";
@@ -233,7 +231,8 @@ async function login() {
     return;
   }
 
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${kelas}&tqx=out:json`;
+  const url =
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${kelas}&tqx=out:json`;
 
   try {
     const res = await fetch(url);
@@ -241,31 +240,31 @@ async function login() {
     const json = JSON.parse(raw.substring(47, raw.length - 2));
 
     const rows = json.table.rows.map(r => r.c.map(c => (c ? c.v : "")));
-
     const siswa = rows.find(r => String(r[0]) === nisn);
 
     if (!siswa) {
-      document.getElementById("loginError").innerText = "NISN tidak ditemukan di kelas " + kelas;
+      document.getElementById("loginError").innerText =
+        "NISN tidak ditemukan di kelas " + kelas;
       return;
     }
 
+    // ---- SWITCH TO DASHBOARD ----
     document.getElementById("loginBox").style.display = "none";
-    document.getElementById("dashboard").style.display = "block";
+    document.getElementById("dashboardBox").style.display = "block";
 
-    const tbody = document.querySelector("#resultTable tbody");
-    tbody.innerHTML = `
-      <tr>
-        <td>${siswa[0]}</td>
-        <td>${siswa[1]}</td>
-        <td>${siswa[2]}</td>
-        <td>${siswa[3]}</td>
-        <td>${siswa[4]}</td>
-        <td>${siswa[5]}</td>
-        <td>${siswa[6]}</td>
-        <td>${siswa[7]}</td>
-        <td>${siswa[8]}</td>
-      </tr>
-    `;
+    // OUTPUT DATA
+    document.getElementById("nama").innerText = siswa[1].toUpperCase();
+    document.getElementById("kelasOut").innerText = siswa[2].toUpperCase();
+
+    const nilai = Number(siswa[4]);
+    const kkm = Number(siswa[5]);
+
+    const nilaiEl = document.getElementById("nilai");
+    nilaiEl.classList.add(nilai < kkm ? "red" : "green");
+    nilaiEl.innerText = nilai;
+
+    document.getElementById("motivasi").innerText = siswa[6].toUpperCase();
+    document.getElementById("remidi").innerText = siswa[8].toUpperCase();
 
   } catch (err) {
     document.getElementById("loginError").innerText =
@@ -274,7 +273,7 @@ async function login() {
 }
 
 function logout() {
-  document.getElementById("dashboard").style.display = "none";
+  document.getElementById("dashboardBox").style.display = "none";
   document.getElementById("loginBox").style.display = "block";
 }
 </script>
