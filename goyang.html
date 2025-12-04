@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cek Nilai</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f4f4f4;
+        text-align: center;
+    }
+
+    h2 {
+        margin-top: 10px;
+    }
+
+    input, select, button {
+        padding: 10px;
+        font-size: 16px;
+        margin: 5px 0;
+        width: 90%;
+        max-width: 350px;
+    }
+
+    #hasil {
+        margin-top: 25px;
+        padding: 20px;
+        background: white;
+        display: none;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        position: relative;
+    }
+
+    .blur {
+        filter: blur(10px);
+    }
+
+    /* === FLOATING STIKER ASLI === */
+    #stiker {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 180px;      /* ukuran lebih besar */
+        transform: translate(-50%, -50%);
+        z-index: 5;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        animation: goyang 1.3s infinite ease-in-out;
+    }
+
+    /* === ANIMASI GOYANG === */
+    @keyframes goyang {
+        0%   { transform: translate(-50%, -50%) rotate(-3deg); }
+        50%  { transform: translate(-50%, -50%) rotate(3deg); }
+        100% { transform: translate(-50%, -50%) rotate(-3deg); }
+    }
+</style>
+</head>
+
+<body>
+
+<h2>Cek Nilai Ujian</h2>
+
+<input type="text" id="nis" placeholder="Masukkan NISN" />
+<select id="kelas">
+    <option value="">Pilih Kelas</option>
+    <option value="Kelas 7">Kelas 7</option>
+    <option value="Kelas 8">Kelas 8</option>
+    <option value="Kelas 9">Kelas 9</option>
+</select>
+
+<button onclick="cekNilai()">Cek Nilai</button>
+
+<div id="hasil">
+    <img id="stiker" src="" alt="stiker">
+
+    <p><b>Nama:</b> <span id="nama"></span></p>
+    <p><b>NISN:</b> <span id="nis_out"></span></p>
+    <p><b>Kelas:</b> <span id="kelas_out"></span></p>
+    <p><b>Nilai:</b> <span id="nilai_out" class="nilai"></span></p>
+</div>
+
+<script>
+const SHEET_ID = "10TG5AWYG9NaP1XvZIbP26r4dVyfAz20u";
+
+/* === PILIH STIKER BERDASARKAN NILAI === */
+function pilihStiker(nilai) {
+  if (nilai < 40) return "9.jpg";
+  if (nilai < 50) return "8.jpg";
+  if (nilai < 60) return "1.jpg";
+  if (nilai < 70) return "2.jpg";
+  if (nilai < 78) return "3.jpg";
+  if (nilai < 80) return "6.jpg";
+  if (nilai < 85) return "5.jpg";
+  if (nilai < 90) return "10.jpg";
+  if (nilai < 95) return "4.jpg";
+  if (nilai < 100) return "11.jpg";
+  return "11.jpg";
+}
+
+/* === CEK NILAI === */
+async function cekNilai() {
+    const nis = document.getElementById("nis").value.trim();
+    const kelas = document.getElementById("kelas").value;
+
+    if (!nis || !kelas) {
+        alert("Lengkapi NISN dan kelas!");
+        return;
+    }
+
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${kelas}&tqx=out:json`;
+
+    try {
+        const res = await fetch(url);
+        let text = await res.text();
+        text = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+
+        const json = JSON.parse(text);
+        const rows = json.table.rows;
+
+        let ditemukan = false;
+
+        rows.forEach(r => {
+            const rowNIS = r.c[0]?.v?.toString().trim();
+            if (rowNIS === nis) {
+                ditemukan = true;
+
+                const nama   = r.c[1]?.v || "";
+                const nilai  = r.c[3]?.v || 0;
+
+                document.getElementById("nama").innerText = nama;
+                document.getElementById("nis_out").innerText = nis;
+                document.getElementById("kelas_out").innerText = kelas;
+                document.getElementById("nilai_out").innerText = nilai;
+
+                /* === BLUR NILAI + TAMPILKAN STIKER === */
+                document.querySelector(".nilai").classList.add("blur");
+
+                const stiker = pilihStiker(Number(nilai));
+                const stikerImg = document.getElementById("stiker");
+                stikerImg.src = `assets/${stiker}`;
+                stikerImg.style.opacity = 1;
+
+                document.getElementById("hasil").style.display = "block";
+            }
+        });
+
+        if (!ditemukan) {
+            alert("NISN tidak ditemukan!");
+        }
+
+    } catch (err) {
+        alert("Gagal mengambil data!");
+        console.log(err);
+    }
+}
+</script>
+
+</body>
+</html>
