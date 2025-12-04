@@ -1,51 +1,97 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Portal Nilai ASAS 2025</title>
 
 <style>
   body {
+    margin: 0;
     font-family: Arial, sans-serif;
     background: #e9eef6;
-    margin: 0;
-    padding: 0;
   }
 
-  .container {
-    max-width: 420px;
-    margin: 80px auto;
-    background: #fff;
+  .page-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .login-card, .dashboard {
+    background: white;
+    width: 360px;
     padding: 25px;
     border-radius: 15px;
     box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    text-align: center;
   }
 
-  h2 {
-    text-align: center;
+  .logo {
+    width: 80px;
+    margin-bottom: 10px;
+  }
+
+  .title {
+    font-size: 22px;
     margin-bottom: 20px;
   }
 
-  input, select, button {
-    width: 100%;
-    padding: 11px;
-    margin-top: 12px;
+  .form {
+    text-align: left;
+  }
+
+  .field {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .label-text {
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+
+  input, select {
+    padding: 10px;
     border-radius: 8px;
     border: 1px solid #bbb;
     font-size: 16px;
   }
 
-  button {
-    background: #4e73df;
-    color: white;
-    cursor: pointer;
-    margin-top: 15px;
-    font-weight: bold;
+  .show-pass {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 15px;
+    font-size: 14px;
   }
 
-  button:hover {
-    background: #3c5cc1;
+  .btn-primary {
+    width: 100%;
+    padding: 10px;
+    background: #4e73df;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .btn-primary:hover {
+    background: #3b5cc3;
+  }
+
+  .footer {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #666;
+  }
+
+  /* Dashboard */
+  #dashboard {
+    display: none;
   }
 
   table {
@@ -55,9 +101,9 @@
   }
 
   th, td {
-    border: 1px solid #cccccc;
-    padding: 10px;
-    text-align: center;
+    border: 1px solid #ccc;
+    padding: 8px;
+    font-size: 13px;
   }
 
   th {
@@ -65,10 +111,25 @@
     color: white;
   }
 
+  .logout-btn {
+    margin-top: 15px;
+    padding: 10px;
+    width: 100%;
+    border-radius: 8px;
+    border: none;
+    background: #db4338;
+    color: white;
+    cursor: pointer;
+  }
+
+  .logout-btn:hover {
+    background: #b83228;
+  }
+
   .error {
     color: red;
-    text-align: center;
     margin-top: 10px;
+    font-size: 14px;
   }
 
 </style>
@@ -76,83 +137,111 @@
 
 <body>
 
-<!-- ================= LOGIN FORM ================= -->
-<div class="container" id="loginBox">
-  <h2>Login Portal Nilai</h2>
+<main class="page-center">
 
-  <input id="nisn" type="text" placeholder="Masukkan NISN">
-  <input id="password" type="password" placeholder="Masukkan Password">
+  <!-- ================= LOGIN PAGE ================= -->
+  <div class="login-card" id="loginBox">
 
-  <select id="kelas">
-    <option value="">-- Pilih Kelas --</option>
-    <option value="Kelas7A">Kelas 7A</option>
-    <option value="Kelas7B">Kelas 7B</option>
-    <option value="Kelas7C">Kelas 7C</option>
-    <option value="Kelas7D">Kelas 7D</option>
-    <option value="Kelas7E">Kelas 7E</option>
-    <option value="Kelas7F">Kelas 7F</option>
-    <option value="Kelas7G">Kelas 7G</option>
-    <option value="Kelas7H">Kelas 7H</option>
-    <option value="Kelas7I">Kelas 7I</option>
-  </select>
+    <img src="assets/logo.png" alt="Logo Sekolah" class="logo" />
+    <h1 class="title">Portal Nilai ASAS 2025</h1>
 
-  <button onclick="login()">Login</button>
-  <div id="loginError" class="error"></div>
-</div>
+    <form id="loginForm" class="form" onsubmit="event.preventDefault(); login();">
 
-<!-- ================= DASHBOARD ================= -->
-<div class="container" id="dashboard" style="display:none;">
-  <h2>Nilai Kamu</h2>
+      <label class="field">
+        <span class="label-text">NISN</span>
+        <input id="username" type="text" placeholder="Masukkan NISN" required />
+      </label>
 
-  <table id="resultTable">
-    <thead>
-      <tr>
-        <th>NISN</th>
-        <th>Nama</th>
-        <th>Kelas</th>
-        <th>Mapel</th>
-        <th>Nilai</th>
-        <th>KKM</th>
-        <th>Motivasi</th>
-        <th>Emoji</th>
-        <th>Remidi</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+      <label class="field">
+        <span class="label-text">Password</span>
+        <input id="password" type="password" placeholder="Masukkan password" required />
+      </label>
 
-  <button onclick="logout()">Logout</button>
-</div>
+      <label class="field">
+        <span class="label-text">Kelas</span>
+        <select id="kelas" required>
+          <option value="">-- Pilih Kelas --</option>
+          <option value="Kelas7A">Kelas 7A</option>
+          <option value="Kelas7B">Kelas 7B</option>
+          <option value="Kelas7C">Kelas 7C</option>
+          <option value="Kelas7D">Kelas 7D</option>
+          <option value="Kelas7E">Kelas 7E</option>
+          <option value="Kelas7F">Kelas 7F</option>
+          <option value="Kelas7G">Kelas 7G</option>
+          <option value="Kelas7H">Kelas 7H</option>
+          <option value="Kelas7I">Kelas 7I</option>
+        </select>
+      </label>
+
+      <div class="show-pass">
+        <input type="checkbox" id="showPassword" />
+        <label for="showPassword">Tampilkan Password</label>
+      </div>
+
+      <button type="submit" class="btn-primary">Masuk</button>
+
+    </form>
+
+    <div id="loginError" class="error"></div>
+    <div class="footer">© 2025 MB All Rights Reserved</div>
+
+  </div>
+
+  <!-- ================= DASHBOARD ================= -->
+  <div class="login-card" id="dashboard">
+
+    <h1 class="title">Nilai Kamu</h1>
+
+    <table id="resultTable">
+      <thead>
+        <tr>
+          <th>NISN</th>
+          <th>Nama</th>
+          <th>Kelas</th>
+          <th>Mapel</th>
+          <th>Nilai</th>
+          <th>KKM</th>
+          <th>Motivasi</th>
+          <th>Emoji</th>
+          <th>Remidi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+</main>
 
 <script>
 const SHEET_ID = "17GeYfdyiD8IrTePPPu0maRl8V3MKk4zJ";
 
+// Show/Hide password
+document.getElementById("showPassword").addEventListener("change", function () {
+  const p = document.getElementById("password");
+  p.type = this.checked ? "text" : "password";
+});
+
 async function login() {
-  const nisn = document.getElementById("nisn").value.trim();
-  const password = document.getElementById("password").value.trim();
+  const nisn = document.getElementById("username").value.trim();
+  const pass = document.getElementById("password").value.trim();
   const kelas = document.getElementById("kelas").value;
 
-  if (!nisn || !password || !kelas) {
-    document.getElementById("loginError").innerText = "Semua kolom harus diisi!";
-    return;
-  }
-
-  if (password !== "asas2025") {
+  if (pass !== "asas2025") {
     document.getElementById("loginError").innerText = "Password salah!";
     return;
   }
 
-  // Fetch berdasarkan sheet kelas
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${kelas}&tqx=out:json`;
 
   try {
     const res = await fetch(url);
-    const text = await res.text();
-    const json = JSON.parse(text.substring(47, text.length - 2));
+    const raw = await res.text();
+    const json = JSON.parse(raw.substring(47, raw.length - 2));
 
     const rows = json.table.rows.map(r => r.c.map(c => (c ? c.v : "")));
 
-    // Cari siswa berdasarkan NISN
     const siswa = rows.find(r => String(r[0]) === nisn);
 
     if (!siswa) {
@@ -160,7 +249,6 @@ async function login() {
       return;
     }
 
-    // Tampilkan dashboard
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("dashboard").style.display = "block";
 
@@ -179,15 +267,15 @@ async function login() {
       </tr>
     `;
 
-  } catch (e) {
-    document.getElementById("loginError").innerText = "Gagal memuat data. Pastikan sheet dipublish!";
+  } catch (err) {
+    document.getElementById("loginError").innerText =
+      "Gagal memuat data! Pastikan Google Sheet sudah di-PUBLISH.";
   }
 }
 
 function logout() {
   document.getElementById("dashboard").style.display = "none";
   document.getElementById("loginBox").style.display = "block";
-  document.getElementById("loginError").innerText = "";
 }
 </script>
 
