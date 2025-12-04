@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rekap Nilai – Sinkronisasi Google Sheet</title>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f3f6fa;
+    margin: 0;
+    padding: 20px;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: auto;
+    background: #fff;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  }
+
+  h2 {
+    margin-top: 0;
+    text-align: center;
+  }
+
+  select, input {
+    padding: 8px 10px;
+    width: 100%;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
+
+  th {
+    background: #4e73df;
+    color: white;
+  }
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h2>📊 Rekap Nilai – Sinkronisasi Google Sheet</h2>
+
+  <label><b>Pilih Google Sheet:</b></label>
+  <select id="sheetSelector">
+    <option value="17GeYfdyiD8IrTePPPu0maRl8V3MKk4zJ">Default Sheet</option>
+    <option value="1V4VE4qFv0YCC8wEFKdPMPRvvcyFwcLyIfgE8gdCScyw">Informatika</option>
+    <option value="1gvxBUDSkXQ7iCasCw197CAn3eZWXmFISgtIANlEzA20">IPS</option>
+  </select>
+
+  <button onclick="loadSheet()">Muat Data</button>
+
+  <div id="loading" style="margin-top:10px; display:none;">Loading data...</div>
+
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>NISN</th>
+        <th>Name</th>
+        <th>Class</th>
+        <th>Subject</th>
+        <th>Score</th>
+        <th>KKM</th>
+        <th>Motivation</th>
+        <th>Emoticon</th>
+        <th>Remediation</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+</div>
+
+<script>
+  const DEFAULT_SHEET_ID = "17GeYfdyiD8IrTePPPu0maRl8V3MKk4zJ";
+
+  const HEADERS = [
+    "NISN",
+    "Name",
+    "Class",
+    "Subject",
+    "Score",
+    "KKM",
+    "Motivation",
+    "Emoticon",
+    "Remediation"
+  ];
+
+  function mapColumns(headerRow) {
+    const map = {};
+    headerRow.forEach((h, i) => {
+      map[h.trim()] = i;
+    });
+    return map;
+  }
+
+  async function loadSheet() {
+    document.getElementById("loading").style.display = "block";
+
+    const sheetId = document.getElementById("sheetSelector").value || DEFAULT_SHEET_ID;
+
+    const url =
+      `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+
+    try {
+      const res = await fetch(url);
+      const text = await res.text();
+
+      const json = JSON.parse(text.substring(47, text.length - 2));
+      const rows = json.table.rows.map(r => r.c.map(c => (c ? c.v : "")));
+
+      // Header mapping
+      const col = mapColumns(HEADERS);
+
+      const tbody = document.querySelector("#dataTable tbody");
+      tbody.innerHTML = "";
+
+      rows.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row[col["NISN"]]}</td>
+          <td>${row[col["Name"]]}</td>
+          <td>${row[col["Class"]]}</td>
+          <td>${row[col["Subject"]]}</td>
+          <td>${row[col["Score"]]}</td>
+          <td>${row[col["KKM"]]}</td>
+          <td>${row[col["Motivation"]]}</td>
+          <td>${row[col["Emoticon"]]}</td>
+          <td>${row[col["Remediation"]]}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+    } catch (e) {
+      alert("Gagal memuat data. Pastikan sheet dipublikasikan ke web.");
+    }
+
+    document.getElementById("loading").style.display = "none";
+  }
+
+  // Auto-load default sheet saat halaman dibuka
+  loadSheet();
+</script>
+
+</body>
+</html>
