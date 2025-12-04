@@ -230,7 +230,6 @@
   <!-- ================= DASHBOARD ================= -->
   <div class="dashboard-card" id="dashboardBox">
 
-    <!-- STIKER MENUTUP NILAI -->
     <div id="stikerCover">
       <div id="closeStiker" onclick="tutupStiker()">×</div>
       <img id="stikerImg" src="" alt="Sticker">
@@ -259,21 +258,21 @@
 </main>
 
 <script>
-const SHEET_ID = "17GeYfdyiD8IrTePPPu0maRl8V3MKk4zJ";
+// ===== CONFIG =====
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1ay2GaUkaZdqhiYBdwlJ3mWTrPt7C4TDYWK6LFMhzZk8Ey_SkkQB_FS8ejI2gjzjlXg/exec";
 
 // Show password toggle
 document.getElementById("showPassword").addEventListener("change", function () {
-  const p = document.getElementById("password");
-  p.type = this.checked ? "text" : "password";
+  document.getElementById("password").type =
+    this.checked ? "text" : "password";
 });
 
-// Convert to Proper Case
 function toProper(str) {
   return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 }
 
-// Tentukan stiker berdasarkan nilai
 function pilihStiker(nilai) {
+  nilai = Number(nilai);
   if (nilai < 40) return "9.jpg";
   if (nilai < 50) return "8.jpg";
   if (nilai < 60) return "1.jpg";
@@ -283,11 +282,9 @@ function pilihStiker(nilai) {
   if (nilai < 85) return "5.jpg";
   if (nilai < 90) return "10.jpg";
   if (nilai < 95) return "4.jpg";
-  if (nilai < 100) return "11.jpg";
   return "11.jpg";
 }
 
-// Tutup stiker
 function tutupStiker() {
   document.getElementById("stikerCover").style.display = "none";
 }
@@ -302,49 +299,43 @@ async function login() {
     return;
   }
 
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${kelas}&tqx=out:json`;
+  const url = `${SCRIPT_URL}?nisn=${nisn}&sheet=${kelas}`;
 
   try {
     const res = await fetch(url);
-    const raw = await res.text();
-    const json = JSON.parse(raw.substring(47, raw.length - 2));
+    const data = await res.json();
 
-    const rows = json.table.rows.map(r => r.c.map(c => (c ? c.v : "")));
-    const siswa = rows.find(r => String(r[0]) === nisn);
-
-    if (!siswa) {
-      document.getElementById("loginError").innerText =
-        "NISN tidak ditemukan di kelas " + kelas;
+    if (!data.status) {
+      document.getElementById("loginError").innerText = "NISN tidak ditemukan!";
       return;
     }
 
-    // SHOW DASHBOARD
+    // MASUK DASHBOARD
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("dashboardBox").style.display = "block";
 
     // OUTPUT DATA
-    document.getElementById("nama").innerText = toProper(siswa[1]);
-    document.getElementById("kelasOut").innerText = siswa[2];
+    document.getElementById("nama").innerText = toProper(data.name);
+    document.getElementById("kelasOut").innerText = data.class;
 
-    const nilai = Number(siswa[4]);
-    const kkm = Number(siswa[5]);
-
+    const nilai = Number(data.score);
     const nilaiEl = document.getElementById("nilai");
+
     nilaiEl.classList.remove("red", "green");
-    nilaiEl.classList.add(nilai < kkm ? "red" : "green");
+    nilaiEl.classList.add(nilai < 75 ? "red" : "green");
     nilaiEl.innerText = nilai;
 
-    document.getElementById("motivasi").innerText = toProper(siswa[6]);
-    document.getElementById("remidi").innerText = toProper(siswa[8]);
+    document.getElementById("motivasi").innerText = toProper(data.motivation);
+    document.getElementById("remidi").innerText = toProper(data.remediation);
 
-    // ======== MUNCULKAN STIKER ========
+    // STIKER
     const stiker = pilihStiker(nilai);
     document.getElementById("stikerImg").src = "assets/" + stiker;
     document.getElementById("stikerCover").style.display = "block";
 
   } catch (err) {
     document.getElementById("loginError").innerText =
-      "Gagal memuat data! Pastikan Google Sheet sudah di-PUBLISH.";
+      "Terjadi kesalahan! Pastikan Apps Script sudah dideploy.";
   }
 }
 
