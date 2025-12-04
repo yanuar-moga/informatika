@@ -3,23 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal Nilai Siswa</title>
+<title>Portal Nilai ASAS 2025</title>
 
 <style>
   body {
     font-family: Arial, sans-serif;
-    background: #edf1f7;
+    background: #e9eef6;
     margin: 0;
     padding: 0;
   }
 
-  .login-box, .dashboard {
-    max-width: 400px;
-    margin: 100px auto;
-    background: white;
+  .container {
+    max-width: 420px;
+    margin: 80px auto;
+    background: #fff;
     padding: 25px;
     border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
   }
 
   h2 {
@@ -27,10 +27,10 @@
     margin-bottom: 20px;
   }
 
-  input, button {
+  input, select, button {
     width: 100%;
-    padding: 10px;
-    margin-top: 10px;
+    padding: 11px;
+    margin-top: 12px;
     border-radius: 8px;
     border: 1px solid #bbb;
     font-size: 16px;
@@ -41,10 +41,11 @@
     color: white;
     cursor: pointer;
     margin-top: 15px;
+    font-weight: bold;
   }
 
   button:hover {
-    background: #3b5cc3;
+    background: #3c5cc1;
   }
 
   table {
@@ -54,7 +55,7 @@
   }
 
   th, td {
-    border: 1px solid #ccc;
+    border: 1px solid #cccccc;
     padding: 10px;
     text-align: center;
   }
@@ -66,30 +67,43 @@
 
   .error {
     color: red;
-    margin-top: 10px;
     text-align: center;
+    margin-top: 10px;
   }
+
 </style>
 </head>
 
 <body>
 
 <!-- ================= LOGIN FORM ================= -->
-<div class="login-box" id="loginBox">
+<div class="container" id="loginBox">
   <h2>Login Portal Nilai</h2>
 
-  <input id="username" type="text" placeholder="Masukkan NISN">
+  <input id="nisn" type="text" placeholder="Masukkan NISN">
   <input id="password" type="password" placeholder="Masukkan Password">
 
-  <button onclick="login()">Login</button>
+  <select id="kelas">
+    <option value="">-- Pilih Kelas --</option>
+    <option value="Kelas7A">Kelas 7A</option>
+    <option value="Kelas7B">Kelas 7B</option>
+    <option value="Kelas7C">Kelas 7C</option>
+    <option value="Kelas7D">Kelas 7D</option>
+    <option value="Kelas7E">Kelas 7E</option>
+    <option value="Kelas7F">Kelas 7F</option>
+    <option value="Kelas7G">Kelas 7G</option>
+    <option value="Kelas7H">Kelas 7H</option>
+    <option value="Kelas7I">Kelas 7I</option>
+  </select>
 
+  <button onclick="login()">Login</button>
   <div id="loginError" class="error"></div>
 </div>
 
 <!-- ================= DASHBOARD ================= -->
-<div class="dashboard" id="dashboard" style="display:none;">
+<div class="container" id="dashboard" style="display:none;">
   <h2>Nilai Kamu</h2>
-  
+
   <table id="resultTable">
     <thead>
       <tr>
@@ -112,55 +126,68 @@
 
 <script>
 const SHEET_ID = "17GeYfdyiD8IrTePPPu0maRl8V3MKk4zJ";
-const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
 
 async function login() {
-  const nisn = document.getElementById("username").value.trim();
+  const nisn = document.getElementById("nisn").value.trim();
   const password = document.getElementById("password").value.trim();
-  
+  const kelas = document.getElementById("kelas").value;
+
+  if (!nisn || !password || !kelas) {
+    document.getElementById("loginError").innerText = "Semua kolom harus diisi!";
+    return;
+  }
+
   if (password !== "asas2025") {
     document.getElementById("loginError").innerText = "Password salah!";
     return;
   }
 
-  const res = await fetch(SHEET_URL);
-  const text = await res.text();
-  const json = JSON.parse(text.substring(47, text.length - 2));
+  // Fetch berdasarkan sheet kelas
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${kelas}&tqx=out:json`;
 
-  const rows = json.table.rows.map(r => r.c.map(c => (c ? c.v : "")));
+  try {
+    const res = await fetch(url);
+    const text = await res.text();
+    const json = JSON.parse(text.substring(47, text.length - 2));
 
-  // Cari siswa berdasarkan NISN
-  const student = rows.find(r => String(r[0]) === nisn);
+    const rows = json.table.rows.map(r => r.c.map(c => (c ? c.v : "")));
 
-  if (!student) {
-    document.getElementById("loginError").innerText = "NISN tidak ditemukan!";
-    return;
+    // Cari siswa berdasarkan NISN
+    const siswa = rows.find(r => String(r[0]) === nisn);
+
+    if (!siswa) {
+      document.getElementById("loginError").innerText = "NISN tidak ditemukan di kelas " + kelas;
+      return;
+    }
+
+    // Tampilkan dashboard
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+
+    const tbody = document.querySelector("#resultTable tbody");
+    tbody.innerHTML = `
+      <tr>
+        <td>${siswa[0]}</td>
+        <td>${siswa[1]}</td>
+        <td>${siswa[2]}</td>
+        <td>${siswa[3]}</td>
+        <td>${siswa[4]}</td>
+        <td>${siswa[5]}</td>
+        <td>${siswa[6]}</td>
+        <td>${siswa[7]}</td>
+        <td>${siswa[8]}</td>
+      </tr>
+    `;
+
+  } catch (e) {
+    document.getElementById("loginError").innerText = "Gagal memuat data. Pastikan sheet dipublish!";
   }
-
-  // Tampilkan dashboard
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("dashboard").style.display = "block";
-
-  // Masukkan data ke tabel
-  const tbody = document.querySelector("#resultTable tbody");
-  tbody.innerHTML = `
-    <tr>
-      <td>${student[0]}</td>
-      <td>${student[1]}</td>
-      <td>${student[2]}</td>
-      <td>${student[3]}</td>
-      <td>${student[4]}</td>
-      <td>${student[5]}</td>
-      <td>${student[6]}</td>
-      <td>${student[7]}</td>
-      <td>${student[8]}</td>
-    </tr>
-  `;
 }
 
 function logout() {
   document.getElementById("dashboard").style.display = "none";
   document.getElementById("loginBox").style.display = "block";
+  document.getElementById("loginError").innerText = "";
 }
 </script>
 
