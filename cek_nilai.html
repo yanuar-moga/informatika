@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Nilai ASAS Informatika Kelas 7</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #e9eef6;
+  }
+
+  /* FIX: Semua output nilai/nama tidak kapital */
+  .item-value {
+    text-transform: none !important;
+  }
+
+  .page-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .login-card, .dashboard-card {
+    background: white;
+    width: 360px;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    text-align: center;
+    position: relative;
+  }
+
+  .logo {
+    width: 80px;
+    margin-bottom: 10px;
+  }
+
+  .title {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .form { text-align: left; }
+
+  .field {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .label-text {
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+
+  input, select {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #bbb;
+    font-size: 16px;
+  }
+
+  .show-pass {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 15px;
+    font-size: 14px;
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 10px;
+    background: #4e73df;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .btn-primary:hover {
+    background: #3b5cc3;
+  }
+
+  .footer {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #666;
+  }
+
+  .error {
+    color: red;
+    margin-top: 10px;
+    font-size: 14px;
+  }
+
+  #dashboardBox { display: none; }
+
+  .item-title {
+    font-weight: bold;
+    margin-top: 18px;
+    font-size: 15px;
+    color: #444;
+    text-align: left;
+  }
+
+  .item-value {
+    font-size: 18px;
+    margin-top: 4px;
+    text-align: left;
+  }
+
+  .nilai-besar {
+    font-size: 70px !important;
+    font-weight: bold;
+    text-align: center !important;
+    margin-top: 10px;
+    filter: blur(12px);
+    transition: 0.3s;
+  }
+
+  .nilai-clear { filter: blur(0) !important; }
+  .red { color: red; font-weight: bold; }
+  .green { color: green; font-weight: bold; }
+
+  .logout-btn {
+    margin-top: 25px;
+    padding: 10px;
+    width: 100%;
+    border-radius: 8px;
+    border: none;
+    background: #db4338;
+    color: white;
+    cursor: pointer;
+  }
+
+  .logout-btn:hover {
+    background: #b83228;
+  }
+
+  /* STIKER */
+  #stikerNilai {
+    position: absolute;
+    top: 190px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 180px;
+    height: auto;
+    cursor: pointer;
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    animation: shake 1.2s infinite ease-in-out;
+  }
+
+  #stikerNilai.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @keyframes shake {
+    0%   { transform: translateX(-50%) rotate(0deg); }
+    25%  { transform: translateX(calc(-50% - 6px)) rotate(-3deg); }
+    50%  { transform: translateX(-50%) rotate(0deg); }
+    75%  { transform: translateX(calc(-50% + 6px)) rotate(3deg); }
+    100% { transform: translateX(-50%) rotate(0deg); }
+  }
+
+</style>
+</head>
+
+<body>
+
+<main class="page-center">
+
+  <!-- LOGIN -->
+  <div class="login-card" id="loginBox">
+
+    <img src="assets/logo.png" alt="Logo Sekolah" class="logo" />
+    <h1 class="title">Nilai ASAS Informatika</h1>
+
+    <form id="loginForm" class="form" onsubmit="event.preventDefault(); login();">
+
+      <label class="field">
+        <span class="label-text">NISN</span>
+        <input id="username" type="text" placeholder="Masukkan NISN" required />
+      </label>
+
+      <label class="field">
+        <span class="label-text">Password</span>
+        <input id="password" type="password" placeholder="Masukkan password" required />
+      </label>
+
+      <label class="field">
+        <span class="label-text">Kelas</span>
+        <select id="kelas" required>
+          <option value="">-- Pilih Kelas --</option>
+          <option value="Kelas7A">Kelas 7A</option>
+          <option value="Kelas7B">Kelas 7B</option>
+          <option value="Kelas7C">Kelas 7C</option>
+          <option value="Kelas7D">Kelas 7D</option>
+          <option value="Kelas7E">Kelas 7E</option>
+          <option value="Kelas7F">Kelas 7F</option>
+          <option value="Kelas7G">Kelas 7G</option>
+          <option value="Kelas7H">Kelas 7H</option>
+          <option value="Kelas7I">Kelas 7I</option>
+        </select>
+      </label>
+
+      <div class="show-pass">
+        <input type="checkbox" id="showPassword" />
+        <label for="showPassword">Tampilkan Password</label>
+      </div>
+
+      <button type="submit" class="btn-primary">Masuk</button>
+
+    </form>
+
+    <div id="loginError" class="error"></div>
+    <div class="footer">© 2025 MB All Rights Reserved</div>
+
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="dashboard-card" id="dashboardBox">
+
+    <img id="stikerNilai" class="hidden" />
+
+    <h1 class="title">Nilai Kamu</h1>
+
+    <div class="item-title">Nama :</div>
+    <div id="nama" class="item-value"></div>
+
+    <div class="item-title">Kelas :</div>
+    <div id="kelasOut" class="item-value"></div>
+
+    <div class="item-title">Nilai :</div>
+    <div id="nilai" class="item-value nilai-besar"></div>
+
+    <div class="item-title"></div>
+    <div id="motivasi" class="item-value"></div>
+
+    <div class="item-title">Remidial :</div>
+    <div id="remidi" class="item-value"></div>
+
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+</main>
+
+<script>
+const SHEET_ID = "10TG5AWYG9NaP1XvZIbP26r4dVyfAz20u";
+
+/* PILIH STIKER */
+function pilihStiker(nilai) {
+  if (nilai < 40) return "9.jpg";
+  if (nilai < 50) return "8.jpg";
+  if (nilai < 60) return "1.jpg";
+  if (nilai < 70) return "2.jpg";
+  if (nilai < 78) return "3.jpg";
+  if (nilai < 80) return "6.jpg";
+  if (nilai < 85) return "5.jpg";
+  if (nilai < 90) return "10.jpg";
+  if (nilai < 95) return "4.jpg";
+  if (nilai < 100) return "11.jpg";
+  return "11.jpg";
+}
+
+/* LOGIN */
+async function login() {
+  const nisn = username.value.trim();
+  const pass = password.value.trim();
+  const kelas = document.getElementById("kelas").value;
+
+  if (pass !== "asas2025") {
+    loginError.innerText = "Password salah!";
+    return;
+  }
+
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${kelas}&tqx=out:json`;
+
+  try {
+    const raw = await (await fetch(url)).text();
+    const json = JSON.parse(raw.substring(47, raw.length - 2));
+    const rows = json.table.rows.map(r => r.c.map(c => (c ? c.v : "")));
+
+    const siswa = rows.find(r => String(r[0]) === nisn);
+
+    if (!siswa) {
+      loginError.innerText = "NISN tidak ditemukan di kelas " + kelas;
+      return;
+    }
+
+    loginBox.style.display = "none";
+    dashboardBox.style.display = "block";
+
+    /* FIX: tidak kapital */
+    nama.innerText = siswa[1];
+    kelasOut.innerText = siswa[2];
+
+    const nilai = Number(siswa[4]);
+    const kkm = Number(siswa[5]);
+
+    const nilaiEl = document.getElementById("nilai");
+    nilaiEl.classList.remove("red", "green");
+    nilaiEl.classList.add(nilai < kkm ? "red" : "green");
+    nilaiEl.innerText = nilai;
+
+    const nilaiHeight = nilaiEl.offsetHeight;
+    const stikerSize = nilaiHeight * 1.2;
+
+    const stikerImg = document.getElementById("stikerNilai");
+    stikerImg.src = "assets/" + pilihStiker(nilai);
+    stikerImg.style.width = stikerSize + "px";
+    stikerImg.classList.add("show");
+
+    nilaiEl.classList.remove("nilai-clear");
+
+    /* FIX: tidak kapital */
+    motivasi.innerText = siswa[6];
+    remidi.innerText = siswa[8];
+
+  } catch (e) {
+    loginError.innerText = "Gagal memuat data!";
+  }
+}
+
+const stikerImg = document.getElementById("stikerNilai");
+const nilaiBox  = document.getElementById("nilai");
+
+stikerImg.addEventListener("click", () => {
+  stikerImg.classList.remove("show");
+  nilaiBox.classList.add("nilai-clear");
+});
+
+nilaiBox.addEventListener("click", () => {
+  stikerImg.classList.add("show");
+  nilaiBox.classList.remove("nilai-clear");
+});
+
+function logout() {
+  dashboardBox.style.display = "none";
+  loginBox.style.display = "block";
+  stikerImg.classList.remove("show");
+}
+</script>
+
+</body>
+</html>
