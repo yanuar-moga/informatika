@@ -2,14 +2,96 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Asesmen Informatika</title>
 <link rel="stylesheet" href="style.css">
+
+<style>
+/* ===== KOP SEKOLAH ===== */
+.kop-wrapper {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.kop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.kop img {
+  width: 80px;
+  height: auto;
+}
+
+.kop-text h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.kop-text p {
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+
+/* GARIS DUA */
+.garis {
+  margin-top: 10px;
+}
+
+.garis .line1 {
+  border-top: 3px solid #000;
+}
+
+.garis .line2 {
+  border-top: 1px solid #000;
+  margin-top: 4px;
+}
+
+/* ===== RESPONSIVE MOBILE ===== */
+@media (max-width: 600px) {
+  .kop {
+    flex-direction: column;
+  }
+
+  .kop img {
+    width: 65px;
+  }
+
+  .kop-text h1 {
+    font-size: 18px;
+  }
+
+  .kop-text p {
+    font-size: 13px;
+  }
+}
+</style>
 </head>
+
 <body>
 
+<!-- ===== KOP SEKOLAH ===== -->
+<div class="kop-wrapper">
+  <div class="kop">
+    <img src="assets/logo.png" alt="Logo SMP Negeri 1 Moga">
+    <div class="kop-text">
+      <h1>SMP Negeri 1 Moga</h1>
+      <p>Jl. Simpang Tiga Banyumudal - Moga - Pemalang</p>
+    </div>
+  </div>
+
+  <div class="garis">
+    <div class="line1"></div>
+    <div class="line2"></div>
+  </div>
+</div>
 
 <h2>Asesmen Informatika</h2>
-
 
 <label>Pilih Kelas</label>
 <select id="kelas" onchange="loadSiswa()">
@@ -30,12 +112,9 @@
   <option value="">-- Pilih Nama --</option>
 </select>
 
-
 <div id="soal"></div>
 
-
 <button onclick="kirimJawaban()">KIRIM</button>
-
 
 <script src="soal.js"></script>
 <script src="script.js"></script>
