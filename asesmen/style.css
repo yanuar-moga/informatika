@@ -1,0 +1,92 @@
+/* ==============================
+TEMA WINDOWS 11 - LIGHT MODE
+============================== */
+
+
+* {
+box-sizing: border-box;
+font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+
+body {
+margin: 0;
+padding: 0;
+background: #f3f6fb;
+color: #1f2937;
+}
+
+
+h2 {
+text-align: center;
+margin-top: 20px;
+color: #2563eb;
+}
+
+
+label {
+font-weight: 600;
+margin-top: 15px;
+display: block;
+}
+
+
+select, button {
+width: 100%;
+padding: 12px;
+margin-top: 8px;
+border-radius: 10px;
+border: 1px solid #d1d5db;
+font-size: 15px;
+}
+
+
+select:focus, button:focus {
+outline: none;
+border-color: #2563eb;
+box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+
+button {
+background: #2563eb;
+color: white;
+font-weight: 600;
+cursor: pointer;
+margin-top: 20px;
+transition: 0.2s ease;
+}
+
+
+button:hover {
+background: #1e40af;
+}
+
+
+#soal {
+background: white;
+margin-top: 20px;
+padding: 20px;
+border-radius: 14px;
+box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+
+#soal p {
+font-weight: 600;
+}
+
+
+#soal label {
+display: block;
+margin: 6px 0;
+cursor: pointer;
+}
+
+
+/* Responsive */
+@media (max-width: 600px) {
+body {
+padding: 10px;
+}
+}
