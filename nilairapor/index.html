@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Nilai Rapor Informatika Kelas 7</title>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f9;
+  padding: 20px;
+}
+h1 {
+  text-align: center;
+}
+h2 {
+  margin-top: 40px;
+  background: #2c7be5;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  margin-top: 10px;
+}
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+th {
+  background: #e9ecef;
+}
+.rank {
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<h1>📊 Nilai Rapor Informatika Kelas 7<br>Semester 1</h1>
+
+<div id="output">Memuat data...</div>
+
+<script>
+const baseURL = "https://yanuar-moga.github.io/informatika/nilairapor/sms1/";
+
+const files = [
+  "f_nilai_Kelas 7A_Informatika.xlsx",
+  "f_nilai_Kelas 7B_Informatika.xlsx",
+  "f_nilai_Kelas 7C_Informatika.xlsx",
+  "f_nilai_Kelas 7D_Informatika.xlsx",
+  "f_nilai_Kelas 7E_Informatika.xlsx",
+  "f_nilai_Kelas 7F_Informatika.xlsx",
+  "f_nilai_Kelas 7G_Informatika.xlsx",
+  "f_nilai_Kelas 7H_Informatika.xlsx",
+  "f_nilai_Kelas 7I_Informatika.xlsx"
+];
+
+const output = document.getElementById("output");
+output.innerHTML = "";
+
+files.forEach(file => {
+  fetch(baseURL + file)
+    .then(res => res.arrayBuffer())
+    .then(data => {
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+      // Header ada di baris ke-2
+      const header = rows[1];
+      const namaIdx = header.indexOf("NAMA SISWA");
+      const nilaiIdx = header.indexOf("NILAI RAPOR");
+
+      let siswa = [];
+
+      for (let i = 2; i < rows.length; i++) {
+        if (!rows[i][namaIdx]) break;
+        siswa.push({
+          nama: rows[i][namaIdx],
+          nilai: Number(rows[i][nilaiIdx])
+        });
+      }
+
+      siswa.sort((a, b) => b.nilai - a.nilai);
+
+      let html = `<h2>${file.replace(".xlsx","")}</h2>`;
+      html += `<table>
+        <tr>
+          <th>Rangking</th>
+          <th>Nama Siswa</th>
+          <th>Nilai Rapor</th>
+        </tr>`;
+
+      siswa.forEach((s, i) => {
+        html += `<tr>
+          <td class="rank">${i + 1}</td>
+          <td>${s.nama}</td>
+          <td>${s.nilai}</td>
+        </tr>`;
+      });
+
+      html += `</table>`;
+      output.innerHTML += html;
+    })
+    .catch(err => {
+      output.innerHTML += `<p style="color:red">Gagal memuat ${file}</p>`;
+      console.error(err);
+    });
+});
+</script>
+
+</body>
+</html>
