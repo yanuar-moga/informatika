@@ -25,10 +25,14 @@ table {
   border-collapse: collapse;
   background: white;
   margin-top: 10px;
+  table-layout: fixed; /* KUNCI LEBAR KOLOM */
 }
 th, td {
   border: 1px solid #ccc;
   padding: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 th {
   background: #e9ecef;
@@ -99,7 +103,13 @@ async function loadData() {
       siswa = siswa.slice(0, 10);
 
       let html = `<h2>${sheet.kelas}</h2>`;
-      html += `<table>
+      html += `
+      <table>
+        <colgroup>
+          <col style="width:10%">
+          <col style="width:70%">
+          <col style="width:20%">
+        </colgroup>
         <tr>
           <th>Rangking</th>
           <th>Nama Siswa</th>
@@ -107,7 +117,8 @@ async function loadData() {
         </tr>`;
 
       siswa.forEach((s, i) => {
-        html += `<tr>
+        html += `
+        <tr>
           <td class="rank">${i + 1}</td>
           <td class="nama">${s.nama}</td>
           <td>${s.nilai}</td>
