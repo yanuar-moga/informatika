@@ -29,13 +29,20 @@ table {
 th, td {
   border: 1px solid #ccc;
   padding: 8px;
-  text-align: center;
 }
 th {
   background: #e9ecef;
+  text-align: center;
+}
+td {
+  text-align: center;
 }
 .rank {
   font-weight: bold;
+}
+.nama {
+  text-align: left;
+  padding-left: 12px;
 }
 </style>
 </head>
@@ -77,16 +84,19 @@ sheets.forEach(sheet => {
         const nama = r.c[5]?.v;   // Kolom F
         const nilai = r.c[6]?.v;  // Kolom G
 
-        if (nama && nilai !== null) {
-          siswa.push({
-            nama,
-            nilai: Number(nilai)
-          });
-        }
+        // Skip header dan data tidak valid
+        if (!nama) return;
+        if (nama.toString().toUpperCase() === "NAMA SISWA") return;
+        if (isNaN(nilai)) return;
+
+        siswa.push({
+          nama: nama,
+          nilai: Number(nilai)
+        });
       });
 
       siswa.sort((a, b) => b.nilai - a.nilai);
-      siswa = siswa.slice(0, 10); // Ranking 1–10
+      siswa = siswa.slice(0, 10);
 
       let html = `<h2>${sheet.kelas}</h2>`;
       html += `<table>
@@ -99,7 +109,7 @@ sheets.forEach(sheet => {
       siswa.forEach((s, i) => {
         html += `<tr>
           <td class="rank">${i + 1}</td>
-          <td>${s.nama}</td>
+          <td class="nama">${s.nama}</td>
           <td>${s.nilai}</td>
         </tr>`;
       });
