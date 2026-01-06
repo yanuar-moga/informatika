@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <title>Nilai Rapor Informatika Kelas 7</title>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
 <style>
 body {
   font-family: Arial, sans-serif;
@@ -49,51 +47,48 @@ th {
 <div id="output">Memuat data...</div>
 
 <script>
-const baseURL = "https://yanuar-moga.github.io/informatika/nilairapor/sms1/";
-
-const files = [
-  "f_nilai_Kelas 7A_Informatika.xlsx",
-  "f_nilai_Kelas 7B_Informatika.xlsx",
-  "f_nilai_Kelas 7C_Informatika.xlsx",
-  "f_nilai_Kelas 7D_Informatika.xlsx",
-  "f_nilai_Kelas 7E_Informatika.xlsx",
-  "f_nilai_Kelas 7F_Informatika.xlsx",
-  "f_nilai_Kelas 7G_Informatika.xlsx",
-  "f_nilai_Kelas 7H_Informatika.xlsx",
-  "f_nilai_Kelas 7I_Informatika.xlsx"
+const sheets = [
+  { kelas: "Kelas 7A", id: "1aICGeD-syUyBPvyA4G69Y8bWyPCEXv0I" },
+  { kelas: "Kelas 7B", id: "148cNp9xuhjcDxIRvqUwauJ5wS3ad6i1d" },
+  { kelas: "Kelas 7C", id: "11CoFJ_81sqjRA3X6uDUQMJMbpfOYANUN" },
+  { kelas: "Kelas 7D", id: "19tAEWT4NRVy5h8Pp62YnWc8TYXe7jd1o" },
+  { kelas: "Kelas 7E", id: "1byJryH5-SHZ9WFa8nn1m4Qyckf3J6E98" },
+  { kelas: "Kelas 7F", id: "15f13CrIxvfQUdvlRGIjmBcSRlf4UmEjX" },
+  { kelas: "Kelas 7G", id: "1hmn98IT_cjXN_jXEyUxzldwhsesrjfsT" },
+  { kelas: "Kelas 7H", id: "18nhFJ2PbDHyWrSPYBnz1ek3nNBuReTmx" },
+  { kelas: "Kelas 7I", id: "1fdDczC0Zb6yzAW7g219REICX7i0zvlCq" }
 ];
 
 const output = document.getElementById("output");
 output.innerHTML = "";
 
-files.forEach(file => {
-  fetch(encodeURI(baseURL + file))
-    .then(res => {
-      if (!res.ok) throw new Error("File tidak ditemukan");
-      return res.arrayBuffer();
-    })
-    .then(data => {
-      const workbook = XLSX.read(data, { type: "array" });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+sheets.forEach(sheet => {
+  const url = `https://docs.google.com/spreadsheets/d/${sheet.id}/gviz/tq?tqx=out:json`;
 
-      const header = rows[1];
-      const namaIdx = header.indexOf("NAMA SISWA");
-      const nilaiIdx = header.indexOf("NILAI RAPOR");
+  fetch(url)
+    .then(res => res.text())
+    .then(text => {
+      const json = JSON.parse(text.substr(47).slice(0, -2));
+      const rows = json.table.rows;
 
       let siswa = [];
 
-      for (let i = 2; i < rows.length; i++) {
-        if (!rows[i][namaIdx]) break;
-        siswa.push({
-          nama: rows[i][namaIdx],
-          nilai: Number(rows[i][nilaiIdx])
-        });
-      }
+      rows.forEach(r => {
+        const nama = r.c[5]?.v;   // Kolom F
+        const nilai = r.c[6]?.v;  // Kolom G
+
+        if (nama && nilai !== null) {
+          siswa.push({
+            nama,
+            nilai: Number(nilai)
+          });
+        }
+      });
 
       siswa.sort((a, b) => b.nilai - a.nilai);
+      siswa = siswa.slice(0, 10); // Ranking 1–10
 
-      let html = `<h2>${file.replace(".xlsx","")}</h2>`;
+      let html = `<h2>${sheet.kelas}</h2>`;
       html += `<table>
         <tr>
           <th>Rangking</th>
@@ -103,7 +98,7 @@ files.forEach(file => {
 
       siswa.forEach((s, i) => {
         html += `<tr>
-          <td><b>${i + 1}</b></td>
+          <td class="rank">${i + 1}</td>
           <td>${s.nama}</td>
           <td>${s.nilai}</td>
         </tr>`;
@@ -113,11 +108,10 @@ files.forEach(file => {
       output.innerHTML += html;
     })
     .catch(() => {
-      output.innerHTML += `<p style="color:red">Gagal memuat ${file}</p>`;
+      output.innerHTML += `<p style="color:red">Gagal memuat ${sheet.kelas}</p>`;
     });
 });
 </script>
-
 
 </body>
 </html>
