@@ -69,12 +69,13 @@ const sheets = [
 const output = document.getElementById("output");
 output.innerHTML = "";
 
-sheets.forEach(sheet => {
-  const url = `https://docs.google.com/spreadsheets/d/${sheet.id}/gviz/tq?tqx=out:json`;
+async function loadData() {
+  for (const sheet of sheets) {
+    const url = `https://docs.google.com/spreadsheets/d/${sheet.id}/gviz/tq?tqx=out:json`;
 
-  fetch(url)
-    .then(res => res.text())
-    .then(text => {
+    try {
+      const res = await fetch(url);
+      const text = await res.text();
       const json = JSON.parse(text.substr(47).slice(0, -2));
       const rows = json.table.rows;
 
@@ -84,7 +85,6 @@ sheets.forEach(sheet => {
         const nama = r.c[5]?.v;   // Kolom F
         const nilai = r.c[6]?.v;  // Kolom G
 
-        // Skip header dan data tidak valid
         if (!nama) return;
         if (nama.toString().toUpperCase() === "NAMA SISWA") return;
         if (isNaN(nilai)) return;
@@ -116,11 +116,14 @@ sheets.forEach(sheet => {
 
       html += `</table>`;
       output.innerHTML += html;
-    })
-    .catch(() => {
+
+    } catch (error) {
       output.innerHTML += `<p style="color:red">Gagal memuat ${sheet.kelas}</p>`;
-    });
-});
+    }
+  }
+}
+
+loadData();
 </script>
 
 </body>
