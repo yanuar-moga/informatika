@@ -44,7 +44,7 @@ th {
 
 <body>
 
-<h1>📊 Nilai Rapor Informatika Kelas 7<br>Semester 1</h1>
+<h1>Nilai Rapor Informatika Kelas 7<br>Semester 1</h1>
 
 <div id="output">Memuat data...</div>
 
@@ -67,14 +67,16 @@ const output = document.getElementById("output");
 output.innerHTML = "";
 
 files.forEach(file => {
-  fetch(baseURL + file)
-    .then(res => res.arrayBuffer())
+  fetch(encodeURI(baseURL + file))
+    .then(res => {
+      if (!res.ok) throw new Error("File tidak ditemukan");
+      return res.arrayBuffer();
+    })
     .then(data => {
       const workbook = XLSX.read(data, { type: "array" });
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-      // Header ada di baris ke-2
       const header = rows[1];
       const namaIdx = header.indexOf("NAMA SISWA");
       const nilaiIdx = header.indexOf("NILAI RAPOR");
@@ -101,7 +103,7 @@ files.forEach(file => {
 
       siswa.forEach((s, i) => {
         html += `<tr>
-          <td class="rank">${i + 1}</td>
+          <td><b>${i + 1}</b></td>
           <td>${s.nama}</td>
           <td>${s.nilai}</td>
         </tr>`;
@@ -110,12 +112,12 @@ files.forEach(file => {
       html += `</table>`;
       output.innerHTML += html;
     })
-    .catch(err => {
+    .catch(() => {
       output.innerHTML += `<p style="color:red">Gagal memuat ${file}</p>`;
-      console.error(err);
     });
 });
 </script>
+
 
 </body>
 </html>
