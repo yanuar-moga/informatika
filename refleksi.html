@@ -143,8 +143,11 @@ let headers = [];
 let allRows = [];
 let filteredRows = [];
 let index = 0;
+let questionIndex = 0;
 
-let idxNama, idxKelas, idxTanya, idxJawab;
+let idxNama, idxKelas;
+let startQ = 3; // Kolom D (index 3)
+let endQ   = 9; // Kolom J (index 9)
 
 fetch(url)
   .then(res => res.text())
@@ -155,8 +158,6 @@ fetch(url)
 
     idxNama  = headers.findIndex(h => h.toLowerCase().includes("nama"));
     idxKelas = headers.findIndex(h => h.toLowerCase().includes("kelas"));
-    idxTanya = headers.findIndex(h => h.toLowerCase().includes("pertanyaan"));
-    idxJawab = headers.findIndex(h => h.toLowerCase().includes("jawaban"));
 
     isiDropdownKelas();
   });
@@ -175,13 +176,11 @@ function isiDropdownKelas() {
 
 function tampilkanData() {
   const kelas = document.getElementById("kelasSelect").value;
-  if (!kelas) {
-    alert("Silakan pilih kelas terlebih dahulu");
-    return;
-  }
+  if (!kelas) return alert("Pilih kelas terlebih dahulu");
 
   filteredRows = allRows.filter(r => r[idxKelas] === kelas);
   index = 0;
+  questionIndex = 0;
   render();
 }
 
@@ -192,10 +191,10 @@ function render() {
     filteredRows[index][idxNama];
 
   document.getElementById("pertanyaan").innerText =
-    "Pertanyaan : " + filteredRows[index][idxTanya];
+    "Pertanyaan : " + headers[startQ + questionIndex];
 
   document.getElementById("jawaban").innerText =
-    "Jawaban : " + filteredRows[index][idxJawab];
+    "Jawaban : " + (filteredRows[index][startQ + questionIndex] || "-");
 }
 
 function nextRow() {
@@ -212,6 +211,7 @@ function prevRow() {
   }
 }
 </script>
+
 
 </body>
 </html>
