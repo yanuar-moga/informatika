@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Data Siswa</title>
+<title>Data Jawaban Siswa</title>
 
 <style>
 :root {
@@ -23,23 +23,35 @@ body {
 
 .card {
   background: white;
-  width: 420px;
+  width: 480px;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.2);
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
   overflow: hidden;
 }
 
 .header {
   background: var(--primary);
   color: white;
+  padding: 15px;
   text-align: center;
-  padding: 18px;
 }
 
 .header h2 {
   margin: 0;
   font-size: 20px;
-  letter-spacing: 1px;
+}
+
+.filter {
+  padding: 15px;
+  background: var(--light);
+  text-align: center;
+}
+
+select {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  font-size: 14px;
 }
 
 .content {
@@ -47,30 +59,31 @@ body {
 }
 
 .nama {
-  font-size: 26px;
+  font-size: 24px;
   font-weight: bold;
   color: var(--primary);
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
-.data {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  row-gap: 10px;
+.qa {
+  background: var(--light);
+  padding: 15px;
+  border-radius: 12px;
 }
 
-.label {
-  font-weight: 600;
-  color: #555;
+.question {
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
-.value {
-  color: #222;
+.answer {
+  padding-left: 10px;
+  border-left: 4px solid var(--secondary);
+  color: #333;
 }
 
 .footer {
-  background: var(--light);
   padding: 15px;
   text-align: center;
 }
@@ -79,14 +92,10 @@ button {
   background: var(--secondary);
   color: white;
   border: none;
-  padding: 8px 16px;
+  padding: 8px 18px;
   margin: 5px;
   border-radius: 20px;
   cursor: pointer;
-}
-
-button:hover {
-  opacity: 0.9;
 }
 </style>
 </head>
@@ -94,19 +103,32 @@ button:hover {
 <body>
 
 <div class="card">
+
   <div class="header">
-    <h2>DATA SISWA</h2>
+    <h2>REFLEKSI PEMBELAJARAN</h2>
+  </div>
+
+  <div class="filter">
+    Filter Kelas :
+    <select id="kelasFilter" onchange="applyFilter()">
+      <option value="">Semua Kelas</option>
+    </select>
   </div>
 
   <div class="content">
     <div id="nama" class="nama">Memuat...</div>
-    <div id="data" class="data"></div>
+
+    <div class="qa">
+      <div class="question" id="pertanyaan"></div>
+      <div class="answer" id="jawaban"></div>
+    </div>
   </div>
 
   <div class="footer">
     <button onclick="prevRow()">⬅ Sebelumnya</button>
     <button onclick="nextRow()">Berikutnya ➡</button>
   </div>
+
 </div>
 
 <script>
@@ -115,41 +137,57 @@ const sheetName = "Sheet1";
 const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
 
 let headers = [];
+let allRows = [];
 let rows = [];
 let index = 0;
+
+let idxNama, idxKelas, idxTanya, idxJawab;
 
 fetch(url)
   .then(res => res.text())
   .then(text => {
     const json = JSON.parse(text.substring(47, text.length - 2));
+
     headers = json.table.cols.map(col => col.label);
-    rows = json.table.rows.map(row =>
-      row.c.map(cell => cell ? cell.v : "")
-    );
+    allRows = json.table.rows.map(r => r.c.map(c => c ? c.v : ""));
+
+    idxNama  = headers.findIndex(h => h.toLowerCase().includes("nama"));
+    idxKelas = headers.findIndex(h => h.toLowerCase().includes("kelas"));
+    idxTanya = headers.findIndex(h => h.toLowerCase().includes("pertanyaan"));
+    idxJawab = headers.findIndex(h => h.toLowerCase().includes("jawaban"));
+
+    populateFilter();
+    rows = allRows;
     render();
   });
+
+function populateFilter() {
+  const select = document.getElementById("kelasFilter");
+  const kelasUnik = [...new Set(allRows.map(r => r[idxKelas]))];
+
+  kelasUnik.forEach(k => {
+    const opt = document.createElement("option");
+    opt.value = k;
+    opt.textContent = k;
+    select.appendChild(opt);
+  });
+}
+
+function applyFilter() {
+  const kelas = document.getElementById("kelasFilter").value;
+  rows = kelas ? allRows.filter(r => r[idxKelas] === kelas) : allRows;
+  index = 0;
+  render();
+}
 
 function render() {
   if (!rows[index]) return;
 
-  const namaIndex = headers.findIndex(h =>
-    h.toLowerCase().includes("nama")
-  );
-
-  document.getElementById("nama").innerText =
-    namaIndex >= 0 ? rows[index][namaIndex] : "Nama Tidak Ditemukan";
-
-  const dataDiv = document.getElementById("data");
-  dataDiv.innerHTML = "";
-
-  headers.forEach((header, i) => {
-    if (i === namaIndex) return;
-
-    dataDiv.innerHTML += `
-      <div class="label">${header}</div>
-      <div class="value">${rows[index][i]}</div>
-    `;
-  });
+  document.getElementById("nama").innerText = rows[index][idxNama];
+  document.getElementById("pertanyaan").innerText =
+    "Pertanyaan : " + rows[index][idxTanya];
+  document.getElementById("jawaban").innerText =
+    "Jawaban : " + rows[index][idxJawab];
 }
 
 function nextRow() {
