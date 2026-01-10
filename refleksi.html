@@ -23,7 +23,7 @@ body {
 
 .card {
   background: white;
-  width: 480px;
+  width: 500px;
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0,0,0,.25);
   overflow: hidden;
@@ -73,16 +73,18 @@ button.filter-btn {
   background: var(--light);
   padding: 15px;
   border-radius: 12px;
+  margin-bottom: 15px;
 }
 
 .question {
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
 .answer {
   padding-left: 10px;
   border-left: 4px solid var(--secondary);
+  margin-bottom: 10px;
 }
 
 .footer {
@@ -121,10 +123,8 @@ button.nav {
   <div class="content">
     <div id="nama" class="nama">Silakan pilih kelas</div>
 
-    <div class="qa">
-      <div class="question" id="pertanyaan">—</div>
-      <div class="answer" id="jawaban">—</div>
-    </div>
+    <!-- SEMUA PERTANYAAN & JAWABAN -->
+    <div id="qaList"></div>
   </div>
 
   <div class="footer">
@@ -143,11 +143,10 @@ let headers = [];
 let allRows = [];
 let filteredRows = [];
 let index = 0;
-let questionIndex = 0;
 
 let idxNama, idxKelas;
-let startQ = 3; // Kolom D (index 3)
-let endQ   = 9; // Kolom J (index 9)
+let startQ = 3; // Kolom D
+let endQ   = 9; // Kolom J (7 pertanyaan)
 
 fetch(url)
   .then(res => res.text())
@@ -176,11 +175,13 @@ function isiDropdownKelas() {
 
 function tampilkanData() {
   const kelas = document.getElementById("kelasSelect").value;
-  if (!kelas) return alert("Pilih kelas terlebih dahulu");
+  if (!kelas) {
+    alert("Pilih kelas terlebih dahulu");
+    return;
+  }
 
   filteredRows = allRows.filter(r => r[idxKelas] === kelas);
   index = 0;
-  questionIndex = 0;
   render();
 }
 
@@ -190,11 +191,23 @@ function render() {
   document.getElementById("nama").innerText =
     filteredRows[index][idxNama];
 
-  document.getElementById("pertanyaan").innerText =
-    "Pertanyaan : " + headers[startQ + questionIndex];
+  const qaList = document.getElementById("qaList");
+  qaList.innerHTML = "";
 
-  document.getElementById("jawaban").innerText =
-    "Jawaban : " + (filteredRows[index][startQ + questionIndex] || "-");
+  for (let i = startQ; i <= endQ; i++) {
+    if (!headers[i]) continue;
+
+    qaList.innerHTML += `
+      <div class="qa">
+        <div class="question">
+          Pertanyaan : ${headers[i]}
+        </div>
+        <div class="answer">
+          Jawaban : ${filteredRows[index][i] || "-"}
+        </div>
+      </div>
+    `;
+  }
 }
 
 function nextRow() {
@@ -211,7 +224,6 @@ function prevRow() {
   }
 }
 </script>
-
 
 </body>
 </html>
