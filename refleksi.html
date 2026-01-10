@@ -12,18 +12,16 @@
   --light: #f4f7fb;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   font-family: "Segoe UI", Arial, sans-serif;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
   margin: 0;
   height: 100vh;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
 }
 
-/* ===== WRAPPER FULL SCREEN ===== */
+/* ===== WRAPPER ===== */
 .wrapper {
   display: flex;
   width: 100vw;
@@ -66,7 +64,7 @@ body {
   color: white;
 }
 
-/* ===== MAIN AREA ===== */
+/* ===== MAIN ===== */
 .main {
   flex: 1;
   display: flex;
@@ -139,23 +137,15 @@ button {
 .footer {
   padding: 12px;
   text-align: center;
-  background: #fff;
   border-top: 1px solid #eee;
 }
 
-/* ===== RESPONSIVE (HP) ===== */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-  .wrapper {
-    flex-direction: column;
-  }
-
+  .wrapper { flex-direction: column; }
   .sidebar {
     width: 100%;
     max-height: 180px;
-  }
-
-  .sidebar li {
-    font-size: 13px;
   }
 }
 </style>
@@ -173,7 +163,7 @@ button {
     </ul>
   </div>
 
-  <!-- MAIN CONTENT -->
+  <!-- MAIN -->
   <div class="main">
 
     <div class="header">
@@ -210,9 +200,7 @@ let allRows = [];
 let filteredRows = [];
 let index = 0;
 
-let idxNama, idxKelas;
-let startQ = 3;
-let endQ = 9;
+let idxNama, idxKelas, startQ;
 
 fetch(url)
   .then(res => res.text())
@@ -221,8 +209,11 @@ fetch(url)
     headers = json.table.cols.map(col => col.label);
     allRows = json.table.rows.map(r => r.c.map(c => c ? c.v : ""));
 
-    idxNama = headers.findIndex(h => h.toLowerCase().includes("nama"));
+    idxNama  = headers.findIndex(h => h.toLowerCase().includes("nama"));
     idxKelas = headers.findIndex(h => h.toLowerCase().includes("kelas"));
+
+    // Pertanyaan dimulai setelah kolom KELAS
+    startQ = idxKelas + 1;
 
     isiDropdownKelas();
   });
@@ -230,6 +221,7 @@ fetch(url)
 function isiDropdownKelas() {
   const select = document.getElementById("kelasSelect");
   [...new Set(allRows.map(r => r[idxKelas]))].forEach(k => {
+    if (!k) return;
     const opt = document.createElement("option");
     opt.value = k;
     opt.textContent = k;
@@ -270,7 +262,7 @@ function render() {
   const qaList = document.getElementById("qaList");
   qaList.innerHTML = "";
 
-  for (let i = startQ; i <= endQ; i++) {
+  for (let i = startQ; i < headers.length; i++) {
     qaList.innerHTML += `
       <div class="qa">
         <div class="question">Pertanyaan : ${headers[i]}</div>
