@@ -1,37 +1,117 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Reader Google Sheet</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    .row {
-      margin-bottom: 10px;
-    }
-    .label {
-      font-weight: bold;
-    }
-    button {
-      margin: 5px;
-      padding: 8px 14px;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Data Siswa</title>
+
+<style>
+:root {
+  --primary: #0d47a1;
+  --secondary: #009688;
+  --light: #f4f7fb;
+}
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  background: white;
+  width: 420px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.2);
+  overflow: hidden;
+}
+
+.header {
+  background: var(--primary);
+  color: white;
+  text-align: center;
+  padding: 18px;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 1px;
+}
+
+.content {
+  padding: 20px;
+}
+
+.nama {
+  font-size: 26px;
+  font-weight: bold;
+  color: var(--primary);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.data {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  row-gap: 10px;
+}
+
+.label {
+  font-weight: 600;
+  color: #555;
+}
+
+.value {
+  color: #222;
+}
+
+.footer {
+  background: var(--light);
+  padding: 15px;
+  text-align: center;
+}
+
+button {
+  background: var(--secondary);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  margin: 5px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+</style>
 </head>
+
 <body>
 
-<h2>Data dari Google Sheet</h2>
+<div class="card">
+  <div class="header">
+    <h2>DATA SISWA</h2>
+  </div>
 
-<div id="output"></div>
+  <div class="content">
+    <div id="nama" class="nama">Memuat...</div>
+    <div id="data" class="data"></div>
+  </div>
 
-<button onclick="prevRow()">⬅ Prev</button>
-<button onclick="nextRow()">Next ➡</button>
+  <div class="footer">
+    <button onclick="prevRow()">⬅ Sebelumnya</button>
+    <button onclick="nextRow()">Berikutnya ➡</button>
+  </div>
+</div>
 
 <script>
 const sheetId = "1e_PwQQV-dwlrcPrH3TaP8qMfeIR1ofZqcYxczUbIkk0";
-const sheetName = "Sheet1"; // ganti jika nama sheet berbeda
+const sheetName = "Sheet1";
 const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
 
 let headers = [];
@@ -50,19 +130,25 @@ fetch(url)
   });
 
 function render() {
-  const output = document.getElementById("output");
-  output.innerHTML = "";
+  if (!rows[index]) return;
 
-  if (!rows[index]) {
-    output.innerHTML = "<p>Data tidak tersedia</p>";
-    return;
-  }
+  const namaIndex = headers.findIndex(h =>
+    h.toLowerCase().includes("nama")
+  );
+
+  document.getElementById("nama").innerText =
+    namaIndex >= 0 ? rows[index][namaIndex] : "Nama Tidak Ditemukan";
+
+  const dataDiv = document.getElementById("data");
+  dataDiv.innerHTML = "";
 
   headers.forEach((header, i) => {
-    const div = document.createElement("div");
-    div.className = "row";
-    div.innerHTML = `<span class="label">${header}:</span> ${rows[index][i]}`;
-    output.appendChild(div);
+    if (i === namaIndex) return;
+
+    dataDiv.innerHTML += `
+      <div class="label">${header}</div>
+      <div class="value">${rows[index][i]}</div>
+    `;
   });
 }
 
