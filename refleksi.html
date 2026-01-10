@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Data Jawaban Siswa</title>
+<title>Refleksi Pembelajaran</title>
 
 <style>
 :root {
@@ -36,22 +36,25 @@ body {
   text-align: center;
 }
 
-.header h2 {
-  margin: 0;
-  font-size: 20px;
-}
-
 .filter {
   padding: 15px;
   background: var(--light);
   text-align: center;
 }
 
-select {
+select, button.filter-btn {
   padding: 8px 14px;
   border-radius: 20px;
   border: 1px solid #ccc;
   font-size: 14px;
+  margin: 5px;
+}
+
+button.filter-btn {
+  background: var(--secondary);
+  color: white;
+  border: none;
+  cursor: pointer;
 }
 
 .content {
@@ -80,7 +83,6 @@ select {
 .answer {
   padding-left: 10px;
   border-left: 4px solid var(--secondary);
-  color: #333;
 }
 
 .footer {
@@ -88,7 +90,7 @@ select {
   text-align: center;
 }
 
-button {
+button.nav {
   background: var(--secondary);
   color: white;
   border: none;
@@ -109,24 +111,25 @@ button {
   </div>
 
   <div class="filter">
-    Filter Kelas :
-    <select id="kelasFilter" onchange="applyFilter()">
-      <option value="">Semua Kelas</option>
+    <select id="kelasSelect">
+      <option value="">Pilih Kelas</option>
     </select>
+    <br>
+    <button class="filter-btn" onclick="tampilkanData()">Tampilkan Data</button>
   </div>
 
   <div class="content">
-    <div id="nama" class="nama">Memuat...</div>
+    <div id="nama" class="nama">Silakan pilih kelas</div>
 
     <div class="qa">
-      <div class="question" id="pertanyaan"></div>
-      <div class="answer" id="jawaban"></div>
+      <div class="question" id="pertanyaan">—</div>
+      <div class="answer" id="jawaban">—</div>
     </div>
   </div>
 
   <div class="footer">
-    <button onclick="prevRow()">⬅ Sebelumnya</button>
-    <button onclick="nextRow()">Berikutnya ➡</button>
+    <button class="nav" onclick="prevRow()">⬅ Sebelumnya</button>
+    <button class="nav" onclick="nextRow()">Berikutnya ➡</button>
   </div>
 
 </div>
@@ -138,7 +141,7 @@ const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:j
 
 let headers = [];
 let allRows = [];
-let rows = [];
+let filteredRows = [];
 let index = 0;
 
 let idxNama, idxKelas, idxTanya, idxJawab;
@@ -147,7 +150,6 @@ fetch(url)
   .then(res => res.text())
   .then(text => {
     const json = JSON.parse(text.substring(47, text.length - 2));
-
     headers = json.table.cols.map(col => col.label);
     allRows = json.table.rows.map(r => r.c.map(c => c ? c.v : ""));
 
@@ -156,13 +158,11 @@ fetch(url)
     idxTanya = headers.findIndex(h => h.toLowerCase().includes("pertanyaan"));
     idxJawab = headers.findIndex(h => h.toLowerCase().includes("jawaban"));
 
-    populateFilter();
-    rows = allRows;
-    render();
+    isiDropdownKelas();
   });
 
-function populateFilter() {
-  const select = document.getElementById("kelasFilter");
+function isiDropdownKelas() {
+  const select = document.getElementById("kelasSelect");
   const kelasUnik = [...new Set(allRows.map(r => r[idxKelas]))];
 
   kelasUnik.forEach(k => {
@@ -173,25 +173,33 @@ function populateFilter() {
   });
 }
 
-function applyFilter() {
-  const kelas = document.getElementById("kelasFilter").value;
-  rows = kelas ? allRows.filter(r => r[idxKelas] === kelas) : allRows;
+function tampilkanData() {
+  const kelas = document.getElementById("kelasSelect").value;
+  if (!kelas) {
+    alert("Silakan pilih kelas terlebih dahulu");
+    return;
+  }
+
+  filteredRows = allRows.filter(r => r[idxKelas] === kelas);
   index = 0;
   render();
 }
 
 function render() {
-  if (!rows[index]) return;
+  if (!filteredRows[index]) return;
 
-  document.getElementById("nama").innerText = rows[index][idxNama];
+  document.getElementById("nama").innerText =
+    filteredRows[index][idxNama];
+
   document.getElementById("pertanyaan").innerText =
-    "Pertanyaan : " + rows[index][idxTanya];
+    "Pertanyaan : " + filteredRows[index][idxTanya];
+
   document.getElementById("jawaban").innerText =
-    "Jawaban : " + rows[index][idxJawab];
+    "Jawaban : " + filteredRows[index][idxJawab];
 }
 
 function nextRow() {
-  if (index < rows.length - 1) {
+  if (index < filteredRows.length - 1) {
     index++;
     render();
   }
