@@ -21,12 +21,56 @@ body {
   align-items: center;
 }
 
-.card {
+.wrapper {
+  display: flex;
+  width: 900px;
+  height: 520px;
   background: white;
-  width: 500px;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.25);
   overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 260px;
+  background: var(--light);
+  padding: 15px;
+  overflow-y: auto;
+}
+
+.sidebar h3 {
+  margin-top: 0;
+  text-align: center;
+  color: var(--primary);
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  background: white;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.sidebar li.active,
+.sidebar li:hover {
+  background: var(--secondary);
+  color: white;
+}
+
+/* ===== MAIN CONTENT ===== */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
@@ -37,20 +81,20 @@ body {
 }
 
 .filter {
-  padding: 15px;
+  padding: 12px;
   background: var(--light);
   text-align: center;
 }
 
-select, button.filter-btn {
+select, button {
   padding: 8px 14px;
   border-radius: 20px;
   border: 1px solid #ccc;
   font-size: 14px;
-  margin: 5px;
+  margin: 4px;
 }
 
-button.filter-btn {
+button {
   background: var(--secondary);
   color: white;
   border: none;
@@ -59,6 +103,7 @@ button.filter-btn {
 
 .content {
   padding: 20px;
+  overflow-y: auto;
 }
 
 .nama {
@@ -71,9 +116,9 @@ button.filter-btn {
 
 .qa {
   background: var(--light);
-  padding: 15px;
+  padding: 12px;
   border-radius: 12px;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
 .question {
@@ -84,54 +129,52 @@ button.filter-btn {
 .answer {
   padding-left: 10px;
   border-left: 4px solid var(--secondary);
-  margin-bottom: 10px;
 }
 
 .footer {
-  padding: 15px;
+  padding: 12px;
   text-align: center;
-}
-
-button.nav {
-  background: var(--secondary);
-  color: white;
-  border: none;
-  padding: 8px 18px;
-  margin: 5px;
-  border-radius: 20px;
-  cursor: pointer;
 }
 </style>
 </head>
 
 <body>
 
-<div class="card">
+<div class="wrapper">
 
-  <div class="header">
-    <h2>REFLEKSI PEMBELAJARAN</h2>
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <h3>Daftar Siswa</h3>
+    <ul id="siswaList">
+      <li>Pilih kelas</li>
+    </ul>
   </div>
 
-  <div class="filter">
-    <select id="kelasSelect">
-      <option value="">Pilih Kelas</option>
-    </select>
-    <br>
-    <button class="filter-btn" onclick="tampilkanData()">Tampilkan Data</button>
+  <!-- MAIN -->
+  <div class="main">
+
+    <div class="header">
+      <h2>REFLEKSI PEMBELAJARAN</h2>
+    </div>
+
+    <div class="filter">
+      <select id="kelasSelect">
+        <option value="">Pilih Kelas</option>
+      </select>
+      <button onclick="tampilkanData()">Tampilkan</button>
+    </div>
+
+    <div class="content">
+      <div id="nama" class="nama">Silakan pilih kelas</div>
+      <div id="qaList"></div>
+    </div>
+
+    <div class="footer">
+      <button onclick="prevRow()">⬅ Sebelumnya</button>
+      <button onclick="nextRow()">Berikutnya ➡</button>
+    </div>
+
   </div>
-
-  <div class="content">
-    <div id="nama" class="nama">Silakan pilih kelas</div>
-
-    <!-- SEMUA PERTANYAAN & JAWABAN -->
-    <div id="qaList"></div>
-  </div>
-
-  <div class="footer">
-    <button class="nav" onclick="prevRow()">⬅ Sebelumnya</button>
-    <button class="nav" onclick="nextRow()">Berikutnya ➡</button>
-  </div>
-
 </div>
 
 <script>
@@ -145,8 +188,8 @@ let filteredRows = [];
 let index = 0;
 
 let idxNama, idxKelas;
-let startQ = 3; // Kolom D
-let endQ   = 9; // Kolom J (7 pertanyaan)
+let startQ = 3; // D
+let endQ = 9;   // J
 
 fetch(url)
   .then(res => res.text())
@@ -155,17 +198,17 @@ fetch(url)
     headers = json.table.cols.map(col => col.label);
     allRows = json.table.rows.map(r => r.c.map(c => c ? c.v : ""));
 
-    idxNama  = headers.findIndex(h => h.toLowerCase().includes("nama"));
+    idxNama = headers.findIndex(h => h.toLowerCase().includes("nama"));
     idxKelas = headers.findIndex(h => h.toLowerCase().includes("kelas"));
 
     isiDropdownKelas();
   });
 
 function isiDropdownKelas() {
+  const kelasSet = [...new Set(allRows.map(r => r[idxKelas]))];
   const select = document.getElementById("kelasSelect");
-  const kelasUnik = [...new Set(allRows.map(r => r[idxKelas]))];
 
-  kelasUnik.forEach(k => {
+  kelasSet.forEach(k => {
     const opt = document.createElement("option");
     opt.value = k;
     opt.textContent = k;
@@ -175,14 +218,27 @@ function isiDropdownKelas() {
 
 function tampilkanData() {
   const kelas = document.getElementById("kelasSelect").value;
-  if (!kelas) {
-    alert("Pilih kelas terlebih dahulu");
-    return;
-  }
+  if (!kelas) return alert("Pilih kelas terlebih dahulu");
 
   filteredRows = allRows.filter(r => r[idxKelas] === kelas);
   index = 0;
+  renderSidebar();
   render();
+}
+
+function renderSidebar() {
+  const ul = document.getElementById("siswaList");
+  ul.innerHTML = "";
+
+  filteredRows.forEach((r, i) => {
+    const li = document.createElement("li");
+    li.textContent = r[idxNama];
+    li.onclick = () => {
+      index = i;
+      render();
+    };
+    ul.appendChild(li);
+  });
 }
 
 function render() {
@@ -195,19 +251,18 @@ function render() {
   qaList.innerHTML = "";
 
   for (let i = startQ; i <= endQ; i++) {
-    if (!headers[i]) continue;
-
     qaList.innerHTML += `
       <div class="qa">
-        <div class="question">
-          Pertanyaan : ${headers[i]}
-        </div>
-        <div class="answer">
-          Jawaban : ${filteredRows[index][i] || "-"}
-        </div>
+        <div class="question">Pertanyaan : ${headers[i]}</div>
+        <div class="answer">Jawaban : ${filteredRows[index][i] || "-"}</div>
       </div>
     `;
   }
+
+  // active sidebar
+  [...document.querySelectorAll(".sidebar li")].forEach((li, i) => {
+    li.classList.toggle("active", i === index);
+  });
 }
 
 function nextRow() {
