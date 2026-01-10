@@ -233,7 +233,13 @@ function tampilkanData() {
   const kelas = document.getElementById("kelasSelect").value;
   if (!kelas) return alert("Pilih kelas terlebih dahulu");
 
-  filteredRows = allRows.filter(r => r[idxKelas] === kelas);
+  // FILTER + URUT ALFABET
+  filteredRows = allRows
+    .filter(r => r[idxKelas] === kelas)
+    .sort((a, b) =>
+      a[idxNama].localeCompare(b[idxNama], "id", { sensitivity: "base" })
+    );
+
   index = 0;
   renderSidebar();
   render();
