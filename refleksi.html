@@ -56,6 +56,7 @@ body {
   border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
+  text-transform: uppercase;
 }
 
 .sidebar li.active,
@@ -114,6 +115,7 @@ button {
   color: var(--primary);
   text-align: center;
   margin-bottom: 20px;
+  text-transform: uppercase;
 }
 
 .qa {
@@ -212,7 +214,6 @@ fetch(url)
     idxNama  = headers.findIndex(h => h.toLowerCase().includes("nama"));
     idxKelas = headers.findIndex(h => h.toLowerCase().includes("kelas"));
 
-    // Pertanyaan dimulai setelah kolom KELAS
     startQ = idxKelas + 1;
 
     isiDropdownKelas();
@@ -233,7 +234,6 @@ function tampilkanData() {
   const kelas = document.getElementById("kelasSelect").value;
   if (!kelas) return alert("Pilih kelas terlebih dahulu");
 
-  // FILTER + URUT ALFABET
   filteredRows = allRows
     .filter(r => r[idxKelas] === kelas)
     .sort((a, b) =>
@@ -248,9 +248,10 @@ function tampilkanData() {
 function renderSidebar() {
   const ul = document.getElementById("siswaList");
   ul.innerHTML = "";
+
   filteredRows.forEach((r, i) => {
     const li = document.createElement("li");
-    li.textContent = r[idxNama];
+    li.textContent = (r[idxNama] || "").toUpperCase();
     li.onclick = () => {
       index = i;
       render();
@@ -263,7 +264,7 @@ function render() {
   if (!filteredRows[index]) return;
 
   document.getElementById("nama").innerText =
-    filteredRows[index][idxNama];
+    (filteredRows[index][idxNama] || "").toUpperCase();
 
   const qaList = document.getElementById("qaList");
   qaList.innerHTML = "";
