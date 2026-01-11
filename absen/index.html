@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Absensi Siswa</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <img src="logo.png" class="logo">
+    <h2>Absensi Siswa</h2>
+    <p class="subtitle">SMP Negeri 1 Moga</p>
+
+    <label>Kelas</label>
+    <select id="kelas">
+      <option value="">-- Pilih Kelas --</option>
+    </select>
+
+    <label>Nama Siswa</label>
+    <select id="nama" disabled>
+      <option value="">-- Pilih Nama --</option>
+    </select>
+
+    <label>Jenis Kelamin</label>
+    <input type="text" id="jk" readonly>
+
+    <label>Tanggal Presensi</label>
+    <input type="text" id="tanggal" readonly>
+
+    <label>Status Kehadiran</label>
+    <select id="status">
+      <option value="Hadir">Hadir</option>
+      <option value="Izin">Izin</option>
+      <option value="Sakit">Sakit</option>
+      <option value="Alpa">Alpa</option>
+    </select>
+
+    <button onclick="kirimAbsensi()">Simpan Presensi</button>
+    <div id="msg"></div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
