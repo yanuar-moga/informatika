@@ -18,43 +18,48 @@
     <h2>Absensi Siswa</h2>
     <p class="subtitle">SMP Negeri 1 Moga</p>
 
-    <!-- KELAS -->
-    <label for="kelas">Kelas</label>
-    <select id="kelas" required>
-      <option value="">-- Pilih Kelas --</option>
-    </select>
+    <!-- FORM (WAJIB) -->
+    <form id="formAbsensi">
 
-    <!-- NAMA -->
-    <label for="nama">Nama Siswa</label>
-    <select id="nama" disabled required>
-      <option value="">-- Pilih Nama --</option>
-    </select>
+      <!-- KELAS -->
+      <label for="kelas">Kelas</label>
+      <select id="kelas" required>
+        <option value="">-- Pilih Kelas --</option>
+      </select>
 
-    <!-- JK -->
-    <label for="jk">Jenis Kelamin</label>
-    <input type="text" id="jk" readonly>
+      <!-- NAMA -->
+      <label for="nama">Nama Siswa</label>
+      <select id="nama" disabled required>
+        <option value="">-- Pilih Nama --</option>
+      </select>
 
-    <!-- TANGGAL -->
-    <label for="tanggal">Tanggal Presensi</label>
-    <input type="text" id="tanggal" readonly>
+      <!-- JK -->
+      <label for="jk">Jenis Kelamin</label>
+      <input type="text" id="jk" readonly>
 
-    <!-- STATUS -->
-    <label for="status">Status Kehadiran</label>
-    <select id="status" required>
-      <option value="">-- Pilih Status --</option>
-      <option value="Hadir">Hadir</option>
-      <option value="Izin">Izin</option>
-      <option value="Sakit">Sakit</option>
-      <option value="Alpa">Alpa</option>
-    </select>
+      <!-- TANGGAL -->
+      <label for="tanggal">Tanggal Presensi</label>
+      <input type="text" id="tanggal" readonly>
 
-    <!-- SUBMIT -->
-    <button type="button" onclick="kirimAbsensi()">
-      Simpan Presensi
-    </button>
+      <!-- STATUS -->
+      <label for="status">Status Kehadiran</label>
+      <select id="status" required>
+        <option value="">-- Pilih Status --</option>
+        <option value="Hadir">Hadir</option>
+        <option value="Izin">Izin</option>
+        <option value="Sakit">Sakit</option>
+        <option value="Alpa">Alpa</option>
+      </select>
 
-    <!-- PESAN -->
-    <div id="msg"></div>
+      <!-- SUBMIT -->
+      <button type="submit">
+        Simpan Presensi
+      </button>
+
+      <!-- PESAN -->
+      <div id="msg"></div>
+
+    </form>
 
   </div>
 </div>
