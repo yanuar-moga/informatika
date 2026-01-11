@@ -1,3 +1,6 @@
+// =========================
+// KONFIGURASI API
+// =========================
 const API = "https://script.google.com/macros/s/AKfycbz_yK-5jwgT-GNMQ3HAB0XDWRW4Dj_Lj5ohq4MiQIFXBlapHSQB1yRRa8VLCp9CQlowVA/exec";
 
 // =========================
@@ -18,7 +21,7 @@ const btnSubmit     = form.querySelector("button");
 tanggalInput.value = new Date().toLocaleString("id-ID");
 
 // =========================
-// LOAD DATA SISWA
+// LOAD DATA SISWA (GET)
 // =========================
 fetch(API + "?action=getData")
   .then(res => res.json())
@@ -66,15 +69,15 @@ namaSelect.addEventListener("change", () => {
 });
 
 // =========================
-// SUBMIT FORM (DIKUNCI)
+// SUBMIT FORM (ANTI RELOAD)
 // =========================
 form.addEventListener("submit", function (e) {
-  e.preventDefault(); // ⛔ stop reload
+  e.preventDefault();
   kirimAbsensi();
 });
 
 // =========================
-// KIRIM ABSENSI
+// KIRIM ABSENSI (POST JSON)
 // =========================
 function kirimAbsensi() {
   const kelas  = kelasSelect.value.trim();
@@ -82,7 +85,7 @@ function kirimAbsensi() {
   const jk     = jkInput.value.trim();
   const status = statusSelect.value.trim();
 
-  // VALIDASI KETAT
+  // VALIDASI
   if (!kelas || !nama || !jk || !status) {
     msg.innerHTML = "⚠️ Kelas, Nama, JK, dan Status WAJIB diisi";
     return;
@@ -91,33 +94,40 @@ function kirimAbsensi() {
   btnSubmit.disabled = true;
   msg.innerHTML = "⏳ Menyimpan presensi...";
 
-  // DEBUG (boleh hapus nanti)
-  console.log({ kelas, nama, jk, status });
+  const payload = {
+    action: "submit",
+    kelas: kelas,
+    nama: nama,
+    jk: jk,
+    status: status
+  };
 
-  const url =
-    API +
-    "?action=submit" +
-    "&kelas="  + encodeURIComponent(kelas) +
-    "&nama="   + encodeURIComponent(nama) +
-    "&jk="     + encodeURIComponent(jk) +
-    "&status=" + encodeURIComponent(status);
-
-  fetch(url)
+  fetch(API, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
     .then(res => res.json())
     .then(res => {
       if (res.status === "success") {
         msg.innerHTML = "✅ Presensi berhasil disimpan";
+
         form.reset();
         namaSelect.disabled = true;
         jkInput.value = "";
         tanggalInput.value = new Date().toLocaleString("id-ID");
-      } else if (res.status === "duplicate") {
+      } 
+      else if (res.status === "duplicate") {
         msg.innerHTML = "⚠️ Siswa sudah presensi hari ini";
-      } else {
+      } 
+      else {
         msg.innerHTML = "❌ " + (res.message || "Gagal menyimpan presensi");
       }
     })
-    .catch(() => {
+    .catch(err => {
+      console.error(err);
       msg.innerHTML = "❌ Koneksi bermasalah";
     })
     .finally(() => {
