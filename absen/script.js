@@ -16,7 +16,7 @@ tanggalInput.value = new Date().toLocaleString("id-ID");
 // =========================
 // LOAD DATA SISWA
 // =========================
-fetch(`${API}?action=getData`)
+fetch(API + "?action=getData")
   .then(res => res.json())
   .then(data => {
     window.dataSiswa = data;
@@ -62,28 +62,30 @@ namaSelect.addEventListener("change", () => {
 // KIRIM ABSENSI
 // =========================
 function kirimAbsensi() {
-  const kelas  = kelasSelect.value;
-  const nama   = namaSelect.value;
-  const jk     = jkInput.value;
-  const status = statusSelect.value;
+  const kelas  = kelasSelect.value.trim();
+  const nama   = namaSelect.value.trim();
+  const jk     = jkInput.value.trim();
+  const status = statusSelect.value.trim();
 
-  if (!kelas || !nama || !jk) {
-    msg.innerHTML = "⚠️ Lengkapi data terlebih dahulu";
+  // VALIDASI LENGKAP
+  if (!kelas || !nama || !jk || !status) {
+    msg.innerHTML = "⚠️ Kelas, Nama, JK, dan Status wajib dipilih";
     return;
   }
 
   btnSubmit.disabled = true;
   msg.innerHTML = "⏳ Menyimpan presensi...";
 
-  const params = new URLSearchParams({
-    action: "submit",
-    kelas,
-    nama,
-    jk,
-    status
-  });
+  // PAKAI encodeURIComponent (PALING AMAN)
+  const url =
+    API +
+    "?action=submit" +
+    "&kelas="  + encodeURIComponent(kelas) +
+    "&nama="   + encodeURIComponent(nama) +
+    "&jk="     + encodeURIComponent(jk) +
+    "&status=" + encodeURIComponent(status);
 
-  fetch(`${API}?${params.toString()}`)
+  fetch(url)
     .then(res => res.json())
     .then(res => {
       if (res.status === "success") {
@@ -91,7 +93,7 @@ function kirimAbsensi() {
       } else if (res.status === "duplicate") {
         msg.innerHTML = "⚠️ Siswa sudah presensi hari ini";
       } else {
-        msg.innerHTML = "❌ Gagal menyimpan presensi";
+        msg.innerHTML = "❌ " + (res.message || "Gagal menyimpan presensi");
       }
     })
     .catch(() => {
