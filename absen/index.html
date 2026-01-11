@@ -10,26 +10,34 @@
 
 <div class="container">
   <div class="card">
-    <div class="card">
-  <img src="assets/logo.png" class="logo" alt="Logo Sekolah">
-  <h2>Absensi Siswa</h2>
-  <p class="subtitle">SMP Negeri 1 Moga</p>
+
+    <!-- LOGO -->
+    <img src="assets/logo.png" class="logo" alt="Logo Sekolah">
+
+    <h2>Absensi Siswa</h2>
+    <p class="subtitle">SMP Negeri 1 Moga</p>
+
+    <!-- KELAS -->
     <label>Kelas</label>
     <select id="kelas">
       <option value="">-- Pilih Kelas --</option>
     </select>
 
+    <!-- NAMA -->
     <label>Nama Siswa</label>
     <select id="nama" disabled>
       <option value="">-- Pilih Nama --</option>
     </select>
 
+    <!-- JK -->
     <label>Jenis Kelamin</label>
     <input type="text" id="jk" readonly>
 
+    <!-- TANGGAL (DISPLAY SAJA) -->
     <label>Tanggal Presensi</label>
     <input type="text" id="tanggal" readonly>
 
+    <!-- STATUS -->
     <label>Status Kehadiran</label>
     <select id="status">
       <option value="Hadir">Hadir</option>
@@ -40,6 +48,7 @@
 
     <button onclick="kirimAbsensi()">Simpan Presensi</button>
     <div id="msg"></div>
+
   </div>
 </div>
 
