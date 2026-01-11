@@ -5,22 +5,15 @@ const SPREADSHEET_ID = "1rQcTtSG2Q_PX_CEx_NC2Cs5eb8CXxXBEsxqiVSNze2Q";
 ========================= */
 function doGet() {
   return HtmlService
-    .createTemplateFromFile("index")
-    .evaluate()
+    .createHtmlOutputFromFile("index")
     .setTitle("Absensi Siswa")
     .addMetaTag("viewport", "width=device-width, initial-scale=1");
 }
 
 /* =========================
-   INCLUDE FILE HTML
-========================= */
-function include(filename) {
-  return HtmlService.createHtmlOutputFromFile(filename).getContent();
-}
-
-/* =========================
    AMBIL DATA SISWA
-   Sheet: DATA SISWA INFORMATIKA KELAS 7
+   Sheet: DATA
+   Kolom:
    B = Nama
    C = Jenis Kelamin
    D = Rombel
@@ -28,30 +21,39 @@ function include(filename) {
 function getDataSiswa() {
   const sheet = SpreadsheetApp
     .openById(SPREADSHEET_ID)
-    .getSheetByName("DATA SISWA INFORMATIKA KELAS 7");
+    .getSheetByName("DATA");
 
   if (!sheet) {
-    throw new Error("Sheet DATA SISWA INFORMATIKA KELAS 7 tidak ditemukan");
+    throw new Error("Sheet DATA tidak ditemukan");
   }
 
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return [];
 
+  // Ambil kolom B-D
   const values = sheet.getRange(2, 2, lastRow - 1, 3).getValues();
 
+  // Bersihkan & validasi data
   return values
-    .filter(r => r[0] && r[2]) // pastikan Nama & Rombel ada
+    .filter(r => r[0] && r[2]) // Nama & Rombel wajib ada
     .map(r => ({
-      nama: r[0],
-      jk: r[1],
-      rombel: r[2]
+      nama: r[0].toString().trim(),
+      jk: (r[1] || "").toString().trim(),
+      rombel: r[2].toString().trim()
     }));
 }
 
 /* =========================
    SIMPAN ABSENSI
+   Sheet: ABSENSI
+   Header:
+   Tanggal | Nama | JK | Kelas | Status
 ========================= */
 function submitAbsensi(data) {
+  if (!data) {
+    return { status: "error", message: "Data kosong" };
+  }
+
   const nama   = (data.nama   || "").toString().trim();
   const jk     = (data.jk     || "").toString().trim();
   const rombel = (data.rombel || "").toString().trim();
@@ -81,7 +83,7 @@ function submitAbsensi(data) {
 
   const dataAbsensi = sheet.getDataRange().getValues();
 
-  // 🔒 CEK DUPLIKAT (Nama + Tanggal)
+  // 🔒 Cek duplikat (Nama + Tanggal)
   for (let i = 1; i < dataAbsensi.length; i++) {
     const tglSheet  = dataAbsensi[i][0];
     const namaSheet = dataAbsensi[i][1];
@@ -99,12 +101,12 @@ function submitAbsensi(data) {
     }
   }
 
-  // ✅ SIMPAN
+  // ✅ Simpan data
   sheet.appendRow([
     now,     // A Tanggal
     nama,    // B Nama
     jk,      // C Jenis Kelamin
-    rombel,  // D Rombel
+    rombel,  // D Kelas
     status   // E Status
   ]);
 
