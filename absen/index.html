@@ -144,19 +144,28 @@
 <script>
 let dataSiswa = [];
 
-// Set tanggal default
-const now = new Date();
-document.getElementById("tanggal").value =
-  now.toISOString().slice(0,16);
+const kelas   = document.getElementById("kelas");
+const nama    = document.getElementById("nama");
+const jk      = document.getElementById("jk");
+const tanggal = document.getElementById("tanggal");
+const status  = document.getElementById("status");
+const msg     = document.getElementById("msg");
 
-// Ambil data siswa
+// =========================
+// SET TANGGAL DEFAULT
+// =========================
+const now = new Date();
+tanggal.value = now.toISOString().slice(0,16);
+
+// =========================
+// AMBIL DATA SISWA
+// =========================
 google.script.run.withSuccessHandler(function(data) {
-  console.log("DATA SISWA:", data); // DEBUG
+  console.log("DATA SISWA:", data);
 
   dataSiswa = data;
 
-  const kelasSelect = document.getElementById("kelas");
-  kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+  kelas.innerHTML = '<option value="">-- Pilih Kelas --</option>';
 
   const rombelUnik = [...new Set(
     data.map(s => s.rombel).filter(r => r)
@@ -166,12 +175,68 @@ google.script.run.withSuccessHandler(function(data) {
     const opt = document.createElement("option");
     opt.value = r;
     opt.textContent = r;
-    kelasSelect.appendChild(opt);
+    kelas.appendChild(opt);
   });
 
 }).getDataSiswa();
-</script>
 
+// =========================
+// SAAT KELAS DIPILIH
+// =========================
+kelas.onchange = function () {
+  nama.disabled = false;
+  nama.innerHTML = '<option value="">-- Pilih Nama --</option>';
+  jk.value = "";
+
+  if (!kelas.value) return;
+
+  dataSiswa
+    .filter(s => s.rombel === kelas.value)
+    .forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s.nama;
+      opt.textContent = s.nama;
+      opt.dataset.jk = s.jk;
+      nama.appendChild(opt);
+    });
+};
+
+// =========================
+// SAAT NAMA DIPILIH
+// =========================
+nama.onchange = function () {
+  const selected = nama.selectedOptions[0];
+  jk.value = selected ? selected.dataset.jk : "";
+};
+
+// =========================
+// SUBMIT ABSENSI
+// =========================
+function submitAbsensi() {
+  msg.innerText = "⏳ Menyimpan...";
+
+  if (!kelas.value || !nama.value || !jk.value || !status.value) {
+    msg.innerText = "⚠️ Lengkapi semua data";
+    return;
+  }
+
+  google.script.run.withSuccessHandler(function(res) {
+    if (res.status === "success") {
+      msg.innerText = "✅ Presensi berhasil disimpan";
+      status.value = "";
+    } else if (res.status === "duplicate") {
+      msg.innerText = "⚠️ Siswa sudah presensi hari ini";
+    } else {
+      msg.innerText = "❌ " + res.message;
+    }
+  }).submitAbsensi({
+    nama: nama.value,
+    jk: jk.value,
+    rombel: kelas.value,
+    status: status.value
+  });
+}
+</script>
 
 </body>
 </html>
