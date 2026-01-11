@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Absensi Siswa</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Absensi Siswa</title>
+
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -18,35 +19,41 @@
     <p class="subtitle">SMP Negeri 1 Moga</p>
 
     <!-- KELAS -->
-    <label>Kelas</label>
-    <select id="kelas">
+    <label for="kelas">Kelas</label>
+    <select id="kelas" required>
       <option value="">-- Pilih Kelas --</option>
     </select>
 
     <!-- NAMA -->
-    <label>Nama Siswa</label>
-    <select id="nama" disabled>
+    <label for="nama">Nama Siswa</label>
+    <select id="nama" disabled required>
       <option value="">-- Pilih Nama --</option>
     </select>
 
     <!-- JK -->
-    <label>Jenis Kelamin</label>
+    <label for="jk">Jenis Kelamin</label>
     <input type="text" id="jk" readonly>
 
-    <!-- TANGGAL (DISPLAY SAJA) -->
-    <label>Tanggal Presensi</label>
+    <!-- TANGGAL -->
+    <label for="tanggal">Tanggal Presensi</label>
     <input type="text" id="tanggal" readonly>
 
     <!-- STATUS -->
-    <label>Status Kehadiran</label>
-    <select id="status">
+    <label for="status">Status Kehadiran</label>
+    <select id="status" required>
+      <option value="">-- Pilih Status --</option>
       <option value="Hadir">Hadir</option>
       <option value="Izin">Izin</option>
       <option value="Sakit">Sakit</option>
       <option value="Alpa">Alpa</option>
     </select>
 
-    <button onclick="kirimAbsensi()">Simpan Presensi</button>
+    <!-- SUBMIT -->
+    <button type="button" onclick="kirimAbsensi()">
+      Simpan Presensi
+    </button>
+
+    <!-- PESAN -->
     <div id="msg"></div>
 
   </div>
