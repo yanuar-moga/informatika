@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Absensi Digital</title>
+<title>Absensi Siswa</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body {
@@ -11,20 +11,21 @@ body {
   padding: 20px;
 }
 .card {
-  max-width: 420px;
+  max-width: 430px;
   margin: auto;
   background: #fff;
-  padding: 20px;
-  border-radius: 10px;
+  padding: 22px;
+  border-radius: 12px;
   box-shadow: 0 5px 15px rgba(0,0,0,.1);
 }
 h2 {
   text-align: center;
+  margin-bottom: 20px;
 }
 label {
+  font-weight: bold;
   display: block;
   margin-top: 12px;
-  font-weight: bold;
 }
 select, input, button {
   width: 100%;
@@ -38,15 +39,15 @@ input[readonly] {
 button {
   margin-top: 18px;
   background: #1976d2;
-  color: white;
+  color: #fff;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
 }
 button:hover {
   background: #125aa3;
 }
-#status {
+#statusInfo {
   margin-top: 15px;
   text-align: center;
   font-weight: bold;
@@ -56,25 +57,34 @@ button:hover {
 
 <body>
 <div class="card">
-  <h2>Absensi Siswa</h2>
+<h2>Absensi Siswa</h2>
 
-  <label>Nama</label>
-  <select id="nama">
-    <option value="">-- Pilih Nama --</option>
-  </select>
+<label>Kelas / Rombel</label>
+<select id="kelas">
+  <option value="">-- Pilih Kelas --</option>
+</select>
 
-  <label>Jenis Kelamin</label>
-  <input type="text" id="jk" readonly>
+<label>Nama</label>
+<select id="nama" disabled>
+  <option value="">-- Pilih Nama --</option>
+</select>
 
-  <label>Kelas / Rombel</label>
-  <input type="text" id="kelas" readonly>
+<label>Jenis Kelamin</label>
+<input type="text" id="jk" readonly>
 
-  <label>Tanggal Presensi</label>
-  <input type="text" id="tanggal" readonly>
+<label>Status Kehadiran</label>
+<select id="status">
+  <option value="Hadir">Hadir</option>
+  <option value="Izin">Izin</option>
+  <option value="Sakit">Sakit</option>
+  <option value="Alpa">Alpa</option>
+</select>
 
-  <button onclick="simpan()">Simpan Absensi</button>
+<label>Tanggal Presensi</label>
+<input type="text" id="tanggal" readonly>
 
-  <div id="status"></div>
+<button onclick="simpan()">Simpan Absensi</button>
+<div id="statusInfo"></div>
 </div>
 
 <script>
@@ -82,51 +92,72 @@ const API_URL = "https://script.google.com/macros/s/AKfycbz_yK-5jwgT-GNMQ3HAB0XD
 
 let dataSiswa = [];
 
-// Load data siswa dari Google Sheet
-function loadData() {
-  fetch(API_URL + "?action=getData")
-    .then(res => res.json())
-    .then(data => {
-      dataSiswa = data;
-      const select = document.getElementById("nama");
-      data.forEach((s, i) => {
-        select.innerHTML += `<option value="${i}">${s.nama}</option>`;
-      });
-    })
-    .catch(() => {
-      document.getElementById("status").innerText = "❌ Gagal memuat data siswa";
-    });
+// Load data siswa
+fetch(API_URL + "?action=getData")
+  .then(res => res.json())
+  .then(data => {
+    dataSiswa = data;
+    loadKelas();
+  });
+
+// Isi dropdown kelas (unik)
+function loadKelas() {
+  const kelasSet = [...new Set(dataSiswa.map(s => s.kelas))];
+  const kelasSelect = document.getElementById("kelas");
+  kelasSet.forEach(k => {
+    kelasSelect.innerHTML += `<option value="${k}">${k}</option>`;
+  });
 }
 
-// Auto isi JK & Kelas
+// Filter nama berdasarkan kelas
+document.getElementById("kelas").addEventListener("change", function () {
+  const namaSelect = document.getElementById("nama");
+  namaSelect.innerHTML = "<option value=''>-- Pilih Nama --</option>";
+  document.getElementById("jk").value = "";
+  namaSelect.disabled = true;
+
+  if (this.value === "") return;
+
+  dataSiswa
+    .filter(s => s.kelas === this.value)
+    .forEach((s, i) => {
+      namaSelect.innerHTML += `<option value="${s.nama}">${s.nama}</option>`;
+    });
+
+  namaSelect.disabled = false;
+});
+
+// Auto isi JK
 document.getElementById("nama").addEventListener("change", function () {
-  const s = dataSiswa[this.value];
-  if (!s) return;
-  document.getElementById("jk").value = s.jk;
-  document.getElementById("kelas").value = s.kelas;
+  const s = dataSiswa.find(d => d.nama === this.value);
+  if (s) document.getElementById("jk").value = s.jk;
 });
 
 // Simpan absensi
 function simpan() {
-  const idx = document.getElementById("nama").value;
-  if (idx === "") {
-    alert("Silakan pilih nama terlebih dahulu");
+  const nama = document.getElementById("nama").value;
+  const kelas = document.getElementById("kelas").value;
+  const jk = document.getElementById("jk").value;
+  const status = document.getElementById("status").value;
+
+  if (!nama || !kelas) {
+    alert("Lengkapi pilihan kelas dan nama");
     return;
   }
 
-  const s = dataSiswa[idx];
-
-  fetch(API_URL + `?action=submit&nama=${encodeURIComponent(s.nama)}&jk=${s.jk}&kelas=${s.kelas}`)
+  fetch(API_URL + `?action=submit&nama=${encodeURIComponent(nama)}&jk=${jk}&kelas=${kelas}&status=${status}`)
     .then(res => res.json())
     .then(() => {
-      document.getElementById("status").innerText = "✅ Absensi berhasil disimpan";
+      document.getElementById("statusInfo").innerText =
+        "✅ Absensi berhasil disimpan";
     })
     .catch(() => {
-      document.getElementById("status").innerText = "❌ Gagal menyimpan absensi";
+      document.getElementById("statusInfo").innerText =
+        "❌ Gagal menyimpan absensi";
     });
 }
 
-// Set tanggal hari ini
+// Tanggal hari ini
 document.getElementById("tanggal").value =
   new Date().toLocaleDateString("id-ID", {
     weekday: "long",
@@ -134,8 +165,6 @@ document.getElementById("tanggal").value =
     month: "long",
     day: "numeric"
   });
-
-loadData();
 </script>
 </body>
 </html>
