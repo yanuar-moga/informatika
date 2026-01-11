@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Absensi Siswa</title>
+</head>
+<body>
+
+<h3>Absensi Siswa</h3>
+
+<select id="kelas"></select><br><br>
+<select id="nama"></select><br><br>
+
+<input id="jk" readonly placeholder="JK"><br><br>
+
+<select id="status">
+  <option value="">-- Status --</option>
+  <option>Hadir</option>
+  <option>Izin</option>
+  <option>Sakit</option>
+  <option>Alpa</option>
+</select><br><br>
+
+<button onclick="submit()">Simpan</button>
+
+<p id="msg"></p>
+
+<script>
+const API = "PASTE_URL_WEB_APP_DISINI";
+
+let siswa = [];
+
+fetch(API + "?action=getData")
+  .then(r => r.json())
+  .then(d => {
+    siswa = d;
+    const kelasUnik = [...new Set(d.map(x => x.kelas))];
+    document.getElementById("kelas").innerHTML =
+      '<option value="">-- Kelas --</option>' +
+      kelasUnik.map(k => `<option>${k}</option>`).join("");
+  });
+
+kelas.onchange = () => {
+  nama.innerHTML =
+    '<option value="">-- Nama --</option>' +
+    siswa
+      .filter(s => s.kelas === kelas.value)
+      .map(s => `<option data-jk="${s.jk}">${s.nama}</option>`)
+      .join("");
+};
+
+nama.onchange = () => {
+  jk.value = nama.selectedOptions[0]?.dataset.jk || "";
+};
+
+function submit() {
+  fetch(API, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "submit",
+      kelas: kelas.value,
+      nama: nama.value,
+      jk: jk.value,
+      status: status.value
+    })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.status === "success") msg.innerText = "✅ Berhasil";
+    else if (res.status === "duplicate") msg.innerText = "⚠️ Sudah presensi";
+    else msg.innerText = "❌ " + res.message;
+  })
+  .catch(() => msg.innerText = "❌ Koneksi bermasalah");
+}
+</script>
+
+</body>
+</html>
