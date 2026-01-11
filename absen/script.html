@@ -1,0 +1,39 @@
+<script>
+let dataSiswa = [];
+
+document.getElementById("tanggal").value =
+  new Date().toLocaleString("id-ID");
+
+google.script.run.withSuccessHandler(data => {
+  dataSiswa = data;
+  [...new Set(data.map(s => s.kelas))].forEach(k => {
+    kelas.innerHTML += `<option>${k}</option>`;
+  });
+}).getDataSiswa();
+
+kelas.onchange = () => {
+  nama.disabled = false;
+  nama.innerHTML = `<option value="">-- Pilih Nama --</option>`;
+  dataSiswa.filter(s => s.kelas === kelas.value).forEach(s => {
+    nama.innerHTML += `<option data-jk="${s.jk}">${s.nama}</option>`;
+  });
+};
+
+nama.onchange = () => {
+  jk.value = nama.selectedOptions[0]?.dataset.jk || "";
+};
+
+function submitAbsensi() {
+  msg.innerText = "⏳ Menyimpan...";
+  google.script.run.withSuccessHandler(res => {
+    if (res.status === "success") msg.innerText = "✅ Berhasil";
+    else if (res.status === "duplicate") msg.innerText = "⚠️ Sudah presensi";
+    else msg.innerText = "❌ " + res.message;
+  }).submitAbsensi({
+    kelas: kelas.value,
+    nama: nama.value,
+    jk: jk.value,
+    status: status.value
+  });
+}
+</script>
