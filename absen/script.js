@@ -1,12 +1,16 @@
 const API = "https://script.google.com/macros/s/AKfycbz_yK-5jwgT-GNMQ3HAB0XDWRW4Dj_Lj5ohq4MiQIFXBlapHSQB1yRRa8VLCp9CQlowVA/exec";
 
+// =========================
+// AMBIL ELEMEN (PASTI ADA)
+// =========================
 const kelasSelect   = document.getElementById("kelas");
 const namaSelect    = document.getElementById("nama");
 const jkInput       = document.getElementById("jk");
 const tanggalInput  = document.getElementById("tanggal");
 const statusSelect  = document.getElementById("status");
 const msg           = document.getElementById("msg");
-const btnSubmit     = document.querySelector("button");
+const form          = document.getElementById("formAbsensi");
+const btnSubmit     = form.querySelector("button");
 
 // =========================
 // TANGGAL (DISPLAY SAJA)
@@ -28,6 +32,9 @@ fetch(API + "?action=getData")
       opt.textContent = k;
       kelasSelect.appendChild(opt);
     });
+  })
+  .catch(() => {
+    msg.innerHTML = "❌ Gagal memuat data siswa";
   });
 
 // =========================
@@ -59,6 +66,14 @@ namaSelect.addEventListener("change", () => {
 });
 
 // =========================
+// SUBMIT FORM (DIKUNCI)
+// =========================
+form.addEventListener("submit", function (e) {
+  e.preventDefault(); // ⛔ stop reload
+  kirimAbsensi();
+});
+
+// =========================
 // KIRIM ABSENSI
 // =========================
 function kirimAbsensi() {
@@ -67,16 +82,18 @@ function kirimAbsensi() {
   const jk     = jkInput.value.trim();
   const status = statusSelect.value.trim();
 
-  // VALIDASI LENGKAP
+  // VALIDASI KETAT
   if (!kelas || !nama || !jk || !status) {
-    msg.innerHTML = "⚠️ Kelas, Nama, JK, dan Status wajib dipilih";
+    msg.innerHTML = "⚠️ Kelas, Nama, JK, dan Status WAJIB diisi";
     return;
   }
 
   btnSubmit.disabled = true;
   msg.innerHTML = "⏳ Menyimpan presensi...";
 
-  // PAKAI encodeURIComponent (PALING AMAN)
+  // DEBUG (boleh hapus nanti)
+  console.log({ kelas, nama, jk, status });
+
   const url =
     API +
     "?action=submit" +
@@ -90,6 +107,10 @@ function kirimAbsensi() {
     .then(res => {
       if (res.status === "success") {
         msg.innerHTML = "✅ Presensi berhasil disimpan";
+        form.reset();
+        namaSelect.disabled = true;
+        jkInput.value = "";
+        tanggalInput.value = new Date().toLocaleString("id-ID");
       } else if (res.status === "duplicate") {
         msg.innerHTML = "⚠️ Siswa sudah presensi hari ini";
       } else {
