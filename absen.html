@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Absensi Digital</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  padding: 20px;
+}
+.card {
+  max-width: 420px;
+  margin: auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,.1);
+}
+h2 {
+  text-align: center;
+}
+label {
+  display: block;
+  margin-top: 12px;
+  font-weight: bold;
+}
+select, input, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  font-size: 14px;
+}
+input[readonly] {
+  background: #eee;
+}
+button {
+  margin-top: 18px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+button:hover {
+  background: #125aa3;
+}
+#status {
+  margin-top: 15px;
+  text-align: center;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+<div class="card">
+  <h2>Absensi Siswa</h2>
+
+  <label>Nama</label>
+  <select id="nama">
+    <option value="">-- Pilih Nama --</option>
+  </select>
+
+  <label>Jenis Kelamin</label>
+  <input type="text" id="jk" readonly>
+
+  <label>Kelas / Rombel</label>
+  <input type="text" id="kelas" readonly>
+
+  <label>Tanggal Presensi</label>
+  <input type="text" id="tanggal" readonly>
+
+  <button onclick="simpan()">Simpan Absensi</button>
+
+  <div id="status"></div>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbz_yK-5jwgT-GNMQ3HAB0XDWRW4Dj_Lj5ohq4MiQIFXBlapHSQB1yRRa8VLCp9CQlowVA/exec";
+
+let dataSiswa = [];
+
+// Load data siswa dari Google Sheet
+function loadData() {
+  fetch(API_URL + "?action=getData")
+    .then(res => res.json())
+    .then(data => {
+      dataSiswa = data;
+      const select = document.getElementById("nama");
+      data.forEach((s, i) => {
+        select.innerHTML += `<option value="${i}">${s.nama}</option>`;
+      });
+    })
+    .catch(() => {
+      document.getElementById("status").innerText = "❌ Gagal memuat data siswa";
+    });
+}
+
+// Auto isi JK & Kelas
+document.getElementById("nama").addEventListener("change", function () {
+  const s = dataSiswa[this.value];
+  if (!s) return;
+  document.getElementById("jk").value = s.jk;
+  document.getElementById("kelas").value = s.kelas;
+});
+
+// Simpan absensi
+function simpan() {
+  const idx = document.getElementById("nama").value;
+  if (idx === "") {
+    alert("Silakan pilih nama terlebih dahulu");
+    return;
+  }
+
+  const s = dataSiswa[idx];
+
+  fetch(API_URL + `?action=submit&nama=${encodeURIComponent(s.nama)}&jk=${s.jk}&kelas=${s.kelas}`)
+    .then(res => res.json())
+    .then(() => {
+      document.getElementById("status").innerText = "✅ Absensi berhasil disimpan";
+    })
+    .catch(() => {
+      document.getElementById("status").innerText = "❌ Gagal menyimpan absensi";
+    });
+}
+
+// Set tanggal hari ini
+document.getElementById("tanggal").value =
+  new Date().toLocaleDateString("id-ID", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });
+
+loadData();
+</script>
+</body>
+</html>
