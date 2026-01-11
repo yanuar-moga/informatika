@@ -1,8 +1,15 @@
+/**
+ * ======================================
+ * KONFIGURASI
+ * ======================================
+ */
 const SPREADSHEET_ID = "1rQcTtSG2Q_PX_CEx_NC2Cs5eb8CXxXBEsxqiVSNze2Q";
 
-/* =========================
-   LOAD WEB APP
-========================= */
+/**
+ * ======================================
+ * LOAD WEB APP
+ * ======================================
+ */
 function doGet() {
   return HtmlService
     .createHtmlOutputFromFile("index")
@@ -10,14 +17,16 @@ function doGet() {
     .addMetaTag("viewport", "width=device-width, initial-scale=1");
 }
 
-/* =========================
-   AMBIL DATA SISWA
-   Sheet: DATA
-   Kolom:
-   B = Nama
-   C = Jenis Kelamin
-   D = Rombel
-========================= */
+/**
+ * ======================================
+ * AMBIL DATA SISWA
+ * Sheet: DATA
+ * Kolom:
+ * B = Nama
+ * C = Jenis Kelamin
+ * D = Rombel
+ * ======================================
+ */
 function getDataSiswa() {
   const sheet = SpreadsheetApp
     .openById(SPREADSHEET_ID)
@@ -43,12 +52,14 @@ function getDataSiswa() {
     }));
 }
 
-/* =========================
-   SIMPAN ABSENSI
-   Sheet: ABSENSI
-   Header:
-   Tanggal | Nama | JK | Kelas | Status
-========================= */
+/**
+ * ======================================
+ * SIMPAN ABSENSI
+ * Sheet: ABSENSI
+ * Header:
+ * Tanggal | Nama | JK | Kelas | Status
+ * ======================================
+ */
 function submitAbsensi(data) {
   if (!data) {
     return { status: "error", message: "Data kosong" };
@@ -83,7 +94,10 @@ function submitAbsensi(data) {
 
   const dataAbsensi = sheet.getDataRange().getValues();
 
-  // 🔒 Cek duplikat (Nama + Tanggal)
+  /**
+   * 🔒 CEK DUPLIKAT
+   * (Nama + Tanggal yang sama)
+   */
   for (let i = 1; i < dataAbsensi.length; i++) {
     const tglSheet  = dataAbsensi[i][0];
     const namaSheet = dataAbsensi[i][1];
@@ -101,7 +115,9 @@ function submitAbsensi(data) {
     }
   }
 
-  // ✅ Simpan data
+  /**
+   * ✅ SIMPAN DATA
+   */
   sheet.appendRow([
     now,     // A Tanggal
     nama,    // B Nama
