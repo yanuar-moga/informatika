@@ -1,40 +1,135 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
   <base target="_top">
-  <?!= include("style"); ?>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #dbeafe, #eff6ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 32px 28px;
+      box-shadow: 0 18px 40px rgba(15, 74, 168, 0.15);
+    }
+
+    .logo {
+      width: 90px;
+      display: block;
+      margin: 0 auto 14px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #0f4aa8;
+      margin: 0;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 22px;
+    }
+
+    label {
+      font-size: 13px;
+      margin-top: 14px;
+      display: block;
+      color: #334155;
+    }
+
+    select,
+    input {
+      width: 100%;
+      padding: 11px 12px;
+      margin-top: 6px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      font-size: 14px;
+    }
+
+    input[readonly] {
+      background: #f1f5f9;
+    }
+
+    button {
+      margin-top: 24px;
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, #0f4aa8, #2563eb);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #msg {
+      text-align: center;
+      margin-top: 14px;
+      font-size: 14px;
+      color: #0f4aa8;
+    }
+  </style>
 </head>
 <body>
 
 <div class="container">
   <div class="card">
 
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Tut_Wuri_Handayani.png/240px-Tut_Wuri_Handayani.png" class="logo">
+    <!-- LOGO -->
+    <img src="assets/logo.png" class="logo" alt="Logo Sekolah">
 
     <h2>Absensi Siswa</h2>
     <p class="subtitle">SMP Negeri 1 Moga</p>
 
-    <label>Kelas</label>
+    <!-- KELAS -->
+    <label>Kelas (Rombel)</label>
     <select id="kelas">
       <option value="">-- Pilih Kelas --</option>
     </select>
 
+    <!-- NAMA -->
     <label>Nama Siswa</label>
     <select id="nama" disabled>
       <option value="">-- Pilih Nama --</option>
     </select>
 
+    <!-- JK -->
     <label>Jenis Kelamin</label>
-    <input id="jk" readonly>
+    <input type="text" id="jk" readonly>
 
+    <!-- TANGGAL -->
     <label>Tanggal Presensi</label>
-    <input id="tanggal" readonly>
+    <input type="datetime-local" id="tanggal">
 
+    <!-- STATUS -->
     <label>Status Kehadiran</label>
     <select id="status">
       <option value="">-- Pilih Status --</option>
       <option>Hadir</option>
-      <option>Izin</option>
+      <option>Ijin</option>
       <option>Sakit</option>
       <option>Alpa</option>
     </select>
@@ -46,6 +141,74 @@
   </div>
 </div>
 
-<?!= include("script"); ?>
+<script>
+let dataSiswa = [];
+
+// Set tanggal default (detik & menit sekarang)
+const now = new Date();
+document.getElementById("tanggal").value =
+  now.toISOString().slice(0,16);
+
+// Ambil data siswa dari Spreadsheet
+google.script.run.withSuccessHandler(data => {
+  dataSiswa = data;
+
+  // Ambil daftar rombel unik
+  const rombelUnik = [...new Set(data.map(s => s.rombel))];
+
+  const kelasSelect = document.getElementById("kelas");
+  rombelUnik.forEach(r => {
+    const opt = document.createElement("option");
+    opt.value = r;
+    opt.textContent = r;
+    kelasSelect.appendChild(opt);
+  });
+}).getDataSiswa();
+
+// Saat kelas dipilih
+kelas.onchange = () => {
+  nama.disabled = false;
+  nama.innerHTML = `<option value="">-- Pilih Nama --</option>`;
+  jk.value = "";
+
+  dataSiswa
+    .filter(s => s.rombel === kelas.value)
+    .forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s.nama;
+      opt.textContent = s.nama;
+      opt.dataset.jk = s.jk;
+      nama.appendChild(opt);
+    });
+};
+
+// Saat nama dipilih
+nama.onchange = () => {
+  const selected = nama.selectedOptions[0];
+  jk.value = selected ? selected.dataset.jk : "";
+};
+
+// Submit absensi
+function submitAbsensi() {
+  msg.innerText = "⏳ Menyimpan...";
+
+  google.script.run.withSuccessHandler(res => {
+    if (res.status === "success") {
+      msg.innerText = "✅ Presensi berhasil disimpan";
+    } else if (res.status === "duplicate") {
+      msg.innerText = "⚠️ Siswa sudah presensi hari ini";
+    } else {
+      msg.innerText = "❌ " + res.message;
+    }
+  }).submitAbsensi({
+    nama: nama.value,
+    jk: jk.value,
+    rombel: kelas.value,
+    status: status.value,
+    tanggal: tanggal.value
+  });
+}
+</script>
+
 </body>
 </html>
