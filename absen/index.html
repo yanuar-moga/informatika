@@ -37,12 +37,23 @@ button{
   cursor:pointer;
 }
 #msg{text-align:center;margin-top:12px}
+  .logo {
+  display: block;
+  margin: 0 auto 12px auto;
+  max-width: 90px;
+}
+
 </style>
 </head>
 
 <body>
 <div class="card">
-<h3 style="text-align:center">Absensi Siswa</h3>
+<div class="card">
+
+  <img src="assets/logo.png" alt="Logo Sekolah" class="logo">
+
+  <h3 style="text-align:center">Absensi Siswa</h3>
+
 
 <label>Kelas</label>
 <select id="kelas"><option value="">-- Pilih Kelas --</option></select>
@@ -73,7 +84,7 @@ button{
 </div>
 
 <script>
-const API_URL = "PASTE_URL_WEB_APP_DISINI";
+const API_URL = "https://script.google.com/macros/s/AKfycbxoRAOtKcG-1binkkGCFrpEAo1iLoMAhA8qVhUydVszr9hHYEu9s-BA-_MtEZcbKPbJ/exec";
 
 const kelas = document.getElementById("kelas");
 const nama = document.getElementById("nama");
