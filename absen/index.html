@@ -6,20 +6,15 @@
 <title>Absensi Siswa</title>
 
 <style>
-* { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-body {
-  margin:0;
-  min-height:100vh;
+*{box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+body{
+  margin:0;min-height:100vh;
   background:linear-gradient(135deg,#dbeafe,#eff6ff);
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  display:flex;align-items:center;justify-content:center
 }
 .container{max-width:420px;width:100%;padding:20px}
 .card{
-  background:#fff;
-  border-radius:18px;
-  padding:30px;
+  background:#fff;border-radius:18px;padding:30px;
   box-shadow:0 18px 40px rgba(15,74,168,.15)
 }
 h2{text-align:center;color:#0f4aa8;margin:0}
@@ -70,14 +65,14 @@ button{
   <option>Alpa</option>
 </select>
 
-<button onclick="submitAbsensi()" id="btn">Simpan Presensi</button>
+<button id="btn" onclick="submitAbsensi()">Simpan Presensi</button>
 <div id="msg"></div>
 
 </div>
 </div>
 
 <script>
-const API_URL = "PASTE_URL_WEB_APP_DI_SINI";
+const API_URL = "https://script.google.com/macros/s/AKfycbxoRAOtKcG-1binkkGCFrpEAo1iLoMAhA8qVhUydVszr9hHYEu9s-BA-_MtEZcbKPbJ/exec";
 
 let dataSiswa=[];
 const kelas=document.getElementById("kelas");
@@ -89,24 +84,23 @@ const noMeja=document.getElementById("noMeja");
 const msg=document.getElementById("msg");
 const btn=document.getElementById("btn");
 
+// waktu WIB
 tanggal.value=new Date(Date.now()+7*3600000).toISOString().slice(0,16);
 
 // meja
 for(let i=1;i<=40;i++) noMeja.innerHTML+=`<option>Meja ${i}</option>`;
 
-// load data
-fetch(API_URL,{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({action:"getDataSiswa"})
-})
-.then(r=>r.json())
-.then(d=>{
-  dataSiswa=d;
-  [...new Set(d.map(s=>s.rombel))].forEach(k=>{
-    kelas.innerHTML+=`<option>${k}</option>`;
-  });
-});
+// LOAD DATA (GET – AMAN)
+fetch(API_URL + "?action=getDataSiswa")
+  .then(res=>res.json())
+  .then(data=>{
+    console.log("DATA SISWA:", data);
+    dataSiswa=data||[];
+    [...new Set(dataSiswa.map(s=>s.rombel))].forEach(r=>{
+      kelas.innerHTML+=`<option value="${r}">${r}</option>`;
+    });
+  })
+  .catch(err=>console.error("GAGAL LOAD DATA",err));
 
 // pilih kelas
 kelas.onchange=()=>{
@@ -149,16 +143,16 @@ function submitAbsensi(){
   })
   .then(r=>r.json())
   .then(res=>{
-    msg.innerText =
-      res.status==="success" ? "✅ Presensi tersimpan" :
-      res.status==="duplicate" ? "⚠️ Sudah presensi hari ini" :
+    msg.innerText=
+      res.status==="success"?"✅ Presensi tersimpan":
+      res.status==="duplicate"?"⚠️ Sudah presensi hari ini":
       "❌ "+res.message;
 
     btn.disabled=false;btn.innerText="Simpan Presensi";
     if(res.status==="success") status.value="";
   })
   .catch(()=>{
-    msg.innerText="❌ Gagal";
+    msg.innerText="❌ Gagal menyimpan";
     btn.disabled=false;btn.innerText="Simpan Presensi";
   });
 }
