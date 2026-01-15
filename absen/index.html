@@ -6,72 +6,43 @@
 <title>Absensi Siswa</title>
 
 <style>
-* { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+* { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
 body {
-  margin: 0;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #dbeafe, #eff6ff);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin:0;
+  min-height:100vh;
+  background:linear-gradient(135deg,#dbeafe,#eff6ff);
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
-.container { max-width: 420px; width: 100%; padding: 20px; }
-.card {
-  background: #fff;
-  border-radius: 18px;
-  padding: 32px 28px;
-  box-shadow: 0 18px 40px rgba(15, 74, 168, 0.15);
+.container{max-width:420px;width:100%;padding:20px}
+.card{
+  background:#fff;
+  border-radius:18px;
+  padding:30px;
+  box-shadow:0 18px 40px rgba(15,74,168,.15)
 }
-.logo {
-  display: block;
-  margin: 0 auto 14px auto;
-  max-width: 90px;
+h2{text-align:center;color:#0f4aa8;margin:0}
+.subtitle{text-align:center;font-size:13px;color:#64748b;margin-bottom:20px}
+label{font-size:13px;margin-top:14px;display:block}
+select,input{
+  width:100%;padding:11px;margin-top:6px;
+  border-radius:10px;border:1px solid #cbd5e1
 }
-h2 { text-align: center; color: #0f4aa8; margin: 0; }
-.subtitle {
-  text-align: center;
-  font-size: 13px;
-  color: #64748b;
-  margin-bottom: 22px;
+input[readonly]{background:#f1f5f9}
+button{
+  margin-top:24px;width:100%;padding:13px;
+  background:linear-gradient(135deg,#0f4aa8,#2563eb);
+  color:#fff;border:none;border-radius:12px;font-size:16px
 }
-label {
-  font-size: 13px;
-  margin-top: 14px;
-  display: block;
-}
-select, input {
-  width: 100%;
-  padding: 11px;
-  margin-top: 6px;
-  border-radius: 10px;
-  border: 1px solid #cbd5e1;
-}
-input[readonly] { background: #f1f5f9; }
-button {
-  margin-top: 24px;
-  width: 100%;
-  padding: 13px;
-  background: linear-gradient(135deg, #0f4aa8, #2563eb);
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  cursor: pointer;
-}
-#msg {
-  text-align: center;
-  margin-top: 14px;
-  font-size: 14px;
-}
+#msg{text-align:center;margin-top:14px}
 </style>
 </head>
 
 <body>
-
 <div class="container">
 <div class="card">
 
-<img src="assets/logo.png" class="logo">
 <h2>Absensi Siswa</h2>
 <p class="subtitle">SMP Negeri 1 Moga</p>
 
@@ -84,13 +55,13 @@ button {
 <label>Jenis Kelamin</label>
 <input id="jk" readonly>
 
-<label>No Meja Laptop</label>
+<label>No Meja</label>
 <select id="noMeja"><option value="">-- Pilih No Meja --</option></select>
 
-<label>Tanggal Presensi</label>
+<label>Tanggal</label>
 <input type="datetime-local" id="tanggal" readonly>
 
-<label>Status Kehadiran</label>
+<label>Status</label>
 <select id="status">
   <option value="">-- Pilih Status --</option>
   <option>Hadir</option>
@@ -99,33 +70,31 @@ button {
   <option>Alpa</option>
 </select>
 
-<button id="btn" onclick="submitAbsensi()">Simpan Presensi</button>
+<button onclick="submitAbsensi()" id="btn">Simpan Presensi</button>
 <div id="msg"></div>
 
 </div>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxoRAOtKcG-1binkkGCFrpEAo1iLoMAhA8qVhUydVszr9hHYEu9s-BA-_MtEZcbKPbJ/exec";
+const API_URL = "PASTE_URL_WEB_APP_DI_SINI";
 
-let dataSiswa = [];
-const kelas = document.getElementById("kelas");
-const nama = document.getElementById("nama");
-const jk = document.getElementById("jk");
-const tanggal = document.getElementById("tanggal");
-const status = document.getElementById("status");
-const noMeja = document.getElementById("noMeja");
-const msg = document.getElementById("msg");
-const btn = document.getElementById("btn");
+let dataSiswa=[];
+const kelas=document.getElementById("kelas");
+const nama=document.getElementById("nama");
+const jk=document.getElementById("jk");
+const tanggal=document.getElementById("tanggal");
+const status=document.getElementById("status");
+const noMeja=document.getElementById("noMeja");
+const msg=document.getElementById("msg");
+const btn=document.getElementById("btn");
 
-tanggal.value = new Date(Date.now()+7*3600000).toISOString().slice(0,16);
+tanggal.value=new Date(Date.now()+7*3600000).toISOString().slice(0,16);
 
-// Meja
-for(let i=1;i<=40;i++){
-  noMeja.innerHTML += `<option>Meja ${i}</option>`;
-}
+// meja
+for(let i=1;i<=40;i++) noMeja.innerHTML+=`<option>Meja ${i}</option>`;
 
-// Load data siswa
+// load data
 fetch(API_URL,{
   method:"POST",
   headers:{"Content-Type":"application/json"},
@@ -139,10 +108,10 @@ fetch(API_URL,{
   });
 });
 
+// pilih kelas
 kelas.onchange=()=>{
-  nama.innerHTML='<option>-- Pilih Nama --</option>';
-  nama.disabled=true;
-  jk.value="";
+  nama.innerHTML='<option value="">-- Pilih Nama --</option>';
+  nama.disabled=true;jk.value="";
   if(!kelas.value) return;
 
   dataSiswa.filter(s=>s.rombel===kelas.value)
@@ -152,16 +121,17 @@ kelas.onchange=()=>{
   nama.disabled=false;
 };
 
+// pilih nama
 nama.onchange=()=>jk.value=nama.selectedOptions[0]?.dataset.jk||"";
 
+// submit
 function submitAbsensi(){
   if(!kelas.value||!nama.value||!jk.value||!status.value||!noMeja.value){
-    msg.innerText="⚠️ Lengkapi semua data";
+    msg.innerText="⚠️ Lengkapi data";
     return;
   }
 
-  btn.disabled=true;
-  btn.innerText="⏳ Menyimpan...";
+  btn.disabled=true;btn.innerText="⏳ Menyimpan...";
 
   fetch(API_URL,{
     method:"POST",
@@ -184,17 +154,14 @@ function submitAbsensi(){
       res.status==="duplicate" ? "⚠️ Sudah presensi hari ini" :
       "❌ "+res.message;
 
-    btn.disabled=false;
-    btn.innerText="Simpan Presensi";
+    btn.disabled=false;btn.innerText="Simpan Presensi";
     if(res.status==="success") status.value="";
   })
   .catch(()=>{
     msg.innerText="❌ Gagal";
-    btn.disabled=false;
-    btn.innerText="Simpan Presensi";
+    btn.disabled=false;btn.innerText="Simpan Presensi";
   });
 }
 </script>
-
 </body>
 </html>
