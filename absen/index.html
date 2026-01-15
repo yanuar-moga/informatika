@@ -1,255 +1,198 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <base target="_top">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Absensi Siswa</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Segoe UI', system-ui, sans-serif;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #dbeafe, #eff6ff);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 420px;
-      padding: 20px;
-    }
-
-    .card {
-      background: #fff;
-      border-radius: 18px;
-      padding: 32px 28px;
-      box-shadow: 0 18px 40px rgba(15, 74, 168, 0.15);
-    }
-
-    .logo {
-      width: 90px;
-      display: block;
-      margin: 0 auto 14px;
-    }
-
-    h2 {
-      text-align: center;
-      color: #0f4aa8;
-      margin: 0;
-    }
-
-    .subtitle {
-      text-align: center;
-      font-size: 13px;
-      color: #64748b;
-      margin-bottom: 22px;
-    }
-
-    label {
-      font-size: 13px;
-      margin-top: 14px;
-      display: block;
-      color: #334155;
-    }
-
-    select,
-    input {
-      width: 100%;
-      padding: 11px 12px;
-      margin-top: 6px;
-      border-radius: 10px;
-      border: 1px solid #cbd5e1;
-      font-size: 14px;
-    }
-
-    input[readonly] {
-      background: #f1f5f9;
-    }
-
-    button {
-      margin-top: 24px;
-      width: 100%;
-      padding: 13px;
-      background: linear-gradient(135deg, #0f4aa8, #2563eb);
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    #msg {
-      text-align: center;
-      margin-top: 14px;
-      font-size: 14px;
-      color: #0f4aa8;
-    }
-  </style>
+<style>
+* { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #dbeafe, #eff6ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.container { max-width: 420px; width: 100%; padding: 20px; }
+.card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 32px 28px;
+  box-shadow: 0 18px 40px rgba(15, 74, 168, 0.15);
+}
+.logo {
+  display: block;
+  margin: 0 auto 14px auto;
+  max-width: 90px;
+}
+h2 { text-align: center; color: #0f4aa8; margin: 0; }
+.subtitle {
+  text-align: center;
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 22px;
+}
+label {
+  font-size: 13px;
+  margin-top: 14px;
+  display: block;
+}
+select, input {
+  width: 100%;
+  padding: 11px;
+  margin-top: 6px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+}
+input[readonly] { background: #f1f5f9; }
+button {
+  margin-top: 24px;
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, #0f4aa8, #2563eb);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  cursor: pointer;
+}
+#msg {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 14px;
+}
+</style>
 </head>
+
 <body>
 
 <div class="container">
-  <div class="card">
+<div class="card">
 
-    <!-- LOGO -->
-    <img src="assets/logo.png" class="logo" alt="Logo Sekolah">
+<img src="assets/logo.png" class="logo">
+<h2>Absensi Siswa</h2>
+<p class="subtitle">SMP Negeri 1 Moga</p>
 
-    <h2>Absensi Siswa</h2>
-    <p class="subtitle">SMP Negeri 1 Moga</p>
+<label>Kelas</label>
+<select id="kelas"><option value="">-- Pilih Kelas --</option></select>
 
-    <!-- KELAS -->
-    <label>Kelas (Rombel)</label>
-    <select id="kelas">
-      <option value="">-- Pilih Kelas --</option>
-    </select>
+<label>Nama Siswa</label>
+<select id="nama" disabled><option value="">-- Pilih Nama --</option></select>
 
-    <!-- NAMA -->
-    <label>Nama Siswa</label>
-    <select id="nama" disabled>
-      <option value="">-- Pilih Nama --</option>
-    </select>
+<label>Jenis Kelamin</label>
+<input id="jk" readonly>
 
-    <!-- JK -->
-    <label>Jenis Kelamin</label>
-    <input type="text" id="jk" readonly>
+<label>No Meja Laptop</label>
+<select id="noMeja"><option value="">-- Pilih No Meja --</option></select>
 
-    <!-- TANGGAL -->
-    <label>Tanggal Presensi</label>
-    <input type="datetime-local" id="tanggal">
+<label>Tanggal Presensi</label>
+<input type="datetime-local" id="tanggal" readonly>
 
-    <!-- STATUS -->
-    <label>Status Kehadiran</label>
-    <select id="status">
-      <option value="">-- Pilih Status --</option>
-      <option>Hadir</option>
-      <option>Ijin</option>
-      <option>Sakit</option>
-      <option>Alpa</option>
-    </select>
+<label>Status Kehadiran</label>
+<select id="status">
+  <option value="">-- Pilih Status --</option>
+  <option>Hadir</option>
+  <option>Izin</option>
+  <option>Sakit</option>
+  <option>Alpa</option>
+</select>
 
-    <button onclick="submitAbsensi()">Simpan Presensi</button>
+<button id="btn" onclick="submitAbsensi()">Simpan Presensi</button>
+<div id="msg"></div>
 
-    <div id="msg"></div>
-
-  </div>
+</div>
 </div>
 
 <script>
+const API_URL = "https://script.google.com/macros/s/AKfycbxoRAOtKcG-1binkkGCFrpEAo1iLoMAhA8qVhUydVszr9hHYEu9s-BA-_MtEZcbKPbJ/exec";
+
 let dataSiswa = [];
-
-const kelas   = document.getElementById("kelas");
-const nama    = document.getElementById("nama");
-const jk      = document.getElementById("jk");
+const kelas = document.getElementById("kelas");
+const nama = document.getElementById("nama");
+const jk = document.getElementById("jk");
 const tanggal = document.getElementById("tanggal");
-const status  = document.getElementById("status");
-const msg     = document.getElementById("msg");
+const status = document.getElementById("status");
+const noMeja = document.getElementById("noMeja");
+const msg = document.getElementById("msg");
+const btn = document.getElementById("btn");
 
-// =========================
-// SET TANGGAL DEFAULT
-// =========================
-const now = new Date();
-tanggal.value = now.toISOString().slice(0,16);
+tanggal.value = new Date(Date.now()+7*3600000).toISOString().slice(0,16);
 
-// =========================
-// AMBIL DATA SISWA DARI GAS
-// =========================
-google.script.run
-  .withSuccessHandler(function(data) {
-    console.log("DATA SISWA:", data);
+// Meja
+for(let i=1;i<=40;i++){
+  noMeja.innerHTML += `<option>Meja ${i}</option>`;
+}
 
-    dataSiswa = data || [];
-
-    kelas.innerHTML = '<option value="">-- Pilih Kelas --</option>';
-
-    const rombelUnik = [...new Set(
-      dataSiswa.map(s => s.rombel).filter(r => r)
-    )];
-
-    rombelUnik.forEach(r => {
-      const opt = document.createElement("option");
-      opt.value = r;
-      opt.textContent = r;
-      kelas.appendChild(opt);
-    });
-  })
-  .withFailureHandler(function(err) {
-    console.error(err);
-    msg.innerText = "❌ Gagal memuat data siswa";
-  })
-  .getDataSiswa();
-
-// =========================
-// SAAT KELAS DIPILIH
-// =========================
-kelas.addEventListener("change", function () {
-  nama.disabled = true;
-  nama.innerHTML = '<option value="">-- Pilih Nama --</option>';
-  jk.value = "";
-
-  if (!kelas.value) return;
-
-  const siswaKelas = dataSiswa.filter(
-    s => s.rombel === kelas.value
-  );
-
-  siswaKelas.forEach(s => {
-    const opt = document.createElement("option");
-    opt.value = s.nama;
-    opt.textContent = s.nama;
-    opt.dataset.jk = s.jk;
-    nama.appendChild(opt);
+// Load data siswa
+fetch(API_URL,{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({action:"getDataSiswa"})
+})
+.then(r=>r.json())
+.then(d=>{
+  dataSiswa=d;
+  [...new Set(d.map(s=>s.rombel))].forEach(k=>{
+    kelas.innerHTML+=`<option>${k}</option>`;
   });
-
-  nama.disabled = false;
 });
 
-// =========================
-// SAAT NAMA DIPILIH
-// =========================
-nama.addEventListener("change", function () {
-  const selected = nama.selectedOptions[0];
-  jk.value = selected ? selected.dataset.jk : "";
-});
+kelas.onchange=()=>{
+  nama.innerHTML='<option>-- Pilih Nama --</option>';
+  nama.disabled=true;
+  jk.value="";
+  if(!kelas.value) return;
 
-// =========================
-// SUBMIT ABSENSI
-// =========================
-function submitAbsensi() {
-  msg.innerText = "⏳ Menyimpan...";
+  dataSiswa.filter(s=>s.rombel===kelas.value)
+    .forEach(s=>{
+      nama.innerHTML+=`<option data-jk="${s.jk}">${s.nama}</option>`;
+    });
+  nama.disabled=false;
+};
 
-  if (!kelas.value || !nama.value || !jk.value || !status.value) {
-    msg.innerText = "⚠️ Lengkapi semua data";
+nama.onchange=()=>jk.value=nama.selectedOptions[0]?.dataset.jk||"";
+
+function submitAbsensi(){
+  if(!kelas.value||!nama.value||!jk.value||!status.value||!noMeja.value){
+    msg.innerText="⚠️ Lengkapi semua data";
     return;
   }
 
-  google.script.run
-    .withSuccessHandler(function(res) {
-      if (res.status === "success") {
-        msg.innerText = "✅ Presensi berhasil disimpan";
-        status.value = "";
-      } else if (res.status === "duplicate") {
-        msg.innerText = "⚠️ Siswa sudah presensi hari ini";
-      } else {
-        msg.innerText = "❌ " + res.message;
+  btn.disabled=true;
+  btn.innerText="⏳ Menyimpan...";
+
+  fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      action:"submitAbsensi",
+      data:{
+        nama:nama.value,
+        jk:jk.value,
+        rombel:kelas.value,
+        status:status.value,
+        noMeja:noMeja.value
       }
     })
-    .withFailureHandler(function(err){
-      console.error(err);
-      msg.innerText = "❌ Gagal menyimpan presensi";
-    })
-    .submitAbsensi({
-      nama: nama.value,
-      jk: jk.value,
-      rombel: kelas.value,
-      status: status.value
-    });
+  })
+  .then(r=>r.json())
+  .then(res=>{
+    msg.innerText =
+      res.status==="success" ? "✅ Presensi tersimpan" :
+      res.status==="duplicate" ? "⚠️ Sudah presensi hari ini" :
+      "❌ "+res.message;
+
+    btn.disabled=false;
+    btn.innerText="Simpan Presensi";
+    if(res.status==="success") status.value="";
+  })
+  .catch(()=>{
+    msg.innerText="❌ Gagal";
+    btn.disabled=false;
+    btn.innerText="Simpan Presensi";
+  });
 }
 </script>
 
