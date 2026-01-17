@@ -1,345 +1,151 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Spinwheel Acak Siswa</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spin Siswa Lab 2</title>
 <style>
-:root{
-  --bg:#0f172a;
-  --card:#111827;
-  --primary:#3b82f6;
-  --secondary:#22c55e;
-  --accent:#f59e0b;
-  --text:#e5e7eb;
-}
-*{box-sizing:border-box}
-html,body{
-  margin:0; padding:0;
-  font-family:'Poppins',sans-serif;
-  background:radial-gradient(circle at top,#0f172a,#020617);
-  color:var(--text);
-  min-height:100vh;
-}
-.app{max-width:1100px;margin:0 auto;padding:20px}
-header{text-align:center;padding:15px}
-header h1{
-  margin:0;
-  background:linear-gradient(90deg,var(--primary),var(--secondary));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-}
-header p{opacity:.8;font-size:14px}
-
-.controls{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-  margin:15px 0 25px;
-}
-.panel{
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:16px;
-  padding:12px;
-  backdrop-filter:blur(8px);
-}
-.panel h3{margin:0 0 8px;font-size:15px}
-
-.select{
-  width:100%;padding:8px 10px;border-radius:10px;
-  background:#020617;color:var(--text);border:1px solid rgba(255,255,255,.2)
-}
-.btn-row{display:flex;gap:8px;flex-wrap:wrap}
-.btn{
-  padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.2);
-  background:rgba(255,255,255,.05);color:var(--text);cursor:pointer;transition:.2s;
-}
-.btn:hover{background:var(--primary)}
-.btn.active{background:var(--secondary);color:#020617}
-
-.main-area{display:grid;grid-template-columns:2fr 1fr;gap:20px;align-items:start}
-
-/* ===== WHEEL (HANYA ANIMASI, TANPA NAMA) ===== */
-.wheel-wrap{display:flex;justify-content:center;position:relative;margin-top:10px}
-#wheel{
-  width:360px;height:360px;border-radius:50%;border:8px solid var(--primary);
-  background:conic-gradient(#3b82f6,#22c55e,#fde68a,#fca5a5,#3b82f6);
-  transition:transform 1.2s cubic-bezier(.17,.67,.12,.99);
-  position:relative;
-}
-#wheel::after{
-  content:'';position:absolute;inset:25%;border-radius:50%;
-  background:var(--card);
-}
-.pointer{position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-size:48px;color:var(--accent);z-index:10}
-
-#center-text{
-  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  text-align:center;font-size:20px;font-weight:700;color:var(--text);z-index:5;padding:20px;
-}
-
-#result{margin-top:15px;font-size:20px;font-weight:700;text-align:center}
-.spin-row{text-align:center;margin-top:20px}
-#spinBtn{
-  padding:12px 30px;font-size:16px;border-radius:999px;border:none;
-  background:linear-gradient(90deg,var(--primary),var(--secondary));color:#020617;font-weight:700;cursor:pointer;
-}
-#spinBtn:hover{filter:brightness(1.1)}
-
-.stats{text-align:center;margin-top:15px;opacity:.8;font-size:14px}
-footer{text-align:center;font-size:12px;margin-top:25px;opacity:.7}
-
-/* ===== DAFTAR HASIL (5 TERAKHIR) ===== */
-.history-box{
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:16px;padding:15px;backdrop-filter:blur(8px);
-}
-.history-box h3{margin:0 0 10px}
-#historyList{list-style:none;padding:0;margin:0}
-#historyList li{
-  padding:8px 10px;border-radius:10px;margin-bottom:6px;
-  background:rgba(255,255,255,.08);
-  display:flex;justify-content:space-between;align-items:center;
-}
-.badge{font-size:12px;opacity:.7}
-
-/* ========== POPUP CELEBRATION ========== */
-#celebrate-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.7);
-  display:none;align-items:center;justify-content:center;z-index:999;
-}
-#celebrate-box{
-  background:linear-gradient(135deg,#2563eb,#22c55e);
-  padding:30px 40px;border-radius:20px;text-align:center;color:#fff;
-  box-shadow:0 0 30px rgba(0,0,0,.6);
-  animation:popIn .5s ease-out;
-}
-#celebrate-name{font-size:32px;font-weight:800;margin:10px 0}
-#closePop{
-  margin-top:15px;padding:8px 18px;border-radius:999px;border:none;
-  background:#fff;color:#020617;font-weight:700;cursor:pointer;
-}
-@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
-
-#confetti{position:fixed;inset:0;pointer-events:none;z-index:1000}
-
-@media(max-width:800px){.main-area{grid-template-columns:1fr}.controls{grid-template-columns:1fr}}
+html,body{margin:0;min-height:100vh;background:#f1f5f9;font-family:Segoe UI,Arial,sans-serif;}
+.container{display:grid;grid-template-columns:1fr 320px;gap:20px;padding:20px;max-width:1200px;margin:0 auto;}
+.card{background:#fff;border-radius:16px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.08);} 
+.header{background:#2563eb;color:#fff;border-radius:0 0 16px 16px;padding:16px 20px;display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+select,button{padding:10px 14px;border-radius:10px;border:1px solid #e2e8f0;font-size:14px;}
+button.primary{background:#2563eb;color:white;border:none;font-weight:600;}
+button.danger{background:#ef4444;color:white;border:none;font-weight:600;}
+.spin-area{display:flex;flex-direction:column;align-items:center;gap:12px;}
+#wheelWrap{width:320px;height:320px;border-radius:50%;background:conic-gradient(#2563eb,#22c55e,#eab308,#2563eb);display:flex;align-items:center;justify-content:center;transition:transform 4s cubic-bezier(.17,.67,.32,.99);} 
+#centerLabel{width:140px;height:140px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;font-weight:700;text-align:center;padding:10px;box-shadow:0 6px 15px rgba(0,0,0,.12);} 
+#resultName{font-size:18px;}
+.side{display:flex;flex-direction:column;gap:12px;}
+.history-header{display:flex;justify-content:space-between;align-items:center;}
+#historyList{list-style:none;padding:0;margin:0;}
+#historyList li{border-radius:12px;padding:10px 10px 10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;font-weight:600;}
+#historyList li .num{font-size:28px;font-weight:800;width:36px;text-align:center;}
+#historyList li:nth-child(1){background:#e0f2fe;color:#075985;}
+#historyList li:nth-child(2){background:#ecfeff;color:#0f766e;}
+#historyList li:nth-child(3){background:#fef3c7;color:#92400e;}
+#historyList li:nth-child(4){background:#f0fdf4;color:#166534;}
+#historyList li:nth-child(5){background:#f5f3ff;color:#5b21b6;}
+.popup{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);} 
+.popup .box{background:white;border-radius:20px;padding:24px 28px;text-align:center;min-width:280px;box-shadow:0 15px 40px rgba(0,0,0,.2);} 
+.popup h2{margin:0 0 8px 0;} 
+.popup button{margin-top:12px;} 
 </style>
 </head>
 <body>
-<canvas id="confetti"></canvas>
-<div id="celebrate-overlay">
-  <div id="celebrate-box">
-    <div>🎉 SELAMAT! 🎉</div>
-    <div id="celebrate-name"></div>
-    <button id="closePop">Tutup</button>
-  </div>
+<div class="header"><h2>🎓 Spin Acak Siswa Lab 2</h2></div>
+<div class="container">
+<div class="card">
+<div class="controls">
+<select id="kelasSelect"><option value="ALL">Semua Kelas</option></select>
+<select id="genderSelect"><option value="ALL">Semua</option><option value="L">Laki-laki</option><option value="P">Perempuan</option></select>
+<button class="primary" id="spinBtn">SPIN SEKARANG</button>
 </div>
-
-<div class="app">
-  <header>
-    <h1>🎡 Spinwheel Acak Siswa</h1>
-    <p>Spin khusus Rombel • Spin khusus Jenis Kelamin • Terhubung ke Google Sheet</p>
-  </header>
-
-  <div class="controls">
-    <div class="panel">
-      <h3>🎓 Pilih Kelas / Rombel</h3>
-      <select id="kelasSelect" class="select">
-        <option value="all">Memuat kelas...</option>
-      </select>
-    </div>
-
-    <div class="panel">
-      <h3>🚻 Pilih Jenis Kelamin</h3>
-      <div class="btn-row">
-        <button class="btn active" data-gender="all">Semua</button>
-        <button class="btn" data-gender="L">Laki-laki</button>
-        <button class="btn" data-gender="P">Perempuan</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="main-area">
-    <div>
-      <div class="wheel-wrap">
-        <div class="pointer">▼</div>
-        <div id="wheel">
-          <div id="center-text">Klik SPIN</div>
-        </div>
-      </div>
-
-      <div id="result"></div>
-
-      <div class="spin-row">
-        <button id="spinBtn">SPIN SEKARANG</button>
-      </div>
-
-      <div class="stats">
-        Siswa sesuai filter: <span id="count">0</span>
-      </div>
-    </div>
-
-    <div class="history-box">
-      <h3>📋 5 Hasil Terakhir</h3>
-      <ul id="historyList"></ul>
-    </div>
-  </div>
-
-  <footer>
-    Pastikan Google Sheet disetel: Share → Anyone with link → Viewer
-  </footer>
+<div class="spin-area">
+<div id="wheelWrap"><div id="centerLabel"><div id="resultName">Klik SPIN</div></div></div>
+<div id="countInfo">Memuat data…</div>
 </div>
-
+</div>
+<div class="card side">
+<div class="history-header">
+<h3>📋 5 Hasil Terakhir</h3>
+<button class="danger" id="resetBtn">Reset Daftar</button>
+</div>
+<ul id="historyList"></ul>
+</div>
+</div>
+<div class="popup" id="popup">
+<div class="box">
+<h2>🎯 Terpilih</h2>
+<div id="popupName" style="font-size:20px;font-weight:700;"></div>
+<button id="closePopup">Tutup</button>
+</div>
+</div>
 <script>
 const SHEET_CSV_URL =
-  "https://docs.google.com/spreadsheets/d/1alXonfmvgeFORy6B7esA-Zq2zrGQfryXMAj64POLsiE/gviz/tq?tqx=out:csv&sheet=DATA";
-
+"https://docs.google.com/spreadsheets/d/1alXonfmvgeFORy6B7esA-Zq2zrGQfryXMAj64POLsiE/gviz/tq?tqx=out:csv&sheet=DATA";
 let students = [];
-let gender = "all";
-let kelas = "all";
-let rotation = 0;
-let history = []; // hanya di memori (hilang saat reload)
-
-// ===== CONFETTI EFFECT =====
-const canvas = document.getElementById('confetti');
-const ctx = canvas.getContext('2d');
-function resize(){canvas.width=innerWidth;canvas.height=innerHeight}
-resize();addEventListener('resize',resize);
-let pieces=[];
-function launchConfetti(){
-  pieces=[];
-  for(let i=0;i<200;i++){
-    pieces.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height-200,
-      r:Math.random()*6+2,
-      d:Math.random()*3+1,
-      color:['#fde68a','#93c5fd','#86efac','#fca5a5'][Math.floor(Math.random()*4)]});
-  }
-  animateConfetti();
+let history = [];
+const kelasSelect = document.getElementById('kelasSelect');
+const genderSelect = document.getElementById('genderSelect');
+const spinBtn = document.getElementById('spinBtn');
+const wheel = document.getElementById('wheelWrap');
+const resultName = document.getElementById('resultName');
+const countInfo = document.getElementById('countInfo');
+const historyList = document.getElementById('historyList');
+const resetBtn = document.getElementById('resetBtn');
+const popup = document.getElementById('popup');
+const popupName = document.getElementById('popupName');
+document.getElementById('closePopup').onclick = ()=> popup.style.display='none';
+function parseCSV(text){
+ const rows = [];
+ let cur='', arr=[], inQ=false;
+ for(let i=0;i<text.length;i++){
+  const c=text[i];
+  if(c=='"'){ inQ=!inQ; continue; }
+  if(c==',' && !inQ){ arr.push(cur.trim()); cur=''; continue; }
+  if(c=='\n' && !inQ){ arr.push(cur.trim()); rows.push(arr); arr=[]; cur=''; continue; }
+  cur+=c;
+ }
+ if(cur||arr.length) arr.push(cur.trim()), rows.push(arr);
+ return rows;
 }
-function animateConfetti(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  pieces.forEach(p=>{
-    p.y+=p.d; p.x+=Math.sin(p.y/20);
-    if(p.y>canvas.height) p.y=-10;
-    ctx.beginPath();ctx.fillStyle=p.color;ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
-  });
-  requestAnimationFrame(animateConfetti);
-}
-
-function splitCSVLine(line){
-  const regex = /,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/;
-  return line.split(regex).map(v=>v.replace(/^"|"$/g,'').trim());
-}
-
-async function loadSheet(){
-  try{
-    const res = await fetch(SHEET_CSV_URL);
-    const text = await res.text();
-    const rows = text.trim().split(/\r?\n/).filter(r=>r.trim());
-    const headers = splitCSVLine(rows[0]);
-
-    students = rows.slice(1).map(r=>{
-      const cols = splitCSVLine(r);
-      const obj = {};
-      headers.forEach((h,i)=>obj[h] = (cols[i]||'').trim());
-      return obj;
-    }).filter(r=>r.Nama);
-
-    buildKelasOptions();
-    updateCount();
-    document.getElementById('center-text').innerText = 'Klik SPIN';
-  }catch(e){
-    document.getElementById('center-text').innerText='Gagal load Sheet';
-    console.error(e);
-  }
-}
-
-function buildKelasOptions(){
-  const select = document.getElementById('kelasSelect');
-  const set = new Set(students.map(s=>s.Rombel).filter(Boolean));
-  select.innerHTML = '<option value="all">Semua Rombel</option>';
-  [...set].sort().forEach(k=>{
-    const opt=document.createElement('option');opt.value=k;opt.textContent=k;select.appendChild(opt);
-  });
-}
-
+fetch(SHEET_CSV_URL).then(r=>r.text()).then(t=>{
+ const data=parseCSV(t);
+ const header=data[0];
+ const idxNama=header.indexOf('Nama');
+ const idxJK=header.indexOf('Jenis Kelamin');
+ const idxRombel=header.indexOf('Rombel');
+ students=data.slice(1).filter(r=>r[idxNama]);
+ const rombelSet=[...new Set(students.map(r=>r[idxRombel]))].sort();
+ rombelSet.forEach(k=>{
+  const opt=document.createElement('option');opt.value=k;opt.textContent=k;kelasSelect.appendChild(opt);
+ });
+ updateCount();
+}).catch(e=>{countInfo.textContent='Gagal load Sheet';});
 function getFiltered(){
-  return students.filter(s=>{
-    const okKelas = kelas==='all' || s.Rombel===kelas;
-    const jk=(s['Jenis Kelamin']||'').toUpperCase();
-    const okGender = gender==='all' || jk.startsWith(gender);
-    return okKelas && okGender;
-  });
+ return students.filter(r=>{
+  const nama=r[students[0]?0:0]; // placeholder
+  const jk=r[2];
+  const rombel=r[3];
+  const okK = kelasSelect.value==='ALL' || rombel===kelasSelect.value;
+  const okG = genderSelect.value==='ALL' || jk===genderSelect.value;
+  return okK && okG;
+ });
 }
-
-function updateCount(){document.getElementById('count').innerText=getFiltered().length}
-
+function updateCount(){
+ const f=getFiltered();
+ countInfo.textContent = f.length+" siswa tersedia";
+}
+kelasSelect.onchange=updateCount;
+genderSelect.onchange=updateCount;
 function renderHistory(){
-  const ul = document.getElementById('historyList');
-  ul.innerHTML = '';
-  history.forEach((h,i)=>{
-    const li=document.createElement('li');
-    li.innerHTML = `<span>${h}</span> <span class='badge'>#${i+1}</span>`;
-    ul.appendChild(li);
-  });
+ historyList.innerHTML='';
+ history.slice(0,5).forEach((name,i)=>{
+  const li=document.createElement('li');
+  const num=document.createElement('div'); num.className='num'; num.textContent=i+1;
+  const span=document.createElement('span'); span.textContent=name;
+  li.appendChild(num); li.appendChild(span);
+  historyList.appendChild(li);
+ });
 }
-
-function showPopup(name){
-  document.getElementById('celebrate-name').innerText = name;
-  document.getElementById('celebrate-overlay').style.display='flex';
-  launchConfetti();
-}
-
-function spin(){
-  const list=getFiltered();
-  if(!list.length){
-    alert('Data belum terbaca atau Sheet belum dibuka untuk publik. Pastikan: Share → Anyone with link → Viewer');
-    return;
-  }
-
-  // animasi roda
-  rotation += 1800 + Math.random()*720;
-  document.getElementById('wheel').style.transform=`rotate(${rotation}deg)`;
-
-  const pick = list[Math.floor(Math.random()*list.length)].Nama;
-
-  setTimeout(()=>{
-    document.getElementById('center-text').innerText = pick;
-    document.getElementById('result').innerText = `Terpilih: ${pick}`;
-
-    // simpan 5 terakhir (tanpa simpan ke storage → hilang saat reload)
-    history.unshift(pick);
-    if(history.length>5) history.pop();
-    renderHistory();
-
-    showPopup(pick);
-  },1200);
-}
-
-// events
-document.querySelectorAll('.btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    gender=btn.dataset.gender;
-    updateCount();
-  });
-});
-
-document.getElementById('kelasSelect').addEventListener('change',e=>{kelas=e.target.value;updateCount()});
-
-document.getElementById('spinBtn').addEventListener('click',spin);
-
-document.getElementById('closePop').addEventListener('click',()=>{
-  document.getElementById('celebrate-overlay').style.display='none';
-});
-
-loadSheet();
+resetBtn.onclick=()=>{history=[];renderHistory();};
+spinBtn.onclick=()=>{
+ const pool=getFiltered();
+ if(pool.length===0){alert('Tidak ada data untuk filter ini');return;}
+ wheel.style.transform='rotate(1080deg)';
+ setTimeout(()=>{
+  wheel.style.transform='rotate(0deg)';
+  const pick = pool[Math.floor(Math.random()*pool.length)][1];
+  resultName.textContent=pick;
+  history.unshift(pick);
+  if(history.length>5) history.pop();
+  renderHistory();
+  popupName.textContent=pick;
+  popup.style.display='flex';
+ },4000);
+};
 </script>
 </body>
 </html>
