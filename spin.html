@@ -24,7 +24,7 @@ html,body{
   color:var(--text);
   min-height:100vh;
 }
-.app{max-width:960px;margin:0 auto;padding:20px}
+.app{max-width:1100px;margin:0 auto;padding:20px}
 header{text-align:center;padding:15px}
 header h1{
   margin:0;
@@ -60,29 +60,26 @@ header p{opacity:.8;font-size:14px}
 .btn:hover{background:var(--primary)}
 .btn.active{background:var(--secondary);color:#020617}
 
+.main-area{display:grid;grid-template-columns:2fr 1fr;gap:20px;align-items:start}
+
+/* ===== WHEEL (HANYA ANIMASI, TANPA NAMA) ===== */
 .wheel-wrap{display:flex;justify-content:center;position:relative;margin-top:10px}
 #wheel{
   width:360px;height:360px;border-radius:50%;border:8px solid var(--primary);
-  display:grid;place-items:center;
+  background:conic-gradient(#3b82f6,#22c55e,#fde68a,#fca5a5,#3b82f6);
   transition:transform 1.2s cubic-bezier(.17,.67,.12,.99);
   position:relative;
 }
-#wheel-segments{
-  position:absolute;inset:0;border-radius:50%;overflow:hidden;
-}
-.segment{
-  position:absolute;inset:0;
-  display:flex;align-items:flex-start;justify-content:center;
-  transform-origin:50% 50%;
-  padding-top:25px;
-  font-size:12px;font-weight:600;color:#020617;text-align:center;
-}
-#wheel-inner{
-  width:180px;height:180px;border-radius:50%;background:var(--card);
-  display:flex;align-items:center;justify-content:center;text-align:center;padding:15px;
-  box-shadow:0 0 20px rgba(0,0,0,.6);z-index:5;color:var(--text);
+#wheel::after{
+  content:'';position:absolute;inset:25%;border-radius:50%;
+  background:var(--card);
 }
 .pointer{position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-size:48px;color:var(--accent);z-index:10}
+
+#center-text{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  text-align:center;font-size:20px;font-weight:700;color:var(--text);z-index:5;padding:20px;
+}
 
 #result{margin-top:15px;font-size:20px;font-weight:700;text-align:center}
 .spin-row{text-align:center;margin-top:20px}
@@ -94,6 +91,21 @@ header p{opacity:.8;font-size:14px}
 
 .stats{text-align:center;margin-top:15px;opacity:.8;font-size:14px}
 footer{text-align:center;font-size:12px;margin-top:25px;opacity:.7}
+
+/* ===== DAFTAR HASIL (5 TERAKHIR) ===== */
+.history-box{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;padding:15px;backdrop-filter:blur(8px);
+}
+.history-box h3{margin:0 0 10px}
+#historyList{list-style:none;padding:0;margin:0}
+#historyList li{
+  padding:8px 10px;border-radius:10px;margin-bottom:6px;
+  background:rgba(255,255,255,.08);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.badge{font-size:12px;opacity:.7}
 
 /* ========== POPUP CELEBRATION ========== */
 #celebrate-overlay{
@@ -115,7 +127,7 @@ footer{text-align:center;font-size:12px;margin-top:25px;opacity:.7}
 
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:1000}
 
-@media(max-width:700px){.controls{grid-template-columns:1fr}}
+@media(max-width:800px){.main-area{grid-template-columns:1fr}.controls{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -152,24 +164,30 @@ footer{text-align:center;font-size:12px;margin-top:25px;opacity:.7}
     </div>
   </div>
 
-  <div class="wheel-wrap">
-    <div class="pointer">▼</div>
-    <div id="wheel">
-      <div id="wheel-segments"></div>
-      <div id="wheel-inner">
-        <div id="center-text">Memuat data...</div>
+  <div class="main-area">
+    <div>
+      <div class="wheel-wrap">
+        <div class="pointer">▼</div>
+        <div id="wheel">
+          <div id="center-text">Klik SPIN</div>
+        </div>
+      </div>
+
+      <div id="result"></div>
+
+      <div class="spin-row">
+        <button id="spinBtn">SPIN SEKARANG</button>
+      </div>
+
+      <div class="stats">
+        Siswa sesuai filter: <span id="count">0</span>
       </div>
     </div>
-  </div>
 
-  <div id="result"></div>
-
-  <div class="spin-row">
-    <button id="spinBtn">SPIN SEKARANG</button>
-  </div>
-
-  <div class="stats">
-    Siswa sesuai filter: <span id="count">0</span>
+    <div class="history-box">
+      <h3>📋 5 Hasil Terakhir</h3>
+      <ul id="historyList"></ul>
+    </div>
   </div>
 
   <footer>
@@ -185,6 +203,7 @@ let students = [];
 let gender = "all";
 let kelas = "all";
 let rotation = 0;
+let history = []; // hanya di memori (hilang saat reload)
 
 // ===== CONFETTI EFFECT =====
 const canvas = document.getElementById('confetti');
@@ -212,7 +231,6 @@ function animateConfetti(){
   requestAnimationFrame(animateConfetti);
 }
 
-// --- Safe CSV split (handles commas inside quotes) ---
 function splitCSVLine(line){
   const regex = /,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/;
   return line.split(regex).map(v=>v.replace(/^"|"$/g,'').trim());
@@ -233,7 +251,6 @@ async function loadSheet(){
     }).filter(r=>r.Nama);
 
     buildKelasOptions();
-    rebuildWheel();
     updateCount();
     document.getElementById('center-text').innerText = 'Klik SPIN';
   }catch(e){
@@ -262,19 +279,13 @@ function getFiltered(){
 
 function updateCount(){document.getElementById('count').innerText=getFiltered().length}
 
-function rebuildWheel(){
-  const list=getFiltered();
-  const container=document.getElementById('wheel-segments');
-  container.innerHTML='';
-  if(!list.length) return;
-  const n=list.length;
-  const angle=360/n;
-  list.forEach((s,i)=>{
-    const div=document.createElement('div');div.className='segment';
-    div.style.transform=`rotate(${i*angle}deg)`;
-    div.style.background = i%2===0?'#93c5fd':'#fde68a';
-    div.innerHTML=`<span style='transform:rotate(${angle/2}deg)'>${s.Nama}</span>`;
-    container.appendChild(div);
+function renderHistory(){
+  const ul = document.getElementById('historyList');
+  ul.innerHTML = '';
+  history.forEach((h,i)=>{
+    const li=document.createElement('li');
+    li.innerHTML = `<span>${h}</span> <span class='badge'>#${i+1}</span>`;
+    ul.appendChild(li);
   });
 }
 
@@ -290,14 +301,23 @@ function spin(){
     alert('Data belum terbaca atau Sheet belum dibuka untuk publik. Pastikan: Share → Anyone with link → Viewer');
     return;
   }
-  rebuildWheel();
+
+  // animasi roda
   rotation += 1800 + Math.random()*720;
   document.getElementById('wheel').style.transform=`rotate(${rotation}deg)`;
-  const pick=list[Math.floor(Math.random()*list.length)];
+
+  const pick = list[Math.floor(Math.random()*list.length)].Nama;
+
   setTimeout(()=>{
-    document.getElementById('center-text').innerText=pick.Nama;
-    document.getElementById('result').innerText=`Terpilih: ${pick.Nama}`;
-    showPopup(pick.Nama);
+    document.getElementById('center-text').innerText = pick;
+    document.getElementById('result').innerText = `Terpilih: ${pick}`;
+
+    // simpan 5 terakhir (tanpa simpan ke storage → hilang saat reload)
+    history.unshift(pick);
+    if(history.length>5) history.pop();
+    renderHistory();
+
+    showPopup(pick);
   },1200);
 }
 
@@ -306,11 +326,12 @@ document.querySelectorAll('.btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-    gender=btn.dataset.gender;rebuildWheel();updateCount();
+    gender=btn.dataset.gender;
+    updateCount();
   });
 });
 
-document.getElementById('kelasSelect').addEventListener('change',e=>{kelas=e.target.value;rebuildWheel();updateCount()});
+document.getElementById('kelasSelect').addEventListener('change',e=>{kelas=e.target.value;updateCount()});
 
 document.getElementById('spinBtn').addEventListener('click',spin);
 
