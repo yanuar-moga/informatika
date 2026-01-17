@@ -7,7 +7,7 @@
 <style>
 html,body{margin:0;min-height:100vh;background:#f1f5f9;font-family:Segoe UI,Arial,sans-serif;}
 
-/* ===== HEADER FLOATING & ANIMATED ===== */
+/* ===== HEADER (ROUNDED TANPA GETAR) ===== */
 .header{
   background:linear-gradient(135deg,#2563eb,#3b82f6);
   color:#fff;
@@ -16,10 +16,9 @@ html,body{margin:0;min-height:100vh;background:#f1f5f9;font-family:Segoe UI,Aria
   display:flex;align-items:center;gap:12px;
   margin-bottom:16px;
   box-shadow:0 8px 25px rgba(37,99,235,.35);
-  animation:floatHeader 3s ease-in-out infinite;
+  /* TIDAK ADA ANIMASI GERAK / GETAR */
 }
-@keyframes floatHeader{
-  0%,100%{transform:translateY(0);} 
+ 
   50%{transform:translateY(-4px);} 
 }
 
@@ -140,7 +139,8 @@ function parseCSV(text){
   const c=text[i];
   if(c=='"'){ inQ=!inQ; continue; }
   if(c==',' && !inQ){ arr.push(cur.trim()); cur=''; continue; }
-  if(c=='\n' && !inQ){ arr.push(cur.trim()); rows.push(arr); arr=[]; cur=''; continue; }
+  if(c=='
+' && !inQ){ arr.push(cur.trim()); rows.push(arr); arr=[]; cur=''; continue; }
   cur+=c;
  }
  if(cur||arr.length) arr.push(cur.trim()), rows.push(arr);
