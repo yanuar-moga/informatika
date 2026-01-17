@@ -62,17 +62,27 @@ header p{opacity:.8;font-size:14px}
 
 .wheel-wrap{display:flex;justify-content:center;position:relative;margin-top:10px}
 #wheel{
-  width:320px;height:320px;border-radius:50%;border:10px solid var(--primary);
-  background:conic-gradient(var(--primary),#9333ea,var(--secondary),var(--accent),var(--primary));
-  display:flex;align-items:center;justify-content:center;
+  width:360px;height:360px;border-radius:50%;border:8px solid var(--primary);
+  display:grid;place-items:center;
   transition:transform 1.2s cubic-bezier(.17,.67,.12,.99);
+  position:relative;
+}
+#wheel-segments{
+  position:absolute;inset:0;border-radius:50%;overflow:hidden;
+}
+.segment{
+  position:absolute;inset:0;
+  display:flex;align-items:flex-start;justify-content:center;
+  transform-origin:50% 50%;
+  padding-top:25px;
+  font-size:12px;font-weight:600;color:#020617;text-align:center;
 }
 #wheel-inner{
-  width:200px;height:200px;border-radius:50%;background:var(--card);
+  width:180px;height:180px;border-radius:50%;background:var(--card);
   display:flex;align-items:center;justify-content:center;text-align:center;padding:15px;
-  box-shadow:0 0 20px rgba(0,0,0,.6);
+  box-shadow:0 0 20px rgba(0,0,0,.6);z-index:5;color:var(--text);
 }
-.pointer{position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:40px;color:var(--accent)}
+.pointer{position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-size:48px;color:var(--accent);z-index:10}
 
 #result{margin-top:15px;font-size:20px;font-weight:700;text-align:center}
 .spin-row{text-align:center;margin-top:20px}
@@ -92,7 +102,7 @@ footer{text-align:center;font-size:12px;margin-top:25px;opacity:.7}
 <div class="app">
   <header>
     <h1>🎡 Spinwheel Acak Siswa</h1>
-    <p>Spin khusus Kelas (Rombel) • Spin khusus Jenis Kelamin • Terhubung ke Google Sheet</p>
+    <p>Spin khusus Rombel • Spin khusus Jenis Kelamin • Terhubung ke Google Sheet</p>
   </header>
 
   <div class="controls">
@@ -116,6 +126,7 @@ footer{text-align:center;font-size:12px;margin-top:25px;opacity:.7}
   <div class="wheel-wrap">
     <div class="pointer">▼</div>
     <div id="wheel">
+      <div id="wheel-segments"></div>
       <div id="wheel-inner">
         <div id="center-text">Klik SPIN</div>
       </div>
@@ -138,39 +149,31 @@ footer{text-align:center;font-size:12px;margin-top:25px;opacity:.7}
 </div>
 
 <script>
-// ===============================
-// SESUAI DATA YANG ANDA BERIKAN
-// Sheet ID:
-// 1alXonfmvgeFORy6B7esA-Zq2zrGQfryXMAj64POLsiE
-// Sheet Name: DATA
-// Kolom:
-// - Rombel (D)  -> header: Rombel
-// - Nama (B)    -> header: Nama
-// - Jenis Kelamin (C) -> header: Jenis Kelamin
-// ===============================
+// === SESUAI DATA ANDA ===
 const SHEET_CSV_URL =
   "https://docs.google.com/spreadsheets/d/1alXonfmvgeFORy6B7esA-Zq2zrGQfryXMAj64POLsiE/gviz/tq?tqx=out:csv&sheet=DATA";
 
 let students = [];
 let gender = "all";
-let kelas = "all"; // ini merujuk ke Rombel
+let kelas = "all"; // Rombel
 let rotation = 0;
 
 async function loadSheet(){
   try{
     const res = await fetch(SHEET_CSV_URL);
     const text = await res.text();
-    const rows = text.trim().split("\n");
-    const headers = rows[0].split(",");
+    const rows = text.trim().split(/\r?\n/);
+    const headers = rows[0].split(",").map(h=>h.trim());
 
     students = rows.slice(1).map(r=>{
       const cols = r.split(",");
       const obj = {};
-      headers.forEach((h,i)=>obj[h.trim()] = (cols[i]||"").trim());
+      headers.forEach((h,i)=>obj[h] = (cols[i]||"").trim());
       return obj;
     }).filter(r=>r.Nama);
 
     buildKelasOptions();
+    rebuildWheel();
     updateCount();
   }catch(e){
     document.getElementById("center-text").innerText = "Gagal load Sheet";
@@ -179,9 +182,11 @@ async function loadSheet(){
 }
 
 function buildKelasOptions(){
-  const set = new Set(students.map(s=>s.Rombel).filter(Boolean));
   const select = document.getElementById('kelasSelect');
-  set.forEach(k=>{
+  const set = new Set(students.map(s=>s.Rombel).filter(Boolean));
+  // bersihkan selain opsi default
+  select.innerHTML = '<option value="all">Semua Rombel</option>';
+  [...set].sort().forEach(k=>{
     const opt = document.createElement('option');
     opt.value = k;
     opt.textContent = k;
@@ -202,9 +207,29 @@ function updateCount(){
   document.getElementById("count").innerText = getFiltered().length;
 }
 
+function rebuildWheel(){
+  const list = getFiltered();
+  const container = document.getElementById('wheel-segments');
+  container.innerHTML = '';
+  if(!list.length) return;
+
+  const n = list.length;
+  const angle = 360 / n;
+
+  list.forEach((s,i)=>{
+    const div = document.createElement('div');
+    div.className = 'segment';
+    div.style.transform = `rotate(${i*angle}deg)`;
+    div.style.background = i % 2 === 0 ? '#93c5fd' : '#fde68a';
+    div.innerHTML = `<span style="transform:rotate(${angle/2}deg)">${s.Nama}</span>`;
+    container.appendChild(div);
+  });
+}
+
 function spin(){
   const list = getFiltered();
   if(!list.length){alert("Tidak ada data untuk filter ini");return;}
+  rebuildWheel();
   rotation += 1800 + Math.random()*720;
   document.getElementById("wheel").style.transform = `rotate(${rotation}deg)`;
   const pick = list[Math.floor(Math.random()*list.length)];
@@ -217,19 +242,21 @@ function spin(){
   },1200);
 }
 
-// Gender buttons
- document.querySelectorAll('.btn').forEach(btn=>{
+// Event filter gender
+document.querySelectorAll('.btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     gender = btn.dataset.gender;
+    rebuildWheel();
     updateCount();
   });
 });
 
-// Kelas/Rombel select
+// Event pilih Rombel
 document.getElementById('kelasSelect').addEventListener('change',e=>{
   kelas = e.target.value;
+  rebuildWheel();
   updateCount();
 });
 
