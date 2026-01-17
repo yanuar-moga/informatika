@@ -135,6 +135,8 @@ const SHEET_CSV_URL =
 "https://docs.google.com/spreadsheets/d/1alXonfmvgeFORy6B7esA-Zq2zrGQfryXMAj64POLsiE/gviz/tq?tqx=out:csv&sheet=DATA";
 let students = [];
 let history = [];
+let idxNama = 0, idxJK = 0, idxRombel = 0;
+
 const kelasSelect = document.getElementById('kelasSelect');
 const genderSelect = document.getElementById('genderSelect');
 const spinBtn = document.getElementById('spinBtn');
@@ -147,6 +149,7 @@ const popup = document.getElementById('popup');
 const popupName = document.getElementById('popupName');
 const drum = document.getElementById('drum');
 const tick = document.getElementById('tick');
+
 document.getElementById('closePopup').onclick = ()=> popup.style.display='none';
 
 function parseCSV(text){
@@ -155,74 +158,102 @@ function parseCSV(text){
   const c=text[i];
   if(c=='"'){ inQ=!inQ; continue; }
   if(c==',' && !inQ){ arr.push(cur.trim()); cur=''; continue; }
-  if(c=='
-' && !inQ){ arr.push(cur.trim()); rows.push(arr); arr=[]; cur=''; continue; }
+  if(c=='\n' && !inQ){ arr.push(cur.trim()); rows.push(arr); arr=[]; cur=''; continue; }
   cur+=c;
  }
  if(cur||arr.length) arr.push(cur.trim()), rows.push(arr);
  return rows;
 }
 
-fetch(SHEET_CSV_URL).then(r=>r.text()).then(t=>{
- const data=parseCSV(t);
- const header=data[0];
- const idxNama=header.indexOf('Nama');
- const idxJK=header.indexOf('Jenis Kelamin');
- const idxRombel=header.indexOf('Rombel');
- students=data.slice(1).filter(r=>r[idxNama]);
- const rombelSet=[...new Set(students.map(r=>r[idxRombel]))].sort();
- rombelSet.forEach(k=>{
-  const opt=document.createElement('option');opt.value=k;opt.textContent=k;kelasSelect.appendChild(opt);
- });
- updateCount();
-}).catch(e=>{countInfo.textContent='Gagal load Sheet';});
+fetch(SHEET_CSV_URL)
+ .then(r=>r.text())
+ .then(t=>{
+  const data = parseCSV(t);
+  const header = data[0];
+
+  // === AMBIL INDEX BERDASARKAN HEADER ===
+  idxNama = header.indexOf('Nama');
+  idxJK = header.indexOf('Jenis Kelamin');
+  idxRombel = header.indexOf('Rombel');
+
+  // simpan semua baris siswa yang punya nama
+  students = data.slice(1).filter(r => r[idxNama]);
+
+  // isi dropdown kelas
+  const rombelSet = [...new Set(students.map(r => r[idxRombel]))]
+                      .filter(k => k)
+                      .sort();
+
+  rombelSet.forEach(k =>{
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = k;
+    kelasSelect.appendChild(opt);
+  });
+
+  updateCount();
+ })
+ .catch(e=>{ countInfo.textContent='Gagal load Sheet'; console.error(e); });
 
 function getFiltered(){
- return students.filter(r=>{
-  const nama=r[students.length?0:0];
-  const jk=r[2];
-  const rombel=r[3];
-  const okK = kelasSelect.value==='ALL' || rombel===kelasSelect.value;
-  const okG = genderSelect.value==='ALL' || jk===genderSelect.value;
-  return okK && okG;
- });
+  return students.filter(r=>{
+    const nama = r[idxNama];
+    const jk = r[idxJK];
+    const rombel = r[idxRombel];
+
+    const okK = kelasSelect.value === 'ALL' || rombel === kelasSelect.value;
+    const okG = genderSelect.value === 'ALL' || jk === genderSelect.value;
+    return okK && okG && nama;
+  });
 }
-function updateCount(){ const f=getFiltered(); countInfo.textContent = f.length+" siswa tersedia"; }
-kelasSelect.onchange=updateCount; genderSelect.onchange=updateCount;
+
+function updateCount(){
+  const f = getFiltered();
+  countInfo.textContent = f.length + " siswa tersedia";
+}
+kelasSelect.onchange = updateCount;
+genderSelect.onchange = updateCount;
 
 function renderHistory(){
- historyList.innerHTML='';
- history.slice(0,5).forEach((name,i)=>{
-  const li=document.createElement('li');
-  const num=document.createElement('div'); num.className='num'; num.textContent=i+1;
-  const span=document.createElement('span'); span.textContent=name;
-  li.appendChild(num); li.appendChild(span);
-  historyList.appendChild(li);
- });
+  historyList.innerHTML='';
+  history.slice(0,5).forEach((name,i)=>{
+    const li=document.createElement('li');
+    const num=document.createElement('div');
+    num.className='num'; num.textContent=i+1;
+    const span=document.createElement('span'); span.textContent=name;
+    li.appendChild(num); li.appendChild(span);
+    historyList.appendChild(li);
+  });
 }
-resetBtn.onclick=()=>{history=[];renderHistory();};
+resetBtn.onclick = ()=>{ history=[]; renderHistory(); };
 
-spinBtn.onclick=()=>{
- const pool=getFiltered();
- if(pool.length===0){alert('Tidak ada data untuk filter ini');return;}
- drum.currentTime=0; drum.play();
- wheel.style.transform='rotate(1440deg)';
- resultName.textContent='Berputar…';
+spinBtn.onclick = ()=>{
+  const pool = getFiltered();
+  if(pool.length===0){ alert('Tidak ada data untuk filter ini'); return; }
 
- // efek tik melambat
- let delays=[120,110,100,90,80,70,60,80,120,180,260,380,520,700];
- delays.forEach((d,i)=>{
-  setTimeout(()=>{tick.currentTime=0; tick.play();}, d*i);
- });
+  drum.currentTime = 0;
+  drum.play();
+  wheel.style.transform = 'rotate(1440deg)';
+  resultName.textContent = 'Berputar…';
 
- setTimeout(()=>{
-  wheel.style.transform='rotate(0deg)';
-  const pick = pool[Math.floor(Math.random()*pool.length)][1];
-  resultName.textContent=pick;
-  history.push(pick); if(history.length>5) history.shift();
-  renderHistory();
-  popupName.textContent=pick; popup.style.display='flex';
- },4200);
+  // efek tik melambat
+  let delays = [120,110,100,90,80,70,60,80,120,180,260,380,520,700];
+  delays.forEach((d,i)=>{
+    setTimeout(()=>{ tick.currentTime=0; tick.play(); }, d*i);
+  });
+
+  setTimeout(()=>{
+    wheel.style.transform = 'rotate(0deg)';
+    const pick = pool[Math.floor(Math.random()*pool.length)][idxNama];
+    resultName.textContent = pick;
+
+    history.push(pick);
+    if(history.length>5) history.shift();
+    renderHistory();
+
+    popupName.textContent = pick;
+    popup.style.display = 'flex';
+  }, 4200);
 };
 </script>
 </body>
