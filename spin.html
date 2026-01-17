@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Spinwheel Acak Siswa</title>
+
+<!-- Google Font -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0f172a;
+  --card:#111827;
+  --primary:#3b82f6;
+  --secondary:#22c55e;
+  --accent:#f59e0b;
+  --text:#e5e7eb;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0; padding:0;
+  font-family:'Poppins',sans-serif;
+  background:radial-gradient(circle at top,#0f172a,#020617);
+  color:var(--text);
+  min-height:100vh;
+}
+.app{
+  max-width:900px;
+  margin:0 auto;
+  padding:20px;
+}
+header{
+  text-align:center;
+  padding:20px;
+}
+header h1{
+  margin:0;
+  background:linear-gradient(90deg,var(--primary),var(--secondary));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+header p{opacity:.8}
+
+.controls{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin:15px 0 25px;
+}
+.btn{
+  padding:10px 18px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.05);
+  color:var(--text);
+  cursor:pointer;
+  backdrop-filter:blur(10px);
+  transition:.3s;
+}
+.btn:hover{background:var(--primary)}
+.btn.active{background:var(--secondary); color:#020617}
+
+.wheel-wrap{
+  display:flex;
+  justify-content:center;
+  position:relative;
+}
+#wheel{
+  width:320px; height:320px;
+  border-radius:50%;
+  border:10px solid var(--primary);
+  background:conic-gradient(
+    var(--primary),
+    #9333ea,
+    var(--secondary),
+    var(--accent),
+    var(--primary)
+  );
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:transform 1.2s cubic-bezier(.17,.67,.12,.99);
+}
+#wheel-inner{
+  width:200px; height:200px;
+  border-radius:50%;
+  background:var(--card);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:15px;
+  box-shadow:0 0 20px rgba(0,0,0,.6);
+}
+.pointer{
+  position:absolute;
+  top:-10px;
+  left:50%; transform:translateX(-50%);
+  font-size:40px;
+  color:var(--accent);
+}
+
+#result{
+  margin-top:15px;
+  font-size:22px;
+  font-weight:700;
+  text-align:center;
+}
+
+.spin-row{
+  text-align:center;
+  margin-top:20px;
+}
+#spinBtn{
+  padding:12px 30px;
+  font-size:16px;
+  border-radius:999px;
+  border:none;
+  background:linear-gradient(90deg,var(--primary),var(--secondary));
+  color:#020617;
+  font-weight:700;
+  cursor:pointer;
+}
+#spinBtn:hover{filter:brightness(1.1)}
+
+.stats{
+  margin-top:20px;
+  text-align:center;
+  opacity:.8;
+}
+
+footer{
+  text-align:center;
+  font-size:12px;
+  margin-top:30px;
+  opacity:.7;
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>🎡 Spinwheel Acak Siswa</h1>
+    <p>Terhubung ke Google Sheets • Siap upload ke GitHub</p>
+  </header>
+
+  <div class="controls">
+    <button class="btn active" data-gender="all">Semua</button>
+    <button class="btn" data-gender="L">Laki-laki</button>
+    <button class="btn" data-gender="P">Perempuan</button>
+  </div>
+
+  <div class="wheel-wrap">
+    <div class="pointer">▼</div>
+    <div id="wheel">
+      <div id="wheel-inner">
+        <div id="center-text">Klik SPIN</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="result"></div>
+
+  <div class="spin-row">
+    <button id="spinBtn">SPIN</button>
+  </div>
+
+  <div class="stats">
+    Siswa aktif: <span id="count">0</span>
+  </div>
+
+  <footer>
+    Pastikan Google Sheet disetel: Share → Anyone with link → Viewer
+  </footer>
+</div>
+
+<script>
+// =======================
+// GANTI DENGAN LINK CSV SHEET ANDA
+// Gunakan format:
+// https://docs.google.com/spreadsheets/d/<SHEET_ID>/gviz/tq?tqx=out:csv&sheet=Sheet1
+const SHEET_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/alXonfmvgeFORy6B7esA-Zq2zrGQfryXMAj64POLsiE/gviz/tq?tqx=out:csv&sheet=Sheet1";
+// =======================
+
+let students = [];
+let gender = "all";
+let rotation = 0;
+
+async function loadSheet(){
+  try{
+    const res = await fetch(SHEET_CSV_URL);
+    const text = await res.text();
+    const rows = text.trim().split("\n");
+    const headers = rows[0].split(",");
+
+    students = rows.slice(1).map(r=>{
+      const cols = r.split(",");
+      const obj = {};
+      headers.forEach((h,i)=>obj[h.trim()] = (cols[i]||"").trim());
+      return obj;
+    }).filter(r=>r.Nama);
+
+    updateCount();
+  }catch(e){
+    document.getElementById("center-text").innerText = "Gagal load Sheet";
+    console.error(e);
+  }
+}
+
+function getFiltered(){
+  if(gender === "all") return students;
+  return students.filter(s => (s.JK||"").toUpperCase().startsWith(gender));
+}
+
+function updateCount(){
+  document.getElementById("count").innerText = getFiltered().length;
+}
+
+function spin(){
+  const list = getFiltered();
+  if(!list.length){
+    alert("Tidak ada data untuk filter ini");
+    return;
+  }
+  rotation += 1800 + Math.random()*720;
+  const wheel = document.getElementById("wheel");
+  wheel.style.transform = `rotate(${rotation}deg)`;
+
+  const pick = list[Math.floor(Math.random()*list.length)];
+  setTimeout(()=>{
+    document.getElementById("center-text").innerText = pick.Nama;
+    document.getElementById("result").innerText = `Terpilih: ${pick.Nama}`;
+  }, 1200);
+}
+
+// Event filter buttons
+ document.querySelectorAll('.btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    gender = btn.dataset.gender;
+    updateCount();
+  });
+});
+
+document.getElementById('spinBtn').addEventListener('click', spin);
+loadSheet();
+</script>
+</body>
+</html>
