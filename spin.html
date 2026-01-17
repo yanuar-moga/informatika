@@ -5,32 +5,75 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Spin Siswa Lab 2</title>
 <style>
-html,body{margin:0;min-height:100vh;background:#f1f5f9;font-family:Segoe UI,Arial,sans-serif;}
-.container{display:grid;grid-template-columns:1fr 320px;gap:20px;padding:20px;max-width:1200px;margin:0 auto;}
-.card{background:#fff;border-radius:16px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.08);} 
-.header{background:#2563eb;color:#fff;border-radius:0 0 16px 16px;padding:16px 20px;display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+html,body{margin:0;min-height:100vh;background:#0b1220;font-family:Segoe UI,Arial,sans-serif;}
+
+/* ===== HEADER FLOATING + ROUNDED ===== */
+.header{
+  background:linear-gradient(135deg,#0f172a,#1e3a8a,#2563eb);
+  color:#fff;
+  border-radius:0 0 24px 24px;
+  padding:18px 22px;
+  display:flex;align-items:center;gap:12px;margin-bottom:16px;
+  box-shadow:0 10px 30px rgba(37,99,235,.4);
+  animation: floatHeader 3s ease-in-out infinite;
+}
+@keyframes floatHeader{
+  0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);} }
+
+.container{display:grid;grid-template-columns:1fr 340px;gap:20px;padding:20px;max-width:1200px;margin:0 auto;}
+.card{background:#0f172a;border-radius:18px;padding:18px;box-shadow:0 10px 35px rgba(0,0,0,.4);color:#e5e7eb;} 
+
 .controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
-select,button{padding:10px 14px;border-radius:10px;border:1px solid #e2e8f0;font-size:14px;}
+select,button{padding:10px 14px;border-radius:12px;border:1px solid #1e293b;font-size:14px;background:#020617;color:#e5e7eb;}
 button.primary{background:#2563eb;color:white;border:none;font-weight:600;}
 button.danger{background:#ef4444;color:white;border:none;font-weight:600;}
-.spin-area{display:flex;flex-direction:column;align-items:center;gap:12px;}
-#wheelWrap{width:320px;height:320px;border-radius:50%;background:conic-gradient(#2563eb,#22c55e,#eab308,#2563eb);display:flex;align-items:center;justify-content:center;transition:transform 4s cubic-bezier(.17,.67,.32,.99);} 
-#centerLabel{width:140px;height:140px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;font-weight:700;text-align:center;padding:10px;box-shadow:0 6px 15px rgba(0,0,0,.12);} 
+
+/* ===== PAPAN PUTAR DJ GLOSSY ===== */
+.spin-area{display:flex;flex-direction:column;align-items:center;gap:14px;}
+#wheelWrap{
+  position:relative;
+  width:340px;height:340px;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, #1e293b, #020617 70%);
+  border:8px solid #111827;
+  box-shadow:inset 0 0 40px rgba(255,255,255,.08), 0 0 20px #2563eb;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform 4.2s cubic-bezier(.17,.67,.32,.99);
+}
+/* STROBO RING */
+#wheelWrap::before{
+  content:'';position:absolute;inset:-6px;border-radius:50%;
+  background:conic-gradient(#2563eb,#22c55e,#eab308,#2563eb);
+  filter:blur(6px);
+  opacity:.85;
+  animation:strobe 1.2s linear infinite;
+}
+@keyframes strobe{0%{opacity:.2;}50%{opacity:.9;}100%{opacity:.2;}}
+
+/* PANAH INDIKATOR */
+#arrow{
+  position:absolute;top:-18px;left:50%;transform:translateX(-50%);
+  width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:22px solid #facc15;
+  filter:drop-shadow(0 0 8px #facc15);
+}
+
+#centerLabel{width:150px;height:150px;border-radius:50%;background:#020617;display:flex;align-items:center;justify-content:center;font-weight:700;text-align:center;padding:10px;box-shadow:0 6px 15px rgba(0,0,0,.4);color:#e5e7eb;border:2px solid #1e40af;} 
 #resultName{font-size:18px;}
+
 .side{display:flex;flex-direction:column;gap:12px;}
 .history-header{display:flex;justify-content:space-between;align-items:center;}
 #historyList{list-style:none;padding:0;margin:0;}
 #historyList li{border-radius:12px;padding:10px 10px 10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;font-weight:600;}
 #historyList li .num{font-size:28px;font-weight:800;width:36px;text-align:center;}
-#historyList li:nth-child(1){background:#e0f2fe;color:#075985;}
-#historyList li:nth-child(2){background:#ecfeff;color:#0f766e;}
-#historyList li:nth-child(3){background:#fef3c7;color:#92400e;}
-#historyList li:nth-child(4){background:#f0fdf4;color:#166534;}
-#historyList li:nth-child(5){background:#f5f3ff;color:#5b21b6;}
-.popup{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);} 
-.popup .box{background:white;border-radius:20px;padding:24px 28px;text-align:center;min-width:280px;box-shadow:0 15px 40px rgba(0,0,0,.2);} 
+#historyList li:nth-child(1){background:#0c4a6e;color:#e0f2fe;}
+#historyList li:nth-child(2){background:#0f766e;color:#ecfeff;}
+#historyList li:nth-child(3){background:#92400e;color:#fef3c7;}
+#historyList li:nth-child(4){background:#166534;color:#f0fdf4;}
+#historyList li:nth-child(5){background:#5b21b6;color:#f5f3ff;}
+
+.popup{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.7);} 
+.popup .box{background:#020617;color:#fff;border-radius:22px;padding:24px 28px;text-align:center;min-width:300px;box-shadow:0 15px 40px rgba(0,0,0,.4);} 
 .popup h2{margin:0 0 8px 0;} 
-.popup button{margin-top:12px;} 
+.popup button{margin-top:12px;background:#2563eb;color:white;border:none;}
 </style>
 </head>
 <body>
@@ -43,7 +86,10 @@ button.danger{background:#ef4444;color:white;border:none;font-weight:600;}
 <button class="primary" id="spinBtn">SPIN SEKARANG</button>
 </div>
 <div class="spin-area">
-<div id="wheelWrap"><div id="centerLabel"><div id="resultName">Klik SPIN</div></div></div>
+<div id="wheelWrap">
+  <div id="arrow"></div>
+  <div id="centerLabel"><div id="resultName">Klik SPIN</div></div>
+</div>
 <div id="countInfo">Memuat data…</div>
 </div>
 </div>
@@ -62,6 +108,8 @@ button.danger{background:#ef4444;color:white;border:none;font-weight:600;}
 <button id="closePopup">Tutup</button>
 </div>
 </div>
+<audio id="drum" src="https://actions.google.com/sounds/v1/impacts/drum_roll.ogg"></audio>
+<audio id="tick" src="https://actions.google.com/sounds/v1/impacts/light_knock.ogg"></audio>
 <script>
 const SHEET_CSV_URL =
 "https://docs.google.com/spreadsheets/d/1alXonfmvgeFORy6B7esA-Zq2zrGQfryXMAj64POLsiE/gviz/tq?tqx=out:csv&sheet=DATA";
@@ -77,10 +125,12 @@ const historyList = document.getElementById('historyList');
 const resetBtn = document.getElementById('resetBtn');
 const popup = document.getElementById('popup');
 const popupName = document.getElementById('popupName');
+const drum = document.getElementById('drum');
+const tick = document.getElementById('tick');
 document.getElementById('closePopup').onclick = ()=> popup.style.display='none';
+
 function parseCSV(text){
- const rows = [];
- let cur='', arr=[], inQ=false;
+ const rows = []; let cur='', arr=[], inQ=false;
  for(let i=0;i<text.length;i++){
   const c=text[i];
   if(c=='"'){ inQ=!inQ; continue; }
@@ -91,6 +141,7 @@ function parseCSV(text){
  if(cur||arr.length) arr.push(cur.trim()), rows.push(arr);
  return rows;
 }
+
 fetch(SHEET_CSV_URL).then(r=>r.text()).then(t=>{
  const data=parseCSV(t);
  const header=data[0];
@@ -104,9 +155,10 @@ fetch(SHEET_CSV_URL).then(r=>r.text()).then(t=>{
  });
  updateCount();
 }).catch(e=>{countInfo.textContent='Gagal load Sheet';});
+
 function getFiltered(){
  return students.filter(r=>{
-  const nama=r[students[0]?0:0]; // placeholder
+  const nama=r[students.length?0:0];
   const jk=r[2];
   const rombel=r[3];
   const okK = kelasSelect.value==='ALL' || rombel===kelasSelect.value;
@@ -114,12 +166,9 @@ function getFiltered(){
   return okK && okG;
  });
 }
-function updateCount(){
- const f=getFiltered();
- countInfo.textContent = f.length+" siswa tersedia";
-}
-kelasSelect.onchange=updateCount;
-genderSelect.onchange=updateCount;
+function updateCount(){ const f=getFiltered(); countInfo.textContent = f.length+" siswa tersedia"; }
+kelasSelect.onchange=updateCount; genderSelect.onchange=updateCount;
+
 function renderHistory(){
  historyList.innerHTML='';
  history.slice(0,5).forEach((name,i)=>{
@@ -131,20 +180,28 @@ function renderHistory(){
  });
 }
 resetBtn.onclick=()=>{history=[];renderHistory();};
+
 spinBtn.onclick=()=>{
  const pool=getFiltered();
  if(pool.length===0){alert('Tidak ada data untuk filter ini');return;}
- wheel.style.transform='rotate(1080deg)';
+ drum.currentTime=0; drum.play();
+ wheel.style.transform='rotate(1440deg)';
+ resultName.textContent='Berputar…';
+
+ // efek tik melambat
+ let delays=[120,110,100,90,80,70,60,80,120,180,260,380,520,700];
+ delays.forEach((d,i)=>{
+  setTimeout(()=>{tick.currentTime=0; tick.play();}, d*i);
+ });
+
  setTimeout(()=>{
   wheel.style.transform='rotate(0deg)';
   const pick = pool[Math.floor(Math.random()*pool.length)][1];
   resultName.textContent=pick;
-  history.unshift(pick);
-  if(history.length>5) history.pop();
+  history.push(pick); if(history.length>5) history.shift();
   renderHistory();
-  popupName.textContent=pick;
-  popup.style.display='flex';
- },4000);
+  popupName.textContent=pick; popup.style.display='flex';
+ },4200);
 };
 </script>
 </body>
