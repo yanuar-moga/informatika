@@ -33,9 +33,29 @@ button.danger{background:#ef4444;color:white;border:none;font-weight:600;}
 #wheelWrap{
   position:relative;
   width:340px;height:340px;border-radius:50%;
-  background:radial-gradient(circle at 30% 30%, #1e293b, #020617 70%);
-  border:8px solid #111827;
-  box-shadow:inset 0 0 40px rgba(255,255,255,.08), 0 0 20px #2563eb;
+  /* ===== RODA SEPERTI GAMBAR (SEGMENT WARNA TANPA TEKS) ===== */
+  background:conic-gradient(
+    #ff4d4d 0deg 20deg,
+    #ffb703 20deg 40deg,
+    #fff176 40deg 60deg,
+    #7cff7c 60deg 80deg,
+    #2ee6a6 80deg 100deg,
+    #2ec9ff 100deg 120deg,
+    #2f7bff 120deg 140deg,
+    #8b5cff 140deg 160deg,
+    #ff5cff 160deg 180deg,
+    #ff4d4d 180deg 200deg,
+    #ffb703 200deg 220deg,
+    #fff176 220deg 240deg,
+    #7cff7c 240deg 260deg,
+    #2ee6a6 260deg 280deg,
+    #2ec9ff 280deg 300deg,
+    #2f7bff 300deg 320deg,
+    #8b5cff 320deg 340deg,
+    #ff5cff 340deg 360deg
+  );
+  border:6px solid #111827;
+  box-shadow:inset 0 0 25px rgba(255,255,255,.12), 0 0 20px #2563eb;
   display:flex;align-items:center;justify-content:center;
   transition:transform 4.2s cubic-bezier(.17,.67,.32,.99);
 }
@@ -135,7 +155,8 @@ function parseCSV(text){
   const c=text[i];
   if(c=='"'){ inQ=!inQ; continue; }
   if(c==',' && !inQ){ arr.push(cur.trim()); cur=''; continue; }
-  if(c=='\n' && !inQ){ arr.push(cur.trim()); rows.push(arr); arr=[]; cur=''; continue; }
+  if(c=='
+' && !inQ){ arr.push(cur.trim()); rows.push(arr); arr=[]; cur=''; continue; }
   cur+=c;
  }
  if(cur||arr.length) arr.push(cur.trim()), rows.push(arr);
