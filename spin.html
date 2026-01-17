@@ -6,17 +6,67 @@
 <title>Spin Siswa Lab 2</title>
 <style>
 html,body{margin:0;min-height:100vh;background:#f1f5f9;font-family:Segoe UI,Arial,sans-serif;}
+
+/* ===== HEADER FLOATING & ANIMATED ===== */
+.header{
+  background:linear-gradient(135deg,#2563eb,#3b82f6);
+  color:#fff;
+  border-radius:0 0 22px 22px;
+  padding:18px 22px;
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:16px;
+  box-shadow:0 8px 25px rgba(37,99,235,.35);
+  animation:floatHeader 3s ease-in-out infinite;
+}
+@keyframes floatHeader{
+  0%,100%{transform:translateY(0);} 
+  50%{transform:translateY(-4px);} 
+}
+
 .container{display:grid;grid-template-columns:1fr 320px;gap:20px;padding:20px;max-width:1200px;margin:0 auto;}
 .card{background:#fff;border-radius:16px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.08);} 
-.header{background:#2563eb;color:#fff;border-radius:0 0 16px 16px;padding:16px 20px;display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+
 .controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
 select,button{padding:10px 14px;border-radius:10px;border:1px solid #e2e8f0;font-size:14px;}
 button.primary{background:#2563eb;color:white;border:none;font-weight:600;}
 button.danger{background:#ef4444;color:white;border:none;font-weight:600;}
-.spin-area{display:flex;flex-direction:column;align-items:center;gap:12px;}
-#wheelWrap{width:320px;height:320px;border-radius:50%;background:conic-gradient(#2563eb,#22c55e,#eab308,#2563eb);display:flex;align-items:center;justify-content:center;transition:transform 4s cubic-bezier(.17,.67,.32,.99);} 
-#centerLabel{width:140px;height:140px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;font-weight:700;text-align:center;padding:10px;box-shadow:0 6px 15px rgba(0,0,0,.12);} 
+
+/* ===== PAPAN PUTAR + RODA ===== */
+.spin-area{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.turntable{
+  width:360px;height:360px;border-radius:50%;
+  border:4px dashed #2563eb;
+  display:flex;align-items:center;justify-content:center;
+  animation:slowRotate 12s linear infinite;
+}
+@keyframes slowRotate{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+#wheelWrap{
+  width:300px;height:300px;border-radius:50%;
+  background:conic-gradient(#2563eb,#22c55e,#eab308,#2563eb);
+  display:flex;align-items:center;justify-content:center;
+  transition:transform 4s cubic-bezier(.17,.67,.32,.99);
+  position:relative;
+  animation:strobe 1.6s infinite;
+}
+@keyframes strobe{
+  0%{box-shadow:0 0 0 rgba(255,255,255,0);} 
+  25%{box-shadow:0 0 20px rgba(255,255,255,.9);} 
+  50%{box-shadow:0 0 0 rgba(255,255,255,0);} 
+  75%{box-shadow:0 0 25px rgba(37,99,235,.9);} 
+  100%{box-shadow:0 0 0 rgba(255,255,255,0);} 
+}
+#wheelWrap::after{
+  content:"";position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at center, rgba(255,255,255,.25), rgba(255,255,255,0));
+}
+
+#centerLabel{width:140px;height:140px;border-radius:50%;background:white;
+ display:flex;align-items:center;justify-content:center;font-weight:700;text-align:center;
+ padding:10px;box-shadow:0 6px 15px rgba(0,0,0,.12);z-index:2;} 
 #resultName{font-size:18px;}
+
+/* ===== HISTORY PANEL ===== */
 .side{display:flex;flex-direction:column;gap:12px;}
 .history-header{display:flex;justify-content:space-between;align-items:center;}
 #historyList{list-style:none;padding:0;margin:0;}
@@ -27,6 +77,8 @@ button.danger{background:#ef4444;color:white;border:none;font-weight:600;}
 #historyList li:nth-child(3){background:#fef3c7;color:#92400e;}
 #historyList li:nth-child(4){background:#f0fdf4;color:#166534;}
 #historyList li:nth-child(5){background:#f5f3ff;color:#5b21b6;}
+
+/* ===== POPUP ===== */
 .popup{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);} 
 .popup .box{background:white;border-radius:20px;padding:24px 28px;text-align:center;min-width:280px;box-shadow:0 15px 40px rgba(0,0,0,.2);} 
 .popup h2{margin:0 0 8px 0;} 
@@ -43,7 +95,9 @@ button.danger{background:#ef4444;color:white;border:none;font-weight:600;}
 <button class="primary" id="spinBtn">SPIN SEKARANG</button>
 </div>
 <div class="spin-area">
-<div id="wheelWrap"><div id="centerLabel"><div id="resultName">Klik SPIN</div></div></div>
+<div class="turntable">
+  <div id="wheelWrap"><div id="centerLabel"><div id="resultName">Klik SPIN</div></div></div>
+</div>
 <div id="countInfo">Memuat data…</div>
 </div>
 </div>
@@ -78,6 +132,7 @@ const resetBtn = document.getElementById('resetBtn');
 const popup = document.getElementById('popup');
 const popupName = document.getElementById('popupName');
 document.getElementById('closePopup').onclick = ()=> popup.style.display='none';
+
 function parseCSV(text){
  const rows = [];
  let cur='', arr=[], inQ=false;
@@ -91,6 +146,7 @@ function parseCSV(text){
  if(cur||arr.length) arr.push(cur.trim()), rows.push(arr);
  return rows;
 }
+
 fetch(SHEET_CSV_URL).then(r=>r.text()).then(t=>{
  const data=parseCSV(t);
  const header=data[0];
@@ -104,14 +160,15 @@ fetch(SHEET_CSV_URL).then(r=>r.text()).then(t=>{
  });
  updateCount();
 }).catch(e=>{countInfo.textContent='Gagal load Sheet';});
+
 function getFiltered(){
  return students.filter(r=>{
-  const nama=r[students[0]?0:0]; // placeholder
+  const nama=r[1];
   const jk=r[2];
   const rombel=r[3];
   const okK = kelasSelect.value==='ALL' || rombel===kelasSelect.value;
   const okG = genderSelect.value==='ALL' || jk===genderSelect.value;
-  return okK && okG;
+  return okK && okG && nama;
  });
 }
 function updateCount(){
@@ -120,6 +177,7 @@ function updateCount(){
 }
 kelasSelect.onchange=updateCount;
 genderSelect.onchange=updateCount;
+
 function renderHistory(){
  historyList.innerHTML='';
  history.slice(0,5).forEach((name,i)=>{
@@ -131,6 +189,7 @@ function renderHistory(){
  });
 }
 resetBtn.onclick=()=>{history=[];renderHistory();};
+
 spinBtn.onclick=()=>{
  const pool=getFiltered();
  if(pool.length===0){alert('Tidak ada data untuk filter ini');return;}
@@ -139,8 +198,9 @@ spinBtn.onclick=()=>{
   wheel.style.transform='rotate(0deg)';
   const pick = pool[Math.floor(Math.random()*pool.length)][1];
   resultName.textContent=pick;
-  history.unshift(pick);
-  if(history.length>5) history.pop();
+  // urutan: spin pertama = no 1, kedua = no 2, dst
+  history.push(pick);
+  if(history.length>5) history.shift();
   renderHistory();
   popupName.textContent=pick;
   popup.style.display='flex';
