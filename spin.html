@@ -4,12 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Spinwheel Acak Siswa</title>
-
-<!-- Google Font -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-
 <style>
 :root{
   --bg:#0f172a;
@@ -27,131 +24,93 @@ html,body{
   color:var(--text);
   min-height:100vh;
 }
-.app{
-  max-width:900px;
-  margin:0 auto;
-  padding:20px;
-}
-header{
-  text-align:center;
-  padding:20px;
-}
+.app{max-width:960px;margin:0 auto;padding:20px}
+header{text-align:center;padding:15px}
 header h1{
   margin:0;
   background:linear-gradient(90deg,var(--primary),var(--secondary));
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
-header p{opacity:.8}
+header p{opacity:.8;font-size:14px}
 
 .controls{
-  display:flex;
-  gap:10px;
-  justify-content:center;
-  flex-wrap:wrap;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
   margin:15px 0 25px;
 }
-.btn{
-  padding:10px 18px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.2);
+.panel{
   background:rgba(255,255,255,.05);
-  color:var(--text);
-  cursor:pointer;
-  backdrop-filter:blur(10px);
-  transition:.3s;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;
+  padding:12px;
+  backdrop-filter:blur(8px);
+}
+.panel h3{margin:0 0 8px;font-size:15px}
+
+.select{
+  width:100%;padding:8px 10px;border-radius:10px;
+  background:#020617;color:var(--text);border:1px solid rgba(255,255,255,.2)
+}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.btn{
+  padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.05);color:var(--text);cursor:pointer;transition:.2s;
 }
 .btn:hover{background:var(--primary)}
-.btn.active{background:var(--secondary); color:#020617}
+.btn.active{background:var(--secondary);color:#020617}
 
-.wheel-wrap{
-  display:flex;
-  justify-content:center;
-  position:relative;
-}
+.wheel-wrap{display:flex;justify-content:center;position:relative;margin-top:10px}
 #wheel{
-  width:320px; height:320px;
-  border-radius:50%;
-  border:10px solid var(--primary);
-  background:conic-gradient(
-    var(--primary),
-    #9333ea,
-    var(--secondary),
-    var(--accent),
-    var(--primary)
-  );
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  width:320px;height:320px;border-radius:50%;border:10px solid var(--primary);
+  background:conic-gradient(var(--primary),#9333ea,var(--secondary),var(--accent),var(--primary));
+  display:flex;align-items:center;justify-content:center;
   transition:transform 1.2s cubic-bezier(.17,.67,.12,.99);
 }
 #wheel-inner{
-  width:200px; height:200px;
-  border-radius:50%;
-  background:var(--card);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding:15px;
+  width:200px;height:200px;border-radius:50%;background:var(--card);
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:15px;
   box-shadow:0 0 20px rgba(0,0,0,.6);
 }
-.pointer{
-  position:absolute;
-  top:-10px;
-  left:50%; transform:translateX(-50%);
-  font-size:40px;
-  color:var(--accent);
-}
+.pointer{position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:40px;color:var(--accent)}
 
-#result{
-  margin-top:15px;
-  font-size:22px;
-  font-weight:700;
-  text-align:center;
-}
-
-.spin-row{
-  text-align:center;
-  margin-top:20px;
-}
+#result{margin-top:15px;font-size:20px;font-weight:700;text-align:center}
+.spin-row{text-align:center;margin-top:20px}
 #spinBtn{
-  padding:12px 30px;
-  font-size:16px;
-  border-radius:999px;
-  border:none;
-  background:linear-gradient(90deg,var(--primary),var(--secondary));
-  color:#020617;
-  font-weight:700;
-  cursor:pointer;
+  padding:12px 30px;font-size:16px;border-radius:999px;border:none;
+  background:linear-gradient(90deg,var(--primary),var(--secondary));color:#020617;font-weight:700;cursor:pointer;
 }
 #spinBtn:hover{filter:brightness(1.1)}
 
-.stats{
-  margin-top:20px;
-  text-align:center;
-  opacity:.8;
-}
+.stats{text-align:center;margin-top:15px;opacity:.8;font-size:14px}
+footer{text-align:center;font-size:12px;margin-top:25px;opacity:.7}
 
-footer{
-  text-align:center;
-  font-size:12px;
-  margin-top:30px;
-  opacity:.7;
-}
+@media(max-width:700px){.controls{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="app">
   <header>
     <h1>🎡 Spinwheel Acak Siswa</h1>
-    <p>Terhubung ke Google Sheets • Siap upload ke GitHub</p>
+    <p>Spin khusus Kelas (Rombel) • Spin khusus Jenis Kelamin • Terhubung ke Google Sheet</p>
   </header>
 
   <div class="controls">
-    <button class="btn active" data-gender="all">Semua</button>
-    <button class="btn" data-gender="L">Laki-laki</button>
-    <button class="btn" data-gender="P">Perempuan</button>
+    <div class="panel">
+      <h3>🎓 Pilih Kelas / Rombel</h3>
+      <select id="kelasSelect" class="select">
+        <option value="all">Semua Rombel</option>
+      </select>
+    </div>
+
+    <div class="panel">
+      <h3>🚻 Pilih Jenis Kelamin</h3>
+      <div class="btn-row">
+        <button class="btn active" data-gender="all">Semua</button>
+        <button class="btn" data-gender="L">Laki-laki</button>
+        <button class="btn" data-gender="P">Perempuan</button>
+      </div>
+    </div>
   </div>
 
   <div class="wheel-wrap">
@@ -166,11 +125,11 @@ footer{
   <div id="result"></div>
 
   <div class="spin-row">
-    <button id="spinBtn">SPIN</button>
+    <button id="spinBtn">SPIN SEKARANG</button>
   </div>
 
   <div class="stats">
-    Siswa aktif: <span id="count">0</span>
+    Siswa sesuai filter: <span id="count">0</span>
   </div>
 
   <footer>
@@ -179,16 +138,22 @@ footer{
 </div>
 
 <script>
-// =======================
-// GANTI DENGAN LINK CSV SHEET ANDA
-// Gunakan format:
-// https://docs.google.com/spreadsheets/d/<SHEET_ID>/gviz/tq?tqx=out:csv&sheet=Sheet1
+// ===============================
+// SESUAI DATA YANG ANDA BERIKAN
+// Sheet ID:
+// 1alXonfmvgeFORy6B7esA-Zq2zrGQfryXMAj64POLsiE
+// Sheet Name: DATA
+// Kolom:
+// - Rombel (D)  -> header: Rombel
+// - Nama (B)    -> header: Nama
+// - Jenis Kelamin (C) -> header: Jenis Kelamin
+// ===============================
 const SHEET_CSV_URL =
-  "https://docs.google.com/spreadsheets/d/alXonfmvgeFORy6B7esA-Zq2zrGQfryXMAj64POLsiE/gviz/tq?tqx=out:csv&sheet=Sheet1";
-// =======================
+  "https://docs.google.com/spreadsheets/d/1alXonfmvgeFORy6B7esA-Zq2zrGQfryXMAj64POLsiE/gviz/tq?tqx=out:csv&sheet=DATA";
 
 let students = [];
 let gender = "all";
+let kelas = "all"; // ini merujuk ke Rombel
 let rotation = 0;
 
 async function loadSheet(){
@@ -205,6 +170,7 @@ async function loadSheet(){
       return obj;
     }).filter(r=>r.Nama);
 
+    buildKelasOptions();
     updateCount();
   }catch(e){
     document.getElementById("center-text").innerText = "Gagal load Sheet";
@@ -212,9 +178,24 @@ async function loadSheet(){
   }
 }
 
+function buildKelasOptions(){
+  const set = new Set(students.map(s=>s.Rombel).filter(Boolean));
+  const select = document.getElementById('kelasSelect');
+  set.forEach(k=>{
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = k;
+    select.appendChild(opt);
+  });
+}
+
 function getFiltered(){
-  if(gender === "all") return students;
-  return students.filter(s => (s.JK||"").toUpperCase().startsWith(gender));
+  return students.filter(s=>{
+    const okKelas = kelas === "all" || s.Rombel === kelas;
+    const jk = (s["Jenis Kelamin"] || "").toUpperCase();
+    const okGender = gender === "all" || jk.startsWith(gender);
+    return okKelas && okGender;
+  });
 }
 
 function updateCount(){
@@ -223,22 +204,20 @@ function updateCount(){
 
 function spin(){
   const list = getFiltered();
-  if(!list.length){
-    alert("Tidak ada data untuk filter ini");
-    return;
-  }
+  if(!list.length){alert("Tidak ada data untuk filter ini");return;}
   rotation += 1800 + Math.random()*720;
-  const wheel = document.getElementById("wheel");
-  wheel.style.transform = `rotate(${rotation}deg)`;
-
+  document.getElementById("wheel").style.transform = `rotate(${rotation}deg)`;
   const pick = list[Math.floor(Math.random()*list.length)];
   setTimeout(()=>{
     document.getElementById("center-text").innerText = pick.Nama;
-    document.getElementById("result").innerText = `Terpilih: ${pick.Nama}`;
-  }, 1200);
+    let label = "";
+    if(kelas !== "all") label += `Rombel ${kelas} `;
+    if(gender !== "all") label += `(${gender}) `;
+    document.getElementById("result").innerText = `Terpilih ${label}: ${pick.Nama}`;
+  },1200);
 }
 
-// Event filter buttons
+// Gender buttons
  document.querySelectorAll('.btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
@@ -246,6 +225,12 @@ function spin(){
     gender = btn.dataset.gender;
     updateCount();
   });
+});
+
+// Kelas/Rombel select
+document.getElementById('kelasSelect').addEventListener('change',e=>{
+  kelas = e.target.value;
+  updateCount();
 });
 
 document.getElementById('spinBtn').addEventListener('click', spin);
