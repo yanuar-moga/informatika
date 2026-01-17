@@ -113,7 +113,6 @@ footer{text-align:center;font-size:12px;margin-top:25px;opacity:.7}
 }
 @keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
 
-/* confetti canvas full screen */
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:1000}
 
 @media(max-width:700px){.controls{grid-template-columns:1fr}}
@@ -139,7 +138,7 @@ footer{text-align:center;font-size:12px;margin-top:25px;opacity:.7}
     <div class="panel">
       <h3>🎓 Pilih Kelas / Rombel</h3>
       <select id="kelasSelect" class="select">
-        <option value="all">Semua Rombel</option>
+        <option value="all">Memuat kelas...</option>
       </select>
     </div>
 
@@ -158,7 +157,7 @@ footer{text-align:center;font-size:12px;margin-top:25px;opacity:.7}
     <div id="wheel">
       <div id="wheel-segments"></div>
       <div id="wheel-inner">
-        <div id="center-text">Klik SPIN</div>
+        <div id="center-text">Memuat data...</div>
       </div>
     </div>
   </div>
@@ -213,15 +212,21 @@ function animateConfetti(){
   requestAnimationFrame(animateConfetti);
 }
 
+// --- Safe CSV split (handles commas inside quotes) ---
+function splitCSVLine(line){
+  const regex = /,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/;
+  return line.split(regex).map(v=>v.replace(/^"|"$/g,'').trim());
+}
+
 async function loadSheet(){
   try{
     const res = await fetch(SHEET_CSV_URL);
     const text = await res.text();
-    const rows = text.trim().split(/\r?\n/);
-    const headers = rows[0].split(',').map(h=>h.trim());
+    const rows = text.trim().split(/\r?\n/).filter(r=>r.trim());
+    const headers = splitCSVLine(rows[0]);
 
     students = rows.slice(1).map(r=>{
-      const cols = r.split(',');
+      const cols = splitCSVLine(r);
       const obj = {};
       headers.forEach((h,i)=>obj[h] = (cols[i]||'').trim());
       return obj;
@@ -230,7 +235,11 @@ async function loadSheet(){
     buildKelasOptions();
     rebuildWheel();
     updateCount();
-  }catch(e){document.getElementById('center-text').innerText='Gagal load Sheet';console.error(e)}
+    document.getElementById('center-text').innerText = 'Klik SPIN';
+  }catch(e){
+    document.getElementById('center-text').innerText='Gagal load Sheet';
+    console.error(e);
+  }
 }
 
 function buildKelasOptions(){
@@ -277,7 +286,10 @@ function showPopup(name){
 
 function spin(){
   const list=getFiltered();
-  if(!list.length){alert('Tidak ada data untuk filter ini');return;}
+  if(!list.length){
+    alert('Data belum terbaca atau Sheet belum dibuka untuk publik. Pastikan: Share → Anyone with link → Viewer');
+    return;
+  }
   rebuildWheel();
   rotation += 1800 + Math.random()*720;
   document.getElementById('wheel').style.transform=`rotate(${rotation}deg)`;
