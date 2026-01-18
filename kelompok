@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pembuat Kelompok Acak</title>
+<style>
+html,body{
+  margin:0;min-height:100vh;
+  background:#0b1220;
+  font-family:Segoe UI,Arial,sans-serif;
+  color:#e5e7eb;
+}
+
+.header{
+  background:linear-gradient(135deg,#0f172a,#1e3a8a,#2563eb);
+  padding:18px 22px;
+  border-radius:0 0 24px 24px;
+  box-shadow:0 10px 30px rgba(37,99,235,.4);
+}
+
+.container{
+  max-width:1100px;
+  margin:20px auto;
+  padding:0 15px;
+}
+
+.card{
+  background:#0f172a;
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 10px 35px rgba(0,0,0,.4);
+  margin-bottom:16px;
+}
+
+.controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+}
+
+select, input, button{
+  padding:10px 14px;
+  border-radius:12px;
+  border:1px solid #1e293b;
+  background:#020617;
+  color:#e5e7eb;
+}
+
+button.primary{
+  background:#2563eb;
+  border:none;
+  font-weight:600;
+}
+
+button.danger{
+  background:#ef4444;
+  border:none;
+  font-weight:600;
+}
+
+.row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:14px;
+}
+
+/* hasil kelompok */
+.group-box{
+  background:#020617;
+  border-radius:16px;
+  padding:14px;
+  border:1px solid #1e40af;
+}
+
+.group-title{
+  font-weight:700;
+  margin-bottom:8px;
+  color:#93c5fd;
+}
+
+.member{
+  padding:6px 8px;
+  border-radius:8px;
+  margin-bottom:6px;
+  background:#0f172a;
+}
+
+.badge{
+  float:right;
+  font-size:12px;
+  padding:2px 6px;
+  border-radius:6px;
+}
+
+.L{background:#2563eb;color:white;}
+.P{background:#ec4899;color:white;}
+
+#info{
+  margin-top:8px;
+  font-size:14px;
+  opacity:.9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h2>👥 Pembuat Kelompok Acak (per Kelas)</h2>
+</div>
+
+<div class="container">
+
+<div class="card">
+<div class="controls">
+
+<select id="kelasSelect">
+  <option value="ALL">Pilih Kelas</option>
+</select>
+
+<select id="modeSelect">
+  <option value="kelompok">Tentukan Jumlah Kelompok</option>
+  <option value="anggota">Tentukan Anggota per Kelompok</option>
+</select>
+
+<input id="jumlahInput" type="number" min="1" placeholder="Isi angka">
+
+<label style="display:flex;align-items:center;gap:6px;">
+  <input type="checkbox" id="balanceCheck" checked>
+  Seimbangkan L / P
+</label>
+
+<button class="primary" id="buatBtn">BUAT KELOMPOK</button>
+<button class="danger" id="resetBtn">Reset</button>
+</div>
+
+<div id="info">Memuat data…</div>
+</div>
+
+<div id="hasilArea" class="row"></div>
+
+</div>
+
+<script>
+const SHEET_CSV_URL =
+"https://docs.google.com/spreadsheets/d/1alXonfmvgeFORy6B7esA-Zq2zrGQfryXMAj64POLsiE/gviz/tq?tqx=out:csv&sheet=DATA";
+
+let students = [];
+let idxNama=0, idxJK=0, idxRombel=0;
+
+const kelasSelect = document.getElementById('kelasSelect');
+const modeSelect = document.getElementById('modeSelect');
+const jumlahInput = document.getElementById('jumlahInput');
+const balanceCheck = document.getElementById('balanceCheck');
+const buatBtn = document.getElementById('buatBtn');
+const resetBtn = document.getElementById('resetBtn');
+const hasilArea = document.getElementById('hasilArea');
+const info = document.getElementById('info');
+
+function parseCSV(text){
+ const rows=[]; let cur='', arr=[], inQ=false;
+ for(let c of text){
+  if(c=='"'){inQ=!inQ; continue;}
+  if(c==',' && !inQ){arr.push(cur.trim());cur='';continue;}
+  if(c=='\n' && !inQ){arr.push(cur.trim());rows.push(arr);arr=[];cur='';continue;}
+  cur+=c;
+ }
+ if(cur||arr.length) arr.push(cur.trim()), rows.push(arr);
+ return rows;
+}
+
+fetch(SHEET_CSV_URL)
+.then(r=>r.text())
+.then(t=>{
+  const data = parseCSV(t);
+  const header = data[0];
+
+  idxNama = header.indexOf('Nama');
+  idxJK = header.indexOf('Jenis Kelamin');
+  idxRombel = header.indexOf('Rombel');
+
+  students = data.slice(1).filter(r=>r[idxNama]);
+
+  const kelas = [...new Set(students.map(r=>r[idxRombel]))]
+                .filter(k=>k).sort();
+
+  kelas.forEach(k=>{
+    const opt=document.createElement('option');
+    opt.value=k;
+    opt.textContent=k;
+    kelasSelect.appendChild(opt);
+  });
+
+  info.textContent="Pilih kelas lalu buat kelompok.";
+})
+.catch(e=>{
+  info.textContent="Gagal load Google Sheet";
+  console.error(e);
+});
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function getKelasSiswa(){
+  return students.filter(r=>r[idxRombel]===kelasSelect.value);
+}
+
+buatBtn.onclick = ()=>{
+  hasilArea.innerHTML='';
+
+  if(kelasSelect.value==="ALL"){
+    alert("Pilih kelas dulu!");
+    return;
+  }
+
+  const pool = getKelasSiswa();
+  if(pool.length===0){
+    alert("Tidak ada siswa di kelas ini");
+    return;
+  }
+
+  const n = parseInt(jumlahInput.value);
+  if(!n || n<=0){
+    alert("Isi jumlah dulu!");
+    return;
+  }
+
+  let groups=[];
+
+  if(balanceCheck.checked){
+    // ==== MODE SEIMBANG L/P ====
+    let L = shuffle(pool.filter(r=>r[idxJK]=='L'));
+    let P = shuffle(pool.filter(r=>r[idxJK]=='P'));
+    let total = pool.length;
+
+    let groupCount = modeSelect.value==="kelompok"
+      ? n
+      : Math.ceil(total/n);
+
+    groups = Array.from({length:groupCount},()=>[]);
+
+    // bagi bergantian L dan P
+    let i=0;
+    while(L.length || P.length){
+      if(L.length) groups[i%groupCount].push(L.pop());
+      if(P.length) groups[i%groupCount].push(P.pop());
+      i++;
+    }
+  }else{
+    // ==== MODE ACak BIASA ====
+    let shuffled = shuffle([...pool]);
+
+    let groupCount = modeSelect.value==="kelompok"
+      ? n
+      : Math.ceil(shuffled.length/n);
+
+    groups = Array.from({length:groupCount},()=>[]);
+
+    shuffled.forEach((s,i)=>{
+      groups[i%groupCount].push(s);
+    });
+  }
+
+  // render hasil
+  groups.forEach((g,i)=>{
+    const box=document.createElement('div');
+    box.className='group-box';
+
+    const title=document.createElement('div');
+    title.className='group-title';
+    title.textContent = "Kelompok " + (i+1) + " ("+g.length+" siswa)";
+    box.appendChild(title);
+
+    g.forEach(r=>{
+      const div=document.createElement('div');
+      div.className='member';
+      div.innerHTML = r[idxNama] +
+        ` <span class="badge ${r[idxJK]}">${r[idxJK]}</span>`;
+      box.appendChild(div);
+    });
+
+    hasilArea.appendChild(box);
+  });
+
+  info.textContent =
+   `Kelas ${kelasSelect.value} • ${pool.length} siswa • `+
+   `Terbagi jadi ${groups.length} kelompok.`;
+};
+
+resetBtn.onclick = ()=>{
+  hasilArea.innerHTML='';
+  info.textContent="Silakan buat ulang kelompok.";
+};
+</script>
+
+</body>
+</html>
