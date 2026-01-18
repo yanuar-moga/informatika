@@ -95,7 +95,7 @@ th{
 
 <body>
 
-<!-- ✅ CEK LOGIN (TANPA FIREBASE) -->
+<!-- CEK LOGIN LOCAL -->
 <script>
 if(sessionStorage.getItem("isLogin") !== "true"){
   location.href = "index.html";
@@ -144,35 +144,34 @@ if(sessionStorage.getItem("isLogin") !== "true"){
 </div>
 
 <script>
-/* 🔗 API Google Apps Script (tetap pakai milik Anda) */
+/* API Google Apps Script Anda */
 const API = 
-"https://script.google.com/macros/s/AKfycbxn-Gd8k8mCgXYCN8euz_4ZWOjdmO6xUNH29GkAXhe4uHs9o_a3UlcUnkcwiNEf9AHp/exec";
+"https://script.google.com/macros/s/AKfycbxVg9psHAIjOsqdfSFT18HCCXn_1aAwCRGGoQtyJkfDEQd7gwv5qCmd8vhTGn2zdpgQCg/exec";
+
+/* ambil email dari sessionStorage */
+const email = sessionStorage.getItem("email");
 
 let kelasAktif = "";
 
-/* Ambil email dari sessionStorage (yang disimpan saat login) */
-const email = sessionStorage.getItem("email");
-
-/* Panggil data user dari Apps Script */
+/* ambil data user & set judul */
 fetch(`${API}?action=login&email=${email}`)
-.then(r=>r.json())
-.then(u=>{
-  if(u.error){
-    alert(u.error);
-    sessionStorage.clear();
-    location.href="index.html";
-    return;
-  }
+  .then(r => r.json())
+  .then(u => {
+    if(u.error){
+      alert(u.error);
+      sessionStorage.clear();
+      location.href="index.html";
+      return;
+    }
+    kelasAktif = u.kelas;
+    userTitle.innerText = `${u.nama} (${u.role}) - ${kelasAktif}`;
 
-  kelasAktif = u.kelas;
-  userTitle.innerText = `${u.nama} (${u.role}) - ${kelasAktif}`;
+    /* load data awal */
+    loadSiswa();
+    loadStat();
+  });
 
-  loadSiswa();
-  loadStat();
-});
-
-/* ================= DATA SISWA ================= */
-
+/* load siswa */
 function loadSiswa(filter=""){
   fetch(`${API}?action=siswa&kelas=${kelasAktif}&filter=${filter}`)
     .then(r=>r.json())
@@ -188,6 +187,7 @@ function loadSiswa(filter=""){
     });
 }
 
+/* load statistik */
 function loadStat(){
   fetch(`${API}?action=statistik&kelas=${kelasAktif}`)
     .then(r=>r.json())
@@ -199,11 +199,12 @@ function loadStat(){
     });
 }
 
+/* cetak PDF */
 function cetak(t){
   window.open(`${API}?action=${t}PDF&kelas=${kelasAktif}`);
 }
 
-/* ✅ LOGOUT TANPA FIREBASE */
+/* logout */
 window.logout = function(){
   sessionStorage.clear();
   location.href="index.html";
