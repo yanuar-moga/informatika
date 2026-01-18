@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard Guru Wali</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#020617;color:white;font-family:Inter}
+.card{max-width:1200px;margin:30px auto;background:#0f172a;padding:24px;border-radius:20px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.box{background:#020617;padding:16px;border-radius:14px;text-align:center}
+table{width:100%;margin-top:20px;border-collapse:collapse}
+th,td{padding:10px;border-bottom:1px solid #1e293b}
+img{width:36px;height:36px;border-radius:50%}
+button,select{padding:8px 12px;border-radius:10px;border:none}
+button{background:#38bdf8;font-weight:700}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2 id="user"></h2>
+
+  <div class="grid">
+    <div class="box" id="s1"></div>
+    <div class="box" id="s2"></div>
+    <div class="box" id="s3"></div>
+    <div class="box" id="s4"></div>
+  </div>
+
+  <select onchange="load(this.value)">
+    <option value="">Semua</option>
+    <option value="L">Laki-laki</option>
+    <option value="P">Perempuan</option>
+    <option value="KIP">Penerima KIP</option>
+    <option value="YATIM">Yatim/Piatu</option>
+  </select>
+
+  <button onclick="pdf('absensi')">Cetak Absensi</button>
+  <button onclick="pdf('leger')">Cetak Leger</button>
+
+  <table>
+    <thead>
+      <tr><th></th><th>Nama</th><th>JK</th><th>NISN</th></tr>
+    </thead>
+    <tbody id="tbl"></tbody>
+  </table>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+/* 🔥 SAMAKAN DENGAN index.html */
+const firebaseConfig = {
+  apiKey: "ISI_API_KEY",
+  authDomain: "ISI_AUTH_DOMAIN",
+  projectId: "ISI_PROJECT_ID",
+  appId: "ISI_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+const API = "PASTE_WEBAPP_URL";
+let kelas = "";
+
+onAuthStateChanged(auth, u => {
+  if (!u) location.href = "index.html";
+
+  fetch(`${API}?action=profile&email=${u.email}`)
+    .then(r => r.json())
+    .then(p => {
+      if (p.error) return alert(p.error);
+      user.innerText = `${p.nama} (${p.role}) - ${p.kelas}`;
+      kelas = p.kelas;
+      load();
+      stat();
+    });
+});
+
+function load(filter="") {
+  fetch(`${API}?action=siswa&kelas=${kelas}&filter=${filter}`)
+    .then(r=>r.json())
+    .then(d=>{
+      tbl.innerHTML = d.map(s=>`
+        <tr>
+          <td><img src="${s.foto||'https://via.placeholder.com/36'}"></td>
+          <td>${s.nama}</td>
+          <td>${s.jk}</td>
+          <td>${s.nisn}</td>
+        </tr>
+      `).join("");
+    });
+}
+
+function stat() {
+  fetch(`${API}?action=statistik&kelas=${kelas}`)
+    .then(r=>r.json())
+    .then(s=>{
+      s1.innerText = `Total ${s.total}`;
+      s2.innerText = `L ${s.laki}`;
+      s3.innerText = `P ${s.perempuan}`;
+      s4.innerText = `KIP ${s.kip}`;
+    });
+}
+
+function pdf(t) {
+  window.open(`${API}?action=${t}PDF&kelas=${kelas}`);
+}
+</script>
+
+</body>
+</html>
