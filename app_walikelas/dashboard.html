@@ -2,115 +2,219 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard Guru Wali</title>
+<title>Dashboard Guru / Wali</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600;800&display=swap" rel="stylesheet">
+
 <style>
-body{margin:0;background:#020617;color:white;font-family:Inter}
-.card{max-width:1200px;margin:30px auto;background:#0f172a;padding:24px;border-radius:20px}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.box{background:#020617;padding:16px;border-radius:14px;text-align:center}
-table{width:100%;margin-top:20px;border-collapse:collapse}
-th,td{padding:10px;border-bottom:1px solid #1e293b}
-img{width:36px;height:36px;border-radius:50%}
-button,select{padding:8px 12px;border-radius:10px;border:none}
-button{background:#38bdf8;font-weight:700}
+body{
+  margin:0;
+  background:#020617;
+  color:white;
+  font-family:Inter,Arial,sans-serif;
+}
+.header{
+  background:#020617;
+  padding:18px 28px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid #1e293b;
+}
+.header h2{margin:0;font-weight:800;color:#38bdf8}
+.header button{
+  background:#ef4444;
+  color:white;
+  border:none;
+  padding:8px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.card{
+  background:#0f172a;
+  padding:24px;
+  border-radius:20px;
+  max-width:1200px;
+  margin:30px auto;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+}
+
+.stat{
+  background:#020617;
+  padding:18px;
+  border-radius:14px;
+  text-align:center;
+  font-weight:600;
+}
+
+.control{
+  margin:20px 0;
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+select,button{
+  padding:10px 14px;
+  border-radius:10px;
+  border:none;
+  font-weight:600;
+}
+
+button{
+  background:#38bdf8;
+  cursor:pointer;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th,td{
+  padding:10px;
+  border-bottom:1px solid #1e293b;
+  text-align:left;
+}
+
+th{
+  color:#94a3b8;
+  font-size:13px;
+}
 </style>
 </head>
 
 <body>
 
+<div class="header">
+  <h2 id="userTitle">Dashboard</h2>
+  <button onclick="logout()">Logout</button>
+</div>
+
 <div class="card">
-  <h2 id="user"></h2>
 
   <div class="grid">
-    <div class="box" id="s1"></div>
-    <div class="box" id="s2"></div>
-    <div class="box" id="s3"></div>
-    <div class="box" id="s4"></div>
+    <div class="stat" id="t1">Total</div>
+    <div class="stat" id="t2">Laki</div>
+    <div class="stat" id="t3">Perempuan</div>
+    <div class="stat" id="t4">KIP</div>
   </div>
 
-  <select onchange="load(this.value)">
-    <option value="">Semua</option>
-    <option value="L">Laki-laki</option>
-    <option value="P">Perempuan</option>
-    <option value="KIP">Penerima KIP</option>
-    <option value="YATIM">Yatim/Piatu</option>
-  </select>
+  <div class="control">
+    <select id="filter" onchange="loadSiswa(this.value)">
+      <option value="">Semua</option>
+      <option value="L">Laki-laki</option>
+      <option value="P">Perempuan</option>
+      <option value="KIP">Penerima KIP</option>
+      <option value="YATIM">Yatim / Piatu</option>
+    </select>
 
-  <button onclick="pdf('absensi')">Cetak Absensi</button>
-  <button onclick="pdf('leger')">Cetak Leger</button>
+    <button onclick="cetak('absensi')">Cetak Absensi PDF</button>
+    <button onclick="cetak('leger')">Cetak Leger PDF</button>
+  </div>
 
   <table>
     <thead>
-      <tr><th></th><th>Nama</th><th>JK</th><th>NISN</th></tr>
+      <tr>
+        <th>Nama</th>
+        <th>JK</th>
+        <th>NIS</th>
+        <th>NISN</th>
+      </tr>
     </thead>
     <tbody id="tbl"></tbody>
   </table>
+
 </div>
 
+<!-- ================= FIREBASE ================= -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, onAuthStateChanged }
+import { getAuth, onAuthStateChanged, signOut }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-/* 🔥 SAMAKAN DENGAN index.html */
+/* 🔥 FIREBASE CONFIG */
 const firebaseConfig = {
-  apiKey: "ISI_API_KEY",
-  authDomain: "ISI_AUTH_DOMAIN",
-  projectId: "ISI_PROJECT_ID",
-  appId: "ISI_APP_ID"
+  apiKey: "AIzaSyD_Dl5cdFBh_dyhkhthI2gclhWoz4ZHYls",
+  authDomain: "login-2f19a.firebaseapp.com",
+  projectId: "login-2f19a",
+  appId: "1:751593178422:web:1d36294b46d1a954b15f97"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-const API = "PASTE_WEBAPP_URL";
-let kelas = "";
+/* 🔗 API GS SCRIPT */
+const API = "https://script.google.com/macros/s/AKfycbxn-Gd8k8mCgXYCN8euz_4ZWOjdmO6xUNH29GkAXhe4uHs9o_a3UlcUnkcwiNEf9AHp/exec";
 
-onAuthStateChanged(auth, u => {
-  if (!u) location.href = "index.html";
+let kelasAktif = "";
 
-  fetch(`${API}?action=profile&email=${u.email}`)
-    .then(r => r.json())
-    .then(p => {
-      if (p.error) return alert(p.error);
-      user.innerText = `${p.nama} (${p.role}) - ${p.kelas}`;
-      kelas = p.kelas;
-      load();
-      stat();
+/* ================= AUTH CHECK ================= */
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    location.href = "index.html";
+    return;
+  }
+
+  fetch(`${API}?action=login&email=${user.email}`)
+    .then(r=>r.json())
+    .then(u=>{
+      if(u.error) return alert(u.error);
+
+      kelasAktif = u.kelas;
+      userTitle.innerText = `${u.nama} (${u.role}) - ${kelasAktif}`;
+
+      loadSiswa();
+      loadStat();
     });
 });
 
-function load(filter="") {
-  fetch(`${API}?action=siswa&kelas=${kelas}&filter=${filter}`)
+/* ================= DATA ================= */
+
+function loadSiswa(filter=""){
+  fetch(`${API}?action=siswa&kelas=${kelasAktif}&filter=${filter}`)
     .then(r=>r.json())
     .then(d=>{
       tbl.innerHTML = d.map(s=>`
         <tr>
-          <td><img src="${s.foto||'https://via.placeholder.com/36'}"></td>
           <td>${s.nama}</td>
           <td>${s.jk}</td>
-          <td>${s.nisn}</td>
+          <td>${s.nis || "-"}</td>
+          <td>${s.nisn || "-"}</td>
         </tr>
       `).join("");
     });
 }
 
-function stat() {
-  fetch(`${API}?action=statistik&kelas=${kelas}`)
+function loadStat(){
+  fetch(`${API}?action=statistik&kelas=${kelasAktif}`)
     .then(r=>r.json())
     .then(s=>{
-      s1.innerText = `Total ${s.total}`;
-      s2.innerText = `L ${s.laki}`;
-      s3.innerText = `P ${s.perempuan}`;
-      s4.innerText = `KIP ${s.kip}`;
+      t1.innerText = `Total: ${s.total}`;
+      t2.innerText = `L: ${s.laki}`;
+      t3.innerText = `P: ${s.perempuan}`;
+      t4.innerText = `KIP: ${s.kip}`;
     });
 }
 
-function pdf(t) {
-  window.open(`${API}?action=${t}PDF&kelas=${kelas}`);
+function cetak(t){
+  window.open(`${API}?action=${t}PDF&kelas=${kelasAktif}`);
 }
+
+window.logout = function(){
+  signOut(auth).then(()=>{
+    location.href="index.html";
+  });
+};
 </script>
 
 </body>
