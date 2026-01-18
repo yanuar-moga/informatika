@@ -7,82 +7,117 @@
 
 <style>
 html,body{
-  margin:0;min-height:100vh;
+  margin:0;
+  min-height:100vh;
   background:#0b1220;
   font-family:Segoe UI,Arial,sans-serif;
   color:#e5e7eb;
 }
 
+/* ===== HEADER ===== */
 .header{
   background:linear-gradient(135deg,#064e3b,#166534,#22c55e);
-  padding:18px 22px;
-  border-radius:0 0 24px 24px;
+  padding:16px 14px;
+  border-radius:0 0 20px 20px;
   box-shadow:0 10px 30px rgba(22,101,52,.5);
+  text-align:center;
 }
 
+/* ===== CONTAINER UTAMA ===== */
 .container{
   max-width:1100px;
-  margin:20px auto;
-  padding:0 15px;
+  margin:16px auto;
+  padding:0 10px;
 }
 
+/* ===== KARTU UTAMA ===== */
 .card{
   background:#0f172a;
   border-radius:18px;
-  padding:18px;
+  padding:14px;
   box-shadow:0 10px 35px rgba(0,0,0,.4);
-  margin-bottom:16px;
+  margin-bottom:12px;
 }
 
+/* ===== CONTROL BAR (RESPONSIVE) ===== */
 .controls{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-bottom:16px;
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
 }
 
+/* Form element */
 select, input, button{
-  padding:10px 14px;
+  width:100%;
+  padding:10px 12px;
   border-radius:12px;
   border:1px solid #1e293b;
   background:#020617;
   color:#e5e7eb;
+  font-size:14px;
 }
 
+/* tombol */
 button.primary{ background:#16a34a; border:none; font-weight:600; }
 button.danger{ background:#ef4444; border:none; font-weight:600; }
 
+/* ===== GRID HASIL TUGAS (RESPONSIVE) ===== */
 .row{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-  gap:14px;
+  grid-template-columns:1fr; /* default HP */
+  gap:10px;
 }
 
 /* KOTAK TUGAS */
 .task-box{
   background:#020617;
   border-radius:16px;
-  padding:14px;
+  padding:12px;
   border:1px solid #22c55e;
 }
 
 .task-title{
   font-weight:700;
-  margin-bottom:8px;
+  margin-bottom:6px;
   color:#86efac;
+  font-size:14px;
 }
 
 .member{
   padding:8px 10px;
   border-radius:10px;
-  margin-bottom:6px;
+  margin-bottom:5px;
   background:#0f172a;
+  font-size:13px;
 }
 
 #info{
-  margin-top:8px;
-  font-size:14px;
+  margin-top:6px;
+  font-size:13px;
   opacity:.9;
+  text-align:center;
+}
+
+/* ===== BREAKPOINT TABLET ===== */
+@media (min-width: 600px){
+  .controls{
+    grid-template-columns:repeat(2, 1fr);
+  }
+
+  .row{
+    grid-template-columns:repeat(2, 1fr);
+  }
+}
+
+/* ===== BREAKPOINT LAPTOP ===== */
+@media (min-width: 900px){
+  .controls{
+    grid-template-columns:repeat(3, 1fr);
+  }
+
+  .row{
+    grid-template-columns:repeat(3, 1fr);
+  }
 }
 </style>
 </head>
@@ -90,7 +125,7 @@ button.danger{ background:#ef4444; border:none; font-weight:600; }
 <body>
 
 <div class="header">
-  <h2>🧹 Pembagi Tugas Kebersihan RESHAP</h2>
+  <h2>Pembagi Tugas Kebersihan RESHAP</h2>
 </div>
 
 <div class="container">
@@ -207,32 +242,26 @@ bagiBtn.onclick = ()=>{
    "Membersihkan halaman kelas": []
   };
 
-  // 1) Pengawas (sesuai input)
   for(let i=0;i<pengawasCount && shuffled.length;i++){
     tugas["Pengawas kebersihan"].push(shuffled.pop());
   }
 
-  // 2) Papan tulis & meja guru = 2 orang
   for(let i=0;i<2 && shuffled.length;i++){
     tugas["Membersihkan papan tulis & meja guru"].push(shuffled.pop());
   }
 
-  // 3) Lantai kelas = 5 orang
   for(let i=0;i<5 && shuffled.length;i++){
     tugas["Membersihkan lantai kelas (sapu & pel)"].push(shuffled.pop());
   }
 
-  // 4) Jendela kelas = 5 orang
   for(let i=0;i<5 && shuffled.length;i++){
     tugas["Membersihkan jendela kelas"].push(shuffled.pop());
   }
 
-  // 5) SISANYA → HALAMAN KELAS
   while(shuffled.length){
     tugas["Membersihkan halaman kelas"].push(shuffled.pop());
   }
 
-  // tampilkan hasil
   Object.keys(tugas).forEach(t=>{
     const box=document.createElement('div');
     box.className='task-box';
