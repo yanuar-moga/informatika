@@ -8,20 +8,33 @@
 <style>
 body{
   font-family: system-ui;
-  background:#eaf2ff;
+  background:#e5e7eb;
   display:flex;
   justify-content:center;
   align-items:center;
   min-height:100vh;
 }
+
 .card{
-  background:#fff;
-  padding:30px;
+  background:#ffffff;
+  padding:25px;
   border-radius:16px;
-  width:360px;
-  box-shadow:0 20px 40px rgba(0,0,0,.15);
+  width:380px;
+  box-shadow:0 20px 40px rgba(0,0,0,.12);
 }
-label{font-size:13px;margin-top:12px;display:block}
+
+.logo {
+  display:block;
+  margin:0 auto 10px auto;
+  max-width:90px;
+}
+
+label{
+  font-size:13px;
+  margin-top:10px;
+  display:block;
+}
+
 select,input,button{
   width:100%;
   padding:10px;
@@ -29,42 +42,91 @@ select,input,button{
   border-radius:8px;
   border:1px solid #cbd5e1;
 }
+
 button{
-  margin-top:20px;
+  margin-top:15px;
   background:#2563eb;
-  color:#fff;
+  color:white;
   border:none;
   cursor:pointer;
-}
-#msg{text-align:center;margin-top:12px}
-  .logo {
-  display: block;
-  margin: 0 auto 12px auto;
-  max-width: 90px;
+  font-weight:600;
 }
 
+#msg{
+  text-align:center;
+  margin-top:10px;
+  font-size:13px;
+}
+
+/* TABEL BELUM ABSEN */
+.table-box{
+  margin-top:18px;
+  padding:10px;
+  border-radius:12px;
+  background:#f1f5f9;
+  border:1px solid #e2e8f0;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+
+th,td{
+  border:1px solid #cbd5e1;
+  padding:6px;
+  text-align:left;
+}
+
+th{
+  background:#e5e7eb;
+}
+
+.status-badge{
+  padding:4px 8px;
+  border-radius:8px;
+  font-size:12px;
+  text-align:center;
+}
+
+.done{
+  background:#dcfce7;
+  color:#166534;
+}
+
+.notyet{
+  background:#fee2e2;
+  color:#7f1d1d;
+}
 </style>
 </head>
 
 <body>
+
 <div class="card">
 
   <img src="assets/logo.png" alt="Logo Sekolah" class="logo">
 
   <h3 style="text-align:center">Absensi Siswa</h3>
 
-
 <label>Kelas</label>
-<select id="kelas"><option value="">-- Pilih Kelas --</option></select>
+<select id="kelas">
+  <option value="">-- Pilih Kelas --</option>
+</select>
 
 <label>Nama</label>
-<select id="nama" disabled><option value="">-- Pilih Nama --</option></select>
+<select id="nama" disabled>
+  <option value="">-- Pilih Nama --</option>
+</select>
 
 <label>Jenis Kelamin</label>
 <input id="jk" readonly>
 
 <label>No Meja</label>
-<select id="noMeja"><option value="">-- Pilih --</option></select>
+<select id="noMeja">
+  <option value="">-- Pilih --</option>
+</select>
 
 <label>Tanggal</label>
 <input id="tanggal" readonly>
@@ -80,10 +142,26 @@ button{
 
 <button onclick="submitAbsensi()" id="btn">Simpan Presensi</button>
 <div id="msg"></div>
+
+<!-- TABEL BELUM ABSEN -->
+<div class="table-box" id="boxBelum" style="display:none">
+  <h4>📋 Belum Absen Hari Ini</h4>
+  <table>
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Nama</th>
+      </tr>
+    </thead>
+    <tbody id="tblBelum"></tbody>
+  </table>
+</div>
+
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxoRAOtKcG-1binkkGCFrpEAo1iLoMAhA8qVhUydVszr9hHYEu9s-BA-_MtEZcbKPbJ/exec";
+const API_URL =
+"https://script.google.com/macros/s/AKfycbxoRAOtKcG-1binkkGCFrpEAo1iLoMAhA8qVhUydVszr9hHYEu9s-BA-_MtEZcbKPbJ/exec";
 
 const kelas = document.getElementById("kelas");
 const nama = document.getElementById("nama");
@@ -93,11 +171,14 @@ const noMeja = document.getElementById("noMeja");
 const tanggal = document.getElementById("tanggal");
 const msg = document.getElementById("msg");
 const btn = document.getElementById("btn");
+const boxBelum = document.getElementById("boxBelum");
+const tblBelum = document.getElementById("tblBelum");
 
 let dataSiswa = [];
 
 tanggal.value = new Date().toLocaleString("id-ID");
 
+// isi nomor meja
 for(let i=1;i<=40;i++){
   noMeja.innerHTML += `<option>Meja ${i}</option>`;
 }
@@ -117,20 +198,27 @@ kelas.onchange=()=>{
   nama.innerHTML='<option value="">-- Pilih Nama --</option>';
   nama.disabled=true;
   jk.value="";
-  dataSiswa.filter(s=>s.rombel===kelas.value)
-    .forEach(s=>{
-      nama.innerHTML+=`<option data-jk="${s.jk}">${s.nama}</option>`;
-    });
+  dataSiswa
+   .filter(s=>s.rombel===kelas.value)
+   .forEach(s=>{
+     nama.innerHTML+=
+     `<option data-jk="${s.jk}">${s.nama}</option>`;
+   });
   nama.disabled=false;
 };
 
 // PILIH NAMA
 nama.onchange=()=>{
-  jk.value=nama.selectedOptions[0]?.dataset.jk||"";
+  jk.value = nama.selectedOptions[0]?.dataset.jk || "";
 };
 
-// SUBMIT
+// KIRIM ABSENSI
 function submitAbsensi(){
+  if(!nama.value || !kelas.value || !status.value){
+    alert("Isi semua data dulu!");
+    return;
+  }
+
   btn.disabled=true;
   btn.innerText="Menyimpan...";
 
@@ -145,17 +233,48 @@ function submitAbsensi(){
   fetch(API_URL,{method:"POST",body:fd})
   .then(r=>r.json())
   .then(res=>{
-    msg.innerText =
-      res.status==="success" ? "✅ Presensi tersimpan" :
-      res.status==="duplicate" ? "⚠️ Sudah absen" :
-      "❌ "+res.message;
+    if(res.status==="success"){
+      alert("✅ BERHASIL\nAbsen tersimpan");
+      msg.innerText="Presensi tercatat ✓";
+      loadBelumAbsen();   // tampilkan tabel setelah klik simpan
+    } else if(res.status==="duplicate"){
+      alert("ℹ️ Kamu sudah absen hari ini.");
+      msg.innerText="Sudah absen hari ini.";
+      loadBelumAbsen();
+    } else {
+      alert("❌ Gagal: "+res.message);
+    }
+
     btn.disabled=false;
     btn.innerText="Simpan Presensi";
   })
   .catch(()=>{
-    msg.innerText="❌ Gagal menyimpan";
+    alert("❌ Gagal menyimpan");
     btn.disabled=false;
     btn.innerText="Simpan Presensi";
+  });
+}
+
+// AMBIL DAFTAR BELUM ABSEN
+function loadBelumAbsen(){
+  if(!kelas.value) return;
+
+  fetch(API_URL + "?action=getBelumAbsen&kelas="+encodeURIComponent(kelas.value))
+  .then(r=>r.json())
+  .then(d=>{
+    boxBelum.style.display="block";
+    tblBelum.innerHTML="";
+
+    if(!d.belum || d.belum.length===0){
+      tblBelum.innerHTML =
+      `<tr><td colspan="2">Semua siswa sudah absen ✓</td></tr>`;
+      return;
+    }
+
+    d.belum.forEach((n,i)=>{
+      tblBelum.innerHTML +=
+      `<tr><td>${i+1}</td><td>${n}</td></tr>`;
+    });
   });
 }
 </script>
