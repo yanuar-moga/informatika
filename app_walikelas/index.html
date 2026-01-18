@@ -8,39 +8,73 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600;800&display=swap" rel="stylesheet">
 
 <style>
+*{box-sizing:border-box}
+
 body{
   margin:0;
   min-height:100vh;
   font-family:Inter,Arial,sans-serif;
-  background:linear-gradient(135deg,#e0f2fe,#f8fafc);
+  background:linear-gradient(135deg,#e0f2fe,#f1f5f9);
   display:flex;
   align-items:center;
   justify-content:center;
 }
 
+/* CARD LOGIN (mirip tampilan gambar) */
 .login-card{
   width:360px;
   background:white;
-  border-radius:20px;
-  padding:30px;
-  box-shadow:0 10px 30px rgba(0,0,0,.12);
+  border-radius:22px;
+  padding:28px 26px 26px;
+  box-shadow:0 12px 35px rgba(0,0,0,.12);
   text-align:center;
 }
 
-input,button{
+/* LOGO */
+.logo{
+  width:90px;
+  margin-bottom:8px;
+}
+
+/* JUDUL */
+.title{
+  margin:6px 0 18px;
+  color:#0284c7;
+  font-size:22px;
+  font-weight:800;
+}
+
+/* INPUT */
+.input-field{
   width:100%;
-  padding:12px;
+  padding:11px 12px;
   margin:8px 0;
   border-radius:10px;
   border:1px solid #e2e8f0;
+  font-size:14px;
+  background:#f8fafc;
 }
 
-button{
-  background:#0ea5e9;
-  color:white;
-  font-weight:800;
+/* TOMBOL LOGIN */
+.btn-primary{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  background:linear-gradient(135deg,#38bdf8,#0ea5e9);
   border:none;
+  border-radius:12px;
+  color:white;
+  font-size:15px;
+  font-weight:800;
   cursor:pointer;
+}
+
+.btn-primary:hover{opacity:.9}
+
+.footer{
+  margin-top:16px;
+  font-size:12px;
+  color:#64748b;
 }
 </style>
 </head>
@@ -48,12 +82,25 @@ button{
 <body>
 
 <div class="login-card">
-  <h2>Aplikasi Guru Wali</h2>
 
-  <input id="email" placeholder="email@gmail.com">
-  <input id="password" type="password" placeholder="password">
+  <!-- ✅ LOGO DARI URL YANG ANDA KIRIM -->
+  <img 
+   src="https://yanuar-moga.github.io/informatika/absen/assets/logo.png"
+   alt="Logo Sekolah"
+   class="logo">
 
-  <button onclick="login()">Masuk</button>
+  <h1 class="title">Aplikasi Guru Wali</h1>
+
+  <input id="email" class="input-field"
+         placeholder="email@gmail.com">
+
+  <input id="password" type="password" class="input-field"
+         placeholder="password">
+
+  <button class="btn-primary" onclick="login()">Masuk</button>
+
+  <div class="footer">© 2026 Sistem Administrasi Sekolah</div>
+
 </div>
 
 <script>
@@ -61,7 +108,7 @@ function login(){
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  // === CONTOH AKUN (GANTI SESUAI KEBUTUHAN) ===
+  // === AKUN CONTOH (bisa diganti nanti) ===
   if(email === "bayu@smpn1moga.sch.id" && password === "12345"){
     sessionStorage.setItem("isLogin","true");
     sessionStorage.setItem("email", email);
