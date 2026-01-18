@@ -52,7 +52,7 @@ button{
   padding:20px;
   border-radius:16px;
   box-shadow:0 10px 30px rgba(0,0,0,.1);
-  display:none; /* DISSEMBUNYIKAN DULU */
+  display:none;
 }
 
 table{
@@ -132,7 +132,7 @@ th{
 <div id="msg"></div>
 </div>
 
-<!-- TABEL BELUM ABSEN (AKAN MUNCUL SETELAH SIMPAN) -->
+<!-- TABEL BELUM ABSEN (MUNCUL SETELAH SIMPAN) -->
 <div class="table-box" id="tableBox">
 <h4>📋 Teman yang Belum Absen Hari Ini</h4>
 <p id="ringkas"></p>
@@ -191,7 +191,7 @@ fetch(API_URL + "?action=getDataSiswa")
   });
 });
 
-// PILIH KELAS (TIDAK LOAD BELUM ABSEN LAGI)
+// PILIH KELAS
 kelas.onchange=()=>{
   nama.innerHTML='<option value="">-- Pilih Nama --</option>';
   nama.disabled=true;
@@ -206,13 +206,12 @@ kelas.onchange=()=>{
   nama.disabled=false;
 };
 
-// PILIH NAMA → CEK DIRI OTOMATIS
+// PILIH NAMA → CEK DIRI (HANYA JIKA SUDAH ABSEN)
 nama.onchange=()=>{
   jk.value = nama.selectedOptions[0]?.dataset.jk || "";
   cekDiri();
 };
 
-// CEK DIRI (POPUP)
 function cekDiri(){
   if(!nama.value || !kelas.value) return;
 
@@ -222,18 +221,16 @@ function cekDiri(){
     if(res.status==="sudah"){
       popup("✅ SUDAH ABSEN",
       `Kamu sudah absen sebagai: ${res.statusAbsen}`);
-    }else{
-      popup("⚠️ BELUM ABSEN",
-      "Silakan isi presensi sekarang.");
     }
+    // ⛔ TIDAK ADA POPUP JIKA BELUM ABSEN
   });
 }
 
-// LOAD DAFTAR BELUM ABSEN (HANYA DIPANGGIL SETELAH SIMPAN)
+// LOAD DAFTAR BELUM ABSEN (HANYA SETELAH SIMPAN)
 function loadBelumAbsen(){
   if(!kelas.value) return;
 
-  tableBox.style.display="block"; // MUNCULKAN TABEL
+  tableBox.style.display="block";
 
   fetch(`${API_URL}?action=getBelumAbsen&rombel=${encodeURIComponent(kelas.value)}`)
   .then(r=>r.json())
@@ -271,8 +268,8 @@ function submitAbsensi(){
   .then(r=>r.json())
   .then(res=>{
     if(res.status==="success"){
-      popup("✅ BERHASIL","Absen tersimpan"); // ← sesuai permintaan
-      loadBelumAbsen(); // ← baru muncul setelah klik simpan
+      popup("✅ BERHASIL","Absen tersimpan");
+      loadBelumAbsen();
     }else{
       popup("⚠️ GAGAL","Kamu sudah absen hari ini");
     }
