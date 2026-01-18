@@ -50,7 +50,6 @@ select, input, button{
 }
 
 button.primary{ background:#16a34a; border:none; font-weight:600; }
-button.secondary{ background:#2563eb; border:none; font-weight:600; }
 button.danger{ background:#ef4444; border:none; font-weight:600; }
 
 .row{
@@ -80,13 +79,10 @@ button.danger{ background:#ef4444; border:none; font-weight:600; }
   background:#0f172a;
 }
 
-/* FORM TAMBAH TUGAS */
-.task-editor{
-  background:#020617;
-  border-radius:16px;
-  padding:12px;
-  border:1px dashed #22c55e;
-  margin-top:10px;
+#info{
+  margin-top:8px;
+  font-size:14px;
+  opacity:.9;
 }
 </style>
 </head>
@@ -101,24 +97,19 @@ button.danger{ background:#ef4444; border:none; font-weight:600; }
 
 <div class="card">
 <div class="controls">
-  <input id="namaInput" placeholder="Masukkan nama (pisah koma)">
-  <input id="nHalaman" type="number" min="1" placeholder="Jumlah petugas halaman (lebih banyak)">
-  <input id="nPengawas" type="number" min="1" placeholder="Jumlah pengawas">
 
-  <button class="primary" id="bagiBtn">BAGI TUGAS</button>
-  <button class="danger" id="resetBtn">Reset</button>
+<select id="kelasSelect">
+  <option value="ALL">Pilih Kelas</option>
+</select>
+
+<input id="nHalaman" type="number" min="1" placeholder="Jumlah petugas halaman">
+<input id="nPengawas" type="number" min="1" placeholder="Jumlah pengawas">
+
+<button class="primary" id="bagiBtn">BAGI TUGAS</button>
+<button class="danger" id="resetBtn">Reset</button>
 </div>
 
-<div class="task-editor">
-  <b>Daftar Tugas (bisa diedit):</b><br>
-  <textarea id="taskList" rows="5" style="width:100%;margin-top:6px;">
-1|Membersihkan lantai kelas (sapu & pel)
-2|Membersihkan jendela kelas
-3|Membersihkan papan tulis & meja guru
-4|Membersihkan halaman kelas
-5|Pengawas kebersihan
-</textarea>
-</div>
+<div id="info">Memuat data kelas…</div>
 </div>
 
 <div id="hasilArea" class="row"></div>
@@ -126,13 +117,59 @@ button.danger{ background:#ef4444; border:none; font-weight:600; }
 </div>
 
 <script>
-const bagiBtn = document.getElementById('bagiBtn');
-const resetBtn = document.getElementById('resetBtn');
-const namaInput = document.getElementById('namaInput');
+const SHEET_CSV_URL =
+"https://docs.google.com/spreadsheets/d/1alXonfmvgeFORy6B7esA-Zq2zrGQfryXMAj64POLsiE/gviz/tq?tqx=out:csv&sheet=DATA";
+
+let students = [];
+let idxNama=0, idxRombel=0;
+
+const kelasSelect = document.getElementById('kelasSelect');
 const nHalaman = document.getElementById('nHalaman');
 const nPengawas = document.getElementById('nPengawas');
-const taskList = document.getElementById('taskList');
+const bagiBtn = document.getElementById('bagiBtn');
+const resetBtn = document.getElementById('resetBtn');
 const hasilArea = document.getElementById('hasilArea');
+const info = document.getElementById('info');
+
+function parseCSV(text){
+ const rows=[]; let cur='', arr=[], inQ=false;
+ for(let c of text){
+  if(c=='"'){inQ=!inQ; continue;}
+  if(c==',' && !inQ){arr.push(cur.trim());cur='';continue;}
+  if(c=='\n' && !inQ){arr.push(cur.trim());rows.push(arr);arr=[];cur='';continue;}
+  cur+=c;
+ }
+ if(cur||arr.length) arr.push(cur.trim()), rows.push(arr);
+ return rows;
+}
+
+fetch(SHEET_CSV_URL)
+.then(r=>r.text())
+.then(t=>{
+  const data = parseCSV(t);
+  const header = data[0];
+
+  idxNama = header.indexOf('Nama');
+  idxRombel = header.indexOf('Rombel');
+
+  students = data.slice(1).filter(r=>r[idxNama]);
+
+  const kelas = [...new Set(students.map(r=>r[idxRombel]))]
+                .filter(k=>k).sort();
+
+  kelas.forEach(k=>{
+    const opt=document.createElement('option');
+    opt.value=k;
+    opt.textContent=k;
+    kelasSelect.appendChild(opt);
+  });
+
+  info.textContent="Pilih kelas lalu klik BAGI TUGAS.";
+})
+.catch(e=>{
+  info.textContent="Gagal memuat Google Sheet";
+  console.error(e);
+});
 
 function shuffle(arr){
   for(let i=arr.length-1;i>0;i--){
@@ -142,46 +179,51 @@ function shuffle(arr){
   return arr;
 }
 
-function getTasks(){
-  return taskList.value
-    .split("\n")
-    .map(l=>l.replace(/^\d+\|/,"").trim())
-    .filter(l=>l);
+function getSiswaKelas(){
+  return students.filter(r=>r[idxRombel]===kelasSelect.value);
 }
 
 bagiBtn.onclick = ()=>{
   hasilArea.innerHTML='';
 
-  let nama = namaInput.value.split(",").map(n=>n.trim()).filter(n=>n);
-  if(nama.length===0){
-    alert("Masukkan daftar nama dulu!");
+  if(kelasSelect.value==="ALL"){
+    alert("Pilih kelas dulu!");
     return;
   }
 
-  let tugas = getTasks();
-  let halamanCount = parseInt(nHalaman.value) || 2;
+  let pool = getSiswaKelas();
+  if(pool.length===0){
+    alert("Tidak ada siswa di kelas ini");
+    return;
+  }
+
+  let halamanCount = parseInt(nHalaman.value) || 3;
   let pengawasCount = parseInt(nPengawas.value) || 1;
 
-  let shuffled = shuffle([...nama]);
+  let shuffled = shuffle([...pool.map(r=>r[idxNama])]);
 
-  // Siapkan kotak tugas
+  const tugas = [
+   "Membersihkan lantai kelas (sapu & pel)",
+   "Membersihkan jendela kelas",
+   "Membersihkan papan tulis & meja guru",
+   "Membersihkan halaman kelas",
+   "Pengawas kebersihan"
+  ];
+
   let boxes = {};
+  tugas.forEach(t=> boxes[t]=[]);
 
-  tugas.forEach(t=>{
-    boxes[t] = [];
-  });
-
-  // Bagi pengawas dulu
+  // bagi pengawas dulu
   for(let i=0;i<pengawasCount;i++){
     boxes["Pengawas kebersihan"].push(shuffled.pop());
   }
 
-  // Bagi halaman (lebih banyak)
+  // bagi halaman (lebih banyak)
   for(let i=0;i<halamanCount;i++){
     boxes["Membersihkan halaman kelas"].push(shuffled.pop());
   }
 
-  // Sisanya bagi merata ke tugas lain
+  // sisanya bagi ke tugas lain
   let otherTasks = tugas.filter(t =>
     t!=="Pengawas kebersihan" &&
     t!=="Membersihkan halaman kelas"
@@ -194,12 +236,12 @@ bagiBtn.onclick = ()=>{
     idx++;
   }
 
-  // Render tampilan
+  // tampilkan hasil
   Object.keys(boxes).forEach(t=>{
-    const box = document.createElement('div');
+    const box=document.createElement('div');
     box.className='task-box';
 
-    const title = document.createElement('div');
+    const title=document.createElement('div');
     title.className='task-title';
     title.textContent = t + " ("+boxes[t].length+" orang)";
     box.appendChild(title);
@@ -213,10 +255,14 @@ bagiBtn.onclick = ()=>{
 
     hasilArea.appendChild(box);
   });
+
+  info.textContent =
+   `Kelas ${kelasSelect.value} • ${pool.length} siswa • Tugas dibagi otomatis.`;
 };
 
 resetBtn.onclick = ()=>{
   hasilArea.innerHTML='';
+  info.textContent="Silakan buat ulang tugas.";
 };
 </script>
 
