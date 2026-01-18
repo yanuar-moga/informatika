@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pembagi Tugas RESHAP</title>
 
+<!-- Library untuk export Excel -->
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+
 <style>
 html,body{
   margin:0;
@@ -23,14 +26,14 @@ html,body{
   text-align:center;
 }
 
-/* ===== CONTAINER UTAMA ===== */
+/* ===== CONTAINER ===== */
 .container{
   max-width:1100px;
   margin:16px auto;
   padding:0 10px;
 }
 
-/* ===== KARTU UTAMA ===== */
+/* ===== CARD ===== */
 .card{
   background:#0f172a;
   border-radius:18px;
@@ -39,14 +42,14 @@ html,body{
   margin-bottom:12px;
 }
 
-/* ===== CONTROL BAR (RESPONSIVE) ===== */
+/* ===== CONTROL BAR ===== */
 .controls{
   display:grid;
   grid-template-columns:1fr;
   gap:8px;
 }
 
-/* Form element */
+/* Form */
 select, input, button{
   width:100%;
   padding:10px 12px;
@@ -59,12 +62,14 @@ select, input, button{
 
 /* tombol */
 button.primary{ background:#16a34a; border:none; font-weight:600; }
+button.secondary{ background:#2563eb; border:none; font-weight:600; }
+button.dark{ background:#0f172a; border:1px solid #22c55e; font-weight:600; }
 button.danger{ background:#ef4444; border:none; font-weight:600; }
 
-/* ===== GRID HASIL TUGAS (RESPONSIVE) ===== */
+/* ===== GRID HASIL ===== */
 .row{
   display:grid;
-  grid-template-columns:1fr; /* default HP */
+  grid-template-columns:1fr;
   gap:10px;
 }
 
@@ -98,26 +103,15 @@ button.danger{ background:#ef4444; border:none; font-weight:600; }
   text-align:center;
 }
 
-/* ===== BREAKPOINT TABLET ===== */
+/* ===== RESPONSIVE ===== */
 @media (min-width: 600px){
-  .controls{
-    grid-template-columns:repeat(2, 1fr);
-  }
-
-  .row{
-    grid-template-columns:repeat(2, 1fr);
-  }
+  .controls{ grid-template-columns:repeat(2, 1fr); }
+  .row{ grid-template-columns:repeat(2, 1fr); }
 }
 
-/* ===== BREAKPOINT LAPTOP ===== */
 @media (min-width: 900px){
-  .controls{
-    grid-template-columns:repeat(3, 1fr);
-  }
-
-  .row{
-    grid-template-columns:repeat(3, 1fr);
-  }
+  .controls{ grid-template-columns:repeat(4, 1fr); }
+  .row{ grid-template-columns:repeat(3, 1fr); }
 }
 </style>
 </head>
@@ -137,9 +131,9 @@ button.danger{ background:#ef4444; border:none; font-weight:600; }
   <option value="ALL">Pilih Kelas</option>
 </select>
 
-<input id="nKoordinator" type="number" min="1" placeholder="Jumlah koordinator">
-
 <button class="primary" id="bagiBtn">BAGI TUGAS</button>
+<button class="secondary" id="dlExcelBtn">Download Excel</button>
+<button class="dark" id="dlTxtBtn">Download TXT</button>
 <button class="danger" id="resetBtn">Reset</button>
 </div>
 
@@ -155,12 +149,13 @@ const SHEET_CSV_URL =
 "https://docs.google.com/spreadsheets/d/1alXonfmvgeFORy6B7esA-Zq2zrGQfryXMAj64POLsiE/gviz/tq?tqx=out:csv&sheet=DATA";
 
 let students = [];
-let idxNama=0, idxRombel=0;
+let idxNama=0, idxRombel=0, idxGender=-1;
 
 const kelasSelect = document.getElementById('kelasSelect');
-const nKoordinator = document.getElementById('nKoordinator');
 const bagiBtn = document.getElementById('bagiBtn');
 const resetBtn = document.getElementById('resetBtn');
+const dlExcelBtn = document.getElementById('dlExcelBtn');
+const dlTxtBtn = document.getElementById('dlTxtBtn');
 const hasilArea = document.getElementById('hasilArea');
 const info = document.getElementById('info');
 
@@ -182,8 +177,14 @@ fetch(SHEET_CSV_URL)
   const data = parseCSV(t);
   const header = data[0];
 
-  idxNama = header.indexOf('Nama');
-  idxRombel = header.indexOf('Rombel');
+  idxNama = header.findIndex(h=>h.toLowerCase().includes("nama"));
+  idxRombel = header.findIndex(h=>h.toLowerCase().includes("rombel"));
+
+  // Cari kolom gender otomatis
+  idxGender = header.findIndex(h=>{
+    const x = h.toLowerCase();
+    return x.includes("jk") || x.includes("jenis") || x.includes("gender") || x.includes("l/p");
+  });
 
   students = data.slice(1).filter(r=>r[idxNama]);
 
@@ -216,8 +217,11 @@ function getSiswaKelas(){
   return students.filter(r=>r[idxRombel]===kelasSelect.value);
 }
 
+let hasilTugas = {}; // untuk export
+
 bagiBtn.onclick = ()=>{
   hasilArea.innerHTML='';
+  hasilTugas = {};
 
   if(kelasSelect.value==="ALL"){
     alert("Pilih kelas dulu!");
@@ -230,37 +234,56 @@ bagiBtn.onclick = ()=>{
     return;
   }
 
-  let koordinatorCount = parseInt(nKoordinator.value) || 1;
+  let shuffled = shuffle([...pool]);
 
-  let shuffled = shuffle([...pool.map(r=>r[idxNama])]);
+  let laki = idxGender>=0 ? shuffled.filter(r=>{
+    const g = (r[idxGender]||"").toLowerCase();
+    return g.includes("l") || g.includes("laki");
+  }) : [];
+
+  let perempuan = idxGender>=0 ? shuffled.filter(r=>{
+    const g = (r[idxGender]||"").toLowerCase();
+    return g.includes("p");
+  }) : [];
+
+  let sisa = shuffled;
 
   const tugas = {
-   "Koordinator kebersihan": [],
+   "Koordinator (1 L + 1 P)": [],
    "Membersihkan papan tulis & meja guru": [],
    "Membersihkan lantai kelas (sapu & pel)": [],
    "Membersihkan jendela kelas": [],
    "Membersihkan halaman kelas": []
   };
 
-  for(let i=0;i<koordinatorCount && shuffled.length;i++){
-    tugas["Koordinator kebersihan"].push(shuffled.pop());
+  // Pilih koordinator
+  if(idxGender>=0 && laki.length && perempuan.length){
+    tugas["Koordinator (1 L + 1 P)"].push(laki.pop()[idxNama]);
+    tugas["Koordinator (1 L + 1 P)"].push(perempuan.pop()[idxNama]);
+    sisa = shuffled.filter(r=> !tugas["Koordinator (1 L + 1 P)"].includes(r[idxNama]));
+  } else {
+    // fallback acak
+    tugas["Koordinator (1 L + 1 P)"].push(sisa.pop()[idxNama]);
+    tugas["Koordinator (1 L + 1 P)"].push(sisa.pop()[idxNama]);
   }
 
-  for(let i=0;i<2 && shuffled.length;i++){
-    tugas["Membersihkan papan tulis & meja guru"].push(shuffled.pop());
+  for(let i=0;i<2 && sisa.length;i++){
+    tugas["Membersihkan papan tulis & meja guru"].push(sisa.pop()[idxNama]);
   }
 
-  for(let i=0;i<5 && shuffled.length;i++){
-    tugas["Membersihkan lantai kelas (sapu & pel)"].push(shuffled.pop());
+  for(let i=0;i<5 && sisa.length;i++){
+    tugas["Membersihkan lantai kelas (sapu & pel)"].push(sisa.pop()[idxNama]);
   }
 
-  for(let i=0;i<5 && shuffled.length;i++){
-    tugas["Membersihkan jendela kelas"].push(shuffled.pop());
+  for(let i=0;i<5 && sisa.length;i++){
+    tugas["Membersihkan jendela kelas"].push(sisa.pop()[idxNama]);
   }
 
-  while(shuffled.length){
-    tugas["Membersihkan halaman kelas"].push(shuffled.pop());
+  while(sisa.length){
+    tugas["Membersihkan halaman kelas"].push(sisa.pop()[idxNama]);
   }
+
+  hasilTugas = tugas;
 
   Object.keys(tugas).forEach(t=>{
     const box=document.createElement('div');
@@ -285,8 +308,53 @@ bagiBtn.onclick = ()=>{
    `Kelas ${kelasSelect.value} • ${pool.length} siswa • Tugas dibagi otomatis.`;
 };
 
+// ===== DOWNLOAD EXCEL =====
+dlExcelBtn.onclick = ()=>{
+  if(!Object.keys(hasilTugas).length){
+    alert("Bagi tugas dulu!");
+    return;
+  }
+
+  let rows = [["TUGAS","NAMA"]];
+  Object.keys(hasilTugas).forEach(t=>{
+    hasilTugas[t].forEach(n=>{
+      rows.push([t,n]);
+    });
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Tugas");
+
+  XLSX.writeFile(wb, "Pembagian_Tugas_RESHAP.xlsx");
+};
+
+// ===== DOWNLOAD TXT =====
+dlTxtBtn.onclick = ()=>{
+  if(!Object.keys(hasilTugas).length){
+    alert("Bagi tugas dulu!");
+    return;
+  }
+
+  let txt = `PEMBAGIAN TUGAS RESHAP - KELAS ${kelasSelect.value}\n\n`;
+
+  Object.keys(hasilTugas).forEach(t=>{
+    txt += `=== ${t} ===\n`;
+    hasilTugas[t].forEach(n=> txt += "- "+n+"\n");
+    txt += "\n";
+  });
+
+  const blob = new Blob([txt], {type:"text/plain"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "Pembagian_Tugas_RESHAP.txt";
+  a.click();
+};
+
+// ===== RESET =====
 resetBtn.onclick = ()=>{
   hasilArea.innerHTML='';
+  hasilTugas = {};
   info.textContent="Silakan buat ulang tugas.";
 };
 </script>
