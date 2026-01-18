@@ -102,7 +102,6 @@ button.danger{ background:#ef4444; border:none; font-weight:600; }
   <option value="ALL">Pilih Kelas</option>
 </select>
 
-<input id="nHalaman" type="number" min="1" placeholder="Jumlah petugas halaman">
 <input id="nPengawas" type="number" min="1" placeholder="Jumlah pengawas">
 
 <button class="primary" id="bagiBtn">BAGI TUGAS</button>
@@ -124,7 +123,6 @@ let students = [];
 let idxNama=0, idxRombel=0;
 
 const kelasSelect = document.getElementById('kelasSelect');
-const nHalaman = document.getElementById('nHalaman');
 const nPengawas = document.getElementById('nPengawas');
 const bagiBtn = document.getElementById('bagiBtn');
 const resetBtn = document.getElementById('resetBtn');
@@ -197,56 +195,54 @@ bagiBtn.onclick = ()=>{
     return;
   }
 
-  let halamanCount = parseInt(nHalaman.value) || 3;
   let pengawasCount = parseInt(nPengawas.value) || 1;
 
   let shuffled = shuffle([...pool.map(r=>r[idxNama])]);
 
-  const tugas = [
-   "Membersihkan lantai kelas (sapu & pel)",
-   "Membersihkan jendela kelas",
-   "Membersihkan papan tulis & meja guru",
-   "Membersihkan halaman kelas",
-   "Pengawas kebersihan"
-  ];
+  const tugas = {
+   "Pengawas kebersihan": [],
+   "Membersihkan papan tulis & meja guru": [],
+   "Membersihkan lantai kelas (sapu & pel)": [],
+   "Membersihkan jendela kelas": [],
+   "Membersihkan halaman kelas": []
+  };
 
-  let boxes = {};
-  tugas.forEach(t=> boxes[t]=[]);
-
-  // bagi pengawas dulu
-  for(let i=0;i<pengawasCount;i++){
-    boxes["Pengawas kebersihan"].push(shuffled.pop());
+  // 1) Pengawas (sesuai input)
+  for(let i=0;i<pengawasCount && shuffled.length;i++){
+    tugas["Pengawas kebersihan"].push(shuffled.pop());
   }
 
-  // bagi halaman (lebih banyak)
-  for(let i=0;i<halamanCount;i++){
-    boxes["Membersihkan halaman kelas"].push(shuffled.pop());
+  // 2) Papan tulis & meja guru = 2 orang
+  for(let i=0;i<2 && shuffled.length;i++){
+    tugas["Membersihkan papan tulis & meja guru"].push(shuffled.pop());
   }
 
-  // sisanya bagi ke tugas lain
-  let otherTasks = tugas.filter(t =>
-    t!=="Pengawas kebersihan" &&
-    t!=="Membersihkan halaman kelas"
-  );
+  // 3) Lantai kelas = 5 orang
+  for(let i=0;i<5 && shuffled.length;i++){
+    tugas["Membersihkan lantai kelas (sapu & pel)"].push(shuffled.pop());
+  }
 
-  let idx=0;
+  // 4) Jendela kelas = 5 orang
+  for(let i=0;i<5 && shuffled.length;i++){
+    tugas["Membersihkan jendela kelas"].push(shuffled.pop());
+  }
+
+  // 5) SISANYA → HALAMAN KELAS
   while(shuffled.length){
-    let t = otherTasks[idx % otherTasks.length];
-    boxes[t].push(shuffled.pop());
-    idx++;
+    tugas["Membersihkan halaman kelas"].push(shuffled.pop());
   }
 
   // tampilkan hasil
-  Object.keys(boxes).forEach(t=>{
+  Object.keys(tugas).forEach(t=>{
     const box=document.createElement('div');
     box.className='task-box';
 
     const title=document.createElement('div');
     title.className='task-title';
-    title.textContent = t + " ("+boxes[t].length+" orang)";
+    title.textContent = t + " ("+tugas[t].length+" orang)";
     box.appendChild(title);
 
-    boxes[t].forEach(n=>{
+    tugas[t].forEach(n=>{
       const div=document.createElement('div');
       div.className='member';
       div.textContent = n;
