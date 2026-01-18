@@ -52,6 +52,7 @@ button{
   padding:20px;
   border-radius:16px;
   box-shadow:0 10px 30px rgba(0,0,0,.1);
+  display:none; /* DISSEMBUNYIKAN DULU */
 }
 
 table{
@@ -131,8 +132,8 @@ th{
 <div id="msg"></div>
 </div>
 
-<!-- TABEL BELUM ABSEN -->
-<div class="table-box">
+<!-- TABEL BELUM ABSEN (AKAN MUNCUL SETELAH SIMPAN) -->
+<div class="table-box" id="tableBox">
 <h4>📋 Teman yang Belum Absen Hari Ini</h4>
 <p id="ringkas"></p>
 
@@ -170,6 +171,7 @@ const noMeja = document.getElementById("noMeja");
 const tanggal = document.getElementById("tanggal");
 const tbl = document.getElementById("tbl");
 const ringkas = document.getElementById("ringkas");
+const tableBox = document.getElementById("tableBox");
 
 tanggal.value = new Date().toLocaleString("id-ID");
 
@@ -189,7 +191,7 @@ fetch(API_URL + "?action=getDataSiswa")
   });
 });
 
-// PILIH KELAS
+// PILIH KELAS (TIDAK LOAD BELUM ABSEN LAGI)
 kelas.onchange=()=>{
   nama.innerHTML='<option value="">-- Pilih Nama --</option>';
   nama.disabled=true;
@@ -202,7 +204,6 @@ kelas.onchange=()=>{
     });
 
   nama.disabled=false;
-  loadBelumAbsen();
 };
 
 // PILIH NAMA → CEK DIRI OTOMATIS
@@ -228,9 +229,11 @@ function cekDiri(){
   });
 }
 
-// LOAD DAFTAR BELUM ABSEN
+// LOAD DAFTAR BELUM ABSEN (HANYA DIPANGGIL SETELAH SIMPAN)
 function loadBelumAbsen(){
   if(!kelas.value) return;
+
+  tableBox.style.display="block"; // MUNCULKAN TABEL
 
   fetch(`${API_URL}?action=getBelumAbsen&rombel=${encodeURIComponent(kelas.value)}`)
   .then(r=>r.json())
@@ -268,8 +271,8 @@ function submitAbsensi(){
   .then(r=>r.json())
   .then(res=>{
     if(res.status==="success"){
-      popup("✅ BERHASIL","Presensi tersimpan");
-      loadBelumAbsen();
+      popup("✅ BERHASIL","Absen tersimpan"); // ← sesuai permintaan
+      loadBelumAbsen(); // ← baru muncul setelah klik simpan
     }else{
       popup("⚠️ GAGAL","Kamu sudah absen hari ini");
     }
