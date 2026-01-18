@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pembagi Tugas RESHAP</title>
+
+<style>
+html,body{
+  margin:0;min-height:100vh;
+  background:#0b1220;
+  font-family:Segoe UI,Arial,sans-serif;
+  color:#e5e7eb;
+}
+
+.header{
+  background:linear-gradient(135deg,#064e3b,#166534,#22c55e);
+  padding:18px 22px;
+  border-radius:0 0 24px 24px;
+  box-shadow:0 10px 30px rgba(22,101,52,.5);
+}
+
+.container{
+  max-width:1100px;
+  margin:20px auto;
+  padding:0 15px;
+}
+
+.card{
+  background:#0f172a;
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 10px 35px rgba(0,0,0,.4);
+  margin-bottom:16px;
+}
+
+.controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+}
+
+select, input, button{
+  padding:10px 14px;
+  border-radius:12px;
+  border:1px solid #1e293b;
+  background:#020617;
+  color:#e5e7eb;
+}
+
+button.primary{ background:#16a34a; border:none; font-weight:600; }
+button.secondary{ background:#2563eb; border:none; font-weight:600; }
+button.danger{ background:#ef4444; border:none; font-weight:600; }
+
+.row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:14px;
+}
+
+/* KOTAK TUGAS */
+.task-box{
+  background:#020617;
+  border-radius:16px;
+  padding:14px;
+  border:1px solid #22c55e;
+}
+
+.task-title{
+  font-weight:700;
+  margin-bottom:8px;
+  color:#86efac;
+}
+
+.member{
+  padding:8px 10px;
+  border-radius:10px;
+  margin-bottom:6px;
+  background:#0f172a;
+}
+
+/* FORM TAMBAH TUGAS */
+.task-editor{
+  background:#020617;
+  border-radius:16px;
+  padding:12px;
+  border:1px dashed #22c55e;
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h2>🧹 Pembagi Tugas Kebersihan RESHAP</h2>
+</div>
+
+<div class="container">
+
+<div class="card">
+<div class="controls">
+  <input id="namaInput" placeholder="Masukkan nama (pisah koma)">
+  <input id="nHalaman" type="number" min="1" placeholder="Jumlah petugas halaman (lebih banyak)">
+  <input id="nPengawas" type="number" min="1" placeholder="Jumlah pengawas">
+
+  <button class="primary" id="bagiBtn">BAGI TUGAS</button>
+  <button class="danger" id="resetBtn">Reset</button>
+</div>
+
+<div class="task-editor">
+  <b>Daftar Tugas (bisa diedit):</b><br>
+  <textarea id="taskList" rows="5" style="width:100%;margin-top:6px;">
+1|Membersihkan lantai kelas (sapu & pel)
+2|Membersihkan jendela kelas
+3|Membersihkan papan tulis & meja guru
+4|Membersihkan halaman kelas
+5|Pengawas kebersihan
+</textarea>
+</div>
+</div>
+
+<div id="hasilArea" class="row"></div>
+
+</div>
+
+<script>
+const bagiBtn = document.getElementById('bagiBtn');
+const resetBtn = document.getElementById('resetBtn');
+const namaInput = document.getElementById('namaInput');
+const nHalaman = document.getElementById('nHalaman');
+const nPengawas = document.getElementById('nPengawas');
+const taskList = document.getElementById('taskList');
+const hasilArea = document.getElementById('hasilArea');
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function getTasks(){
+  return taskList.value
+    .split("\n")
+    .map(l=>l.replace(/^\d+\|/,"").trim())
+    .filter(l=>l);
+}
+
+bagiBtn.onclick = ()=>{
+  hasilArea.innerHTML='';
+
+  let nama = namaInput.value.split(",").map(n=>n.trim()).filter(n=>n);
+  if(nama.length===0){
+    alert("Masukkan daftar nama dulu!");
+    return;
+  }
+
+  let tugas = getTasks();
+  let halamanCount = parseInt(nHalaman.value) || 2;
+  let pengawasCount = parseInt(nPengawas.value) || 1;
+
+  let shuffled = shuffle([...nama]);
+
+  // Siapkan kotak tugas
+  let boxes = {};
+
+  tugas.forEach(t=>{
+    boxes[t] = [];
+  });
+
+  // Bagi pengawas dulu
+  for(let i=0;i<pengawasCount;i++){
+    boxes["Pengawas kebersihan"].push(shuffled.pop());
+  }
+
+  // Bagi halaman (lebih banyak)
+  for(let i=0;i<halamanCount;i++){
+    boxes["Membersihkan halaman kelas"].push(shuffled.pop());
+  }
+
+  // Sisanya bagi merata ke tugas lain
+  let otherTasks = tugas.filter(t =>
+    t!=="Pengawas kebersihan" &&
+    t!=="Membersihkan halaman kelas"
+  );
+
+  let idx=0;
+  while(shuffled.length){
+    let t = otherTasks[idx % otherTasks.length];
+    boxes[t].push(shuffled.pop());
+    idx++;
+  }
+
+  // Render tampilan
+  Object.keys(boxes).forEach(t=>{
+    const box = document.createElement('div');
+    box.className='task-box';
+
+    const title = document.createElement('div');
+    title.className='task-title';
+    title.textContent = t + " ("+boxes[t].length+" orang)";
+    box.appendChild(title);
+
+    boxes[t].forEach(n=>{
+      const div=document.createElement('div');
+      div.className='member';
+      div.textContent = n;
+      box.appendChild(div);
+    });
+
+    hasilArea.appendChild(box);
+  });
+};
+
+resetBtn.onclick = ()=>{
+  hasilArea.innerHTML='';
+};
+</script>
+
+</body>
+</html>
