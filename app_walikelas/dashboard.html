@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard Guru / Wali</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sistem Administrasi Guru</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600;800&display=swap" rel="stylesheet">
 
@@ -14,6 +14,7 @@ body{
   color:white;
   font-family:Inter,Arial,sans-serif;
 }
+
 .header{
   background:#020617;
   padding:18px 28px;
@@ -22,15 +23,11 @@ body{
   align-items:center;
   border-bottom:1px solid #1e293b;
 }
-.header h2{margin:0;font-weight:800;color:#38bdf8}
-.header button{
-  background:#ef4444;
-  color:white;
-  border:none;
-  padding:8px 14px;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:600;
+
+.header h2{
+  margin:0;
+  font-weight:800;
+  color:#38bdf8;
 }
 
 .card{
@@ -41,25 +38,11 @@ body{
   margin:30px auto;
 }
 
-.grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:16px;
-}
-
-.stat{
-  background:#020617;
-  padding:18px;
-  border-radius:14px;
-  text-align:center;
-  font-weight:600;
-}
-
-.control{
-  margin:20px 0;
+.row{
   display:flex;
   gap:12px;
   flex-wrap:wrap;
+  margin-bottom:20px;
 }
 
 select,button{
@@ -77,65 +60,38 @@ button{
 table{
   width:100%;
   border-collapse:collapse;
-  margin-top:20px;
 }
 
 th,td{
   padding:10px;
   border-bottom:1px solid #1e293b;
-  text-align:left;
 }
 
 th{
   color:#94a3b8;
-  font-size:13px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- CEK LOGIN LOCAL -->
-<script>
-if(sessionStorage.getItem("isLogin") !== "true"){
-  location.href = "index.html";
-}
-</script>
-
 <div class="header">
-  <h2 id="userTitle">Dashboard</h2>
-  <button onclick="logout()">Logout</button>
+  <h2 id="judul">Dashboard Guru</h2>
 </div>
 
 <div class="card">
 
-  <div class="grid">
-    <div class="stat" id="t1">Total</div>
-    <div class="stat" id="t2">Laki</div>
-    <div class="stat" id="t3">Perempuan</div>
-    <div class="stat" id="t4">KIP</div>
-  </div>
-
-  <div class="control">
-    <select id="filter" onchange="loadSiswa(this.value)">
-      <option value="">Semua</option>
-      <option value="L">Laki-laki</option>
-      <option value="P">Perempuan</option>
-      <option value="KIP">Penerima KIP</option>
-      <option value="YATIM">Yatim / Piatu</option>
-    </select>
-
-    <button onclick="cetak('absensi')">Cetak Absensi PDF</button>
-    <button onclick="cetak('leger')">Cetak Leger PDF</button>
+  <div class="row">
+    <select id="pilihKelas"></select>
+    <button onclick="muatSiswa()">Tampilkan Siswa</button>
   </div>
 
   <table>
     <thead>
       <tr>
-        <th>Nama</th>
-        <th>JK</th>
-        <th>NIS</th>
-        <th>NISN</th>
+        <th>No</th>
+        <th>Nama Siswa</th>
+        <th>Kelas</th>
       </tr>
     </thead>
     <tbody id="tbl"></tbody>
@@ -144,71 +100,44 @@ if(sessionStorage.getItem("isLogin") !== "true"){
 </div>
 
 <script>
-/* API Google Apps Script Anda */
-const API = 
-"https://script.google.com/macros/s/AKfycbxVg9psHAIjOsqdfSFT18HCCXn_1aAwCRGGoQtyJkfDEQd7gwv5qCmd8vhTGn2zdpgQCg/exec";
+/* ===== LOAD MASTER DATA (KELAS) ===== */
+google.script.run.withSuccessHandler(function(res){
+  let sel = document.getElementById("pilihKelas");
+  sel.innerHTML = "<option value=''>-- Pilih Kelas --</option>";
 
-/* ambil email dari sessionStorage */
-const email = sessionStorage.getItem("email");
-
-let kelasAktif = "";
-
-/* ambil data user & set judul */
-fetch(`${API}?action=login&email=${email}`)
-  .then(r => r.json())
-  .then(u => {
-    if(u.error){
-      alert(u.error);
-      sessionStorage.clear();
-      location.href="index.html";
-      return;
-    }
-    kelasAktif = u.kelas;
-    userTitle.innerText = `${u.nama} (${u.role}) - ${kelasAktif}`;
-
-    /* load data awal */
-    loadSiswa();
-    loadStat();
+  res.kelas.forEach(k=>{
+    sel.innerHTML += `<option value="${k}">${k}</option>`;
   });
 
-/* load siswa */
-function loadSiswa(filter=""){
-  fetch(`${API}?action=siswa&kelas=${kelasAktif}&filter=${filter}`)
-    .then(r=>r.json())
-    .then(d=>{
-      tbl.innerHTML = d.map(s=>`
-        <tr>
-          <td>${s.nama}</td>
-          <td>${s.jk}</td>
-          <td>${s.nis || "-"}</td>
-          <td>${s.nisn || "-"}</td>
-        </tr>
-      `).join("");
-    });
+}).getMasterData();
+
+/* ===== AMBIL SISWA PER KELAS ===== */
+function muatSiswa(){
+  let kls = document.getElementById("pilihKelas").value;
+  if(!kls){
+    alert("Pilih kelas dulu!");
+    return;
+  }
+
+  google.script.run.withSuccessHandler(tampilkanSiswa)
+    .getSiswaByKelas(kls);
 }
 
-/* load statistik */
-function loadStat(){
-  fetch(`${API}?action=statistik&kelas=${kelasAktif}`)
-    .then(r=>r.json())
-    .then(s=>{
-      t1.innerText = `Total: ${s.total}`;
-      t2.innerText = `L: ${s.laki}`;
-      t3.innerText = `P: ${s.perempuan}`;
-      t4.innerText = `KIP: ${s.kip}`;
-    });
-}
+/* ===== TAMPILKAN KE TABEL ===== */
+function tampilkanSiswa(arr){
+  let tbody = document.getElementById("tbl");
+  tbody.innerHTML = "";
 
-/* cetak PDF */
-function cetak(t){
-  window.open(`${API}?action=${t}PDF&kelas=${kelasAktif}`);
+  arr.forEach((nama, i)=>{
+    tbody.innerHTML += `
+      <tr>
+        <td>${i+1}</td>
+        <td>${nama}</td>
+        <td>${document.getElementById("pilihKelas").value}</td>
+      </tr>
+    `;
+  });
 }
-
-/* logout */
-window.logout = function(){
-  sessionStorage.clear();
-  location.href="index.html";
-};
 </script>
 
 </body>
