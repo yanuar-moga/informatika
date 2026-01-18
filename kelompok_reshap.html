@@ -137,7 +137,7 @@ button.danger{ background:#ef4444; border:none; font-weight:600; }
   <option value="ALL">Pilih Kelas</option>
 </select>
 
-<input id="nPengawas" type="number" min="1" placeholder="Jumlah pengawas">
+<input id="nKoordinator" type="number" min="1" placeholder="Jumlah koordinator">
 
 <button class="primary" id="bagiBtn">BAGI TUGAS</button>
 <button class="danger" id="resetBtn">Reset</button>
@@ -158,7 +158,7 @@ let students = [];
 let idxNama=0, idxRombel=0;
 
 const kelasSelect = document.getElementById('kelasSelect');
-const nPengawas = document.getElementById('nPengawas');
+const nKoordinator = document.getElementById('nKoordinator');
 const bagiBtn = document.getElementById('bagiBtn');
 const resetBtn = document.getElementById('resetBtn');
 const hasilArea = document.getElementById('hasilArea');
@@ -230,20 +230,20 @@ bagiBtn.onclick = ()=>{
     return;
   }
 
-  let pengawasCount = parseInt(nPengawas.value) || 1;
+  let koordinatorCount = parseInt(nKoordinator.value) || 1;
 
   let shuffled = shuffle([...pool.map(r=>r[idxNama])]);
 
   const tugas = {
-   "Pengawas kebersihan": [],
+   "Koordinator kebersihan": [],
    "Membersihkan papan tulis & meja guru": [],
    "Membersihkan lantai kelas (sapu & pel)": [],
    "Membersihkan jendela kelas": [],
    "Membersihkan halaman kelas": []
   };
 
-  for(let i=0;i<pengawasCount && shuffled.length;i++){
-    tugas["Pengawas kebersihan"].push(shuffled.pop());
+  for(let i=0;i<koordinatorCount && shuffled.length;i++){
+    tugas["Koordinator kebersihan"].push(shuffled.pop());
   }
 
   for(let i=0;i<2 && shuffled.length;i++){
