@@ -65,10 +65,53 @@ th{
 }
 .status-ok{color:green;font-weight:bold}
 .status-no{color:red;font-weight:bold}
+
+/* ===== POPUP MODAL DI TENGAH ===== */
+.modal-bg{
+  position:fixed;
+  top:0;left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,.5);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+
+.modal-box{
+  background:white;
+  padding:25px 30px;
+  border-radius:16px;
+  text-align:center;
+  width:260px;
+  box-shadow:0 10px 30px rgba(0,0,0,.2);
+}
+
+.modal-box h3{
+  margin:0;
+  color:#16a34a;
+}
+
+.modal-box p{
+  margin:10px 0 15px 0;
+}
+
+.modal-box button{
+  background:#16a34a;
+}
 </style>
 </head>
 
 <body>
+
+<div class="modal-bg" id="modal">
+  <div class="modal-box">
+    <h3>BERHASIL</h3>
+    <p>Absen tersimpan</p>
+    <button onclick="closeModal()">OK</button>
+  </div>
+</div>
+
 <div class="card">
 
   <img src="assets/logo.png" alt="Logo Sekolah" class="logo">
@@ -129,9 +172,9 @@ const jk = document.getElementById("jk");
 const status = document.getElementById("status");
 const noMeja = document.getElementById("noMeja");
 const tanggal = document.getElementById("tanggal");
-const msg = document.getElementById("msg");
 const btn = document.getElementById("btn");
 const statusTable = document.getElementById("statusTable");
+const modal = document.getElementById("modal");
 
 let dataSiswa = [];
 
@@ -165,8 +208,6 @@ kelas.onchange = ()=>{
    });
 
   nama.disabled=false;
-
-  // tampilkan tabel status siswa (TANPA AUTO REFRESH)
   renderStatusTable();
 };
 
@@ -175,7 +216,15 @@ nama.onchange = ()=>{
   jk.value = nama.selectedOptions[0]?.dataset.jk || "";
 };
 
-// SUBMIT ABSENSI
+// TAMPILKAN POPUP TENGAH
+function showModal(){
+  modal.style.display="flex";
+}
+function closeModal(){
+  modal.style.display="none";
+}
+
+// SUBMIT ABSENSI (PAKAI POPUP TENGAH)
 function submitAbsensi(){
   if(!nama.value || !kelas.value || !status.value){
     alert("Isi semua data dulu");
@@ -198,7 +247,7 @@ function submitAbsensi(){
   .then(res=>{
 
     if(res.status==="success"){
-      alert("✅ BERHASIL\nAbsen tersimpan");
+      showModal();   // 👉 POPUP TENGAH
     }else if(res.status==="duplicate"){
       alert("⚠️ SUDAH ABSEN\nAnda sudah melakukan presensi hari ini.");
     }else{
@@ -207,8 +256,6 @@ function submitAbsensi(){
 
     btn.disabled=false;
     btn.innerText="Simpan Presensi";
-
-    // update tabel setelah submit (manual, hemat bandwidth)
     renderStatusTable();
   })
   .catch(()=>{
@@ -218,7 +265,7 @@ function submitAbsensi(){
   });
 }
 
-// TAMPILKAN STATUS TIAP SISWA (✔️ / ❌)
+// TABEL STATUS
 function renderStatusTable(){
   if(!kelas.value){
     statusTable.innerHTML = "";
