@@ -204,23 +204,34 @@ function downloadExcel(){
 
   const ws = XLSX.utils.aoa_to_sheet(dataSheet);
 
-  /* CONDITIONAL FORMATTING TOTAL */
-  ws["!conditionalFormatting"] = [{
-    ref: `H2:H${dataSheet.length}`,
-    rules: [
-      { type:"cellIs", operator:"lessThan", formula:["78"],
-        style:{ fill:{ fgColor:{ rgb:"FFC7CE" }}} },
-      { type:"cellIs", operator:"equal", formula:["78"],
-        style:{ fill:{ fgColor:{ rgb:"FFEB9C" }}} },
-      { type:"cellIs", operator:"greaterThan", formula:["78"],
-        style:{ fill:{ fgColor:{ rgb:"C6EFCE" }}} }
-    ]
-  }];
+  /* ===== WARNA LANGSUNG DI CELL TOTAL ===== */
+  for(let i=1;i<dataSheet.length;i++){
+    const cell = ws[`H${i+1}`];
+    if(!cell) continue;
+
+    const nilai = cell.v;
+
+    if(nilai < 78){
+      cell.s = { fill:{ fgColor:{ rgb:"FFC7CE" }} };
+    }
+    else if(nilai === 78){
+      cell.s = { fill:{ fgColor:{ rgb:"FFEB9C" }} };
+    }
+    else{
+      cell.s = { fill:{ fgColor:{ rgb:"C6EFCE" }} };
+    }
+  }
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Rekap Nilai");
-  XLSX.writeFile(wb, "Rekap_Nilai_Asesmen.xlsx");
+
+  XLSX.writeFile(wb, "Rekap_Nilai_Asesmen.xlsx", {
+  bookType: "xlsx",
+  cellStyles: true
+});
+
 }
+
 </script>
 
 </body>
