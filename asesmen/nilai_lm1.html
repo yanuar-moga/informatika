@@ -111,7 +111,7 @@ function renderSidebar(){
   siswaList.innerHTML="";
   filtered.forEach((r,i)=>{
     const li=document.createElement("li");
-    li.textContent=r[2];
+    li.textContent = r[2].toUpperCase();
     li.onclick=()=>{index=i; render();}
     siswaList.appendChild(li);
   });
