@@ -65,7 +65,6 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
 const sheetId = "1wYkp-mZ96BXEin8mF8F3Z9brSjkPeFtB5k2IFm5Qxjc";
 const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
 
-/* 🔑 KUNCI JAWABAN */
 const kunci = [
   "Kumpulan informasi yang dapat diolah",
   "Jumlah siswa di kelas",
@@ -100,7 +99,7 @@ function isiKelas(){
 function tampilkanData(){
   filtered = rows
     .filter(r=>r[4]===kelasSelect.value)
-    .sort((a,b)=>a[2].localeCompare(b[2])); // 🔥 URUT A–Z
+    .sort((a,b)=>a[2].localeCompare(b[2]));
 
   index=0;
   renderSidebar();
@@ -137,8 +136,8 @@ function render(){
   const total=Math.round((tp1+tp2+tp3+tp4)/4);
 
   let warna="orange";
-  if(total>78) warna="hijau";
-  else if(total==78) warna="kuning";
+  if(total>=80) warna="hijau";
+  else if(total>=70) warna="kuning";
 
   let detail="";
   for(let i=0;i<20;i++){
@@ -160,38 +159,32 @@ function render(){
     <div class="qa">TP4 : ${tp4}</div>
     <div class="qa"><b>Detail Jawaban</b>${detail}</div>
   `;
-
-  document.querySelectorAll(".sidebar li")
-    .forEach((li,i)=>li.classList.toggle("active",i===index));
 }
 
-/* ⬇ DOWNLOAD EXCEL */
 function downloadExcel(){
   let csv = "No,Nama Siswa,Kelas,TP1,TP2,TP3,TP4,TOTAL,PREDIKAT\n";
 
-  filtered.forEach((r, i) => {
-    const tp1 = nilaiTP(0,4,r);
-    const tp2 = nilaiTP(5,9,r);
-    const tp3 = nilaiTP(10,14,r);
-    const tp4 = nilaiTP(15,19,r);
+  filtered.forEach((r,i)=>{
+    const tp1=nilaiTP(0,4,r);
+    const tp2=nilaiTP(5,9,r);
+    const tp3=nilaiTP(10,14,r);
+    const tp4=nilaiTP(15,19,r);
+    const total=Math.round((tp1+tp2+tp3+tp4)/4);
 
-    const total = Math.round((tp1 + tp2 + tp3 + tp4) / 4);
+    let pred="D (PERLU BIMBINGAN)";
+    if(total>=90) pred="A (SANGAT BAIK)";
+    else if(total>=80) pred="B (BAIK)";
+    else if(total>=70) pred="C (CUKUP)";
 
-    let predikat = "D (PERLU BIMBINGAN)";
-    if (total >= 90) predikat = "A (SANGAT BAIK)";
-    else if (total >= 80) predikat = "B (BAIK)";
-    else if (total >= 70) predikat = "C (CUKUP)";
-
-    csv += `${i+1},"${r[2].toUpperCase()}","${r[4]}",${tp1},${tp2},${tp3},${tp4},${total},"${predikat}"\n`;
+    csv+=`${i+1},"${r[2].toUpperCase()}","${r[4]}",${tp1},${tp2},${tp3},${tp4},${total},"${pred}"\n`;
   });
 
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "Rekap_Nilai_Asesmen.xlsx";
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="Rekap_Nilai_Asesmen.csv";
   a.click();
 }
-
 </script>
 
 </body>
