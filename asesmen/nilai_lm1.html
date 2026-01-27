@@ -51,6 +51,7 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
     <div class="filter">
       <select id="kelasSelect"></select>
       <button onclick="tampilkanData()">Tampilkan</button>
+      <button onclick="downloadExcel()">⬇ Download Excel</button>
     </div>
 
     <div class="content">
@@ -71,21 +72,13 @@ const kunci = [
   "Data primer",
   "Membantu keputusan tepat",
   "Jumlah meja dan kursi",
-  "SUM",
-  "AVERAGE",
-  "MAX",
-  "MIN",
-  "=SUM(A1:A5)",
+  "SUM","AVERAGE","MAX","MIN","=SUM(A1:A5)",
   "Keputusan bersyarat",
   "=IF(B2>=75,\"LULUS\",\"REMIDI\")",
-  "Logika",
-  "REMIDI",
-  "Keputusan otomatis",
+  "Logika","REMIDI","Keputusan otomatis",
   "Memudahkan mengolah data",
-  "Menganalisis",
-  "Tersusun rapi",
-  "Pengambilan keputusan",
-  "Jujur dan teliti"
+  "Menganalisis","Tersusun rapi",
+  "Pengambilan keputusan","Jujur dan teliti"
 ];
 
 let rows=[], filtered=[], index=0;
@@ -101,13 +94,14 @@ fetch(url)
 function isiKelas(){
   const kelas = [...new Set(rows.map(r=>r[4]))];
   kelasSelect.innerHTML='<option value="">Pilih Kelas</option>';
-  kelas.forEach(k=>{
-    if(k) kelasSelect.innerHTML+=`<option>${k}</option>`;
-  });
+  kelas.forEach(k=>{ if(k) kelasSelect.innerHTML+=`<option>${k}</option>`; });
 }
 
 function tampilkanData(){
-  filtered = rows.filter(r=>r[4]===kelasSelect.value);
+  filtered = rows
+    .filter(r=>r[4]===kelasSelect.value)
+    .sort((a,b)=>a[2].localeCompare(b[2])); // 🔥 URUT A–Z
+
   index=0;
   renderSidebar();
   render();
@@ -117,7 +111,7 @@ function renderSidebar(){
   siswaList.innerHTML="";
   filtered.forEach((r,i)=>{
     const li=document.createElement("li");
-    li.textContent=r[2]; // Nama Lengkap Siswa (Kolom C)
+    li.textContent=r[2];
     li.onclick=()=>{index=i; render();}
     siswaList.appendChild(li);
   });
@@ -160,20 +154,34 @@ function render(){
 
   qaList.innerHTML=`
     <div class="nilai ${warna}">TOTAL NILAI : ${total}</div>
-
-    <div class="qa">TP1 (1–5) : ${tp1}</div>
-    <div class="qa">TP2 (6–10) : ${tp2}</div>
-    <div class="qa">TP3 (11–15) : ${tp3}</div>
-    <div class="qa">TP4 (16–20) : ${tp4}</div>
-
-    <div class="qa">
-      <b>Detail Jawaban</b>
-      ${detail}
-    </div>
+    <div class="qa">TP1 : ${tp1}</div>
+    <div class="qa">TP2 : ${tp2}</div>
+    <div class="qa">TP3 : ${tp3}</div>
+    <div class="qa">TP4 : ${tp4}</div>
+    <div class="qa"><b>Detail Jawaban</b>${detail}</div>
   `;
 
   document.querySelectorAll(".sidebar li")
     .forEach((li,i)=>li.classList.toggle("active",i===index));
+}
+
+/* ⬇ DOWNLOAD EXCEL */
+function downloadExcel(){
+  let csv="No,Nama,Kelas,TP1,TP2,TP3,TP4\n";
+
+  filtered.forEach((r,i)=>{
+    const tp1=nilaiTP(0,4,r);
+    const tp2=nilaiTP(5,9,r);
+    const tp3=nilaiTP(10,14,r);
+    const tp4=nilaiTP(15,19,r);
+    csv+=`${i+1},"${r[2]}","${r[4]}",${tp1},${tp2},${tp3},${tp4}\n`;
+  });
+
+  const blob=new Blob([csv],{type:"text/csv"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="Rekap_Nilai_Asesmen.csv";
+  a.click();
 }
 </script>
 
