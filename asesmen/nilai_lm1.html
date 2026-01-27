@@ -61,68 +61,76 @@ body { margin:0; font-family:Segoe UI, Arial; }
 const sheetId = "1wYkp-mZ96BXEin8mF8F3Z9brSjkPeFtB5k2IFm5Qxjc";
 const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
 
-let rows=[], filtered=[], index=0;
+let rows = [];
+let filtered = [];
+let index = 0;
 
 fetch(url)
-.then(r=>r.text())
-.then(t=>{
-  const json = JSON.parse(t.substring(47).slice(0,-2));
-  rows = json.table.rows.map(r=>r.c.map(c=>c?c.v:""));
-  isiKelas();
-});
+  .then(res => res.text())
+  .then(text => {
+    const json = JSON.parse(text.substring(47).slice(0, -2));
+    rows = json.table.rows.map(r => r.c.map(c => c ? c.v : ""));
+    isiDropdown();
+  });
 
-function isiKelas(){
-  const kelas = [...new Set(rows.map(r=>r[4]))];
-  kelasSelect.innerHTML='<option value="">Pilih Rombel</option>';
-  kelas.forEach(k=>{
-    if(!k) return;
-    kelasSelect.innerHTML+=`<option>${k}</option>`;
+function isiDropdown() {
+  const select = document.getElementById("kelasSelect");
+  [...new Set(rows.map(r => r[4]))].forEach(k => {
+    if (!k) return;
+    const opt = document.createElement("option");
+    opt.value = k;
+    opt.textContent = k;
+    select.appendChild(opt);
   });
 }
 
-function tampilkanData(){
-  filtered = rows.filter(r=>r[4]===kelasSelect.value);
-  index=0;
+function tampilkanData() {
+  const kelas = kelasSelect.value;
+  if (!kelas) return alert("Pilih rombel");
+
+  filtered = rows.filter(r => r[4] === kelas);
+  index = 0;
   renderSidebar();
   render();
 }
 
-function renderSidebar(){
-  siswaList.innerHTML="";
-  filtered.forEach((r,i)=>{
-    const li=document.createElement("li");
-    li.textContent=r[1];
-    li.onclick=()=>{index=i; render();}
+function renderSidebar() {
+  siswaList.innerHTML = "";
+  filtered.forEach((r, i) => {
+    const li = document.createElement("li");
+    li.textContent = r[2]; // ✅ NAMA DARI KOLOM C
+    li.onclick = () => { index = i; render(); };
     siswaList.appendChild(li);
   });
 }
 
-function nilaiTP(start,end,r){
-  let benar=0;
-  for(let i=start;i<=end;i++){
-    if(r[i]==1) benar++;
+function hitung(start, end, r) {
+  let benar = 0;
+  for (let i = start; i <= end; i++) {
+    if (r[i] == 1) benar++;
   }
-  return benar*20;
+  return benar * 20;
 }
 
-function render(){
-  if(!filtered[index]) return;
-  const r=filtered[index];
+function render() {
+  if (!filtered[index]) return;
+  const r = filtered[index];
 
-  nama.innerText=r[1].toUpperCase();
+  nama.innerText = r[2].toUpperCase(); // ✅ NAMA DARI KOLOM C
 
-  const tp1=nilaiTP(5,9,r);
-  const tp2=nilaiTP(10,14,r);
-  const tp3=nilaiTP(15,19,r);
-  const tp4=nilaiTP(20,24,r);
+  const tp1 = hitung(5, 9, r);
+  const tp2 = hitung(10,14, r);
+  const tp3 = hitung(15,19, r);
+  const tp4 = hitung(20,24, r);
 
-  const total=Math.round((tp1+tp2+tp3+tp4)/4);
-  let warna="orange";
-  if(total>78) warna="hijau";
-  else if(total==78) warna="kuning";
+  const total = Math.round((tp1 + tp2 + tp3 + tp4) / 4);
 
-  qaList.innerHTML=`
-    <div class="nilai ${warna}">TOTAL : ${total}</div>
+  let warna = "orange";
+  if (total > 78) warna = "hijau";
+  else if (total === 78) warna = "kuning";
+
+  qaList.innerHTML = `
+    <div class="nilai ${warna}">TOTAL NILAI : ${total}</div>
     <div class="qa">TP1 (1–5) : ${tp1}</div>
     <div class="qa">TP2 (6–10) : ${tp2}</div>
     <div class="qa">TP3 (11–15) : ${tp3}</div>
@@ -130,9 +138,10 @@ function render(){
   `;
 
   document.querySelectorAll(".sidebar li")
-    .forEach((li,i)=>li.classList.toggle("active",i===index));
+    .forEach((li, i) => li.classList.toggle("active", i === index));
 }
 </script>
+
 
 </body>
 </html>
