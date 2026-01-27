@@ -167,22 +167,31 @@ function render(){
 
 /* ⬇ DOWNLOAD EXCEL */
 function downloadExcel(){
-  let csv="No,Nama,Kelas,TP1,TP2,TP3,TP4\n";
+  let csv = "No,Nama Siswa,Kelas,TP1,TP2,TP3,TP4,TOTAL,PREDIKAT\n";
 
-  filtered.forEach((r,i)=>{
-    const tp1=nilaiTP(0,4,r);
-    const tp2=nilaiTP(5,9,r);
-    const tp3=nilaiTP(10,14,r);
-    const tp4=nilaiTP(15,19,r);
-    csv+=`${i+1},"${r[2]}","${r[4]}",${tp1},${tp2},${tp3},${tp4}\n`;
+  filtered.forEach((r, i) => {
+    const tp1 = nilaiTP(0,4,r);
+    const tp2 = nilaiTP(5,9,r);
+    const tp3 = nilaiTP(10,14,r);
+    const tp4 = nilaiTP(15,19,r);
+
+    const total = Math.round((tp1 + tp2 + tp3 + tp4) / 4);
+
+    let predikat = "D (PERLU BIMBINGAN)";
+    if (total >= 90) predikat = "A (SANGAT BAIK)";
+    else if (total >= 80) predikat = "B (BAIK)";
+    else if (total >= 70) predikat = "C (CUKUP)";
+
+    csv += `${i+1},"${r[2].toUpperCase()}","${r[4]}",${tp1},${tp2},${tp3},${tp4},${total},"${predikat}"\n`;
   });
 
-  const blob=new Blob([csv],{type:"text/csv"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="Rekap_Nilai_Asesmen.csv";
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "Rekap_Nilai_Asesmen.xlsx";
   a.click();
 }
+
 </script>
 
 </body>
