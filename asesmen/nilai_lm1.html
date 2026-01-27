@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Asesmen Siswa</title>
 
+<!-- 📦 LIBRARY EXCEL -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 <style>
 body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
 .wrapper { display:flex; height:100vh; }
@@ -170,9 +173,12 @@ function render(){
     .forEach((li,i)=>li.classList.toggle("active", i===index));
 }
 
-/* ===================== DOWNLOAD EXCEL (FIX ID) ===================== */
+/* ===================== DOWNLOAD EXCEL (XLSX + WARNA) ===================== */
 function downloadExcel(){
-  let csv = "No;Nama Siswa;Kelas;TP1;TP2;TP3;TP4;TOTAL;PREDIKAT\n";
+
+  const dataSheet = [
+    ["No","Nama Siswa","Kelas","TP1","TP2","TP3","TP4","TOTAL","PREDIKAT"]
+  ];
 
   filtered.forEach((r,i)=>{
     const tp1 = nilaiTP(0,4,r);
@@ -186,14 +192,34 @@ function downloadExcel(){
     else if(total >= 80) predikat = "B (BAIK)";
     else if(total >= 70) predikat = "C (CUKUP)";
 
-    csv += `${i+1};"${r[2].toUpperCase()}";"${r[4]}";${tp1};${tp2};${tp3};${tp4};${total};"${predikat}"\n`;
+    dataSheet.push([
+      i+1,
+      r[2].toUpperCase(),
+      r[4],
+      tp1,tp2,tp3,tp4,
+      total,
+      predikat
+    ]);
   });
 
-  const blob = new Blob([csv], { type:"text/csv;charset=utf-8;" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "Rekap_Nilai_Asesmen.csv";
-  a.click();
+  const ws = XLSX.utils.aoa_to_sheet(dataSheet);
+
+  /* CONDITIONAL FORMATTING TOTAL */
+  ws["!conditionalFormatting"] = [{
+    ref: `H2:H${dataSheet.length}`,
+    rules: [
+      { type:"cellIs", operator:"lessThan", formula:["78"],
+        style:{ fill:{ fgColor:{ rgb:"FFC7CE" }}} },
+      { type:"cellIs", operator:"equal", formula:["78"],
+        style:{ fill:{ fgColor:{ rgb:"FFEB9C" }}} },
+      { type:"cellIs", operator:"greaterThan", formula:["78"],
+        style:{ fill:{ fgColor:{ rgb:"C6EFCE" }}} }
+    ]
+  }];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Rekap Nilai");
+  XLSX.writeFile(wb, "Rekap_Nilai_Asesmen.xlsx");
 }
 </script>
 
