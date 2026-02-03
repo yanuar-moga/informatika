@@ -51,12 +51,10 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
 </div>
 
 <script>
-/* ===================== KONFIGURASI ===================== */
 const sheetId = "1wYkp-mZ96BXEin8mF8F3Z9brSjkPeFtB5k2IFm5Qxjc";
 const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
 const KKM = 78;
 
-/* ===================== KUNCI JAWABAN ===================== */
 const kunci = [
   "Kumpulan informasi yang dapat diolah",
   "Jumlah siswa di kelas",
@@ -72,90 +70,79 @@ const kunci = [
   "Pengambilan keputusan","Jujur dan teliti"
 ];
 
-let rows = [];
-let filtered = [];
-let index = 0;
+let rows=[], filtered=[], index=0;
 
-/* ===================== LOAD DATA ===================== */
-fetch(url)
-.then(r => r.text())
-.then(t => {
-  const json = JSON.parse(t.substring(47).slice(0,-2));
-  rows = json.table.rows.map(r => r.c.map(c => c ? c.v : ""));
+fetch(url).then(r=>r.text()).then(t=>{
+  const json=JSON.parse(t.substring(47).slice(0,-2));
+  rows=json.table.rows.map(r=>r.c.map(c=>c?String(c.v).trim():""));
   isiKelas();
 });
 
-/* ===================== KELAS ===================== */
 function isiKelas(){
-  const kelas = [...new Set(rows.map(r => r[4]))];
-  kelasSelect.innerHTML = '<option value="">Pilih Kelas</option>';
-  kelas.forEach(k => k && (kelasSelect.innerHTML += `<option>${k}</option>`));
+  const kelas=[...new Set(rows.map(r=>r[4]))];
+  kelasSelect.innerHTML='<option value="">Pilih Kelas</option>';
+  kelas.forEach(k=>k && (kelasSelect.innerHTML+=`<option>${k}</option>`));
 }
 
-/* ===================== HITUNG TP ===================== */
 function nilaiTP(start,end,row){
-  let benar = 0;
+  let benar=0;
   for(let i=start;i<=end;i++){
-    if(String(row[5+i]).trim() === String(kunci[i]).trim()) benar++;
+    if(row[5+i]===kunci[i]) benar++;
   }
-  return benar * 20;
+  return benar*20;
 }
 
-/* ===================== GABUNG DATA SISWA ===================== */
-function prosesSiswa(kelas){
-  const grup = {};
+/* ===================== LOGIKA FINAL TP ===================== */
+function hitungTPFinal(tpIndex, kiriman){
+  let nilaiLulus = null;
 
-  rows.filter(r=>r[4]===kelas).forEach(r=>{
-    const nama = r[2].toUpperCase();
-    if(!grup[nama]) grup[nama]=[];
-    grup[nama].push(r);
+  kiriman.forEach(r=>{
+    const n = nilaiTP(tpIndex*5,tpIndex*5+4,r);
+    if(n>=KKM && nilaiLulus===null) nilaiLulus=n;
   });
 
-  const hasil = [];
+  if(nilaiLulus!==null) return nilaiLulus;
 
-  Object.keys(grup).forEach(nama=>{
-    const kiriman = grup[nama].sort((a,b)=>(a[25]||1)-(b[25]||1));
-    const tpFinal = [0,0,0,0];
+  const terakhir = nilaiTP(tpIndex*5,tpIndex*5+4,kiriman[kiriman.length-1]);
+  return terakhir>=KKM ? KKM : terakhir;
+}
 
-    for(let tp=0;tp<4;tp++){
-      let nilaiAwal = nilaiTP(tp*5,tp*5+4,kiriman[0]);
-      if(nilaiAwal>=KKM){
-        tpFinal[tp]=nilaiAwal;
-      } else {
-        let terakhir = nilaiTP(tp*5,tp*5+4,kiriman[kiriman.length-1]);
-        tpFinal[tp]= terakhir>=KKM ? KKM : terakhir;
-      }
-    }
+/* ===================== PROSES SISWA ===================== */
+function prosesSiswa(kelas){
+  const map={};
 
-    const rata = Math.round((tpFinal[0]+tpFinal[1]+tpFinal[2]+tpFinal[3])/4);
-    const total = rata>=KKM ? KKM : rata;
+  rows.filter(r=>r[4]===kelas).forEach(r=>{
+    const nama=r[2].replace(/\s+/g,' ').trim().toUpperCase();
+    if(!map[nama]) map[nama]=[];
+    map[nama].push(r);
+  });
 
-    let predikat = "D (PERLU BIMBINGAN)";
-    if(total>=90) predikat="A (SANGAT BAIK)";
-    else if(total>=80) predikat="B (BAIK)";
-    else if(total>=78) predikat="C (CUKUP)";
+  const hasil=[];
 
-    hasil.push({
-      nama:nama,
-      kelas:kelas,
-      tp:tpFinal,
-      total:total,
-      predikat:predikat
-    });
+  Object.keys(map).forEach(nama=>{
+    const kiriman=map[nama].sort((a,b)=>(a[25]||1)-(b[25]||1));
+    const tp=[0,1,2,3].map(i=>hitungTPFinal(i,kiriman));
+    let total=Math.round(tp.reduce((a,b)=>a+b,0)/4);
+    if(total>=KKM) total=KKM;
+
+    let pred="D (PERLU BIMBINGAN)";
+    if(total>=90) pred="A (SANGAT BAIK)";
+    else if(total>=80) pred="B (BAIK)";
+    else if(total>=78) pred="C (CUKUP)";
+
+    hasil.push({nama,kelas,tp,total,pred});
   });
 
   return hasil.sort((a,b)=>a.nama.localeCompare(b.nama));
 }
 
-/* ===================== TAMPILKAN ===================== */
 function tampilkanData(){
-  filtered = prosesSiswa(kelasSelect.value);
-  index = 0;
+  filtered=prosesSiswa(kelasSelect.value);
+  index=0;
   renderSidebar();
   render();
 }
 
-/* ===================== SIDEBAR ===================== */
 function renderSidebar(){
   siswaList.innerHTML="";
   filtered.forEach((s,i)=>{
@@ -166,11 +153,9 @@ function renderSidebar(){
   });
 }
 
-/* ===================== RENDER ===================== */
 function render(){
   if(!filtered[index])return;
   const s=filtered[index];
-
   nama.innerText=s.nama;
   qaList.innerHTML=`
     <div class="nilai">TOTAL : ${s.total}</div>
@@ -178,18 +163,14 @@ function render(){
     <div class="qa">TP2 : ${s.tp[1]}</div>
     <div class="qa">TP3 : ${s.tp[2]}</div>
     <div class="qa">TP4 : ${s.tp[3]}</div>
-    <div class="qa"><b>${s.predikat}</b></div>
+    <div class="qa"><b>${s.pred}</b></div>
   `;
-
-  document.querySelectorAll(".sidebar li")
-    .forEach((li,i)=>li.classList.toggle("active",i===index));
 }
 
-/* ===================== EXCEL ===================== */
 function downloadExcel(){
   const data=[["No","Nama","Kelas","TP1","TP2","TP3","TP4","TOTAL","PREDIKAT"]];
   filtered.forEach((s,i)=>{
-    data.push([i+1,s.nama,s.kelas,s.tp[0],s.tp[1],s.tp[2],s.tp[3],s.total,s.predikat]);
+    data.push([i+1,s.nama,s.kelas,...s.tp,s.total,s.pred]);
   });
   const ws=XLSX.utils.aoa_to_sheet(data);
   const wb=XLSX.utils.book_new();
