@@ -21,7 +21,6 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
 
 .nama { font-size:26px; font-weight:bold; text-align:center; }
 .nilai { font-size:34px; text-align:center; margin:10px 0; }
-
 .qa { background:#fff; padding:12px; border-radius:12px; margin-bottom:12px; }
 </style>
 </head>
@@ -36,13 +35,11 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
 
   <div class="main">
     <div class="header">PENILAIAN ASESMEN</div>
-
     <div class="filter">
       <select id="kelasSelect"></select>
       <button onclick="tampilkanData()">Tampilkan</button>
       <button onclick="downloadExcel()">⬇ Download Excel</button>
     </div>
-
     <div class="content">
       <div id="nama" class="nama">Pilih Kelas</div>
       <div id="qaList"></div>
@@ -92,35 +89,28 @@ function nilaiTP(start,end,row){
   return benar*20;
 }
 
-/* ===================== LOGIKA FINAL TP ===================== */
-function hitungTPFinal(tpIndex, kiriman){
-  let nilaiLulus = null;
-
-  kiriman.forEach(r=>{
-    const n = nilaiTP(tpIndex*5,tpIndex*5+4,r);
-    if(n>=KKM && nilaiLulus===null) nilaiLulus=n;
-  });
-
-  if(nilaiLulus!==null) return nilaiLulus;
-
-  const terakhir = nilaiTP(tpIndex*5,tpIndex*5+4,kiriman[kiriman.length-1]);
-  return terakhir>=KKM ? KKM : terakhir;
+function hitungTPFinal(tpIndex,kiriman){
+  for(let r of kiriman){
+    const n=nilaiTP(tpIndex*5,tpIndex*5+4,r);
+    if(n>=KKM) return n;
+  }
+  const last=nilaiTP(tpIndex*5,tpIndex*5+4,kiriman[kiriman.length-1]);
+  return last>=KKM?KKM:last;
 }
 
-/* ===================== PROSES SISWA ===================== */
+/* ===================== FINAL PROSES (ANTI DUPLIKAT) ===================== */
 function prosesSiswa(kelas){
   const map={};
 
   rows.filter(r=>r[4]===kelas).forEach(r=>{
     const nama=r[2].replace(/\s+/g,' ').trim().toUpperCase();
-    if(!map[nama]) map[nama]=[];
-    map[nama].push(r);
+    const key=nama+"||"+kelas;
+    if(!map[key]) map[key]=[];
+    map[key].push(r);
   });
 
-  const hasil=[];
-
-  Object.keys(map).forEach(nama=>{
-    const kiriman=map[nama].sort((a,b)=>(a[25]||1)-(b[25]||1));
+  return Object.keys(map).map(key=>{
+    const kiriman=map[key].sort((a,b)=>(a[25]||1)-(b[25]||1));
     const tp=[0,1,2,3].map(i=>hitungTPFinal(i,kiriman));
     let total=Math.round(tp.reduce((a,b)=>a+b,0)/4);
     if(total>=KKM) total=KKM;
@@ -130,10 +120,8 @@ function prosesSiswa(kelas){
     else if(total>=80) pred="B (BAIK)";
     else if(total>=78) pred="C (CUKUP)";
 
-    hasil.push({nama,kelas,tp,total,pred});
-  });
-
-  return hasil.sort((a,b)=>a.nama.localeCompare(b.nama));
+    return { nama:key.split("||")[0], kelas, tp, total, pred };
+  }).sort((a,b)=>a.nama.localeCompare(b.nama));
 }
 
 function tampilkanData(){
