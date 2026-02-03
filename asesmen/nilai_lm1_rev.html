@@ -89,16 +89,21 @@ function nilaiTP(start,end,row){
   return benar*20;
 }
 
-function hitungTPFinal(tpIndex,kiriman){
-  for(let r of kiriman){
-    const n=nilaiTP(tpIndex*5,tpIndex*5+4,r);
-    if(n>=KKM) return n;
+/* ===================== LOGIKA TP FINAL (BENAR) ===================== */
+function hitungTPFinal(tpIndex, kiriman){
+  const nilaiAwal = nilaiTP(tpIndex*5,tpIndex*5+4,kiriman[0]);
+  if(nilaiAwal >= KKM) return nilaiAwal;
+
+  for(let i=1;i<kiriman.length;i++){
+    const n = nilaiTP(tpIndex*5,tpIndex*5+4,kiriman[i]);
+    if(n >= KKM) return KKM;
   }
-  const last=nilaiTP(tpIndex*5,tpIndex*5+4,kiriman[kiriman.length-1]);
-  return last>=KKM?KKM:last;
+
+  const terakhir = nilaiTP(tpIndex*5,tpIndex*5+4,kiriman[kiriman.length-1]);
+  return terakhir;
 }
 
-/* ===================== FINAL PROSES (ANTI DUPLIKAT) ===================== */
+/* ===================== PROSES SISWA (ANTI DUPLIKAT) ===================== */
 function prosesSiswa(kelas){
   const map={};
 
@@ -112,6 +117,7 @@ function prosesSiswa(kelas){
   return Object.keys(map).map(key=>{
     const kiriman=map[key].sort((a,b)=>(a[25]||1)-(b[25]||1));
     const tp=[0,1,2,3].map(i=>hitungTPFinal(i,kiriman));
+
     let total=Math.round(tp.reduce((a,b)=>a+b,0)/4);
     if(total>=KKM) total=KKM;
 
