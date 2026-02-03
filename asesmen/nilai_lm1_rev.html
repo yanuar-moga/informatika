@@ -2,20 +2,20 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Nilai Akhir Final</title>
+<title>Nilai Akhir Final Remidi</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 body{font-family:Arial;background:#f4f4f4;padding:20px}
 table{border-collapse:collapse;width:100%;background:#fff}
-th,td{border:1px solid #ccc;padding:8px;text-align:center}
-th{background:#1976d2;color:#fff}
+th,td{border:1px solid #ccc;padding:6px;text-align:center}
+th{background:#1565c0;color:#fff}
 </style>
 </head>
-
 <body>
 
-<h2>Rekap Nilai Akhir</h2>
-<button onclick="exportExcel()">Download Excel</button>
+<h2>Rekap Nilai Akhir (Final)</h2>
+<button onclick="download()">Download Excel</button>
+
 <table id="tabel">
 <thead>
 <tr>
@@ -48,71 +48,66 @@ fetch(url).then(r=>r.text()).then(t=>{
 
   const hasil = [];
 
-  Object.keys(map).forEach(key=>{
-    const kiriman = map[key]; // urutan baris = urutan kirim
+  Object.values(map).forEach(kiriman=>{
     const tpFinal = [];
 
     for(let tp=0;tp<4;tp++){
-      const idx = 5 + tp*5;
-      const nilaiAwal = kiriman[0].slice(idx,idx+5)
-        .filter((v,i)=>v===kiriman[0][idx+i]).length*20;
-
-      if(nilaiAwal >= KKM){
-        tpFinal.push(nilaiAwal);
-      } else {
-        let lulus=false;
-        for(let k=1;k<kiriman.length;k++){
-          const nilaiUlang = kiriman[k].slice(idx,idx+5)
-            .filter((v,i)=>v===kiriman[k][idx+i]).length*20;
-          if(nilaiUlang >= KKM){
-            tpFinal.push(KKM);
-            lulus=true;
-            break;
+      const nilai = kiriman.map(r=>{
+        let benar=0;
+        for(let i=0;i<5;i++){
+          if(String(r[5+tp*5+i]).trim() === String(r[5+tp*5+i]).trim()){
+            benar++;
           }
         }
-        if(!lulus){
-          const terakhir = kiriman[kiriman.length-1]
-            .slice(idx,idx+5)
-            .filter((v,i)=>v===kiriman[kiriman.length-1][idx+i]).length*20;
-          tpFinal.push(terakhir);
-        }
+        return benar*20;
+      });
+
+      if(nilai[0] >= KKM){
+        tpFinal.push(nilai[0]);
+      } else {
+        let naik = nilai.slice(1).find(n=>n>=KKM);
+        tpFinal.push(naik ? KKM : nilai[nilai.length-1]);
       }
     }
 
     let total = Math.round(tpFinal.reduce((a,b)=>a+b,0)/4);
-    if(total>=KKM) total=KKM;
+    if(total >= KKM) total = KKM;
 
     let pred="D (PERLU BIMBINGAN)";
     if(total>=90) pred="A (SANGAT BAIK)";
     else if(total>=80) pred="B (BAIK)";
     else if(total>=78) pred="C (CUKUP)";
 
-    const [nama,kelas] = key.split("||");
-    hasil.push({nama,kelas,tpFinal,total,pred});
+    hasil.push({
+      nama:kiriman[0][2].toUpperCase(),
+      kelas:kiriman[0][4],
+      tp:tpFinal,
+      total,pred
+    });
   });
 
-  const tbody = document.querySelector("tbody");
+  const tbody=document.querySelector("tbody");
   hasil.forEach((s,i)=>{
     tbody.innerHTML+=`
       <tr>
         <td>${i+1}</td>
         <td>${s.nama}</td>
         <td>${s.kelas}</td>
-        <td>${s.tpFinal[0]}</td>
-        <td>${s.tpFinal[1]}</td>
-        <td>${s.tpFinal[2]}</td>
-        <td>${s.tpFinal[3]}</td>
+        <td>${s.tp[0]}</td>
+        <td>${s.tp[1]}</td>
+        <td>${s.tp[2]}</td>
+        <td>${s.tp[3]}</td>
         <td>${s.total}</td>
         <td>${s.pred}</td>
       </tr>`;
   });
 });
 
-function exportExcel(){
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.table_to_sheet(document.getElementById("tabel"));
-  XLSX.utils.book_append_sheet(wb,ws,"Nilai Akhir");
-  XLSX.writeFile(wb,"Nilai_Akhir_FINAL.xlsx");
+function download(){
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.table_to_sheet(document.getElementById("tabel"));
+  XLSX.utils.book_append_sheet(wb,ws,"Nilai Final");
+  XLSX.writeFile(wb,"Nilai_Akhir_Final.xlsx");
 }
 </script>
 
