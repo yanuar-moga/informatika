@@ -28,8 +28,8 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
 }
 .sidebar li.belum {
   border:2px solid #dc2626;
-  color:#dc2626;
   background:#fff5f5;
+  color:#dc2626;
 }
 
 .main { flex:1; display:flex; flex-direction:column; }
@@ -93,71 +93,78 @@ const kunci = [
   "Pengambilan keputusan","Jujur dan teliti"
 ];
 
-let rows = [], filtered = [], index = 0;
+let rows = [], allSiswa = [], filtered = [], index = 0;
 
-/* ===================== LOAD DATA ===================== */
+/* ===================== LOAD ===================== */
 fetch(url)
 .then(r=>r.text())
 .then(t=>{
   const json = JSON.parse(t.substring(47).slice(0,-2));
   rows = json.table.rows.map(r=>r.c.map(c=>c?c.v:""));
+  allSiswa = rows.map(r=>({ nama:r[2], kelas:r[4], row:r }));
   isiKelas();
 });
 
-/* ===================== DROPDOWN KELAS + JUMLAH SISWA ===================== */
+/* ===================== DROPDOWN ===================== */
 function isiKelas(){
 
   const kelasMap = {};
 
-  rows.forEach(r=>{
-    if(!r[4] || !r[2]) return;
-    if(!kelasMap[r[4]]) kelasMap[r[4]] = new Set();
-    kelasMap[r[4]].add(r[2].toUpperCase());
+  allSiswa.forEach(s=>{
+    if(!s.kelas || !s.nama) return;
+    if(!kelasMap[s.kelas]) kelasMap[s.kelas] = new Set();
+    kelasMap[s.kelas].add(s.nama.toUpperCase());
   });
 
-  const kelasList = Object.keys(kelasMap)
-    .sort((a,b)=>a.localeCompare(b));
+  const kelasList = Object.keys(kelasMap).sort((a,b)=>a.localeCompare(b));
 
   kelasSelect.innerHTML = '<option value="">Pilih Kelas</option>';
-
   kelasList.forEach(k=>{
-    kelasSelect.innerHTML +=
-      `<option value="${k}">${k} (${kelasMap[k].size} siswa)</option>`;
+    kelasSelect.innerHTML += `<option value="${k}">${k} (${kelasMap[k].size} siswa)</option>`;
   });
 }
 
 /* ===================== TAMPIL DATA ===================== */
 function tampilkanData(){
 
-  filtered = rows
-    .filter(r=>r[4]===kelasSelect.value)
-    .sort((a,b)=>a[2].localeCompare(b[2]));
+  const kelas = kelasSelect.value;
+
+  const siswaKelas = allSiswa
+    .filter(s=>s.kelas===kelas)
+    .map(s=>s.nama.toUpperCase());
+
+  const pengirim = new Set(
+    rows.filter(r=>r[4]===kelas && r.slice(5,25).some(v=>String(v).trim()!==""))
+        .map(r=>r[2].toUpperCase())
+  );
+
+  filtered = siswaKelas.map(nama=>{
+    const data = rows.find(r=>r[2].toUpperCase()===nama && r[4]===kelas);
+    return data || [,"",nama,"",kelas];
+  }).sort((a,b)=>a[2].localeCompare(b[2]));
 
   index = 0;
-  renderSidebar();
-  render();
+  renderSidebar(pengirim);
+  render(pengirim);
 }
 
-/* ===================== SIDEBAR SISWA ===================== */
-function renderSidebar(){
+/* ===================== SIDEBAR ===================== */
+function renderSidebar(pengirim){
 
-  siswaList.innerHTML = "";
+  siswaList.innerHTML="";
 
   filtered.forEach((r,i)=>{
-    const li = document.createElement("li");
-    li.textContent = r[2];
+    const li=document.createElement("li");
+    li.textContent=r[2];
 
-    const belumKirim =
-      r.slice(5,25).every(v=>String(v).trim()==="");
+    if(!pengirim.has(r[2].toUpperCase())) li.classList.add("belum");
 
-    if(belumKirim) li.classList.add("belum");
-
-    li.onclick=()=>{ index=i; render(); };
+    li.onclick=()=>{ index=i; render(pengirim); };
     siswaList.appendChild(li);
   });
 }
 
-/* ===================== HITUNG NILAI ===================== */
+/* ===================== NILAI ===================== */
 function nilaiTP(start,end,row){
   let benar=0;
   for(let i=start;i<=end;i++){
@@ -167,36 +174,31 @@ function nilaiTP(start,end,row){
 }
 
 /* ===================== RENDER ===================== */
-function render(){
+function render(pengirim){
 
-  if(!filtered[index]) return;
-  const r = filtered[index];
+  const r=filtered[index];
+  if(!r) return;
 
-  nama.innerText = r[2].toUpperCase();
+  nama.innerText=r[2].toUpperCase();
 
-  const belumKirim =
-    r.slice(5,25).every(v=>String(v).trim()==="");
-
-  if(belumKirim){
-    qaList.innerHTML = `
+  if(!pengirim.has(r[2].toUpperCase())){
+    qaList.innerHTML=`
       <div class="nilai orange">BELUM MENGIRIM JAWABAN</div>
       <div class="qa">STATUS : <b>REMIDI</b></div>
     `;
     return;
   }
 
-  const tp1 = nilaiTP(0,4,r);
-  const tp2 = nilaiTP(5,9,r);
-  const tp3 = nilaiTP(10,14,r);
-  const tp4 = nilaiTP(15,19,r);
-  const total = Math.round((tp1+tp2+tp3+tp4)/4);
-
-  const status = total>=78?"TUNTAS":"REMIDI";
-  const warna = total>=78?"hijau":"orange";
+  const tp1=nilaiTP(0,4,r);
+  const tp2=nilaiTP(5,9,r);
+  const tp3=nilaiTP(10,14,r);
+  const tp4=nilaiTP(15,19,r);
+  const total=Math.round((tp1+tp2+tp3+tp4)/4);
+  const status=total>=78?"TUNTAS":"REMIDI";
 
   let detail="";
   for(let i=0;i<20;i++){
-    const benar = String(r[5+i]).trim()===String(kunci[i]).trim();
+    const benar=String(r[5+i]).trim()===String(kunci[i]).trim();
     detail+=`
       <div class="soal">
         <span>Soal ${i+1}</span>
@@ -207,7 +209,7 @@ function render(){
   }
 
   qaList.innerHTML=`
-    <div class="nilai ${warna}">TOTAL NILAI : ${total}</div>
+    <div class="nilai ${total>=78?'hijau':'orange'}">TOTAL NILAI : ${total}</div>
     <div class="qa">STATUS : <b>${status}</b></div>
     <div class="qa">TP1 : ${tp1}</div>
     <div class="qa">TP2 : ${tp2}</div>
@@ -215,9 +217,6 @@ function render(){
     <div class="qa">TP4 : ${tp4}</div>
     <div class="qa"><b>Detail Jawaban</b>${detail}</div>
   `;
-
-  document.querySelectorAll(".sidebar li")
-    .forEach((li,i)=>li.classList.toggle("active",i===index));
 }
 </script>
 
