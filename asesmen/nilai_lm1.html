@@ -95,106 +95,110 @@ let index = 0;
 
 /* ===================== LOAD DATA ===================== */
 fetch(url)
-.then(r=>r.text())
-.then(t=>{
+.then(r => r.text())
+.then(t => {
   const json = JSON.parse(t.substring(47).slice(0,-2));
-  rows = json.table.rows.map(r=>r.c.map(c=>c?c.v:""));
+  rows = json.table.rows.map(r => r.c.map(c => c ? c.v : ""));
   prosesFinal();
   isiKelas();
 });
 
 /* ===================== HITUNG TP ===================== */
 function hitungTP(row,tp){
-  let benar=0;
+  let benar = 0;
   for(let i=0;i<5;i++){
     const idx = tp*5+i;
     if(String(row[5+idx]).trim() === String(kunci[idx]).trim()) benar++;
   }
-  return benar*20;
+  return benar * 20;
 }
 
-/* ===================== PROSES FINAL ===================== */
+/* ===================== PROSES FINAL REMIDI ===================== */
 function prosesFinal(){
   const map = {};
 
   rows.forEach(r=>{
     const nama = String(r[2]).trim().toUpperCase();
     const kelas = r[4];
-    if(!nama||!kelas) return;
+    if(!nama || !kelas) return;
+
     const key = nama+"||"+kelas;
-    if(!map[key]) map[key]=[];
+    if(!map[key]) map[key] = [];
     map[key].push(r);
   });
 
   Object.values(map).forEach(kiriman=>{
-    const tpFinal=[];
+    const tpFinal = [];
+
     for(let tp=0;tp<4;tp++){
-      const nilai = kiriman.map(r=>hitungTP(r,tp));
-      if(nilai[0]>=KKM) tpFinal.push(nilai[0]);
+      const nilai = kiriman.map(r => hitungTP(r,tp));
+      if(nilai[0] >= KKM) tpFinal.push(nilai[0]);
       else{
-        const lulus = nilai.slice(1).find(n=>n>=KKM);
-        tpFinal.push(lulus?KKM:nilai[nilai.length-1]);
+        const lulus = nilai.slice(1).find(n => n >= KKM);
+        tpFinal.push(lulus ? KKM : nilai[nilai.length-1]);
       }
     }
 
-    let total=Math.round(tpFinal.reduce((a,b)=>a+b,0)/4);
-    if(total>KKM) total=KKM;
+    let total = Math.round(tpFinal.reduce((a,b)=>a+b,0)/4);
+    if(total > KKM) total = KKM;
 
     dataFinal.push({
-      nama:kiriman[0][2].toUpperCase(),
-      kelas:kiriman[0][4],
-      tp:tpFinal,
+      nama: kiriman[0][2].toUpperCase(),
+      kelas: kiriman[0][4],
+      tp: tpFinal,
       total,
-      status: total>=KKM?"LULUS":"REMIDI",
-      detail: kiriman[kiriman.length-1]
+      status: total >= KKM ? "LULUS" : "REMIDI",
+      detailRow: kiriman[kiriman.length-1]
     });
   });
 }
 
 /* ===================== FILTER ===================== */
 function isiKelas(){
-  const kelas=[...new Set(dataFinal.map(d=>d.kelas))];
-  kelasSelect.innerHTML='<option value="">Pilih Kelas</option>';
-  kelas.forEach(k=>kelasSelect.innerHTML+=`<option>${k}</option>`);
+  const kelas = [...new Set(dataFinal.map(d=>d.kelas))];
+  kelasSelect.innerHTML = '<option value="">Pilih Kelas</option>';
+  kelas.forEach(k => kelasSelect.innerHTML += `<option>${k}</option>`);
 }
 
 function tampilkanData(){
-  filtered=dataFinal.filter(d=>d.kelas===kelasSelect.value);
-  index=0;
+  filtered = dataFinal.filter(d => d.kelas === kelasSelect.value);
+  index = 0;
   renderSidebar();
   render();
 }
 
 function renderSidebar(){
-  siswaList.innerHTML="";
+  siswaList.innerHTML = "";
   filtered.forEach((s,i)=>{
-    const li=document.createElement("li");
-    li.textContent=s.nama;
-    li.onclick=()=>{index=i;render();};
+    const li = document.createElement("li");
+    li.textContent = s.nama;
+    li.onclick = ()=>{ index=i; render(); };
     siswaList.appendChild(li);
   });
 }
 
-/* ===================== RENDER ===================== */
+/* ===================== RENDER DETAIL ===================== */
 function render(){
   if(!filtered[index]) return;
-  const s=filtered[index];
-  nama.innerText=s.nama;
-  infoKelas.innerText=`Kelas ${s.kelas} | Total Siswa Mengirim: ${filtered.length}`;
 
-  let detail="";
+  const s = filtered[index];
+  nama.innerText = s.nama;
+  infoKelas.innerText = `Kelas ${s.kelas} | Total Siswa Mengirim: ${filtered.length}`;
+
+  let detailHTML = "";
   for(let i=0;i<20;i++){
-    const benar=String(s.detail[5+i]).trim()===String(kunci[i]).trim();
-    detail+=`
+    const jawaban = String(s.detailRow[5+i]).trim();
+    const benar = jawaban === String(kunci[i]).trim();
+    detailHTML += `
       <div class="soal">
         <span>Soal ${i+1}</span>
-        <span class="${benar?'benar':'salah'}">
-          ${benar?'✅ Benar (+20)':'❌ Salah (0)'}
+        <span class="${benar ? 'benar' : 'salah'}">
+          ${benar ? '✅ Benar (+20)' : '❌ Salah (0)'}
         </span>
       </div>`;
   }
 
-  qaList.innerHTML=`
+  qaList.innerHTML = `
     <div class="nilai">${s.total}</div>
     <div class="qa">KKM : ${KKM}</div>
     <div class="qa">STATUS : <b>${s.status}</b></div>
@@ -202,8 +206,11 @@ function render(){
     <div class="qa">TP2 : ${s.tp[1]}</div>
     <div class="qa">TP3 : ${s.tp[2]}</div>
     <div class="qa">TP4 : ${s.tp[3]}</div>
-    <div class="qa"><b>Detail Jawaban</b>${detail}</div>
+    <div class="qa"><b>Detail Jawaban</b>${detailHTML}</div>
   `;
+
+  document.querySelectorAll(".sidebar li")
+    .forEach((li,i)=>li.classList.toggle("active", i===index));
 }
 
 /* ===================== EXCEL ===================== */
@@ -212,6 +219,7 @@ function downloadExcel(){
   filtered.forEach((s,i)=>{
     data.push([i+1,s.nama,s.kelas,...s.tp,s.total,KKM,s.status]);
   });
+
   const ws=XLSX.utils.aoa_to_sheet(data);
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,"Final Remidi");
