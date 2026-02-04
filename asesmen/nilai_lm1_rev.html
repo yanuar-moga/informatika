@@ -30,10 +30,6 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
 .info { text-align:center; font-size:14px; margin-bottom:10px; }
 .nilai { font-size:34px; text-align:center; margin:10px 0; }
 
-.hijau { color:#16a34a }
-.kuning { color:#facc15 }
-.orange { color:#f97316 }
-
 .qa { background:#fff; padding:12px; border-radius:12px; margin-bottom:12px; }
 .soal { display:flex; justify-content:space-between; padding:4px 0; }
 .benar { color:#16a34a; font-weight:bold; }
@@ -116,7 +112,7 @@ function hitungTP(row,tp){
   return benar * 20;
 }
 
-/* ===================== PROSES FINAL ===================== */
+/* ===================== PROSES NILAI FINAL ===================== */
 function prosesFinal(){
   const map = {};
 
@@ -152,7 +148,7 @@ function prosesFinal(){
       kelas: kiriman[0][4],
       tp: tpFinal,
       total,
-      status: total >= KKM ? "LULUS" : "REMIDI",
+      status: total >= KKM ? "TUNTAS" : "REMIDI",
       detailRow: kiriman[kiriman.length-1]
     });
   });
@@ -160,9 +156,9 @@ function prosesFinal(){
 
 /* ===================== FILTER ===================== */
 function isiKelas(){
-  const kelas = [...new Set(rows.map(r=>r[4]))];
+  const kelas = [...new Set(rows.map(r=>r[4]).filter(k=>k))];
   kelasSelect.innerHTML = '<option value="">Pilih Kelas</option>';
-  kelas.forEach(k => k && (kelasSelect.innerHTML += `<option>${k}</option>`));
+  kelas.forEach(k => kelasSelect.innerHTML += `<option>${k}</option>`);
 }
 
 function tampilkanData(){
@@ -183,17 +179,23 @@ function renderSidebar(){
   });
 }
 
-/* ===================== BELUM KIRIM ===================== */
+/* ===================== BELUM KIRIM (LOGIKA BENAR) ===================== */
 function tampilkanBelumKirim(){
-  const semua = rows
-    .filter(r => r[4] === kelasSelect.value)
-    .map(r => String(r[2]).toUpperCase());
 
-  const sudah = dataFinal
-    .filter(d => d.kelas === kelasSelect.value)
-    .map(d => d.nama);
+  const semuaSiswa = [...new Set(
+    rows
+      .filter(r => r[4] === kelasSelect.value)
+      .map(r => String(r[2]).trim().toUpperCase())
+      .filter(n => n)
+  )];
 
-  const belum = [...new Set(semua.filter(n => !sudah.includes(n)))];
+  const sudahKirim = [...new Set(
+    dataFinal
+      .filter(d => d.kelas === kelasSelect.value)
+      .map(d => d.nama)
+  )];
+
+  const belum = semuaSiswa.filter(n => !sudahKirim.includes(n));
 
   let html = `<div class="qa belum"><b>Belum Mengirim Jawaban (${belum.length})</b><br>`;
   html += belum.length ? belum.join("<br>") : "Semua siswa sudah mengirim";
@@ -202,7 +204,7 @@ function tampilkanBelumKirim(){
   belumKirim.innerHTML = html;
 }
 
-/* ===================== RENDER DETAIL ===================== */
+/* ===================== RENDER ===================== */
 function render(){
   if(!filtered[index]) return;
 
