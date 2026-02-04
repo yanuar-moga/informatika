@@ -27,6 +27,7 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
 .content { flex:1; padding:20px; overflow:auto; }
 
 .nama { font-size:26px; font-weight:bold; text-align:center; }
+.info { text-align:center; margin-bottom:12px; font-size:14px; color:#444; }
 .nilai { font-size:34px; text-align:center; margin:10px 0; }
 
 .hijau { color:#16a34a }
@@ -56,6 +57,7 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
 
     <div class="content">
       <div id="nama" class="nama">Pilih Kelas</div>
+      <div id="infoKelas" class="info"></div>
       <div id="qaList"></div>
     </div>
   </div>
@@ -89,6 +91,8 @@ function prosesFinal(){
   rows.forEach(r=>{
     const nama = String(r[2]).trim().toUpperCase();
     const kelas = r[4];
+    if(!nama || !kelas) return;
+
     const key = nama+"||"+kelas;
     if(!map[key]) map[key]=[];
     map[key].push(r);
@@ -99,11 +103,11 @@ function prosesFinal(){
 
     for(let tp=0;tp<4;tp++){
       const nilai = kiriman.map(r=>{
-        let benar=0;
+        let benar = 0;
         for(let i=0;i<5;i++){
           if(String(r[5+tp*5+i]).trim() !== "") benar++;
         }
-        return benar*20;
+        return benar * 20;
       });
 
       if(nilai[0] >= KKM){
@@ -121,7 +125,8 @@ function prosesFinal(){
       nama: kiriman[0][2].toUpperCase(),
       kelas: kiriman[0][4],
       tp: tpFinal,
-      total
+      total,
+      status: total >= KKM ? "LULUS" : "REMIDI"
     });
   });
 }
@@ -146,6 +151,7 @@ function tampilkanData(){
   render();
 }
 
+/* ===================== SIDEBAR ===================== */
 function renderSidebar(){
   siswaList.innerHTML = "";
   filtered.forEach((s,i)=>{
@@ -160,19 +166,22 @@ function renderSidebar(){
 function render(){
   if(!filtered[index]) return;
   const s = filtered[index];
+
   nama.innerText = s.nama;
+  infoKelas.innerText = `Kelas ${s.kelas} | Total Siswa Mengirim: ${filtered.length}`;
 
   let warna = "orange";
-  if(s.total > 78) warna="hijau";
-  else if(s.total === 78) warna="kuning";
+  if(s.total > KKM) warna="hijau";
+  else if(s.total === KKM) warna="kuning";
 
   qaList.innerHTML = `
     <div class="nilai ${warna}">TOTAL NILAI : ${s.total}</div>
+    <div class="qa">KKM : ${KKM}</div>
+    <div class="qa">STATUS : <b>${s.status}</b></div>
     <div class="qa">TP1 : ${s.tp[0]}</div>
     <div class="qa">TP2 : ${s.tp[1]}</div>
     <div class="qa">TP3 : ${s.tp[2]}</div>
     <div class="qa">TP4 : ${s.tp[3]}</div>
-    <div class="qa"><b>Status :</b> FINAL REMIDI</div>
   `;
 
   document.querySelectorAll(".sidebar li")
@@ -182,11 +191,11 @@ function render(){
 /* ===================== DOWNLOAD EXCEL ===================== */
 function downloadExcel(){
   const dataSheet = [
-    ["No","Nama","Kelas","TP1","TP2","TP3","TP4","TOTAL","PREDIKAT"]
+    ["No","Nama","Kelas","TP1","TP2","TP3","TP4","TOTAL","KKM","STATUS","PREDIKAT"]
   ];
 
   filtered.forEach((s,i)=>{
-    let pred = "D (PERLU BIMBINGAN)";
+    let pred="D (PERLU BIMBINGAN)";
     if(s.total>=90) pred="A (SANGAT BAIK)";
     else if(s.total>=80) pred="B (BAIK)";
     else if(s.total>=78) pred="C (CUKUP)";
@@ -197,6 +206,8 @@ function downloadExcel(){
       s.kelas,
       s.tp[0],s.tp[1],s.tp[2],s.tp[3],
       s.total,
+      KKM,
+      s.status,
       pred
     ]);
   });
@@ -206,8 +217,8 @@ function downloadExcel(){
   for(let i=1;i<dataSheet.length;i++){
     const cell = ws[`H${i+1}`];
     if(!cell) continue;
-    if(cell.v < 78) cell.s={fill:{fgColor:{rgb:"FFC7CE"}}};
-    else if(cell.v === 78) cell.s={fill:{fgColor:{rgb:"FFEB9C"}}};
+    if(cell.v < KKM) cell.s={fill:{fgColor:{rgb:"FFC7CE"}}};
+    else if(cell.v === KKM) cell.s={fill:{fgColor:{rgb:"FFEB9C"}}};
     else cell.s={fill:{fgColor:{rgb:"C6EFCE"}}};
   }
 
