@@ -38,6 +38,8 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
 .soal { display:flex; justify-content:space-between; padding:4px 0; }
 .benar { color:#16a34a; font-weight:bold; }
 .salah { color:#dc2626; font-weight:bold; }
+
+.belum { background:#fee2e2; border:1px solid #dc2626; }
 </style>
 </head>
 
@@ -62,6 +64,7 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
       <div id="nama" class="nama">Pilih Kelas</div>
       <div id="infoKelas" class="info"></div>
       <div id="qaList"></div>
+      <div id="belumKirim"></div>
     </div>
   </div>
 </div>
@@ -113,14 +116,16 @@ function hitungTP(row,tp){
   return benar * 20;
 }
 
-/* ===================== PROSES FINAL REMIDI ===================== */
+/* ===================== PROSES FINAL ===================== */
 function prosesFinal(){
   const map = {};
 
   rows.forEach(r=>{
     const nama = String(r[2]).trim().toUpperCase();
     const kelas = r[4];
-    if(!nama || !kelas) return;
+    const adaJawaban = r.slice(5,25).some(j => String(j).trim() !== "");
+
+    if(!nama || !kelas || !adaJawaban) return;
 
     const key = nama+"||"+kelas;
     if(!map[key]) map[key] = [];
@@ -155,9 +160,9 @@ function prosesFinal(){
 
 /* ===================== FILTER ===================== */
 function isiKelas(){
-  const kelas = [...new Set(dataFinal.map(d=>d.kelas))];
+  const kelas = [...new Set(rows.map(r=>r[4]))];
   kelasSelect.innerHTML = '<option value="">Pilih Kelas</option>';
-  kelas.forEach(k => kelasSelect.innerHTML += `<option>${k}</option>`);
+  kelas.forEach(k => k && (kelasSelect.innerHTML += `<option>${k}</option>`));
 }
 
 function tampilkanData(){
@@ -165,6 +170,7 @@ function tampilkanData(){
   index = 0;
   renderSidebar();
   render();
+  tampilkanBelumKirim();
 }
 
 function renderSidebar(){
@@ -177,13 +183,32 @@ function renderSidebar(){
   });
 }
 
+/* ===================== BELUM KIRIM ===================== */
+function tampilkanBelumKirim(){
+  const semua = rows
+    .filter(r => r[4] === kelasSelect.value)
+    .map(r => String(r[2]).toUpperCase());
+
+  const sudah = dataFinal
+    .filter(d => d.kelas === kelasSelect.value)
+    .map(d => d.nama);
+
+  const belum = [...new Set(semua.filter(n => !sudah.includes(n)))];
+
+  let html = `<div class="qa belum"><b>Belum Mengirim Jawaban (${belum.length})</b><br>`;
+  html += belum.length ? belum.join("<br>") : "Semua siswa sudah mengirim";
+  html += `</div>`;
+
+  belumKirim.innerHTML = html;
+}
+
 /* ===================== RENDER DETAIL ===================== */
 function render(){
   if(!filtered[index]) return;
 
   const s = filtered[index];
   nama.innerText = s.nama;
-  infoKelas.innerText = `Kelas ${s.kelas} | Total Siswa Mengirim: ${filtered.length}`;
+  infoKelas.innerText = `Kelas ${s.kelas} | Sudah Mengirim: ${filtered.length}`;
 
   let detailHTML = "";
   for(let i=0;i<20;i++){
