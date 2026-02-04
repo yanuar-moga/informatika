@@ -27,7 +27,7 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
 .content { flex:1; padding:20px; overflow:auto; }
 
 .nama { font-size:26px; font-weight:bold; text-align:center; }
-.info { text-align:center; margin-bottom:12px; font-size:14px; color:#444; }
+.info { text-align:center; font-size:14px; margin-bottom:10px; }
 .nilai { font-size:34px; text-align:center; margin:10px 0; }
 
 .hijau { color:#16a34a }
@@ -35,6 +35,9 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
 .orange { color:#f97316 }
 
 .qa { background:#fff; padding:12px; border-radius:12px; margin-bottom:12px; }
+.soal { display:flex; justify-content:space-between; padding:4px 0; }
+.benar { color:#16a34a; font-weight:bold; }
+.salah { color:#dc2626; font-weight:bold; }
 </style>
 </head>
 
@@ -69,6 +72,22 @@ const KKM = 78;
 const sheetId = "1wYkp-mZ96BXEin8mF8F3Z9brSjkPeFtB5k2IFm5Qxjc";
 const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
 
+/* KUNCI JAWABAN */
+const kunci = [
+  "Kumpulan informasi yang dapat diolah",
+  "Jumlah siswa di kelas",
+  "Data primer",
+  "Membantu keputusan tepat",
+  "Jumlah meja dan kursi",
+  "SUM","AVERAGE","MAX","MIN","=SUM(A1:A5)",
+  "Keputusan bersyarat",
+  "=IF(B2>=75,\"LULUS\",\"REMIDI\")",
+  "Logika","REMIDI","Keputusan otomatis",
+  "Memudahkan mengolah data",
+  "Menganalisis","Tersusun rapi",
+  "Pengambilan keputusan","Jujur dan teliti"
+];
+
 let rows = [];
 let dataFinal = [];
 let filtered = [];
@@ -84,6 +103,16 @@ fetch(url)
   isiKelas();
 });
 
+/* ===================== HITUNG TP ===================== */
+function hitungTP(row,tp){
+  let benar = 0;
+  for(let i=0;i<5;i++){
+    const idx = tp*5+i;
+    if(String(row[5+idx]).trim() === String(kunci[idx]).trim()) benar++;
+  }
+  return benar * 20;
+}
+
 /* ===================== PROSES FINAL REMIDI ===================== */
 function prosesFinal(){
   const map = {};
@@ -94,7 +123,7 @@ function prosesFinal(){
     if(!nama || !kelas) return;
 
     const key = nama+"||"+kelas;
-    if(!map[key]) map[key]=[];
+    if(!map[key]) map[key] = [];
     map[key].push(r);
   });
 
@@ -102,18 +131,10 @@ function prosesFinal(){
     const tpFinal = [];
 
     for(let tp=0;tp<4;tp++){
-      const nilai = kiriman.map(r=>{
-        let benar = 0;
-        for(let i=0;i<5;i++){
-          if(String(r[5+tp*5+i]).trim() !== "") benar++;
-        }
-        return benar * 20;
-      });
-
-      if(nilai[0] >= KKM){
-        tpFinal.push(nilai[0]);
-      } else {
-        const lulus = nilai.slice(1).find(n=>n>=KKM);
+      const nilai = kiriman.map(r => hitungTP(r,tp));
+      if(nilai[0] >= KKM) tpFinal.push(nilai[0]);
+      else{
+        const lulus = nilai.slice(1).find(n => n >= KKM);
         tpFinal.push(lulus ? KKM : nilai[nilai.length-1]);
       }
     }
@@ -126,32 +147,26 @@ function prosesFinal(){
       kelas: kiriman[0][4],
       tp: tpFinal,
       total,
-      status: total >= KKM ? "LULUS" : "REMIDI"
+      status: total >= KKM ? "LULUS" : "REMIDI",
+      detailRow: kiriman[kiriman.length-1]
     });
   });
 }
 
-/* ===================== FILTER KELAS ===================== */
+/* ===================== FILTER ===================== */
 function isiKelas(){
   const kelas = [...new Set(dataFinal.map(d=>d.kelas))];
   kelasSelect.innerHTML = '<option value="">Pilih Kelas</option>';
-  kelas.forEach(k=>{
-    if(k) kelasSelect.innerHTML += `<option>${k}</option>`;
-  });
+  kelas.forEach(k => kelasSelect.innerHTML += `<option>${k}</option>`);
 }
 
-/* ===================== TAMPILKAN DATA ===================== */
 function tampilkanData(){
-  filtered = dataFinal
-    .filter(d=>d.kelas === kelasSelect.value)
-    .sort((a,b)=>a.nama.localeCompare(b.nama));
-
+  filtered = dataFinal.filter(d => d.kelas === kelasSelect.value);
   index = 0;
   renderSidebar();
   render();
 }
 
-/* ===================== SIDEBAR ===================== */
 function renderSidebar(){
   siswaList.innerHTML = "";
   filtered.forEach((s,i)=>{
@@ -165,70 +180,50 @@ function renderSidebar(){
 /* ===================== RENDER DETAIL ===================== */
 function render(){
   if(!filtered[index]) return;
-  const s = filtered[index];
 
+  const s = filtered[index];
   nama.innerText = s.nama;
   infoKelas.innerText = `Kelas ${s.kelas} | Total Siswa Mengirim: ${filtered.length}`;
 
-  let warna = "orange";
-  if(s.total > KKM) warna="hijau";
-  else if(s.total === KKM) warna="kuning";
+  let detailHTML = "";
+  for(let i=0;i<20;i++){
+    const jawaban = String(s.detailRow[5+i]).trim();
+    const benar = jawaban === String(kunci[i]).trim();
+    detailHTML += `
+      <div class="soal">
+        <span>Soal ${i+1}</span>
+        <span class="${benar ? 'benar' : 'salah'}">
+          ${benar ? '✅ Benar (+20)' : '❌ Salah (0)'}
+        </span>
+      </div>`;
+  }
 
   qaList.innerHTML = `
-    <div class="nilai ${warna}">TOTAL NILAI : ${s.total}</div>
+    <div class="nilai">${s.total}</div>
     <div class="qa">KKM : ${KKM}</div>
     <div class="qa">STATUS : <b>${s.status}</b></div>
     <div class="qa">TP1 : ${s.tp[0]}</div>
     <div class="qa">TP2 : ${s.tp[1]}</div>
     <div class="qa">TP3 : ${s.tp[2]}</div>
     <div class="qa">TP4 : ${s.tp[3]}</div>
+    <div class="qa"><b>Detail Jawaban</b>${detailHTML}</div>
   `;
 
   document.querySelectorAll(".sidebar li")
     .forEach((li,i)=>li.classList.toggle("active", i===index));
 }
 
-/* ===================== DOWNLOAD EXCEL ===================== */
+/* ===================== EXCEL ===================== */
 function downloadExcel(){
-  const dataSheet = [
-    ["No","Nama","Kelas","TP1","TP2","TP3","TP4","TOTAL","KKM","STATUS","PREDIKAT"]
-  ];
-
+  const data=[["No","Nama","Kelas","TP1","TP2","TP3","TP4","TOTAL","KKM","STATUS"]];
   filtered.forEach((s,i)=>{
-    let pred="D (PERLU BIMBINGAN)";
-    if(s.total>=90) pred="A (SANGAT BAIK)";
-    else if(s.total>=80) pred="B (BAIK)";
-    else if(s.total>=78) pred="C (CUKUP)";
-
-    dataSheet.push([
-      i+1,
-      s.nama,
-      s.kelas,
-      s.tp[0],s.tp[1],s.tp[2],s.tp[3],
-      s.total,
-      KKM,
-      s.status,
-      pred
-    ]);
+    data.push([i+1,s.nama,s.kelas,...s.tp,s.total,KKM,s.status]);
   });
 
-  const ws = XLSX.utils.aoa_to_sheet(dataSheet);
-
-  for(let i=1;i<dataSheet.length;i++){
-    const cell = ws[`H${i+1}`];
-    if(!cell) continue;
-    if(cell.v < KKM) cell.s={fill:{fgColor:{rgb:"FFC7CE"}}};
-    else if(cell.v === KKM) cell.s={fill:{fgColor:{rgb:"FFEB9C"}}};
-    else cell.s={fill:{fgColor:{rgb:"C6EFCE"}}};
-  }
-
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,"Nilai Final Remidi");
-
-  XLSX.writeFile(wb,"Nilai_Akhir_Final_Remidi.xlsx",{
-    bookType:"xlsx",
-    cellStyles:true
-  });
+  const ws=XLSX.utils.aoa_to_sheet(data);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,"Final Remidi");
+  XLSX.writeFile(wb,"Nilai_Akhir_Final_Remidi.xlsx");
 }
 </script>
 
