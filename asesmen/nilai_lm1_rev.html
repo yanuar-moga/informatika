@@ -15,14 +15,21 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
   border-right:1px solid #ddd; overflow:auto;
 }
 .sidebar li {
-  list-style:none; padding:8px; margin:4px 0;
-  border-radius:8px; cursor:pointer;
+  list-style:none;
+  padding:8px;
+  margin:4px 0;
+  border-radius:8px;
+  cursor:pointer;
   text-transform:uppercase;
 }
-.sidebar li.active { background:#009688; color:#fff; }
+.sidebar li.active {
+  background:#009688;
+  color:#fff;
+}
 .sidebar li.belum {
   border:2px solid #dc2626;
   color:#dc2626;
+  background:#fff5f5;
 }
 
 .main { flex:1; display:flex; flex-direction:column; }
@@ -34,7 +41,6 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
 .nilai { font-size:34px; text-align:center; margin:10px 0; }
 
 .hijau { color:#16a34a }
-.kuning { color:#facc15 }
 .orange { color:#f97316 }
 
 .qa { background:#fff; padding:12px; border-radius:12px; margin-bottom:12px; }
@@ -89,19 +95,20 @@ const kunci = [
 
 let rows = [], filtered = [], index = 0;
 
-/* ===================== LOAD ===================== */
+/* ===================== LOAD DATA ===================== */
 fetch(url)
-.then(r => r.text())
-.then(t => {
+.then(r=>r.text())
+.then(t=>{
   const json = JSON.parse(t.substring(47).slice(0,-2));
-  rows = json.table.rows.map(r => r.c.map(c => c ? c.v : ""));
+  rows = json.table.rows.map(r=>r.c.map(c=>c?c.v:""));
   isiKelas();
 });
 
-/* ===================== DROPDOWN KELAS + JUMLAH ===================== */
+/* ===================== DROPDOWN KELAS + JUMLAH SISWA ===================== */
 function isiKelas(){
 
   const kelasMap = {};
+
   rows.forEach(r=>{
     if(!r[4] || !r[2]) return;
     if(!kelasMap[r[4]]) kelasMap[r[4]] = new Set();
@@ -123,7 +130,7 @@ function isiKelas(){
 function tampilkanData(){
 
   filtered = rows
-    .filter(r => r[4] === kelasSelect.value)
+    .filter(r=>r[4]===kelasSelect.value)
     .sort((a,b)=>a[2].localeCompare(b[2]));
 
   index = 0;
@@ -131,7 +138,7 @@ function tampilkanData(){
   render();
 }
 
-/* ===================== SIDEBAR ===================== */
+/* ===================== SIDEBAR SISWA ===================== */
 function renderSidebar(){
 
   siswaList.innerHTML = "";
@@ -140,21 +147,23 @@ function renderSidebar(){
     const li = document.createElement("li");
     li.textContent = r[2];
 
-    const sudahKirim = r.slice(5,25).some(v=>String(v).trim()!=="");
-    if(!sudahKirim) li.classList.add("belum");
+    const belumKirim =
+      r.slice(5,25).every(v=>String(v).trim()==="");
 
-    li.onclick = ()=>{ index=i; render(); };
+    if(belumKirim) li.classList.add("belum");
+
+    li.onclick=()=>{ index=i; render(); };
     siswaList.appendChild(li);
   });
 }
 
-/* ===================== NILAI ===================== */
+/* ===================== HITUNG NILAI ===================== */
 function nilaiTP(start,end,row){
-  let benar = 0;
+  let benar=0;
   for(let i=start;i<=end;i++){
-    if(String(row[5+i]).trim() === String(kunci[i]).trim()) benar++;
+    if(String(row[5+i]).trim()===String(kunci[i]).trim()) benar++;
   }
-  return benar * 20;
+  return benar*20;
 }
 
 /* ===================== RENDER ===================== */
@@ -165,19 +174,30 @@ function render(){
 
   nama.innerText = r[2].toUpperCase();
 
+  const belumKirim =
+    r.slice(5,25).every(v=>String(v).trim()==="");
+
+  if(belumKirim){
+    qaList.innerHTML = `
+      <div class="nilai orange">BELUM MENGIRIM JAWABAN</div>
+      <div class="qa">STATUS : <b>REMIDI</b></div>
+    `;
+    return;
+  }
+
   const tp1 = nilaiTP(0,4,r);
   const tp2 = nilaiTP(5,9,r);
   const tp3 = nilaiTP(10,14,r);
   const tp4 = nilaiTP(15,19,r);
   const total = Math.round((tp1+tp2+tp3+tp4)/4);
 
-  let status = total >= 78 ? "TUNTAS" : "REMIDI";
-  let warna = total >= 78 ? "hijau" : "orange";
+  const status = total>=78?"TUNTAS":"REMIDI";
+  const warna = total>=78?"hijau":"orange";
 
-  let detail = "";
+  let detail="";
   for(let i=0;i<20;i++){
-    const benar = String(r[5+i]).trim() === String(kunci[i]).trim();
-    detail += `
+    const benar = String(r[5+i]).trim()===String(kunci[i]).trim();
+    detail+=`
       <div class="soal">
         <span>Soal ${i+1}</span>
         <span class="${benar?'benar':'salah'}">
@@ -186,7 +206,7 @@ function render(){
       </div>`;
   }
 
-  qaList.innerHTML = `
+  qaList.innerHTML=`
     <div class="nilai ${warna}">TOTAL NILAI : ${total}</div>
     <div class="qa">STATUS : <b>${status}</b></div>
     <div class="qa">TP1 : ${tp1}</div>
@@ -197,7 +217,7 @@ function render(){
   `;
 
   document.querySelectorAll(".sidebar li")
-    .forEach((li,i)=>li.classList.toggle("active", i===index));
+    .forEach((li,i)=>li.classList.toggle("active",i===index));
 }
 </script>
 
