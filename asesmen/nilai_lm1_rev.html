@@ -2,40 +2,88 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nilai Akhir Final Remidi</title>
+
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 <style>
-body{font-family:Arial;background:#f4f4f4;padding:20px}
-table{border-collapse:collapse;width:100%;background:#fff}
-th,td{border:1px solid #ccc;padding:6px;text-align:center}
-th{background:#1565c0;color:#fff}
+body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
+.wrapper { display:flex; height:100vh; }
+.sidebar {
+  width:260px; background:#fff; padding:10px;
+  border-right:1px solid #ddd; overflow:auto;
+}
+.sidebar li {
+  list-style:none; padding:8px; margin:4px 0;
+  border-radius:8px; cursor:pointer;
+  text-transform:uppercase;
+}
+.sidebar li.active { background:#009688; color:#fff; }
+
+.main { flex:1; display:flex; flex-direction:column; }
+.header { background:#0d47a1; color:#fff; padding:14px; text-align:center; }
+.filter { padding:10px; background:#eee; text-align:center; }
+.content { flex:1; padding:20px; overflow:auto; }
+
+.nama { font-size:26px; font-weight:bold; text-align:center; }
+.nilai { font-size:34px; text-align:center; margin:10px 0; }
+
+.hijau { color:#16a34a }
+.kuning { color:#facc15 }
+.orange { color:#f97316 }
+
+.qa { background:#fff; padding:12px; border-radius:12px; margin-bottom:12px; }
 </style>
 </head>
+
 <body>
 
-<h2>Rekap Nilai Akhir (Final)</h2>
-<button onclick="download()">Download Excel</button>
+<div class="wrapper">
+  <div class="sidebar">
+    <h3>Daftar Siswa</h3>
+    <ul id="siswaList"></ul>
+  </div>
 
-<table id="tabel">
-<thead>
-<tr>
-<th>No</th><th>Nama</th><th>Kelas</th>
-<th>TP1</th><th>TP2</th><th>TP3</th><th>TP4</th>
-<th>TOTAL</th><th>PREDIKAT</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
+  <div class="main">
+    <div class="header">NILAI AKHIR FINAL REMIDI</div>
+
+    <div class="filter">
+      <select id="kelasSelect"></select>
+      <button onclick="tampilkanData()">Tampilkan</button>
+      <button onclick="downloadExcel()">⬇ Download Excel</button>
+    </div>
+
+    <div class="content">
+      <div id="nama" class="nama">Pilih Kelas</div>
+      <div id="qaList"></div>
+    </div>
+  </div>
+</div>
 
 <script>
+/* ===================== KONFIGURASI ===================== */
 const KKM = 78;
 const sheetId = "1wYkp-mZ96BXEin8mF8F3Z9brSjkPeFtB5k2IFm5Qxjc";
 const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
 
-fetch(url).then(r=>r.text()).then(t=>{
-  const json = JSON.parse(t.substring(47).slice(0,-2));
-  const rows = json.table.rows.map(r=>r.c.map(c=>c?c.v:""));
+let rows = [];
+let dataFinal = [];
+let filtered = [];
+let index = 0;
 
+/* ===================== LOAD DATA ===================== */
+fetch(url)
+.then(r => r.text())
+.then(t => {
+  const json = JSON.parse(t.substring(47).slice(0,-2));
+  rows = json.table.rows.map(r => r.c.map(c => c ? c.v : ""));
+  prosesFinal();
+  isiKelas();
+});
+
+/* ===================== PROSES FINAL REMIDI ===================== */
+function prosesFinal(){
   const map = {};
 
   rows.forEach(r=>{
@@ -46,8 +94,6 @@ fetch(url).then(r=>r.text()).then(t=>{
     map[key].push(r);
   });
 
-  const hasil = [];
-
   Object.values(map).forEach(kiriman=>{
     const tpFinal = [];
 
@@ -55,9 +101,7 @@ fetch(url).then(r=>r.text()).then(t=>{
       const nilai = kiriman.map(r=>{
         let benar=0;
         for(let i=0;i<5;i++){
-          if(String(r[5+tp*5+i]).trim() === String(r[5+tp*5+i]).trim()){
-            benar++;
-          }
+          if(String(r[5+tp*5+i]).trim() !== "") benar++;
         }
         return benar*20;
       });
@@ -65,49 +109,115 @@ fetch(url).then(r=>r.text()).then(t=>{
       if(nilai[0] >= KKM){
         tpFinal.push(nilai[0]);
       } else {
-        let naik = nilai.slice(1).find(n=>n>=KKM);
-        tpFinal.push(naik ? KKM : nilai[nilai.length-1]);
+        const lulus = nilai.slice(1).find(n=>n>=KKM);
+        tpFinal.push(lulus ? KKM : nilai[nilai.length-1]);
       }
     }
 
     let total = Math.round(tpFinal.reduce((a,b)=>a+b,0)/4);
-    if(total >= KKM) total = KKM;
+    if(total > KKM) total = KKM;
 
-    let pred="D (PERLU BIMBINGAN)";
-    if(total>=90) pred="A (SANGAT BAIK)";
-    else if(total>=80) pred="B (BAIK)";
-    else if(total>=78) pred="C (CUKUP)";
-
-    hasil.push({
-      nama:kiriman[0][2].toUpperCase(),
-      kelas:kiriman[0][4],
-      tp:tpFinal,
-      total,pred
+    dataFinal.push({
+      nama: kiriman[0][2].toUpperCase(),
+      kelas: kiriman[0][4],
+      tp: tpFinal,
+      total
     });
   });
+}
 
-  const tbody=document.querySelector("tbody");
-  hasil.forEach((s,i)=>{
-    tbody.innerHTML+=`
-      <tr>
-        <td>${i+1}</td>
-        <td>${s.nama}</td>
-        <td>${s.kelas}</td>
-        <td>${s.tp[0]}</td>
-        <td>${s.tp[1]}</td>
-        <td>${s.tp[2]}</td>
-        <td>${s.tp[3]}</td>
-        <td>${s.total}</td>
-        <td>${s.pred}</td>
-      </tr>`;
+/* ===================== FILTER KELAS ===================== */
+function isiKelas(){
+  const kelas = [...new Set(dataFinal.map(d=>d.kelas))];
+  kelasSelect.innerHTML = '<option value="">Pilih Kelas</option>';
+  kelas.forEach(k=>{
+    if(k) kelasSelect.innerHTML += `<option>${k}</option>`;
   });
-});
+}
 
-function download(){
-  const wb=XLSX.utils.book_new();
-  const ws=XLSX.utils.table_to_sheet(document.getElementById("tabel"));
-  XLSX.utils.book_append_sheet(wb,ws,"Nilai Final");
-  XLSX.writeFile(wb,"Nilai_Akhir_Final.xlsx");
+/* ===================== TAMPILKAN DATA ===================== */
+function tampilkanData(){
+  filtered = dataFinal
+    .filter(d=>d.kelas === kelasSelect.value)
+    .sort((a,b)=>a.nama.localeCompare(b.nama));
+
+  index = 0;
+  renderSidebar();
+  render();
+}
+
+function renderSidebar(){
+  siswaList.innerHTML = "";
+  filtered.forEach((s,i)=>{
+    const li = document.createElement("li");
+    li.textContent = s.nama;
+    li.onclick = ()=>{ index=i; render(); };
+    siswaList.appendChild(li);
+  });
+}
+
+/* ===================== RENDER DETAIL ===================== */
+function render(){
+  if(!filtered[index]) return;
+  const s = filtered[index];
+  nama.innerText = s.nama;
+
+  let warna = "orange";
+  if(s.total > 78) warna="hijau";
+  else if(s.total === 78) warna="kuning";
+
+  qaList.innerHTML = `
+    <div class="nilai ${warna}">TOTAL NILAI : ${s.total}</div>
+    <div class="qa">TP1 : ${s.tp[0]}</div>
+    <div class="qa">TP2 : ${s.tp[1]}</div>
+    <div class="qa">TP3 : ${s.tp[2]}</div>
+    <div class="qa">TP4 : ${s.tp[3]}</div>
+    <div class="qa"><b>Status :</b> FINAL REMIDI</div>
+  `;
+
+  document.querySelectorAll(".sidebar li")
+    .forEach((li,i)=>li.classList.toggle("active", i===index));
+}
+
+/* ===================== DOWNLOAD EXCEL ===================== */
+function downloadExcel(){
+  const dataSheet = [
+    ["No","Nama","Kelas","TP1","TP2","TP3","TP4","TOTAL","PREDIKAT"]
+  ];
+
+  filtered.forEach((s,i)=>{
+    let pred = "D (PERLU BIMBINGAN)";
+    if(s.total>=90) pred="A (SANGAT BAIK)";
+    else if(s.total>=80) pred="B (BAIK)";
+    else if(s.total>=78) pred="C (CUKUP)";
+
+    dataSheet.push([
+      i+1,
+      s.nama,
+      s.kelas,
+      s.tp[0],s.tp[1],s.tp[2],s.tp[3],
+      s.total,
+      pred
+    ]);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(dataSheet);
+
+  for(let i=1;i<dataSheet.length;i++){
+    const cell = ws[`H${i+1}`];
+    if(!cell) continue;
+    if(cell.v < 78) cell.s={fill:{fgColor:{rgb:"FFC7CE"}}};
+    else if(cell.v === 78) cell.s={fill:{fgColor:{rgb:"FFEB9C"}}};
+    else cell.s={fill:{fgColor:{rgb:"C6EFCE"}}};
+  }
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,"Nilai Final Remidi");
+
+  XLSX.writeFile(wb,"Nilai_Akhir_Final_Remidi.xlsx",{
+    bookType:"xlsx",
+    cellStyles:true
+  });
 }
 </script>
 
