@@ -120,7 +120,6 @@ function prosesFinal(){
     const nama = String(r[2]).trim().toUpperCase();
     const kelas = r[4];
     const adaJawaban = r.slice(5,25).some(j => String(j).trim() !== "");
-
     if(!nama || !kelas || !adaJawaban) return;
 
     const key = nama+"||"+kelas;
@@ -162,13 +161,17 @@ function isiKelas(){
 }
 
 function tampilkanData(){
-  filtered = dataFinal.filter(d => d.kelas === kelasSelect.value);
+  filtered = dataFinal
+    .filter(d => d.kelas === kelasSelect.value)
+    .sort((a,b)=>a.nama.localeCompare(b.nama)); /* 🔥 SORT ALFABET */
+
   index = 0;
   renderSidebar();
   render();
   tampilkanBelumKirim();
 }
 
+/* ===================== SIDEBAR (ALFABET) ===================== */
 function renderSidebar(){
   siswaList.innerHTML = "";
   filtered.forEach((s,i)=>{
@@ -179,48 +182,38 @@ function renderSidebar(){
   });
 }
 
-/* ===================== BELUM KIRIM (LOGIKA BENAR) ===================== */
+/* ===================== BELUM KIRIM ===================== */
 function tampilkanBelumKirim(){
-
   const semuaSiswa = [...new Set(
-    rows
-      .filter(r => r[4] === kelasSelect.value)
-      .map(r => String(r[2]).trim().toUpperCase())
-      .filter(n => n)
+    rows.filter(r=>r[4]===kelasSelect.value)
+        .map(r=>String(r[2]).trim().toUpperCase())
+        .filter(n=>n)
   )];
 
-  const sudahKirim = [...new Set(
-    dataFinal
-      .filter(d => d.kelas === kelasSelect.value)
-      .map(d => d.nama)
-  )];
-
-  const belum = semuaSiswa.filter(n => !sudahKirim.includes(n));
+  const sudah = filtered.map(s=>s.nama);
+  const belum = semuaSiswa.filter(n=>!sudah.includes(n));
 
   let html = `<div class="qa belum"><b>Belum Mengirim Jawaban (${belum.length})</b><br>`;
-  html += belum.length ? belum.join("<br>") : "Semua siswa sudah mengirim";
+  html += belum.length ? belum.sort().join("<br>") : "Semua siswa sudah mengirim";
   html += `</div>`;
-
   belumKirim.innerHTML = html;
 }
 
 /* ===================== RENDER ===================== */
 function render(){
   if(!filtered[index]) return;
-
   const s = filtered[index];
   nama.innerText = s.nama;
   infoKelas.innerText = `Kelas ${s.kelas} | Sudah Mengirim: ${filtered.length}`;
 
   let detailHTML = "";
   for(let i=0;i<20;i++){
-    const jawaban = String(s.detailRow[5+i]).trim();
-    const benar = jawaban === String(kunci[i]).trim();
+    const benar = String(s.detailRow[5+i]).trim() === String(kunci[i]).trim();
     detailHTML += `
       <div class="soal">
         <span>Soal ${i+1}</span>
-        <span class="${benar ? 'benar' : 'salah'}">
-          ${benar ? '✅ Benar (+20)' : '❌ Salah (0)'}
+        <span class="${benar?'benar':'salah'}">
+          ${benar?'✅ Benar (+20)':'❌ Salah (0)'}
         </span>
       </div>`;
   }
