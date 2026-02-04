@@ -21,6 +21,14 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
 }
 .sidebar li.active { background:#009688; color:#fff; }
 
+/* 🔴 PENANDA BELUM KIRIM */
+.sidebar li.belum {
+  background:#fee2e2;
+  border:2px solid #dc2626;
+  color:#991b1b;
+  font-weight:bold;
+}
+
 .main { flex:1; display:flex; flex-direction:column; }
 .header { background:#0d47a1; color:#fff; padding:14px; text-align:center; }
 .filter { padding:10px; background:#eee; text-align:center; }
@@ -35,7 +43,7 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
 .benar { color:#16a34a; font-weight:bold; }
 .salah { color:#dc2626; font-weight:bold; }
 
-.belum { background:#fee2e2; border:1px solid #dc2626; }
+.belumBox { background:#fee2e2; border:1px solid #dc2626; }
 </style>
 </head>
 
@@ -90,6 +98,7 @@ const kunci = [
 let rows = [];
 let dataFinal = [];
 let filtered = [];
+let semuaSiswaKelas = [];
 let index = 0;
 
 /* ===================== LOAD DATA ===================== */
@@ -161,47 +170,48 @@ function isiKelas(){
 }
 
 function tampilkanData(){
+  semuaSiswaKelas = [...new Set(
+    rows.filter(r=>r[4]===kelasSelect.value)
+        .map(r=>String(r[2]).trim().toUpperCase())
+        .filter(n=>n)
+  )].sort((a,b)=>a.localeCompare(b));
+
   filtered = dataFinal
-    .filter(d => d.kelas === kelasSelect.value)
-    .sort((a,b)=>a.nama.localeCompare(b.nama)); /* 🔥 SORT ALFABET */
+    .filter(d=>d.kelas===kelasSelect.value)
+    .sort((a,b)=>a.nama.localeCompare(b.nama));
 
   index = 0;
   renderSidebar();
   render();
-  tampilkanBelumKirim();
 }
 
-/* ===================== SIDEBAR (ALFABET) ===================== */
+/* ===================== SIDEBAR (ALFABET + TANDA MERAH) ===================== */
 function renderSidebar(){
   siswaList.innerHTML = "";
-  filtered.forEach((s,i)=>{
+
+  semuaSiswaKelas.forEach(nama=>{
+    const sudah = filtered.find(s=>s.nama===nama);
     const li = document.createElement("li");
-    li.textContent = s.nama;
-    li.onclick = ()=>{ index=i; render(); };
+    li.textContent = nama;
+
+    if(!sudah){
+      li.classList.add("belum");
+      li.onclick = ()=>alert(nama+" belum mengirim jawaban");
+    }else{
+      li.onclick = ()=>{
+        index = filtered.findIndex(s=>s.nama===nama);
+        render();
+      };
+    }
+
     siswaList.appendChild(li);
   });
-}
-
-/* ===================== BELUM KIRIM ===================== */
-function tampilkanBelumKirim(){
-  const semuaSiswa = [...new Set(
-    rows.filter(r=>r[4]===kelasSelect.value)
-        .map(r=>String(r[2]).trim().toUpperCase())
-        .filter(n=>n)
-  )];
-
-  const sudah = filtered.map(s=>s.nama);
-  const belum = semuaSiswa.filter(n=>!sudah.includes(n));
-
-  let html = `<div class="qa belum"><b>Belum Mengirim Jawaban (${belum.length})</b><br>`;
-  html += belum.length ? belum.sort().join("<br>") : "Semua siswa sudah mengirim";
-  html += `</div>`;
-  belumKirim.innerHTML = html;
 }
 
 /* ===================== RENDER ===================== */
 function render(){
   if(!filtered[index]) return;
+
   const s = filtered[index];
   nama.innerText = s.nama;
   infoKelas.innerText = `Kelas ${s.kelas} | Sudah Mengirim: ${filtered.length}`;
@@ -228,9 +238,6 @@ function render(){
     <div class="qa">TP4 : ${s.tp[3]}</div>
     <div class="qa"><b>Detail Jawaban</b>${detailHTML}</div>
   `;
-
-  document.querySelectorAll(".sidebar li")
-    .forEach((li,i)=>li.classList.toggle("active", i===index));
 }
 
 /* ===================== EXCEL ===================== */
