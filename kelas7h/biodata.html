@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard Guru</title>
+
+<!-- ANTI CACHE -->
+<meta http-equiv="Cache-Control" content="no-store" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<!-- LIBRARY WAJIB -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#f4f6f9;
+}
+
+/* ===== TOP HEADER ===== */
+.top-header{
+  display:flex;
+  align-items:center;
+  gap:15px;
+  background:#2563eb;
+  padding:14px 18px;
+  box-shadow:0 3px 8px rgba(0,0,0,.3);
+  color:#fff;
+}
+.top-header img{
+  width:48px;
+  height:48px;
+  border-radius:10px;
+  background:#fff;
+  padding:5px;
+  object-fit:contain;
+}
+.top-header h1{margin:0;font-size:18px}
+.top-header p{margin:0;font-size:12px;color:#e0e7ff}
+
+/* ===== LAYOUT ===== */
+.layout{
+  display:grid;
+  grid-template-columns:240px 1fr;
+  min-height:calc(100vh - 76px);
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+  background:#0A4FA3;
+  color:#fff;
+  padding:18px;
+}
+
+/* MENU GROUP */
+.menu-group{
+  background:rgba(255,255,255,.10);
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:16px;
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,.25),
+    0 4px 10px rgba(0,0,0,.18);
+}
+.menu-group h3{
+  margin:0 0 10px;
+  font-size:14px;
+  font-weight:bold;
+}
+.menu-group .menu-title{
+  background:#ffffff;
+  color:#0A4FA3;
+  padding:8px 12px;
+  border-radius:10px;
+  font-size:13px;
+  font-weight:bold;
+  box-shadow:0 3px 0 #c7d2fe;
+  margin-bottom:8px;
+}
+.sub-menu{
+  margin-left:18px;
+}
+.sub-menu a{
+  display:block;
+  color:#e0e7ff;
+  text-decoration:none;
+  font-size:13px;
+  padding:4px 0 4px 18px;
+  position:relative;
+}
+.sub-menu a::before{
+  content:"▶";
+  position:absolute;
+  left:0;
+  font-size:11px;
+}
+.sub-menu a:hover{text-decoration:underline}
+
+/* ===== CONTENT ===== */
+.content{padding:22px}
+
+.card{
+  background:#fff;
+  border-radius:12px;
+  padding:20px;
+  box-shadow:0 6px 18px rgba(10,79,163,.06);
+  margin-bottom:20px;
+}
+
+/* === FOTO SEJAJAR DATA (TANPA UBAH TAMPILAN) === */
+.foto-wrap{
+  max-width:600px;
+  margin:0 auto;
+  display:flex;
+  justify-content:center;
+}
+
+/* === RAPITKAN DATA BIODATA === */
+#data{
+  max-width:600px;
+  margin:0 auto;
+}
+
+.data-row{
+  display:grid;
+  grid-template-columns:170px 10px 1fr;
+  gap:6px;
+  margin-bottom:4px;
+  font-size:14px;
+}
+
+.data-label{font-weight:bold}
+.data-colon{text-align:center}
+.data-value{word-break:break-word}
+
+/* FLOATING MENU */
+.floating-menu{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  z-index:999;
+}
+#downloadMenu{display:none}
+
+@media(max-width:768px){
+  .layout{grid-template-columns:1fr}
+  .data-row{
+    grid-template-columns:130px 8px 1fr;
+    font-size:13px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== FIREBASE AUTH ===== -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD_Dl5cdFBh_dyhkhthI2gclhWoz4ZHYls",
+  authDomain: "login-2f19a.firebaseapp.com",
+  projectId: "login-2f19a",
+  appId: "1:751593178422:web:1d36294b46d1a954b15f97"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+onAuthStateChanged(auth, user => {
+  if (!user) window.location.replace("index.html");
+});
+
+window.logout = function(){
+  signOut(auth).then(() => {
+    window.location.replace("index.html");
+  });
+};
+</script>
+
+<header class="top-header">
+  <img src="https://yanuar-moga.github.io/guruwali/assets/mb.jpg">
+  <div>
+    <h1>Aplikasi Guru Wali</h1>
+    <p>Versi 1.0 · Dev by MB</p>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ===== SIDEBAR ===== -->
+<aside class="sidebar">
+
+  <div class="menu-group">
+    <h3>Dashboard</h3>
+    <div class="menu-title">Menu</div>
+    <div class="sub-menu">
+      <a href="../dashboard.html">Home</a>
+    </div>
+  </div>
+
+  <div class="menu-group">
+    <h3>Guru Informatika</h3>
+    <div class="menu-title">Menu</div>
+    <div class="sub-menu">
+      <a href="../informatika/modulajar.html">Modul Ajar</a>
+      <a href="../informatika/asesmen.html">Asesmen / Kuis</a>
+      <a href="../informatika/nilai-informatika.html">Rekap Nilai</a>
+      <a href="../informatika/proyek.html">Proyek Siswa</a>
+    </div>
+  </div>
+
+  <div class="menu-group">
+    <h3>Guru Wali</h3>
+    <div class="menu-title">Menu</div>
+    <div class="sub-menu">
+      <a href="../guruwali/profilsiswa.html">Profil Siswa</a>
+      <a href="../guruwali/perkembangan.html">Perkembangan Akademik</a>
+      <a href="../guruwali/catatan.html">Catatan Perilaku</a>
+      <a href="../guruwali/konsultasi.html">Jadwal Konsultasi</a>
+    </div>
+  </div>
+
+  <div class="menu-group">
+    <h3>Wali Kelas</h3>
+    <div class="menu-title">Menu</div>
+    <div class="sub-menu">
+      <a href="../walikelas/strukturkelas.html">Struktur Kelas</a>
+      <a href="../walikelas/biodata.html">Kartu Siswa</a>
+      <a href="../walikelas/datasiswa.html">Tabel Data Siswa</a>
+      <a href="../walikelas/keadaankelas.html">Keadaan Kelas</a>
+      <a href="../walikelas/absensi.html">Rekap Absensi</a>
+      <a href="../walikelas/laporan.html">Laporan Perkembangan</a>
+    </div>
+  </div>
+
+  <div class="menu-group">
+    <h3>Pembina Ekstra</h3>
+    <div class="menu-title">Menu</div>
+    <div class="sub-menu">
+      <a href="../ekstra/ekstra.html">Data Ekstrakurikuler</a>
+      <a href="../ekstra/anggota-ekstra.html">Anggota Ekskul</a>
+      <a href="../ekstra/jadwal-ekstra.html">Jadwal Latihan</a>
+      <a href="../ekstra/prestasi-ekstra.html">Prestasi</a>
+    </div>
+  </div>
+
+  <div class="menu-group">
+    <h3>Admin Website</h3>
+    <div class="menu-title">Menu</div>
+    <div class="sub-menu">
+      <a href="../admin/user.html">Manajemen User</a>
+      <a href="../admin/kelas.html">Manajemen Kelas</a>
+      <a href="../admin/siswa.html">Data Siswa</a>
+      <a href="../admin/setting.html">Pengaturan</a>
+    </div>
+  </div>
+
+  <!-- ✅ LOGOUT DI DALAM SIDEBAR -->
+  <button onclick="logout()"
+    style="margin-top:10px;background:#ff5d5d;color:#fff;border:none;padding:10px;border-radius:12px;width:100%;font-weight:bold;">
+    Logout
+  </button>
+
+</aside>
+
+<!-- ===== CONTENT ===== -->
+<div class="content">
+  <div id="card" class="card">
+    <h2>Biodata Siswa Kelas 7H</h2>
+
+    <div class="foto-wrap">
+      <img id="foto" style="width:150px;border-radius:10px">
+    </div>
+
+    <br>
+    <div id="data"></div>
+  </div>
+</div>
+
+</div>
+
+<!-- FLOATING MENU -->
+<div class="floating-menu">
+  <button onclick="prev()">◀ Prev</button>
+  <button onclick="next()">Next ▶</button>
+  <button onclick="toggleMenu()">Download ▼</button>
+
+  <div id="downloadMenu">
+    <button onclick="downloadJPG()">📷 JPG</button>
+    <button onclick="downloadPDFsingle()">📄 PDF</button>
+    <button onclick="downloadPDFall()">📚 Semua PDF</button>
+  </div>
+</div>
+
+<script>
+const foto = document.getElementById("foto");
+const dataBox = document.getElementById("data");
+const card = document.getElementById("card");
+const downloadMenu = document.getElementById("downloadMenu");
+
+let siswa=[], index=0;
+
+function formatTanggal(excelDate){
+  if(!excelDate) return "-";
+  if(isNaN(excelDate)) return excelDate;
+  const d=new Date((excelDate-25569)*86400*1000);
+  return d.toLocaleDateString("id-ID");
+}
+
+async function loadExcel(){
+  const res=await fetch("https://raw.githubusercontent.com/yanuar-moga/guruwali/main/assets/data.xlsx");
+  const buf=await res.arrayBuffer();
+  const wb=XLSX.read(buf,{type:"array"});
+  siswa=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+  showData();
+}
+
+function showData(){
+  const s=siswa[index];
+  foto.src=`https://raw.githubusercontent.com/yanuar-moga/guruwali/main/foto/${index+1}.jpg`;
+  let html="";
+  Object.keys(s).forEach(k=>{
+    let v=s[k];
+    if(typeof v==="number" && v>30000) v=formatTanggal(v);
+    html+=`
+      <div class="data-row">
+        <div class="data-label">${k}</div>
+        <div class="data-colon">:</div>
+        <div class="data-value">${v || "-"}</div>
+      </div>`;
+  });
+  dataBox.innerHTML=html;
+}
+
+function next(){ if(index<siswa.length-1){index++;showData();}}
+function prev(){ if(index>0){index--;showData();}}
+
+function toggleMenu(){
+  downloadMenu.style.display =
+    downloadMenu.style.display==="block"?"none":"block";
+}
+
+function downloadJPG(){
+  html2canvas(card,{scale:3}).then(c=>{
+    const a=document.createElement("a");
+    a.href=c.toDataURL("image/jpeg");
+    a.download=`Kartu-${index+1}.jpg`;
+    a.click();
+  });
+}
+
+function downloadPDFsingle(){
+  const {jsPDF}=window.jspdf;
+  html2canvas(card,{scale:3}).then(c=>{
+    const pdf=new jsPDF("p","px",[400,640]);
+    pdf.addImage(c.toDataURL("image/jpeg"),"JPEG",10,10,380,620);
+    pdf.save(`Kartu-${index+1}.pdf`);
+  });
+}
+
+async function downloadPDFall(){
+  const {jsPDF}=window.jspdf;
+  const pdf=new jsPDF("p","px",[400,640]);
+  for(let i=0;i<siswa.length;i++){
+    index=i;showData();
+    const c=await html2canvas(card,{scale:3});
+    if(i>0) pdf.addPage();
+    pdf.addImage(c.toDataURL("image/jpeg"),"JPEG",10,10,380,620);
+  }
+  pdf.save("Semua-Kartu-Siswa.pdf");
+}
+
+loadExcel();
+</script>
+
+</body>
+</html>
