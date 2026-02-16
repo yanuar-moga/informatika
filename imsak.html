@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jadwal Imsakiyah Ramadhan - Kabupaten Pemalang</title>
+
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<style>
+body{
+    margin:0;
+    background:#0f2e28;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    font-family:'Segoe UI', sans-serif;
+}
+
+.container{
+    width:390px;
+    height:780px;
+    background-image:url('ramadan_template_blank.png');
+    background-size:cover;
+    background-position:center;
+    position:relative;
+    color:#ffffff;
+    padding:30px;
+    box-sizing:border-box;
+    overflow:hidden;
+}
+
+.overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,0.35);
+}
+
+.content{
+    position:relative;
+    z-index:2;
+    margin-top:130px;
+}
+
+h1{
+    text-align:center;
+    font-size:22px;
+    margin-bottom:5px;
+    text-shadow:0 0 15px rgba(255,215,0,0.8);
+}
+
+h2{
+    text-align:center;
+    font-size:14px;
+    font-weight:400;
+    margin-bottom:3px;
+    text-shadow:0 2px 8px rgba(0,0,0,0.8);
+}
+
+h3{
+    text-align:center;
+    font-size:13px;
+    margin-bottom:20px;
+    font-weight:400;
+    opacity:0.9;
+}
+
+select, button{
+    width:100%;
+    padding:8px;
+    border-radius:8px;
+    border:none;
+    margin-bottom:10px;
+    font-size:14px;
+}
+
+button{
+    background:gold;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.table{
+    background:rgba(0,0,0,0.45);
+    border-radius:15px;
+    padding:15px;
+    backdrop-filter:blur(6px);
+}
+
+.row{
+    display:flex;
+    justify-content:space-between;
+    padding:8px 0;
+    border-bottom:1px solid rgba(255,255,255,0.2);
+    font-size:14px;
+    text-shadow:0 2px 6px rgba(0,0,0,0.8);
+}
+
+.row:last-child{
+    border-bottom:none;
+}
+
+/* Animasi glow lampu */
+@keyframes glow{
+    0%{ filter:brightness(1); }
+    50%{ filter:brightness(1.2); }
+    100%{ filter:brightness(1); }
+}
+
+.container{
+    animation: glow 4s infinite ease-in-out;
+}
+
+.footer{
+    position:absolute;
+    bottom:15px;
+    width:100%;
+    text-align:center;
+    font-size:11px;
+    opacity:0.8;
+}
+
+/* Mode IG */
+.hide{
+    display:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container" id="captureArea">
+<div class="overlay"></div>
+
+<div class="content">
+    <h1>JADWAL IMSAKIYAH</h1>
+    <h2>Ramadhan 1447 H</h2>
+    <h3>Kabupaten Pemalang</h3>
+
+    <select id="daySelect" onchange="updateSchedule()"></select>
+
+    <button onclick="downloadImage()">📸 Download Screenshot</button>
+    <button onclick="toggleIGMode()">📱 Mode IG</button>
+
+    <div class="table">
+        <div class="row"><span>Imsak</span><span id="imsak"></span></div>
+        <div class="row"><span>Subuh</span><span id="subuh"></span></div>
+        <div class="row"><span>Dzuhur</span><span id="dzuhur"></span></div>
+        <div class="row"><span>Ashar</span><span id="ashar"></span></div>
+        <div class="row"><span>Maghrib</span><span id="maghrib"></span></div>
+        <div class="row"><span>Isya</span><span id="isya"></span></div>
+    </div>
+</div>
+
+<div class="footer">
+© 2026 Jadwal Ramadhan Pemalang
+</div>
+
+</div>
+
+<script>
+const schedule = {};
+for(let i=1;i<=30;i++){
+    schedule[i]={
+        imsak:"04:"+(28-i%3).toString().padStart(2,'0'),
+        subuh:"04:"+(38-i%3).toString().padStart(2,'0'),
+        dzuhur:"12:05",
+        ashar:"15:"+(18+i%3).toString().padStart(2,'0'),
+        maghrib:"18:"+(12+i%4).toString().padStart(2,'0'),
+        isya:"19:"+(20+i%3).toString().padStart(2,'0')
+    };
+}
+
+const select=document.getElementById("daySelect");
+for(let i=1;i<=30;i++){
+    let opt=document.createElement("option");
+    opt.value=i;
+    opt.text=i+" Ramadhan";
+    select.appendChild(opt);
+}
+
+function updateSchedule(){
+    const day=select.value;
+    document.getElementById("imsak").innerText=schedule[day].imsak;
+    document.getElementById("subuh").innerText=schedule[day].subuh;
+    document.getElementById("dzuhur").innerText=schedule[day].dzuhur;
+    document.getElementById("ashar").innerText=schedule[day].ashar;
+    document.getElementById("maghrib").innerText=schedule[day].maghrib;
+    document.getElementById("isya").innerText=schedule[day].isya;
+}
+updateSchedule();
+
+function downloadImage(){
+    html2canvas(document.querySelector("#captureArea")).then(canvas=>{
+        let link=document.createElement("a");
+        link.download="imsakiyah-pemalang.png";
+        link.href=canvas.toDataURL();
+        link.click();
+    });
+}
+
+function toggleIGMode(){
+    document.getElementById("daySelect").classList.toggle("hide");
+}
+</script>
+
+</body>
+</html>
