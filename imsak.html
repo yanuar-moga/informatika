@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jadwal Imsakiyah Ramadhan - Kabupaten Pemalang</title>
 
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-
 <style>
 body{
     margin:0;
@@ -34,7 +32,7 @@ body{
 
 @keyframes glow{
     0%{ filter:brightness(1); }
-    50%{ filter:brightness(1.15); }
+    50%{ filter:brightness(1.12); }
     100%{ filter:brightness(1); }
 }
 
@@ -81,17 +79,10 @@ select{
     padding:8px;
     border-radius:8px;
     border:none;
-    margin-bottom:10px;
+    margin-bottom:15px;
     text-align:center;
     text-align-last:center;
-}
-
-.dayText{
-    display:none;
-    text-align:center;
-    font-size:16px;
-    font-weight:bold;
-    margin-bottom:5px;
+    font-size:14px;
 }
 
 .table{
@@ -112,18 +103,6 @@ select{
     border-bottom:none;
 }
 
-.shareBtn{
-    position:absolute;
-    bottom:20px;
-    right:20px;
-    background:gold;
-    border:none;
-    padding:8px 14px;
-    border-radius:20px;
-    font-weight:bold;
-    cursor:pointer;
-}
-
 .footer{
     position:absolute;
     bottom:20px;
@@ -137,7 +116,7 @@ select{
 
 <body>
 
-<div class="container" id="captureArea">
+<div class="container">
 <div class="overlay"></div>
 
 <div class="content">
@@ -146,7 +125,7 @@ select{
     <h3>Kabupaten Pemalang</h3>
 
     <select id="daySelect" onchange="updateSchedule()"></select>
-    <div class="dayText" id="dayText"></div>
+
     <div class="dateText" id="dateText"></div>
 
     <div class="table">
@@ -162,8 +141,6 @@ select{
 <div class="footer">
 © 2026 MB · All Rights Reserved Jadwal Ramadhan Pemalang
 </div>
-
-<button class="shareBtn" onclick="shareImage()">Share</button>
 
 </div>
 
@@ -202,6 +179,7 @@ const data = {
 };
 
 const select=document.getElementById("daySelect");
+
 for(let i=1;i<=30;i++){
     let opt=document.createElement("option");
     opt.value=i;
@@ -211,7 +189,6 @@ for(let i=1;i<=30;i++){
 
 function updateSchedule(){
     const day=select.value;
-    document.getElementById("dayText").innerText=day+" Ramadhan";
     document.getElementById("dateText").innerText=data[day][0];
     document.getElementById("imsak").innerText=data[day][1];
     document.getElementById("subuh").innerText=data[day][2];
@@ -220,30 +197,8 @@ function updateSchedule(){
     document.getElementById("maghrib").innerText=data[day][5];
     document.getElementById("isya").innerText=data[day][6];
 }
+
 updateSchedule();
-
-function shareImage(){
-    const day=select.value;
-    select.style.display="none";
-    document.getElementById("dayText").style.display="block";
-
-    html2canvas(document.querySelector("#captureArea")).then(canvas=>{
-        canvas.toBlob(async function(blob){
-            const file=new File([blob],"imsakiyah-"+day+".png",{type:"image/png"});
-            if(navigator.canShare && navigator.canShare({files:[file]})){
-                await navigator.share({
-                    files:[file],
-                    title:"Jadwal Imsakiyah",
-                    text:"Jadwal Imsakiyah "+day+" Ramadhan - Kabupaten Pemalang"
-                });
-            } else {
-                alert("Fitur share aktif di browser HP modern.");
-            }
-            select.style.display="block";
-            document.getElementById("dayText").style.display="none";
-        });
-    });
-}
 </script>
 
 </body>
