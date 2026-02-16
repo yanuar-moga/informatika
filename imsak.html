@@ -29,6 +29,13 @@ body{
     padding:30px;
     box-sizing:border-box;
     overflow:hidden;
+    animation: glow 4s infinite ease-in-out;
+}
+
+@keyframes glow{
+    0%{ filter:brightness(1); }
+    50%{ filter:brightness(1.15); }
+    100%{ filter:brightness(1); }
 }
 
 .overlay{
@@ -40,7 +47,7 @@ body{
 .content{
     position:relative;
     z-index:2;
-    margin-top:130px;
+    margin-top:120px;
 }
 
 h1{
@@ -53,32 +60,38 @@ h1{
 h2{
     text-align:center;
     font-size:14px;
-    font-weight:400;
     margin-bottom:3px;
-    text-shadow:0 2px 8px rgba(0,0,0,0.8);
 }
 
 h3{
     text-align:center;
     font-size:13px;
-    margin-bottom:20px;
-    font-weight:400;
+    margin-bottom:10px;
+}
+
+.dateText{
+    text-align:center;
+    font-size:12px;
+    margin-bottom:10px;
     opacity:0.9;
 }
 
-select, button{
+select{
     width:100%;
     padding:8px;
     border-radius:8px;
     border:none;
     margin-bottom:10px;
-    font-size:14px;
+    text-align:center;
+    text-align-last:center;
 }
 
-button{
-    background:gold;
+.dayText{
+    display:none;
+    text-align:center;
+    font-size:16px;
     font-weight:bold;
-    cursor:pointer;
+    margin-bottom:5px;
 }
 
 .table{
@@ -93,37 +106,31 @@ button{
     justify-content:space-between;
     padding:8px 0;
     border-bottom:1px solid rgba(255,255,255,0.2);
-    font-size:14px;
-    text-shadow:0 2px 6px rgba(0,0,0,0.8);
 }
 
 .row:last-child{
     border-bottom:none;
 }
 
-/* Animasi glow lampu */
-@keyframes glow{
-    0%{ filter:brightness(1); }
-    50%{ filter:brightness(1.2); }
-    100%{ filter:brightness(1); }
-}
-
-.container{
-    animation: glow 4s infinite ease-in-out;
+.shareBtn{
+    position:absolute;
+    bottom:20px;
+    right:20px;
+    background:gold;
+    border:none;
+    padding:8px 14px;
+    border-radius:20px;
+    font-weight:bold;
+    cursor:pointer;
 }
 
 .footer{
     position:absolute;
-    bottom:15px;
+    bottom:20px;
     width:100%;
     text-align:center;
     font-size:11px;
-    opacity:0.8;
-}
-
-/* Mode IG */
-.hide{
-    display:none;
+    opacity:0.9;
 }
 </style>
 </head>
@@ -139,9 +146,8 @@ button{
     <h3>Kabupaten Pemalang</h3>
 
     <select id="daySelect" onchange="updateSchedule()"></select>
-
-    <button onclick="downloadImage()">📸 Download Screenshot</button>
-    <button onclick="toggleIGMode()">📱 Mode IG</button>
+    <div class="dayText" id="dayText"></div>
+    <div class="dateText" id="dateText"></div>
 
     <div class="table">
         <div class="row"><span>Imsak</span><span id="imsak"></span></div>
@@ -154,23 +160,46 @@ button{
 </div>
 
 <div class="footer">
-© 2026 Jadwal Ramadhan Pemalang
+© 2026 MB · All Rights Reserved Jadwal Ramadhan Pemalang
 </div>
+
+<button class="shareBtn" onclick="shareImage()">Share</button>
 
 </div>
 
 <script>
-const schedule = {};
-for(let i=1;i<=30;i++){
-    schedule[i]={
-        imsak:"04:"+(28-i%3).toString().padStart(2,'0'),
-        subuh:"04:"+(38-i%3).toString().padStart(2,'0'),
-        dzuhur:"12:05",
-        ashar:"15:"+(18+i%3).toString().padStart(2,'0'),
-        maghrib:"18:"+(12+i%4).toString().padStart(2,'0'),
-        isya:"19:"+(20+i%3).toString().padStart(2,'0')
-    };
-}
+const data = {
+1:["Kamis, 19 Februari 2026","04.21","04.31","12.00","15.09","18.08","19.19"],
+2:["Jumat, 20 Februari 2026","04.21","04.31","12.00","15.08","18.08","19.18"],
+3:["Sabtu, 21 Februari 2026","04.21","04.31","12.00","15.08","18.08","19.18"],
+4:["Ahad, 22 Februari 2026","04.21","04.31","11.59","15.07","18.07","19.17"],
+5:["Senin, 23 Februari 2026","04.21","04.31","11.59","15.06","18.07","19.17"],
+6:["Selasa, 24 Februari 2026","04.21","04.31","11.59","15.05","18.07","19.17"],
+7:["Rabu, 25 Februari 2026","04.22","04.32","11.59","15.04","18.06","19.16"],
+8:["Kamis, 26 Februari 2026","04.22","04.32","11.59","15.03","18.06","19.16"],
+9:["Jumat, 27 Februari 2026","04.22","04.32","11.59","15.02","18.06","19.15"],
+10:["Sabtu, 28 Februari 2026","04.22","04.32","11.59","15.01","18.05","19.15"],
+11:["Ahad, 1 Maret 2026","04.22","04.32","11.58","15.00","18.05","19.14"],
+12:["Senin, 2 Maret 2026","04.22","04.32","11.58","15.59","18.05","19.14"],
+13:["Selasa, 3 Maret 2026","04.22","04.32","11.58","14.58","18.04","19.13"],
+14:["Rabu, 4 Maret 2026","04.22","04.32","11.58","14.59","18.04","19.13"],
+15:["Kamis, 5 Maret 2026","04.22","04.32","11.57","14.59","18.03","19.12"],
+16:["Jumat, 6 Maret 2026","04.22","04.32","11.57","15.00","18.03","19.12"],
+17:["Sabtu, 7 Maret 2026","04.22","04.32","11.57","15.00","18.03","19.11"],
+18:["Ahad, 8 Maret 2026","04.22","04.32","11.57","15.00","18.02","19.11"],
+19:["Senin, 9 Maret 2026","04.22","04.32","11.57","15.01","18.02","19.10"],
+20:["Selasa, 10 Maret 2026","04.22","04.32","11.56","15.01","18.01","19.10"],
+21:["Rabu, 11 Maret 2026","04.22","04.32","11.56","15.01","18.01","19.09"],
+22:["Kamis, 12 Maret 2026","04.22","04.32","11.56","15.02","18.00","19.09"],
+23:["Jumat, 13 Maret 2026","04.22","04.32","11.55","15.02","18.00","19.08"],
+24:["Sabtu, 14 Maret 2026","04.22","04.32","11.55","15.02","17.59","19.08"],
+25:["Ahad, 15 Maret 2026","04.22","04.32","11.55","15.03","17.59","19.07"],
+26:["Senin, 16 Maret 2026","04.22","04.32","11.55","15.03","17.58","19.07"],
+27:["Selasa, 17 Maret 2026","04.22","04.52","11.54","15.03","17.58","19.06"],
+28:["Rabu, 18 Maret 2026","04.22","04.32","11.54","15.03","17.57","19.06"],
+29:["Kamis, 19 Maret 2026","04.22","04.32","11.54","15.03","17.57","19.05"],
+30:["Jumat, 20 Maret 2026","04.22","04.32","11.54","15.04","17.56","19.05"]
+};
 
 const select=document.getElementById("daySelect");
 for(let i=1;i<=30;i++){
@@ -182,26 +211,38 @@ for(let i=1;i<=30;i++){
 
 function updateSchedule(){
     const day=select.value;
-    document.getElementById("imsak").innerText=schedule[day].imsak;
-    document.getElementById("subuh").innerText=schedule[day].subuh;
-    document.getElementById("dzuhur").innerText=schedule[day].dzuhur;
-    document.getElementById("ashar").innerText=schedule[day].ashar;
-    document.getElementById("maghrib").innerText=schedule[day].maghrib;
-    document.getElementById("isya").innerText=schedule[day].isya;
+    document.getElementById("dayText").innerText=day+" Ramadhan";
+    document.getElementById("dateText").innerText=data[day][0];
+    document.getElementById("imsak").innerText=data[day][1];
+    document.getElementById("subuh").innerText=data[day][2];
+    document.getElementById("dzuhur").innerText=data[day][3];
+    document.getElementById("ashar").innerText=data[day][4];
+    document.getElementById("maghrib").innerText=data[day][5];
+    document.getElementById("isya").innerText=data[day][6];
 }
 updateSchedule();
 
-function downloadImage(){
-    html2canvas(document.querySelector("#captureArea")).then(canvas=>{
-        let link=document.createElement("a");
-        link.download="imsakiyah-pemalang.png";
-        link.href=canvas.toDataURL();
-        link.click();
-    });
-}
+function shareImage(){
+    const day=select.value;
+    select.style.display="none";
+    document.getElementById("dayText").style.display="block";
 
-function toggleIGMode(){
-    document.getElementById("daySelect").classList.toggle("hide");
+    html2canvas(document.querySelector("#captureArea")).then(canvas=>{
+        canvas.toBlob(async function(blob){
+            const file=new File([blob],"imsakiyah-"+day+".png",{type:"image/png"});
+            if(navigator.canShare && navigator.canShare({files:[file]})){
+                await navigator.share({
+                    files:[file],
+                    title:"Jadwal Imsakiyah",
+                    text:"Jadwal Imsakiyah "+day+" Ramadhan - Kabupaten Pemalang"
+                });
+            } else {
+                alert("Fitur share aktif di browser HP modern.");
+            }
+            select.style.display="block";
+            document.getElementById("dayText").style.display="none";
+        });
+    });
 }
 </script>
 
