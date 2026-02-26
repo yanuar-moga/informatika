@@ -155,7 +155,6 @@ textarea{
   <div class="footer">© 2026 Informatika</div>
 </div>
 
-
 <script>
 document.addEventListener("DOMContentLoaded", function(){
 
@@ -171,39 +170,24 @@ const judul=document.getElementById("judul");
 const link=document.getElementById("link");
 const catatan=document.getElementById("catatan");
 
-/* =======================
-   DISABLE SAMPAI DATA SIAP
-======================= */
-kelasSelect.disabled = true;
-namaSelect.disabled = true;
+/* Disable sampai data siap */
+kelasSelect.disabled=true;
+namaSelect.disabled=true;
 namaSelect.innerHTML='<option value="">Memuat data...</option>';
 
-/* =======================
-   NORMALIZE
-======================= */
-function normalize(str){
-  return String(str).replace(/\s+/g," ").trim().toLowerCase();
-}
-
-/* =======================
-   LOAD DATA SISWA
-======================= */
+/* Load data siswa */
 fetch(url+"?action=getDataSiswa")
 .then(res=>res.json())
 .then(data=>{
   semuaSiswa=data || [];
-
-  kelasSelect.disabled = false; // aktifkan kelas
+  kelasSelect.disabled=false;
   namaSelect.innerHTML='<option value="">Pilih Kelas Dulu</option>';
 })
 .catch(()=>{
   namaSelect.innerHTML='<option value="">Gagal memuat data</option>';
 });
 
-
-/* =======================
-   FILTER
-======================= */
+/* FILTER SESUAI DATA JSON (KELAS FULL CAPS) */
 kelasSelect.addEventListener("change",function(){
 
   const kelasDipilih=this.value;
@@ -214,14 +198,14 @@ kelasSelect.addEventListener("change",function(){
     return;
   }
 
-  const kelasFix = normalize(kelasDipilih);
+  const kelasFix=kelasDipilih.trim().toUpperCase();
 
-  const siswaFilter = semuaSiswa.filter(s =>
-    s.rombel && normalize(s.rombel) === kelasFix
+  const siswaFilter=semuaSiswa.filter(s=>
+    s.rombel && s.rombel.trim().toUpperCase()===kelasFix
   );
 
   if(siswaFilter.length===0){
-    namaSelect.innerHTML='<option value="">Data tidak ditemukan</option>';
+    namaSelect.innerHTML='<option value="">Tidak ada data</option>';
     namaSelect.disabled=true;
     return;
   }
@@ -238,10 +222,7 @@ kelasSelect.addEventListener("change",function(){
 
 });
 
-
-/* =======================
-   SUBMIT
-======================= */
+/* SUBMIT */
 formTugas.addEventListener("submit",function(e){
 
   e.preventDefault();
