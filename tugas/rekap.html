@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>Rekap Pengumpulan Tugas</title>
@@ -11,8 +11,16 @@ body{
   padding:20px;
 }
 
-h2{
-  margin-bottom:5px;
+h2{ margin-bottom:10px; }
+
+.stat{
+  margin-bottom:15px;
+  font-weight:bold;
+}
+
+select{
+  padding:8px;
+  margin-bottom:15px;
 }
 
 .container{
@@ -37,17 +45,17 @@ ul{
 
 .sudah{ color:green; }
 .belum{ color:red; }
-
-.stat{
-  margin-bottom:15px;
-  font-weight:bold;
-}
 </style>
 </head>
 
 <body>
 
 <h2>📊 Rekap Pengumpulan Tugas</h2>
+
+<select id="filterKelas">
+  <option value="ALL">Semua Rombel</option>
+</select>
+
 <div class="stat" id="statistik">Memuat data...</div>
 
 <div class="container">
@@ -64,63 +72,72 @@ ul{
 
 <script>
 
-const url = "https://script.google.com/macros/s/AKfycbxgAo3v9_PFiqW8l7UtMeN0upTLs8FiRGzJuiLd4pyybxhayVlGGfMDxQ42UlSmoYU1/exec";
+const url = "https://script.google.com/macros/s/AKfycbwl_F3KnbrgDNq4zMTKEKwoILyRHY-yifteuAiqlEFPGkBxFNzNbXaaqF4X3JiRGxiv/exec";
 
-/* ===== DAFTAR SISWA TETAP ===== */
-const daftarSiswa = [
-  "Ahmad",
-  "Budi",
-  "Citra",
-  "Dewi",
-  "Eko",
-  "Fajar",
-  "Gina",
-  "Hadi",
-  "Intan",
-  "Joko"
-];
+let semuaSiswa = [];
+let semuaTugas = [];
 
 fetch(url)
 .then(res => res.json())
 .then(data => {
 
-  let sudahKirim = [];
+  semuaTugas = data.tugas.slice(1);
+  semuaSiswa = data.siswa.slice(1);
 
-  // Lewati baris header
-  data.slice(1).forEach(row => {
-    if(row[2]){
-      sudahKirim.push(row[2].toString().trim());
-    }
-  });
-
-  // Hilangkan duplikat
-  sudahKirim = [...new Set(sudahKirim)];
-
-  const belumKirim = daftarSiswa.filter(nama => !sudahKirim.includes(nama));
-
-  document.getElementById("statistik").innerHTML =
-    "Total Siswa: " + daftarSiswa.length +
-    " | Sudah: " + sudahKirim.length +
-    " | Belum: " + belumKirim.length;
-
-  const sudahList = document.getElementById("sudahList");
-  const belumList = document.getElementById("belumList");
-
-  sudahList.innerHTML = "";
-  belumList.innerHTML = "";
-
-  sudahKirim.forEach(nama=>{
-    sudahList.innerHTML += "<li>"+nama+"</li>";
-  });
-
-  belumKirim.forEach(nama=>{
-    belumList.innerHTML += "<li>"+nama+"</li>";
-  });
+  initFilter();
+  renderData("ALL");
 
 })
 .catch(()=>{
   document.getElementById("statistik").innerHTML = "Gagal mengambil data";
 });
+
+function initFilter(){
+  const select = document.getElementById("filterKelas");
+
+  const rombels = [...new Set(semuaSiswa.map(s=>s[3]))];
+
+  rombels.forEach(r=>{
+    select.innerHTML += `<option value="${r}">${r}</option>`;
+  });
+
+  select.addEventListener("change",function(){
+    renderData(this.value);
+  });
+}
+
+function renderData(kelas){
+
+  const siswaFilter = kelas==="ALL"
+    ? semuaSiswa
+    : semuaSiswa.filter(s=>s[3]===kelas);
+
+  let sudahKirim = semuaTugas.map(t=>t[2]);
+  sudahKirim = [...new Set(sudahKirim)];
+
+  const sudah = siswaFilter.filter(s=>sudahKirim.includes(s[1]));
+  const belum = siswaFilter.filter(s=>!sudahKirim.includes(s[1]));
+
+  document.getElementById("statistik").innerHTML =
+    "Total: " + siswaFilter.length +
+    " | Sudah: " + sudah.length +
+    " | Belum: " + belum.length;
+
+  const sudahList = document.getElementById("sudahList");
+  const belumList = document.getElementById("belumList");
+
+  sudahList.innerHTML="";
+  belumList.innerHTML="";
+
+  sudah.forEach(s=>{
+    sudahList.innerHTML += `<li>${s[1]}</li>`;
+  });
+
+  belum.forEach(s=>{
+    belumList.innerHTML += `<li>${s[1]}</li>`;
+  });
+
+}
 
 </script>
 
