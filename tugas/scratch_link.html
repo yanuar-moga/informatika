@@ -163,37 +163,105 @@ textarea{
 </div>
 
 <script>
-document.getElementById("kelas").addEventListener("change", function(){
 
-  const kelasDipilih=this.value;
-  const selectNama=document.getElementById("nama");
+const url="https://script.google.com/macros/s/AKfycbwuTavspDkxW3EBiUQyT6Fvr2XvPehhcbsENdsjELzRk3-Xv4xQZb8JUM1hPhYfNVcF/exec";
 
-  selectNama.innerHTML="<option>Memuat...</option>";
+let semuaSiswa=[];
 
-  if(!kelasDipilih){
-    selectNama.innerHTML="<option>Pilih Kelas Dulu</option>";
+const kelasSelect=document.getElementById("kelas");
+const namaSelect=document.getElementById("nama");
+
+/* NONAKTIFKAN NAMA DULU */
+namaSelect.disabled=true;
+
+/* AMBIL DATA */
+fetch(url)
+.then(res=>res.json())
+.then(data=>{
+
+  semuaSiswa=data.slice(1);
+
+  /* AKTIFKAN SETELAH DATA SIAP */
+  namaSelect.disabled=false;
+
+  kelasSelect.addEventListener("change",function(){
+
+    const kelasDipilih=this.value;
+
+    if(!kelasDipilih){
+      namaSelect.innerHTML="<option>Pilih Kelas Dulu</option>";
+      return;
+    }
+
+    namaSelect.innerHTML="<option>Memuat...</option>";
+
+    const siswaFilter = semuaSiswa.filter(s =>
+      s[3].toUpperCase().includes(kelasDipilih.toUpperCase())
+    );
+
+    namaSelect.innerHTML="<option value=''>Pilih Nama</option>";
+
+    siswaFilter.forEach(s=>{
+      namaSelect.innerHTML+=
+        `<option value="${s[1]}">${s[1]}</option>`;
+    });
+
+  });
+
+})
+.catch(err=>{
+  alert("Gagal mengambil data siswa");
+  console.log(err);
+});
+
+
+/* SUBMIT */
+document.getElementById("formTugas").addEventListener("submit",function(e){
+
+  e.preventDefault();
+
+  const btn=document.getElementById("btnKirim");
+
+  if(!kelas.value||!nama.value||!judul.value||!link.value){
+    alert("Semua field wajib diisi!");
     return;
   }
 
-  const siswaFilter = semuaSiswa.filter(s =>
-    s[3]?.toString().toUpperCase().includes(
-      kelasDipilih.toUpperCase()
-    )
-  );
+  btn.disabled=true;
+  btn.innerText="Mengirim...";
 
-  selectNama.innerHTML="<option value=''>Pilih Nama</option>";
+  fetch(url,{
+    method:"POST",
+    body:new URLSearchParams({
+      kelas:kelas.value,
+      nama:nama.value,
+      judul:judul.value,
+      link:link.value,
+      catatan:catatan.value
+    })
+  })
+  .then(res=>res.text())
+  .then(res=>{
 
-  if(siswaFilter.length===0){
-    selectNama.innerHTML+="<option>Tidak ada siswa</option>";
-    return;
-  }
+    if(res==="SUCCESS"){
+      alert("Tugas berhasil dikirim!");
+      formTugas.reset();
+      namaSelect.innerHTML="<option>Pilih Kelas Dulu</option>";
+    }else{
+      alert("Gagal mengirim data");
+    }
 
-  siswaFilter.forEach(s=>{
-    selectNama.innerHTML +=
-      `<option value="${s[1]}">${s[1]}</option>`;
+    btn.disabled=false;
+    btn.innerText="Kirim Tugas";
+  })
+  .catch(()=>{
+    alert("Terjadi kesalahan koneksi");
+    btn.disabled=false;
+    btn.innerText="Kirim Tugas";
   });
 
 });
+
 </script>
 
 </body>
