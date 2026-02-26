@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
 <meta charset="UTF-8">
 <title>Rekap Pengumpulan Tugas</title>
@@ -64,76 +64,9 @@ ul{
 
 <script>
 
-const url = "<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Rekap Pengumpulan Tugas</title>
-
-<style>
-body{
-  font-family:Arial;
-  background:#f4f6f9;
-  padding:20px;
-}
-
-h2{
-  margin-bottom:5px;
-}
-
-.container{
-  display:flex;
-  gap:20px;
-  flex-wrap:wrap;
-}
-
-.box{
-  flex:1;
-  min-width:250px;
-  background:white;
-  padding:15px;
-  border-radius:10px;
-  box-shadow:0 5px 15px rgba(0,0,0,.1);
-}
-
-ul{
-  padding-left:18px;
-  font-size:14px;
-}
-
-.sudah{ color:green; }
-.belum{ color:red; }
-
-.stat{
-  margin-bottom:15px;
-  font-weight:bold;
-}
-</style>
-</head>
-
-<body>
-
-<h2>📊 Rekap Pengumpulan Tugas</h2>
-<div class="stat" id="statistik">Memuat data...</div>
-
-<div class="container">
-  <div class="box">
-    <h3 class="sudah">🟢 Sudah Mengirim</h3>
-    <ul id="sudahList"></ul>
-  </div>
-
-  <div class="box">
-    <h3 class="belum">🔴 Belum Mengirim</h3>
-    <ul id="belumList"></ul>
-  </div>
-</div>
-
-<script>
-
-const url = "https://script.google.com/macros/s/AKfycbx4aqDyNagpIxnvqpBZFt9yecesl5VNSF2eTm834u0sAcIC93ZCOZei01FqcHevtiwM/exec";
+const url = "https://script.google.com/macros/s/AKfycbxgAo3v9_PFiqW8l7UtMeN0upTLs8FiRGzJuiLd4pyybxhayVlGGfMDxQ42UlSmoYU1/exec";
 
 /* ===== DAFTAR SISWA TETAP ===== */
-/* EDIT SESUAI DATA SISWA ANDA */
 const daftarSiswa = [
   "Ahmad",
   "Budi",
@@ -148,19 +81,19 @@ const daftarSiswa = [
 ];
 
 fetch(url)
-.then(res=>res.json())
-.then(data=>{
+.then(res => res.json())
+.then(data => {
 
   let sudahKirim = [];
 
-  // ambil nama dari spreadsheet (kolom ke-3)
-  data.slice(1).forEach(row=>{
+  // Lewati baris header
+  data.slice(1).forEach(row => {
     if(row[2]){
-      sudahKirim.push(row[2]);
+      sudahKirim.push(row[2].toString().trim());
     }
   });
 
-  // hilangkan duplikat
+  // Hilangkan duplikat
   sudahKirim = [...new Set(sudahKirim)];
 
   const belumKirim = daftarSiswa.filter(nama => !sudahKirim.includes(nama));
@@ -173,64 +106,8 @@ fetch(url)
   const sudahList = document.getElementById("sudahList");
   const belumList = document.getElementById("belumList");
 
-  sudahKirim.forEach(nama=>{
-    sudahList.innerHTML += "<li>"+nama+"</li>";
-  });
-
-  belumKirim.forEach(nama=>{
-    belumList.innerHTML += "<li>"+nama+"</li>";
-  });
-
-})
-.catch(()=>{
-  document.getElementById("statistik").innerHTML = "Gagal mengambil data";
-});
-
-</script>
-
-</body>
-</html>";
-
-/* ===== DAFTAR SISWA TETAP ===== */
-/* EDIT SESUAI DATA SISWA ANDA */
-const daftarSiswa = [
-  "Ahmad",
-  "Budi",
-  "Citra",
-  "Dewi",
-  "Eko",
-  "Fajar",
-  "Gina",
-  "Hadi",
-  "Intan",
-  "Joko"
-];
-
-fetch(url)
-.then(res=>res.json())
-.then(data=>{
-
-  let sudahKirim = [];
-
-  // ambil nama dari spreadsheet (kolom ke-3)
-  data.slice(1).forEach(row=>{
-    if(row[2]){
-      sudahKirim.push(row[2]);
-    }
-  });
-
-  // hilangkan duplikat
-  sudahKirim = [...new Set(sudahKirim)];
-
-  const belumKirim = daftarSiswa.filter(nama => !sudahKirim.includes(nama));
-
-  document.getElementById("statistik").innerHTML =
-    "Total Siswa: " + daftarSiswa.length +
-    " | Sudah: " + sudahKirim.length +
-    " | Belum: " + belumKirim.length;
-
-  const sudahList = document.getElementById("sudahList");
-  const belumList = document.getElementById("belumList");
+  sudahList.innerHTML = "";
+  belumList.innerHTML = "";
 
   sudahKirim.forEach(nama=>{
     sudahList.innerHTML += "<li>"+nama+"</li>";
