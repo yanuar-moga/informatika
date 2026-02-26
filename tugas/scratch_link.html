@@ -3,116 +3,113 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Pengumpulan Tugas - Informatika</title>
+<title>Form Pengumpulan Tugas</title>
 
 <style>
-* { box-sizing: border-box; }
+*{box-sizing:border-box}
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg,#e3f2fd,#bbdefb);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(135deg,#e3f2fd,#bbdefb);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
 }
 
-.login-card {
-  width: 380px;
-  background: #fff;
-  border-radius: 18px;
-  padding: 28px 26px 22px;
-  box-shadow: 0 12px 30px rgba(0,0,0,.15);
-  text-align: center;
+.card{
+  width:380px;
+  background:#fff;
+  border-radius:18px;
+  padding:28px 26px 22px;
+  box-shadow:0 12px 30px rgba(0,0,0,.15);
+  text-align:center;
 }
 
-.logo {
-  width: 80px;
-  margin-bottom: 10px;
+.logo{
+  width:80px;
+  margin-bottom:10px;
 }
 
-.title {
-  margin: 6px 0 18px;
-  color: #0A4FA3;
-  font-size: 20px;
+.title{
+  margin:6px 0 18px;
+  color:#0A4FA3;
+  font-size:20px;
 }
 
-.form { text-align: left; }
+.form{text-align:left}
 
-.field {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 14px;
+.field{
+  display:flex;
+  flex-direction:column;
+  margin-bottom:14px;
 }
 
-.label-text {
-  font-size: 13px;
-  margin-bottom: 5px;
-  color: #444;
+.label-text{
+  font-size:13px;
+  margin-bottom:5px;
+  color:#444;
 }
 
-.input-field, select, textarea {
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  height: 42px;
-  outline: none;
+.input-field,select,textarea{
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:14px;
+  height:42px;
+  outline:none;
 }
 
-textarea {
-  height: 60px;
-  resize: none;
+textarea{
+  height:65px;
+  resize:none;
 }
 
-.input-field:focus, select:focus, textarea:focus {
-  border-color: #0A4FA3;
+.input-field:focus,select:focus,textarea:focus{
+  border-color:#0A4FA3;
 }
 
-.btn-primary {
-  width: 100%;
-  padding: 11px;
-  background: #0A4FA3;
-  border: none;
-  border-radius: 10px;
-  color: white;
-  font-size: 15px;
-  font-weight: bold;
-  cursor: pointer;
+.btn-primary{
+  width:100%;
+  padding:11px;
+  background:#0A4FA3;
+  border:none;
+  border-radius:10px;
+  color:#fff;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
 }
 
-.btn-primary:hover {
-  background: #083d82;
+.btn-primary:hover{
+  background:#083d82;
 }
 
-.btn-primary:disabled {
+.btn-primary:disabled{
   background:#7a9bc7;
   cursor:not-allowed;
 }
 
-.footer {
-  margin-top: 18px;
-  font-size: 12px;
-  color: #777;
+.footer{
+  margin-top:18px;
+  font-size:12px;
+  color:#777;
 }
 </style>
 </head>
 
 <body>
 
-<div class="login-card">
+<div class="card">
 
-  <img src="assets/logo.png" alt="Logo Sekolah" class="logo" />
+  <img src="assets/logo.png" class="logo">
   <h1 class="title">Form Pengumpulan Tugas</h1>
 
   <form id="formTugas" class="form">
 
-    <div class="field">
-      <span class="label-text">Judul Tugas</span>
-      <input id="judul" class="input-field" required />
-    </div>
-
+    <!-- 1️⃣ KELAS -->
     <div class="field">
       <span class="label-text">Kelas</span>
       <select id="kelas" required>
@@ -129,6 +126,7 @@ textarea {
       </select>
     </div>
 
+    <!-- 2️⃣ NAMA -->
     <div class="field">
       <span class="label-text">Nama Lengkap</span>
       <select id="nama" required>
@@ -136,11 +134,19 @@ textarea {
       </select>
     </div>
 
+    <!-- 3️⃣ JUDUL -->
     <div class="field">
-      <span class="label-text">Link Tugas</span>
-      <input id="link" type="url" class="input-field" required />
+      <span class="label-text">Judul Tugas</span>
+      <input id="judul" class="input-field" required>
     </div>
 
+    <!-- 4️⃣ LINK -->
+    <div class="field">
+      <span class="label-text">Link Tugas</span>
+      <input id="link" type="url" class="input-field" required>
+    </div>
+
+    <!-- 5️⃣ CATATAN -->
     <div class="field">
       <span class="label-text">Catatan</span>
       <textarea id="catatan"></textarea>
@@ -157,87 +163,81 @@ textarea {
 </div>
 
 <script>
-const url = "https://script.google.com/macros/s/AKfycbwuTavspDkxW3EBiUQyT6Fvr2XvPehhcbsENdsjELzRk3-Xv4xQZb8JUM1hPhYfNVcF/exec";
 
-let semuaSiswa = [];
+const url="https://script.google.com/macros/s/AKfycbwuTavspDkxW3EBiUQyT6Fvr2XvPehhcbsENdsjELzRk3-Xv4xQZb8JUM1hPhYfNVcF/exec";
 
-// Ambil data siswa
+let semuaSiswa=[];
+
 fetch(url)
-.then(res => res.json())
-.then(data => {
-  semuaSiswa = data.slice(1);
+.then(res=>res.json())
+.then(data=>{
+  semuaSiswa=data.slice(1);
 })
-.catch(() => alert("Gagal mengambil data siswa"));
+.catch(()=>alert("Gagal mengambil data siswa"));
 
+document.getElementById("kelas").addEventListener("change",function(){
 
-// Saat kelas dipilih
-document.getElementById("kelas").addEventListener("change", function(){
+  const kelasDipilih=this.value;
+  const selectNama=document.getElementById("nama");
 
-  const kelasDipilih = this.value;
-  const selectNama = document.getElementById("nama");
-
-  selectNama.innerHTML = "<option value=''>Memuat...</option>";
+  selectNama.innerHTML="<option>Memuat...</option>";
 
   if(!kelasDipilih){
-    selectNama.innerHTML = "<option value=''>Pilih Kelas Dulu</option>";
+    selectNama.innerHTML="<option>Pilih Kelas Dulu</option>";
     return;
   }
 
-  const siswaFilter = semuaSiswa.filter(s =>
-    s[3] === kelasDipilih
+  const siswaFilter=semuaSiswa.filter(s=>
+    s[3]?.toString().trim().toUpperCase() ===
+    kelasDipilih.toString().trim().toUpperCase()
   );
 
-  selectNama.innerHTML = "<option value=''>Pilih Nama</option>";
+  selectNama.innerHTML="<option value=''>Pilih Nama</option>";
 
-  siswaFilter.forEach(s => {
-    selectNama.innerHTML += `
-      <option value="${s[1]}">${s[1]}</option>
-    `;
+  if(siswaFilter.length===0){
+    selectNama.innerHTML+="<option>Tidak ada siswa</option>";
+    return;
+  }
+
+  siswaFilter.forEach(s=>{
+    selectNama.innerHTML+=
+      `<option value="${s[1]}">${s[1]}</option>`;
   });
 
 });
 
-
-// Kirim data
-document.getElementById("formTugas").addEventListener("submit", function(e){
+document.getElementById("formTugas").addEventListener("submit",function(e){
 
   e.preventDefault();
 
-  const btn = document.getElementById("btnKirim");
+  const btn=document.getElementById("btnKirim");
 
-  const judul = judul.value.trim();
-  const kelas = kelas.value;
-  const nama = nama.value;
-  const link = link.value.trim();
-  const catatan = catatan.value.trim();
-
-  if(!judul || !kelas || !nama || !link){
+  if(!kelas.value||!nama.value||!judul.value||!link.value){
     alert("Semua field wajib diisi!");
     return;
   }
 
-  btn.disabled = true;
-  btn.innerText = "Mengirim...";
+  btn.disabled=true;
+  btn.innerText="Mengirim...";
 
   fetch(url,{
     method:"POST",
     body:new URLSearchParams({
-      judul,
-      nama,
-      kelas,
-      link,
-      catatan
+      kelas:kelas.value,
+      nama:nama.value,
+      judul:judul.value,
+      link:link.value,
+      catatan:catatan.value
     })
   })
   .then(res=>res.text())
   .then(res=>{
 
-    if(res === "SUCCESS"){
+    if(res==="SUCCESS"){
       alert("Tugas berhasil dikirim!");
       formTugas.reset();
-      document.getElementById("nama").innerHTML =
-        "<option value=''>Pilih Kelas Dulu</option>";
-    } else {
+      nama.innerHTML="<option>Pilih Kelas Dulu</option>";
+    }else{
       alert("Gagal mengirim data");
     }
 
@@ -251,6 +251,7 @@ document.getElementById("formTugas").addEventListener("submit", function(e){
   });
 
 });
+
 </script>
 
 </body>
