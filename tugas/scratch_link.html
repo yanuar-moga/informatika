@@ -99,30 +99,6 @@ textarea { resize: none; }
   cursor:pointer;
 }
 
-.table-container{
-  margin-top:15px;
-  max-height:200px;
-  overflow:auto;
-  display:none;
-  text-align:left;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:12px;
-}
-
-th,td{
-  border:1px solid #ddd;
-  padding:6px;
-}
-
-th{
-  background:#0A4FA3;
-  color:white;
-}
-
 .footer {
   margin-top: 18px;
   font-size: 12px;
@@ -177,20 +153,6 @@ th{
     </div>
 
     <button id="btnKirim" class="btn-primary" onclick="kirim()">Kirim Tugas</button>
-    <button class="btn-secondary" onclick="toggleData()">📊 Lihat Data Masuk</button>
-
-    <div class="table-container" id="tableBox">
-      <table>
-        <thead>
-          <tr>
-            <th>Nama</th>
-            <th>Kelas</th>
-            <th>Judul</th>
-          </tr>
-        </thead>
-        <tbody id="dataBody"></tbody>
-      </table>
-    </div>
 
   </div>
 
@@ -199,10 +161,11 @@ th{
 </div>
 
 <script>
-const url = "https://script.google.com/macros/s/AKfycbxpjcmCFQcc_QxtTeLQE6OvN91U6sEtMNiMEXP7PmWegZ0g5mpeGPmdZy4MykLg5goQ/exec";
 
-/* VALIDASI + KIRIM */
+const url = "https://script.google.com/macros/s/AKfycbxgAo3v9_PFiqW8l7UtMeN0upTLs8FiRGzJuiLd4pyybxhayVlGGfMDxQ42UlSmoYU1/exec";
+
 function kirim(){
+
   const btn = document.getElementById("btnKirim");
   const judul = document.getElementById("judul").value.trim();
   const nama = document.getElementById("nama").value.trim();
@@ -220,14 +183,17 @@ function kirim(){
 
   fetch(url,{
     method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({judul,nama,kelas,link,catatan})
+    body:new URLSearchParams({
+      judul:judul,
+      nama:nama,
+      kelas:kelas,
+      link:link,
+      catatan:catatan
+    })
   })
-  .then(res=>res.json())
+  .then(res=>res.text())
   .then(res=>{
-    if(res.status==="success"){
+    if(res === "SUCCESS"){
       alert("Tugas berhasil dikirim!");
       document.getElementById("judul").value="";
       document.getElementById("nama").value="";
@@ -235,41 +201,19 @@ function kirim(){
       document.getElementById("link").value="";
       document.getElementById("catatan").value="";
     }else{
-      alert("Gagal mengirim data");
+      alert("Gagal mengirim data: " + res);
     }
     btn.disabled=false;
     btn.innerText="Kirim Tugas";
   })
-  .catch(()=>{
+  .catch(err=>{
     alert("Terjadi kesalahan koneksi");
     btn.disabled=false;
     btn.innerText="Kirim Tugas";
   });
+
 }
 
-/* AMBIL DATA */
-function toggleData(){
-  const box = document.getElementById("tableBox");
-  box.style.display = box.style.display==="block"?"none":"block";
-
-  if(box.style.display==="block"){
-    fetch(url)
-    .then(res=>res.json())
-    .then(data=>{
-      const body = document.getElementById("dataBody");
-      body.innerHTML="";
-      data.reverse().forEach(row=>{
-        body.innerHTML += `
-          <tr>
-            <td>${row[2]}</td>
-            <td>${row[3]}</td>
-            <td>${row[1]}</td>
-          </tr>`;
-      });
-    })
-    .catch(()=>alert("Gagal mengambil data"));
-  }
-}
 </script>
 
 </body>
