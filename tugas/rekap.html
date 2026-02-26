@@ -72,69 +72,88 @@ ul{
 
 <script>
 
-const url = "https://script.google.com/macros/s/AKfycbwl_F3KnbrgDNq4zMTKEKwoILyRHY-yifteuAiqlEFPGkBxFNzNbXaaqF4X3JiRGxiv/exec";
+const url="https://script.google.com/macros/s/AKfycbx0pBzQehWLYRcH20TRjIdHzBlRJy_EvDGPuhZJGx1J0VTieGjNbxFCfmILLK_q2J5v/exec";
 
-let semuaSiswa = [];
-let semuaTugas = [];
+let semuaSiswa=[];
+let semuaTugas=[];
 
-fetch(url)
-.then(res => res.json())
-.then(data => {
+/* =========================
+   LOAD DATA
+========================= */
+Promise.all([
+  fetch(url+"?action=getDataSiswa").then(r=>r.json()),
+  fetch(url+"?action=getDataTugas").then(r=>r.json())
+])
+.then(([siswa,tugas])=>{
 
-  semuaTugas = data.tugas.slice(1);
-  semuaSiswa = data.siswa.slice(1);
+  semuaSiswa=siswa;
+  semuaTugas=tugas;
 
   initFilter();
   renderData("ALL");
 
 })
 .catch(()=>{
-  document.getElementById("statistik").innerHTML = "Gagal mengambil data";
+  document.getElementById("statistik").innerHTML="Gagal mengambil data";
 });
 
-function initFilter(){
-  const select = document.getElementById("filterKelas");
 
-  const rombels = [...new Set(semuaSiswa.map(s=>s[3]))];
+/* =========================
+   INIT FILTER
+========================= */
+function initFilter(){
+
+  const select=document.getElementById("filterKelas");
+
+  const rombels=[...new Set(semuaSiswa.map(s=>s.rombel))];
+
+  rombels.sort();
 
   rombels.forEach(r=>{
-    select.innerHTML += `<option value="${r}">${r}</option>`;
+    select.innerHTML+=`<option value="${r}">${r}</option>`;
   });
 
   select.addEventListener("change",function(){
     renderData(this.value);
   });
+
 }
 
+
+/* =========================
+   RENDER DATA
+========================= */
 function renderData(kelas){
 
-  const siswaFilter = kelas==="ALL"
+  const siswaFilter=kelas==="ALL"
     ? semuaSiswa
-    : semuaSiswa.filter(s=>s[3]===kelas);
+    : semuaSiswa.filter(s=>s.rombel===kelas);
 
-  let sudahKirim = semuaTugas.map(t=>t[2]);
-  sudahKirim = [...new Set(sudahKirim)];
+  const sudahKirim=[...new Set(semuaTugas.map(t=>t.nama))];
 
-  const sudah = siswaFilter.filter(s=>sudahKirim.includes(s[1]));
-  const belum = siswaFilter.filter(s=>!sudahKirim.includes(s[1]));
+  const sudah=siswaFilter.filter(s=>sudahKirim.includes(s.nama));
+  const belum=siswaFilter.filter(s=>!sudahKirim.includes(s.nama));
 
-  document.getElementById("statistik").innerHTML =
-    "Total: " + siswaFilter.length +
-    " | Sudah: " + sudah.length +
-    " | Belum: " + belum.length;
+  document.getElementById("statistik").innerHTML=
+    "Total: "+siswaFilter.length+
+    " | Sudah: "+sudah.length+
+    " | Belum: "+belum.length;
 
-  const sudahList = document.getElementById("sudahList");
-  const belumList = document.getElementById("belumList");
+  const sudahList=document.getElementById("sudahList");
+  const belumList=document.getElementById("belumList");
 
   sudahList.innerHTML="";
   belumList.innerHTML="";
 
+  sudah.sort((a,b)=>a.nama.localeCompare(b.nama));
+  belum.sort((a,b)=>a.nama.localeCompare(b.nama));
+
   sudah.forEach(s=>{
-    sudahList.innerHTML += `<li>${s[1]}</li>`;
+    sudahList.innerHTML+=`<li>${s.nama}</li>`;
   });
 
   belum.forEach(s=>{
-    belumList.innerHTML += `<li>${s[1]}</li>`;
+    belumList.innerHTML+=`<li>${s.nama}</li>`;
   });
 
 }
