@@ -84,6 +84,11 @@ textarea { resize: none; }
   background: #083d82;
 }
 
+.btn-primary:disabled{
+  background:#7a9bc7;
+  cursor:not-allowed;
+}
+
 .btn-secondary{
   width:100%;
   padding:10px;
@@ -171,7 +176,7 @@ th{
       <textarea id="catatan" rows="2"></textarea>
     </div>
 
-    <button class="btn-primary" onclick="kirim()">Kirim Tugas</button>
+    <button id="btnKirim" class="btn-primary" onclick="kirim()">Kirim Tugas</button>
     <button class="btn-secondary" onclick="toggleData()">📊 Lihat Data Masuk</button>
 
     <div class="table-container" id="tableBox">
@@ -194,10 +199,11 @@ th{
 </div>
 
 <script>
-const url = "https://script.google.com/macros/s/AKfycbxPzDZv_6la9QD82dxOcZjp--DScG7ZAMmWz0JzC1SH1TupF-uTB1L_aFTCpl3Lenud/exec";
+const url = "https://script.google.com/macros/s/AKfycbxpjcmCFQcc_QxtTeLQE6OvN91U6sEtMNiMEXP7PmWegZ0g5mpeGPmdZy4MykLg5goQ/exec";
 
 /* VALIDASI + KIRIM */
 function kirim(){
+  const btn = document.getElementById("btnKirim");
   const judul = document.getElementById("judul").value.trim();
   const nama = document.getElementById("nama").value.trim();
   const kelas = document.getElementById("kelas").value;
@@ -209,39 +215,60 @@ function kirim(){
     return;
   }
 
+  btn.disabled = true;
+  btn.innerText = "Mengirim...";
+
   fetch(url,{
     method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
     body:JSON.stringify({judul,nama,kelas,link,catatan})
   })
   .then(res=>res.json())
   .then(res=>{
     if(res.status==="success"){
       alert("Tugas berhasil dikirim!");
-      location.reload();
+      document.getElementById("judul").value="";
+      document.getElementById("nama").value="";
+      document.getElementById("kelas").value="";
+      document.getElementById("link").value="";
+      document.getElementById("catatan").value="";
+    }else{
+      alert("Gagal mengirim data");
     }
+    btn.disabled=false;
+    btn.innerText="Kirim Tugas";
   })
-  .catch(()=>alert("Gagal mengirim data"));
+  .catch(()=>{
+    alert("Terjadi kesalahan koneksi");
+    btn.disabled=false;
+    btn.innerText="Kirim Tugas";
+  });
 }
 
 /* AMBIL DATA */
 function toggleData(){
   const box = document.getElementById("tableBox");
-  box.style.display = box.style.display==="none"?"block":"none";
+  box.style.display = box.style.display==="block"?"none":"block";
 
-  fetch(url)
-  .then(res=>res.json())
-  .then(data=>{
-    const body = document.getElementById("dataBody");
-    body.innerHTML="";
-    data.reverse().forEach(row=>{
-      body.innerHTML += `
-        <tr>
-          <td>${row[2]}</td>
-          <td>${row[3]}</td>
-          <td>${row[1]}</td>
-        </tr>`;
-    });
-  });
+  if(box.style.display==="block"){
+    fetch(url)
+    .then(res=>res.json())
+    .then(data=>{
+      const body = document.getElementById("dataBody");
+      body.innerHTML="";
+      data.reverse().forEach(row=>{
+        body.innerHTML += `
+          <tr>
+            <td>${row[2]}</td>
+            <td>${row[3]}</td>
+            <td>${row[1]}</td>
+          </tr>`;
+      });
+    })
+    .catch(()=>alert("Gagal mengambil data"));
+  }
 }
 </script>
 
