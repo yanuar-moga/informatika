@@ -163,19 +163,7 @@ textarea{
 </div>
 
 <script>
-
-const url="https://script.google.com/macros/s/AKfycbwuTavspDkxW3EBiUQyT6Fvr2XvPehhcbsENdsjELzRk3-Xv4xQZb8JUM1hPhYfNVcF/exec";
-
-let semuaSiswa=[];
-
-fetch(url)
-.then(res=>res.json())
-.then(data=>{
-  semuaSiswa=data.slice(1);
-})
-.catch(()=>alert("Gagal mengambil data siswa"));
-
-document.getElementById("kelas").addEventListener("change",function(){
+document.getElementById("kelas").addEventListener("change", function(){
 
   const kelasDipilih=this.value;
   const selectNama=document.getElementById("nama");
@@ -187,9 +175,10 @@ document.getElementById("kelas").addEventListener("change",function(){
     return;
   }
 
-  const siswaFilter=semuaSiswa.filter(s=>
-    s[3]?.toString().trim().toUpperCase() ===
-    kelasDipilih.toString().trim().toUpperCase()
+  const siswaFilter = semuaSiswa.filter(s =>
+    s[3]?.toString().toUpperCase().includes(
+      kelasDipilih.toUpperCase()
+    )
   );
 
   selectNama.innerHTML="<option value=''>Pilih Nama</option>";
@@ -200,58 +189,11 @@ document.getElementById("kelas").addEventListener("change",function(){
   }
 
   siswaFilter.forEach(s=>{
-    selectNama.innerHTML+=
+    selectNama.innerHTML +=
       `<option value="${s[1]}">${s[1]}</option>`;
   });
 
 });
-
-document.getElementById("formTugas").addEventListener("submit",function(e){
-
-  e.preventDefault();
-
-  const btn=document.getElementById("btnKirim");
-
-  if(!kelas.value||!nama.value||!judul.value||!link.value){
-    alert("Semua field wajib diisi!");
-    return;
-  }
-
-  btn.disabled=true;
-  btn.innerText="Mengirim...";
-
-  fetch(url,{
-    method:"POST",
-    body:new URLSearchParams({
-      kelas:kelas.value,
-      nama:nama.value,
-      judul:judul.value,
-      link:link.value,
-      catatan:catatan.value
-    })
-  })
-  .then(res=>res.text())
-  .then(res=>{
-
-    if(res==="SUCCESS"){
-      alert("Tugas berhasil dikirim!");
-      formTugas.reset();
-      nama.innerHTML="<option>Pilih Kelas Dulu</option>";
-    }else{
-      alert("Gagal mengirim data");
-    }
-
-    btn.disabled=false;
-    btn.innerText="Kirim Tugas";
-  })
-  .catch(()=>{
-    alert("Terjadi kesalahan koneksi");
-    btn.disabled=false;
-    btn.innerText="Kirim Tugas";
-  });
-
-});
-
 </script>
 
 </body>
