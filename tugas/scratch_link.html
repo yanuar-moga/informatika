@@ -1,74 +1,153 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Form Pengumpulan Tugas</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Pengumpulan Tugas - Aplikasi Sekolah</title>
 
 <style>
-body{
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg,#4e73df,#1cc88a);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    margin:0;
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#e3f2fd,#bbdefb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding:20px;
 }
 
-.container{
-    background:#fff;
-    padding:30px;
-    width:400px;
-    border-radius:12px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.2);
+.card {
+  width: 420px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 28px 26px 22px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.15);
+  text-align: center;
 }
 
-h2{
-    text-align:center;
-    margin-bottom:20px;
+.logo {
+  width: 80px;
+  margin-bottom: 10px;
 }
 
-input, select, textarea{
-    width:100%;
-    padding:10px;
-    margin-bottom:15px;
-    border-radius:8px;
-    border:1px solid #ccc;
-    font-size:14px;
+.title {
+  margin: 6px 0 18px;
+  color: #0A4FA3;
+  font-size: 20px;
 }
 
-button{
-    width:100%;
-    padding:12px;
-    background:#4e73df;
-    color:white;
-    border:none;
-    border-radius:8px;
-    font-size:16px;
-    cursor:pointer;
+.form { text-align: left; }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
 }
 
-button:hover{
-    background:#2e59d9;
+.label-text {
+  font-size: 13px;
+  margin-bottom: 5px;
+  color: #444;
 }
 
-.success{
-    text-align:center;
-    color:green;
-    display:none;
+.input-field, select, textarea {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  outline: none;
+}
+
+.input-field:focus, select:focus, textarea:focus {
+  border-color: #0A4FA3;
+}
+
+textarea { resize: none; }
+
+.btn-primary {
+  width: 100%;
+  padding: 11px;
+  background: #0A4FA3;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top:10px;
+}
+
+.btn-primary:hover {
+  background: #083d82;
+}
+
+.btn-secondary{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  background:#f1f1f1;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.table-container{
+  margin-top:15px;
+  max-height:200px;
+  overflow:auto;
+  display:none;
+  text-align:left;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+
+th,td{
+  border:1px solid #ddd;
+  padding:6px;
+}
+
+th{
+  background:#0A4FA3;
+  color:white;
+}
+
+.footer {
+  margin-top: 18px;
+  font-size: 12px;
+  color: #777;
 }
 </style>
 </head>
+
 <body>
 
-<div class="container">
-    <h2>Pengumpulan Tugas</h2>
+<div class="card">
 
-    <input type="text" id="judul" placeholder="Judul Tugas" required>
-    <input type="text" id="nama" placeholder="Nama Lengkap" required>
+  <img src="assets/logo.png" alt="Logo Sekolah" class="logo" />
+  <h1 class="title">Form Pengumpulan Tugas</h1>
 
-    <select id="kelas">
+  <div class="form">
+
+    <div class="field">
+      <span class="label-text">Judul Tugas</span>
+      <input id="judul" class="input-field" required />
+    </div>
+
+    <div class="field">
+      <span class="label-text">Nama Lengkap</span>
+      <input id="nama" class="input-field" required />
+    </div>
+
+    <div class="field">
+      <span class="label-text">Kelas</span>
+      <select id="kelas" required>
         <option value="">Pilih Kelas</option>
         <option>7A</option>
         <option>7B</option>
@@ -79,41 +158,90 @@ button:hover{
         <option>7G</option>
         <option>7H</option>
         <option>7I</option>
-    </select>
-
-    <input type="url" id="link" placeholder="Link Tugas (Google Drive / dll)" required>
-
-    <textarea id="catatan" rows="3" placeholder="Catatan (Opsional)"></textarea>
-
-    <button onclick="kirimData()">Kirim</button>
-
-    <div class="success" id="successMsg">
-        ✅ Tugas berhasil dikirim!
+      </select>
     </div>
+
+    <div class="field">
+      <span class="label-text">Link Tugas</span>
+      <input id="link" type="url" class="input-field" required />
+    </div>
+
+    <div class="field">
+      <span class="label-text">Catatan</span>
+      <textarea id="catatan" rows="2"></textarea>
+    </div>
+
+    <button class="btn-primary" onclick="kirim()">Kirim Tugas</button>
+    <button class="btn-secondary" onclick="toggleData()">📊 Lihat Data Masuk</button>
+
+    <div class="table-container" id="tableBox">
+      <table>
+        <thead>
+          <tr>
+            <th>Nama</th>
+            <th>Kelas</th>
+            <th>Judul</th>
+          </tr>
+        </thead>
+        <tbody id="dataBody"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <div class="footer">© 2026 Aplikasi Sekolah</div>
+
 </div>
 
 <script>
-function kirimData(){
-    const data = {
-        judul: document.getElementById("judul").value,
-        nama: document.getElementById("nama").value,
-        kelas: document.getElementById("kelas").value,
-        link: document.getElementById("link").value,
-        catatan: document.getElementById("catatan").value
-    };
+const url = "https://script.google.com/macros/s/AKfycbxPzDZv_6la9QD82dxOcZjp--DScG7ZAMmWz0JzC1SH1TupF-uTB1L_aFTCpl3Lenud/exec";
 
-    fetch("https://script.google.com/macros/s/AKfycbxPzDZv_6la9QD82dxOcZjp--DScG7ZAMmWz0JzC1SH1TupF-uTB1L_aFTCpl3Lenud/exec", {
-        method: "POST",
-        body: JSON.stringify(data)
-    })
-    .then(res => res.json())
-    .then(response => {
-        if(response.status === "success"){
-            document.getElementById("successMsg").style.display = "block";
-            document.querySelector("form")?.reset();
-        }
-    })
-    .catch(err => alert("Gagal mengirim data"));
+/* VALIDASI + KIRIM */
+function kirim(){
+  const judul = document.getElementById("judul").value.trim();
+  const nama = document.getElementById("nama").value.trim();
+  const kelas = document.getElementById("kelas").value;
+  const link = document.getElementById("link").value.trim();
+  const catatan = document.getElementById("catatan").value.trim();
+
+  if(!judul || !nama || !kelas || !link){
+    alert("Semua field wajib diisi!");
+    return;
+  }
+
+  fetch(url,{
+    method:"POST",
+    body:JSON.stringify({judul,nama,kelas,link,catatan})
+  })
+  .then(res=>res.json())
+  .then(res=>{
+    if(res.status==="success"){
+      alert("Tugas berhasil dikirim!");
+      location.reload();
+    }
+  })
+  .catch(()=>alert("Gagal mengirim data"));
+}
+
+/* AMBIL DATA */
+function toggleData(){
+  const box = document.getElementById("tableBox");
+  box.style.display = box.style.display==="none"?"block":"none";
+
+  fetch(url)
+  .then(res=>res.json())
+  .then(data=>{
+    const body = document.getElementById("dataBody");
+    body.innerHTML="";
+    data.reverse().forEach(row=>{
+      body.innerHTML += `
+        <tr>
+          <td>${row[2]}</td>
+          <td>${row[3]}</td>
+          <td>${row[1]}</td>
+        </tr>`;
+    });
+  });
 }
 </script>
 
