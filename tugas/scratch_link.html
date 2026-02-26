@@ -109,44 +109,39 @@ textarea{
 
   <form id="formTugas" class="form">
 
-    <!-- 1️⃣ KELAS -->
     <div class="field">
       <span class="label-text">Kelas</span>
       <select id="kelas" required>
         <option value="">Pilih Kelas</option>
-        <option>7A</option>
-        <option>7B</option>
-        <option>7C</option>
-        <option>7D</option>
-        <option>7E</option>
-        <option>7F</option>
-        <option>7G</option>
-        <option>7H</option>
-        <option>7I</option>
+        <option>Kelas 7A</option>
+        <option>Kelas 7B</option>
+        <option>Kelas 7C</option>
+        <option>Kelas 7D</option>
+        <option>Kelas 7E</option>
+        <option>Kelas 7F</option>
+        <option>Kelas 7G</option>
+        <option>Kelas 7H</option>
+        <option>Kelas 7I</option>
       </select>
     </div>
 
-    <!-- 2️⃣ NAMA -->
     <div class="field">
       <span class="label-text">Nama Lengkap</span>
-      <select id="nama" required>
-        <option value="">Pilih Kelas Dulu</option>
+      <select id="nama" required disabled>
+        <option value="">Memuat data...</option>
       </select>
     </div>
 
-    <!-- 3️⃣ JUDUL -->
     <div class="field">
       <span class="label-text">Judul Tugas</span>
       <input id="judul" class="input-field" required>
     </div>
 
-    <!-- 4️⃣ LINK -->
     <div class="field">
       <span class="label-text">Link Tugas</span>
       <input id="link" type="url" class="input-field" required>
     </div>
 
-    <!-- 5️⃣ CATATAN -->
     <div class="field">
       <span class="label-text">Catatan</span>
       <textarea id="catatan"></textarea>
@@ -170,36 +165,34 @@ let semuaSiswa=[];
 
 const kelasSelect=document.getElementById("kelas");
 const namaSelect=document.getElementById("nama");
+const formTugas=document.getElementById("formTugas");
+const btn=document.getElementById("btnKirim");
 
-/* NONAKTIFKAN NAMA DULU */
-namaSelect.disabled=true;
-
-/* AMBIL DATA */
 fetch(url)
 .then(res=>res.json())
 .then(data=>{
 
   semuaSiswa=data.slice(1);
 
-  /* AKTIFKAN SETELAH DATA SIAP */
   namaSelect.disabled=false;
+  namaSelect.innerHTML='<option value="">Pilih Kelas Dulu</option>';
 
   kelasSelect.addEventListener("change",function(){
 
     const kelasDipilih=this.value;
 
     if(!kelasDipilih){
-      namaSelect.innerHTML="<option>Pilih Kelas Dulu</option>";
+      namaSelect.innerHTML='<option value="">Pilih Kelas Dulu</option>';
       return;
     }
 
-    namaSelect.innerHTML="<option>Memuat...</option>";
+    namaSelect.innerHTML='<option value="">Memuat...</option>';
 
     const siswaFilter = semuaSiswa.filter(s =>
-      s[3].toUpperCase().includes(kelasDipilih.toUpperCase())
+      s[3].trim().toUpperCase() === kelasDipilih.trim().toUpperCase()
     );
 
-    namaSelect.innerHTML="<option value=''>Pilih Nama</option>";
+    namaSelect.innerHTML='<option value="">Pilih Nama</option>';
 
     siswaFilter.forEach(s=>{
       namaSelect.innerHTML+=
@@ -215,12 +208,9 @@ fetch(url)
 });
 
 
-/* SUBMIT */
-document.getElementById("formTugas").addEventListener("submit",function(e){
+formTugas.addEventListener("submit",function(e){
 
   e.preventDefault();
-
-  const btn=document.getElementById("btnKirim");
 
   if(!kelas.value||!nama.value||!judul.value||!link.value){
     alert("Semua field wajib diisi!");
@@ -246,13 +236,14 @@ document.getElementById("formTugas").addEventListener("submit",function(e){
     if(res==="SUCCESS"){
       alert("Tugas berhasil dikirim!");
       formTugas.reset();
-      namaSelect.innerHTML="<option>Pilih Kelas Dulu</option>";
+      namaSelect.innerHTML='<option value="">Pilih Kelas Dulu</option>';
     }else{
       alert("Gagal mengirim data");
     }
 
     btn.disabled=false;
     btn.innerText="Kirim Tugas";
+
   })
   .catch(()=>{
     alert("Terjadi kesalahan koneksi");
