@@ -159,7 +159,7 @@ textarea{
 <script>
 document.addEventListener("DOMContentLoaded", function(){
 
-const url="https://script.google.com/macros/s/AKfycbwsgOOQS-GHxjTAx_LzaS9odx6djVlIZxigZpBTEtjFpVWhu-Sh5K6qb5Afp5fH4PSh/exec";
+const url="https://script.google.com/macros/s/AKfycby0J7y7lPo95WM3I5DVXA-5OV0Amn-TvuJAd9Df8QqCjsXV19EN5WJsBhNyp2QQ_ER8/exec";
 
 let semuaSiswa=[];
 
@@ -171,28 +171,33 @@ const judul=document.getElementById("judul");
 const link=document.getElementById("link");
 const catatan=document.getElementById("catatan");
 
-if(!kelasSelect || !namaSelect || !formTugas){
-  console.error("Element form tidak ditemukan.");
-  return;
-}
-
 namaSelect.disabled=true;
+
 
 /* =======================
    AMBIL DATA SISWA
 ======================= */
 fetch(url+"?action=getDataSiswa")
-.then(res=>{
-  if(!res.ok) throw new Error("Response error");
-  return res.json();
-})
+.then(res=>res.json())
 .then(data=>{
-  semuaSiswa=data;
+  semuaSiswa=data || [];
   namaSelect.innerHTML='<option value="">Pilih Kelas Dulu</option>';
 })
 .catch(err=>{
   console.error("Gagal ambil data:",err);
+  namaSelect.innerHTML='<option value="">Gagal memuat data</option>';
 });
+
+
+/* =======================
+   NORMALISASI STRING (ANTI ERROR SPASI & CASE)
+======================= */
+function normalize(str){
+  return String(str)
+    .replace(/\s+/g," ")
+    .trim()
+    .toUpperCase();
+}
 
 
 /* =======================
@@ -208,16 +213,27 @@ kelasSelect.addEventListener("change",function(){
     return;
   }
 
+  const kelasFix = normalize(kelasDipilih);
+
   const siswaFilter = semuaSiswa.filter(s =>
-    s.rombel && s.rombel.trim().toUpperCase() === kelasDipilih.trim().toUpperCase()
+    s.rombel && normalize(s.rombel) === kelasFix
   );
 
   namaSelect.innerHTML='<option value="">Pilih Nama</option>';
+
+  if(siswaFilter.length===0){
+    namaSelect.innerHTML='<option value="">Tidak ada data</option>';
+    namaSelect.disabled=true;
+    return;
+  }
+
   namaSelect.disabled=false;
 
   siswaFilter.forEach(s=>{
-    namaSelect.innerHTML +=
-      `<option value="${s.nama}">${s.nama}</option>`;
+    const option=document.createElement("option");
+    option.value=s.nama;
+    option.textContent=s.nama;
+    namaSelect.appendChild(option);
   });
 
 });
