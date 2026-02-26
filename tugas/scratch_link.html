@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Form Pengumpulan Tugas</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg,#4e73df,#1cc88a);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+}
+
+.container{
+    background:#fff;
+    padding:30px;
+    width:400px;
+    border-radius:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+h2{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+input, select, textarea{
+    width:100%;
+    padding:10px;
+    margin-bottom:15px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    font-size:14px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    background:#4e73df;
+    color:white;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#2e59d9;
+}
+
+.success{
+    text-align:center;
+    color:green;
+    display:none;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Pengumpulan Tugas</h2>
+
+    <input type="text" id="judul" placeholder="Judul Tugas" required>
+    <input type="text" id="nama" placeholder="Nama Lengkap" required>
+
+    <select id="kelas">
+        <option value="">Pilih Kelas</option>
+        <option>7A</option>
+        <option>7B</option>
+        <option>7C</option>
+        <option>7D</option>
+        <option>7E</option>
+        <option>7F</option>
+        <option>7G</option>
+        <option>7H</option>
+        <option>7I</option>
+    </select>
+
+    <input type="url" id="link" placeholder="Link Tugas (Google Drive / dll)" required>
+
+    <textarea id="catatan" rows="3" placeholder="Catatan (Opsional)"></textarea>
+
+    <button onclick="kirimData()">Kirim</button>
+
+    <div class="success" id="successMsg">
+        ✅ Tugas berhasil dikirim!
+    </div>
+</div>
+
+<script>
+function kirimData(){
+    const data = {
+        judul: document.getElementById("judul").value,
+        nama: document.getElementById("nama").value,
+        kelas: document.getElementById("kelas").value,
+        link: document.getElementById("link").value,
+        catatan: document.getElementById("catatan").value
+    };
+
+    fetch("https://script.google.com/macros/s/AKfycbxPzDZv_6la9QD82dxOcZjp--DScG7ZAMmWz0JzC1SH1TupF-uTB1L_aFTCpl3Lenud/exec", {
+        method: "POST",
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(response => {
+        if(response.status === "success"){
+            document.getElementById("successMsg").style.display = "block";
+            document.querySelector("form")?.reset();
+        }
+    })
+    .catch(err => alert("Gagal mengirim data"));
+}
+</script>
+
+</body>
+</html>
