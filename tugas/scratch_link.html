@@ -159,10 +159,9 @@ textarea{
 <script>
 document.addEventListener("DOMContentLoaded", function(){
 
-const url="https://script.google.com/macros/s/AKfycbyvN0eqfimD2r2Ahzv1daA8Vmrb58EQdGWqETpLT2_-Q3P1z7rN-tYLkS1VX1tkIt5c/exec";
+const url="https://script.google.com/macros/s/AKfycby0J7y7lPo95WM3I5DVXA-5OV0Amn-TvuJAd9Df8QqCjsXV19EN5WJsBhNyp2QQ_ER8/exec";
 
 let semuaSiswa=[];
-let dataLoaded=false;
 
 const kelasSelect=document.getElementById("kelas");
 const namaSelect=document.getElementById("nama");
@@ -172,17 +171,18 @@ const judul=document.getElementById("judul");
 const link=document.getElementById("link");
 const catatan=document.getElementById("catatan");
 
+/* =======================
+   DISABLE SAMPAI DATA SIAP
+======================= */
+kelasSelect.disabled = true;
+namaSelect.disabled = true;
 namaSelect.innerHTML='<option value="">Memuat data...</option>';
-namaSelect.disabled=true;
 
 /* =======================
    NORMALIZE
 ======================= */
 function normalize(str){
-  return String(str)
-    .replace(/\s+/g," ")
-    .trim()
-    .toLowerCase();
+  return String(str).replace(/\s+/g," ").trim().toLowerCase();
 }
 
 /* =======================
@@ -192,11 +192,11 @@ fetch(url+"?action=getDataSiswa")
 .then(res=>res.json())
 .then(data=>{
   semuaSiswa=data || [];
-  dataLoaded=true;
+
+  kelasSelect.disabled = false; // aktifkan kelas
   namaSelect.innerHTML='<option value="">Pilih Kelas Dulu</option>';
 })
-.catch(err=>{
-  console.error("Error load:",err);
+.catch(()=>{
   namaSelect.innerHTML='<option value="">Gagal memuat data</option>';
 });
 
@@ -205,11 +205,6 @@ fetch(url+"?action=getDataSiswa")
    FILTER
 ======================= */
 kelasSelect.addEventListener("change",function(){
-
-  if(!dataLoaded){
-    alert("Data siswa belum selesai dimuat, tunggu sebentar...");
-    return;
-  }
 
   const kelasDipilih=this.value;
 
@@ -221,10 +216,9 @@ kelasSelect.addEventListener("change",function(){
 
   const kelasFix = normalize(kelasDipilih);
 
-  const siswaFilter = semuaSiswa.filter(s=>{
-    if(!s.rombel) return false;
-    return normalize(s.rombel) === kelasFix;
-  });
+  const siswaFilter = semuaSiswa.filter(s =>
+    s.rombel && normalize(s.rombel) === kelasFix
+  );
 
   if(siswaFilter.length===0){
     namaSelect.innerHTML='<option value="">Data tidak ditemukan</option>';
@@ -274,19 +268,17 @@ formTugas.addEventListener("submit",function(e){
   })
   .then(res=>res.json())
   .then(res=>{
-
     if(res.status==="success"){
       alert("Tugas berhasil dikirim!");
       formTugas.reset();
       namaSelect.innerHTML='<option value="">Pilih Kelas Dulu</option>';
       namaSelect.disabled=true;
     }else{
-      alert(res.message || "Gagal mengirim");
+      alert("Gagal mengirim");
     }
 
     btn.disabled=false;
     btn.innerText="Kirim Tugas";
-
   })
   .catch(()=>{
     alert("Terjadi kesalahan koneksi");
