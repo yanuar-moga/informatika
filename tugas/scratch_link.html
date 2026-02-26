@@ -159,7 +159,7 @@ textarea{
 
 <script>
 
-const url="https://script.google.com/macros/s/AKfycbwuTavspDkxW3EBiUQyT6Fvr2XvPehhcbsENdsjELzRk3-Xv4xQZb8JUM1hPhYfNVcF/exec";
+const url="https://script.google.com/macros/s/AKfycbx0pBzQehWLYRcH20TRjIdHzBlRJy_EvDGPuhZJGx1J0VTieGjNbxFCfmILLK_q2J5v/exec";
 
 let semuaSiswa=[];
 
@@ -168,38 +168,19 @@ const namaSelect=document.getElementById("nama");
 const formTugas=document.getElementById("formTugas");
 const btn=document.getElementById("btnKirim");
 
-fetch(url)
+namaSelect.disabled=true;
+
+/* =========================
+   AMBIL DATA SISWA (ACTION)
+========================= */
+fetch(url+"?action=getDataSiswa")
 .then(res=>res.json())
 .then(data=>{
 
-  semuaSiswa=data.slice(1);
+  semuaSiswa=data; // karena sudah JSON object
 
   namaSelect.disabled=false;
   namaSelect.innerHTML='<option value="">Pilih Kelas Dulu</option>';
-
-  kelasSelect.addEventListener("change",function(){
-
-    const kelasDipilih=this.value;
-
-    if(!kelasDipilih){
-      namaSelect.innerHTML='<option value="">Pilih Kelas Dulu</option>';
-      return;
-    }
-
-    namaSelect.innerHTML='<option value="">Memuat...</option>';
-
-    const siswaFilter = semuaSiswa.filter(s =>
-      s[3].trim().toUpperCase() === kelasDipilih.trim().toUpperCase()
-    );
-
-    namaSelect.innerHTML='<option value="">Pilih Nama</option>';
-
-    siswaFilter.forEach(s=>{
-      namaSelect.innerHTML+=
-        `<option value="${s[1]}">${s[1]}</option>`;
-    });
-
-  });
 
 })
 .catch(err=>{
@@ -208,11 +189,40 @@ fetch(url)
 });
 
 
+/* =========================
+   FILTER BERDASARKAN KELAS
+========================= */
+kelasSelect.addEventListener("change",function(){
+
+  const kelasDipilih=this.value;
+
+  if(!kelasDipilih){
+    namaSelect.innerHTML='<option value="">Pilih Kelas Dulu</option>';
+    return;
+  }
+
+  const siswaFilter = semuaSiswa.filter(s =>
+    s.rombel.trim().toUpperCase() === kelasDipilih.trim().toUpperCase()
+  );
+
+  namaSelect.innerHTML='<option value="">Pilih Nama</option>';
+
+  siswaFilter.forEach(s=>{
+    namaSelect.innerHTML+=
+      `<option value="${s.nama}">${s.nama}</option>`;
+  });
+
+});
+
+
+/* =========================
+   SUBMIT (ACTION SYSTEM)
+========================= */
 formTugas.addEventListener("submit",function(e){
 
   e.preventDefault();
 
-  if(!kelas.value||!nama.value||!judul.value||!link.value){
+  if(!kelasSelect.value||!namaSelect.value||!judul.value||!link.value){
     alert("Semua field wajib diisi!");
     return;
   }
@@ -220,25 +230,27 @@ formTugas.addEventListener("submit",function(e){
   btn.disabled=true;
   btn.innerText="Mengirim...";
 
+  const fd=new URLSearchParams();
+  fd.append("action","submitTugas");
+  fd.append("kelas",kelasSelect.value);
+  fd.append("nama",namaSelect.value);
+  fd.append("judul",judul.value);
+  fd.append("link",link.value);
+  fd.append("catatan",catatan.value);
+
   fetch(url,{
     method:"POST",
-    body:new URLSearchParams({
-      kelas:kelas.value,
-      nama:nama.value,
-      judul:judul.value,
-      link:link.value,
-      catatan:catatan.value
-    })
+    body:fd
   })
-  .then(res=>res.text())
+  .then(res=>res.json())
   .then(res=>{
 
-    if(res==="SUCCESS"){
+    if(res.status==="success"){
       alert("Tugas berhasil dikirim!");
       formTugas.reset();
       namaSelect.innerHTML='<option value="">Pilih Kelas Dulu</option>';
     }else{
-      alert("Gagal mengirim data");
+      alert(res.message);
     }
 
     btn.disabled=false;
@@ -254,6 +266,5 @@ formTugas.addEventListener("submit",function(e){
 });
 
 </script>
-
 </body>
 </html>
