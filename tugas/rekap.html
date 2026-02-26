@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Rekap Pengumpulan Tugas</title>
+<title>Dashboard Rekap Tugas</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body{
@@ -11,16 +12,32 @@ body{
   padding:20px;
 }
 
-h2{ margin-bottom:10px; }
+h2{ margin-bottom:15px; }
 
-.stat{
+.topbar{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
   margin-bottom:15px;
-  font-weight:bold;
 }
 
-select{
+select,button{
   padding:8px;
-  margin-bottom:15px;
+}
+
+button{
+  background:#0A4FA3;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+button:hover{ background:#083d82; }
+
+.stat{
+  margin:10px 0;
+  font-weight:bold;
 }
 
 .container{
@@ -41,20 +58,38 @@ select{
 ul{
   padding-left:18px;
   font-size:14px;
+  max-height:250px;
+  overflow:auto;
 }
 
 .sudah{ color:green; }
 .belum{ color:red; }
+
+canvas{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  box-shadow:0 5px 15px rgba(0,0,0,.1);
+  margin-top:20px;
+}
 </style>
 </head>
 
 <body>
 
-<h2>📊 Rekap Pengumpulan Tugas</h2>
+<h2>📊 Dashboard Rekap Pengumpulan Tugas</h2>
 
-<select id="filterKelas">
-  <option value="ALL">Semua Rombel</option>
-</select>
+<div class="topbar">
+  <select id="filterKelas">
+    <option value="ALL">Semua Kelas</option>
+  </select>
+
+  <select id="filterJudul">
+    <option value="ALL">Semua Judul Tugas</option>
+  </select>
+
+  <button onclick="exportExcel()">📥 Export Excel</button>
+</div>
 
 <div class="stat" id="statistik">Memuat data...</div>
 
@@ -70,92 +105,139 @@ ul{
   </div>
 </div>
 
+<canvas id="chartBar" height="120"></canvas>
+
 <script>
 
 const url="https://script.google.com/macros/s/AKfycbx0pBzQehWLYRcH20TRjIdHzBlRJy_EvDGPuhZJGx1J0VTieGjNbxFCfmILLK_q2J5v/exec";
 
 let semuaSiswa=[];
 let semuaTugas=[];
+let chart;
 
-/* =========================
-   LOAD DATA
-========================= */
+/* LOAD DATA */
 Promise.all([
   fetch(url+"?action=getDataSiswa").then(r=>r.json()),
   fetch(url+"?action=getDataTugas").then(r=>r.json())
 ])
 .then(([siswa,tugas])=>{
-
   semuaSiswa=siswa;
   semuaTugas=tugas;
-
   initFilter();
-  renderData("ALL");
-
+  renderData();
 })
 .catch(()=>{
   document.getElementById("statistik").innerHTML="Gagal mengambil data";
 });
 
 
-/* =========================
-   INIT FILTER
-========================= */
 function initFilter(){
 
-  const select=document.getElementById("filterKelas");
+  const kelasSelect=document.getElementById("filterKelas");
+  const judulSelect=document.getElementById("filterJudul");
 
-  const rombels=[...new Set(semuaSiswa.map(s=>s.rombel))];
-
-  rombels.sort();
-
-  rombels.forEach(r=>{
-    select.innerHTML+=`<option value="${r}">${r}</option>`;
+  [...new Set(semuaSiswa.map(s=>s.rombel))]
+  .sort()
+  .forEach(r=>{
+    kelasSelect.innerHTML+=`<option value="${r}">${r}</option>`;
   });
 
-  select.addEventListener("change",function(){
-    renderData(this.value);
+  [...new Set(semuaTugas.map(t=>t.judul))]
+  .sort()
+  .forEach(j=>{
+    judulSelect.innerHTML+=`<option value="${j}">${j}</option>`;
   });
 
+  kelasSelect.onchange=renderData;
+  judulSelect.onchange=renderData;
 }
 
 
-/* =========================
-   RENDER DATA
-========================= */
-function renderData(kelas){
+function renderData(){
 
-  const siswaFilter=kelas==="ALL"
+  const kelas=document.getElementById("filterKelas").value;
+  const judul=document.getElementById("filterJudul").value;
+
+  let siswaFilter=kelas==="ALL"
     ? semuaSiswa
     : semuaSiswa.filter(s=>s.rombel===kelas);
 
-  const sudahKirim=[...new Set(semuaTugas.map(t=>t.nama))];
+  let tugasFilter=judul==="ALL"
+    ? semuaTugas
+    : semuaTugas.filter(t=>t.judul===judul);
+
+  const sudahKirim=[...new Set(tugasFilter.map(t=>t.nama))];
 
   const sudah=siswaFilter.filter(s=>sudahKirim.includes(s.nama));
   const belum=siswaFilter.filter(s=>!sudahKirim.includes(s.nama));
 
   document.getElementById("statistik").innerHTML=
-    "Total: "+siswaFilter.length+
-    " | Sudah: "+sudah.length+
-    " | Belum: "+belum.length;
+    `Total: ${siswaFilter.length} | Sudah: ${sudah.length} | Belum: ${belum.length}`;
 
-  const sudahList=document.getElementById("sudahList");
-  const belumList=document.getElementById("belumList");
+  document.getElementById("sudahList").innerHTML=
+    sudah.map(s=>`<li>${s.nama}</li>`).join("");
 
-  sudahList.innerHTML="";
-  belumList.innerHTML="";
+  document.getElementById("belumList").innerHTML=
+    belum.map(s=>`<li>${s.nama}</li>`).join("");
 
-  sudah.sort((a,b)=>a.nama.localeCompare(b.nama));
-  belum.sort((a,b)=>a.nama.localeCompare(b.nama));
+  renderChart(sudah.length,belum.length);
+}
 
-  sudah.forEach(s=>{
-    sudahList.innerHTML+=`<li>${s.nama}</li>`;
+
+function renderChart(jumlahSudah,jumlahBelum){
+
+  const ctx=document.getElementById("chartBar").getContext("2d");
+
+  if(chart) chart.destroy();
+
+  chart=new Chart(ctx,{
+    type:"bar",
+    data:{
+      labels:["Sudah","Belum"],
+      datasets:[{
+        label:"Jumlah Siswa",
+        data:[jumlahSudah,jumlahBelum],
+        backgroundColor:["green","red"]
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{ display:false }
+      }
+    }
+  });
+}
+
+
+/* EXPORT EXCEL */
+function exportExcel(){
+
+  const kelas=document.getElementById("filterKelas").value;
+  const judul=document.getElementById("filterJudul").value;
+
+  let siswaFilter=kelas==="ALL"
+    ? semuaSiswa
+    : semuaSiswa.filter(s=>s.rombel===kelas);
+
+  let tugasFilter=judul==="ALL"
+    ? semuaTugas
+    : semuaTugas.filter(t=>t.judul===judul);
+
+  const sudahKirim=[...new Set(tugasFilter.map(t=>t.nama))];
+
+  let csv="Nama,Kelas,Status\n";
+
+  siswaFilter.forEach(s=>{
+    const status=sudahKirim.includes(s.nama)?"Sudah":"Belum";
+    csv+=`${s.nama},${s.rombel},${status}\n`;
   });
 
-  belum.forEach(s=>{
-    belumList.innerHTML+=`<li>${s.nama}</li>`;
-  });
-
+  const blob=new Blob([csv],{type:"text/csv"});
+  const link=document.createElement("a");
+  link.href=URL.createObjectURL(blob);
+  link.download="rekap_tugas.csv";
+  link.click();
 }
 
 </script>
