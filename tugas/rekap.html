@@ -16,9 +16,10 @@ h2{ margin-bottom:15px; }
 
 .topbar{
   display:flex;
-  gap:15px;
+  gap:10px;
   flex-wrap:wrap;
   margin-bottom:15px;
+  align-items:center;
 }
 
 select,button{
@@ -48,18 +49,27 @@ button:hover{ background:#083d82; }
 
 .box{
   flex:1;
-  min-width:250px;
+  min-width:300px;
   background:white;
   padding:15px;
   border-radius:10px;
   box-shadow:0 5px 15px rgba(0,0,0,.1);
 }
 
-ul{
-  padding-left:18px;
+table{
+  width:100%;
+  border-collapse:collapse;
   font-size:14px;
-  max-height:250px;
-  overflow:auto;
+}
+
+th,td{
+  border:1px solid #ddd;
+  padding:6px;
+  text-align:left;
+}
+
+th{
+  background:#f0f0f0;
 }
 
 .sudah{ color:green; }
@@ -84,6 +94,8 @@ canvas{
     <option value="ALL">Semua Kelas</option>
   </select>
 
+  <button onclick="renderData()">Tampilkan</button>
+
   <select id="filterJudul">
     <option value="ALL">Semua Judul Tugas</option>
   </select>
@@ -96,7 +108,16 @@ canvas{
 <div class="container">
   <div class="box">
     <h3 class="sudah">🟢 Sudah Mengirim</h3>
-    <ul id="sudahList"></ul>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama Siswa</th>
+          <th>Link</th>
+        </tr>
+      </thead>
+      <tbody id="sudahList"></tbody>
+    </table>
   </div>
 
   <div class="box">
@@ -121,8 +142,8 @@ Promise.all([
   fetch(url+"?action=getDataTugas").then(r=>r.json())
 ])
 .then(([siswa,tugas])=>{
-  semuaSiswa=siswa;
-  semuaTugas=tugas;
+  semuaSiswa=siswa || [];
+  semuaTugas=tugas || [];
   initFilter();
   renderData();
 })
@@ -137,19 +158,18 @@ function initFilter(){
   const judulSelect=document.getElementById("filterJudul");
 
   [...new Set(semuaSiswa.map(s=>s.rombel))]
+  .filter(Boolean)
   .sort()
   .forEach(r=>{
     kelasSelect.innerHTML+=`<option value="${r}">${r}</option>`;
   });
 
   [...new Set(semuaTugas.map(t=>t.judul))]
+  .filter(Boolean)
   .sort()
   .forEach(j=>{
     judulSelect.innerHTML+=`<option value="${j}">${j}</option>`;
   });
-
-  kelasSelect.onchange=renderData;
-  judulSelect.onchange=renderData;
 }
 
 
@@ -166,17 +186,29 @@ function renderData(){
     ? semuaTugas
     : semuaTugas.filter(t=>t.judul===judul);
 
-  const sudahKirim=[...new Set(tugasFilter.map(t=>t.nama))];
+  const sudahData=tugasFilter.filter(t=>
+    siswaFilter.some(s=>s.nama===t.nama)
+  );
 
-  const sudah=siswaFilter.filter(s=>sudahKirim.includes(s.nama));
-  const belum=siswaFilter.filter(s=>!sudahKirim.includes(s.nama));
+  const sudahNama=[...new Set(sudahData.map(t=>t.nama))];
+
+  const sudah=siswaFilter.filter(s=>sudahNama.includes(s.nama));
+  const belum=siswaFilter.filter(s=>!sudahNama.includes(s.nama));
 
   document.getElementById("statistik").innerHTML=
     `Total: ${siswaFilter.length} | Sudah: ${sudah.length} | Belum: ${belum.length}`;
 
+  /* TABEL SUDAH */
   document.getElementById("sudahList").innerHTML=
-    sudah.map(s=>`<li>${s.nama}</li>`).join("");
+    sudahData.map((t,i)=>`
+      <tr>
+        <td>${i+1}</td>
+        <td>${t.nama}</td>
+        <td><a href="${t.link}" target="_blank">Buka</a></td>
+      </tr>
+    `).join("");
 
+  /* LIST BELUM */
   document.getElementById("belumList").innerHTML=
     belum.map(s=>`<li>${s.nama}</li>`).join("");
 
