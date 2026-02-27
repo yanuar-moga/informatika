@@ -100,7 +100,6 @@ canvas{
     <option value="ALL">Semua Judul Tugas</option>
   </select>
 
-  <!-- TOMBOL BARU -->
   <button onclick="renderPerJudul()">📄 Tampilkan per Judul</button>
 </div>
 
@@ -127,7 +126,6 @@ canvas{
   </div>
 </div>
 
-<!-- AREA REKAP PER JUDUL -->
 <div id="rekapJudul" style="margin-top:30px;"></div>
 
 <canvas id="chartBar" height="120"></canvas>
@@ -140,7 +138,6 @@ let semuaSiswa=[];
 let semuaTugas=[];
 let chart;
 
-/* LOAD DATA */
 Promise.all([
   fetch(url+"?action=getDataSiswa").then(r=>r.json()),
   fetch(url+"?action=getDataTugas").then(r=>r.json())
@@ -220,68 +217,49 @@ function renderData(){
 }
 
 
-/* FITUR BARU */
+/* REVISI UTAMA DI SINI */
 function renderPerJudul(){
 
+  const kelas=document.getElementById("filterKelas").value;
   const judul=document.getElementById("filterJudul").value;
 
   if(judul==="ALL"){
-    alert("Pilih salah satu judul tugas terlebih dahulu!");
+    alert("Pilih judul tugas terlebih dahulu!");
     return;
   }
 
+  let siswaFilter=kelas==="ALL"
+    ? semuaSiswa
+    : semuaSiswa.filter(s=>s.rombel===kelas);
+
   let tugasFilter=semuaTugas.filter(t=>t.judul===judul);
 
-  const kelasUnik=[...new Set(semuaSiswa.map(s=>s.rombel))].sort();
+  const sudahKirim=[...new Set(
+    tugasFilter
+    .filter(t=>siswaFilter.some(s=>s.nama===t.nama))
+    .map(t=>t.nama)
+  )];
 
-  let html=`
-    <h3>📋 Rekap Per Kelas - ${judul}</h3>
+  const total=siswaFilter.length;
+  const sudah=sudahKirim.length;
+  const belum=total-sudah;
+  const persen=total?Math.round((sudah/total)*100):0;
+
+  document.getElementById("rekapJudul").innerHTML=`
+    <h3>📋 Rekap ${judul} (${kelas})</h3>
     <table>
-      <thead>
-        <tr>
-          <th>Kelas</th>
-          <th>Total</th>
-          <th>Sudah</th>
-          <th>Belum</th>
-          <th>Persentase</th>
-        </tr>
-      </thead>
-      <tbody>
+      <tr><th>Total Siswa</th><td>${total}</td></tr>
+      <tr><th>Sudah Mengirim</th><td class="sudah">${sudah}</td></tr>
+      <tr><th>Belum Mengirim</th><td class="belum">${belum}</td></tr>
+      <tr><th>Persentase</th><td>${persen}%</td></tr>
+    </table>
   `;
 
-  kelasUnik.forEach(kelas=>{
-    const siswaKelas=semuaSiswa.filter(s=>s.rombel===kelas);
-    const total=siswaKelas.length;
-
-    const sudahKirim=[...new Set(
-      tugasFilter
-      .filter(t=>siswaKelas.some(s=>s.nama===t.nama))
-      .map(t=>t.nama)
-    )];
-
-    const sudah=sudahKirim.length;
-    const belum=total-sudah;
-    const persen=total?Math.round((sudah/total)*100):0;
-
-    html+=`
-      <tr>
-        <td>${kelas}</td>
-        <td>${total}</td>
-        <td class="sudah">${sudah}</td>
-        <td class="belum">${belum}</td>
-        <td>${persen}%</td>
-      </tr>
-    `;
-  });
-
-  html+=`</tbody></table>`;
-
-  document.getElementById("rekapJudul").innerHTML=html;
+  document.getElementById("statistik").innerHTML=
+    `Rekap berdasarkan judul "${judul}" untuk kelas "${kelas}"`;
 
   document.getElementById("sudahList").innerHTML="";
   document.getElementById("belumList").innerHTML="";
-  document.getElementById("statistik").innerHTML=
-    `Menampilkan rekap berdasarkan judul: ${judul}`;
 }
 
 
@@ -297,16 +275,12 @@ function renderChart(jumlahSudah,jumlahBelum){
     data:{
       labels:["Sudah","Belum"],
       datasets:[{
-        label:"Jumlah Siswa",
         data:[jumlahSudah,jumlahBelum],
         backgroundColor:["green","red"]
       }]
     },
     options:{
-      responsive:true,
-      plugins:{
-        legend:{ display:false }
-      }
+      plugins:{ legend:{ display:false } }
     }
   });
 }
