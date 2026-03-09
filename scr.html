@@ -2,12 +2,13 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Script UKIN Informatika - Perangkat Lunak</title>
+<title>Script UKIN Informatika</title>
 
 <style>
+
 body{
-font-family: Arial, sans-serif;
-background:#f4f6f9;
+font-family:Arial;
+background:#eef2f7;
 padding:40px;
 }
 
@@ -15,171 +16,188 @@ h1{
 text-align:center;
 }
 
-.container{
-max-width:900px;
-margin:auto;
-}
-
 button{
 width:100%;
-padding:15px;
-margin:8px 0;
-font-size:18px;
-background:#2c7be5;
+padding:14px;
+margin-top:10px;
+font-size:17px;
+background:#2d7ef7;
 color:white;
 border:none;
-border-radius:8px;
+border-radius:6px;
 cursor:pointer;
 }
 
 button:hover{
-background:#1a5ec8;
+background:#1b5fd1;
 }
 
 .dialog{
 display:none;
 background:white;
 padding:20px;
+border-left:5px solid #2d7ef7;
 margin-top:5px;
-border-left:5px solid #2c7be5;
-border-radius:6px;
-box-shadow:0 2px 8px rgba(0,0,0,0.1);
 white-space:pre-line;
+border-radius:6px;
 }
+
 </style>
 
 <script>
-function toggle(id){
-var x = document.getElementById(id);
-if(x.style.display === "block"){
-x.style.display = "none";
-}else{
-x.style.display = "block";
+
+function buka(id){
+
+var x=document.getElementById(id);
+
+if(x.style.display=="block")
+{
+x.style.display="none";
 }
+else
+{
+x.style.display="block";
 }
+
+}
+
 </script>
 
 </head>
 
 <body>
 
-<div class="container">
-
 <h1>Script Video UKIN Informatika</h1>
-<h3>Materi: Perangkat Lunak (Software)</h3>
+<h3>Materi : Perangkat Lunak (Software)</h3>
 
-<!-- STEP 1 -->
-<button onclick="toggle('s1')">STEP 1 — Salam & Pembukaan</button>
+
+<button onclick="buka('s1')">STEP 1 — Salam</button>
 <div id="s1" class="dialog">
 
-Gesture:
-Guru berdiri di depan kelas, tersenyum, kontak mata dengan siswa.
+Gesture
+Guru berdiri di depan kelas, tersenyum dan kontak mata.
 
-Guru:
+Guru
 Assalamu’alaikum warahmatullahi wabarakatuh.
 Selamat pagi anak-anak.
 
-Siswa:
+Siswa
 Waalaikumsalam warahmatullahi wabarakatuh.
 
-Guru:
+Guru
 Bagaimana kabar kalian hari ini?
 
-Siswa:
+Siswa
 Baik Pak.
 
-Guru:
-Alhamdulillah, semoga semuanya sehat dan siap mengikuti pembelajaran hari ini.
+Guru
+Alhamdulillah semoga semuanya sehat dan siap mengikuti pembelajaran hari ini.
+
 </div>
 
-<!-- STEP 2 -->
-<button onclick="toggle('s2')">STEP 2 — Doa</button>
+
+<button onclick="buka('s2')">STEP 2 — Doa</button>
 <div id="s2" class="dialog">
 
-Gesture:
 Guru menundukkan kepala.
 
-Guru:
-Sebelum kita memulai pembelajaran, mari kita berdoa
-agar kegiatan belajar kita berjalan dengan lancar.
+Guru
+Sebelum kita mulai pembelajaran, mari kita berdoa agar kegiatan belajar kita berjalan dengan lancar.
+
 </div>
 
-<!-- STEP 3 -->
-<button onclick="toggle('s3')">STEP 3 — Presensi</button>
+
+<button onclick="buka('s3')">STEP 3 — Presensi</button>
 <div id="s3" class="dialog">
 
-Gesture:
-Guru membuka daftar hadir pada tablet.
+Guru membuka tablet.
 
-Guru:
+Guru
 Bapak akan mengecek kehadiran kalian terlebih dahulu.
 
 (Guru menyebut beberapa nama siswa)
 
-Catatan:
+Catatan UKIN
 Tablet menunjukkan pemanfaatan teknologi dalam manajemen kelas.
+
 </div>
 
-<!-- STEP 4 -->
-<button onclick="toggle('s4')">STEP 4 — Apersepsi</button>
+
+<button onclick="buka('s4')">STEP 4 — Apersepsi</button>
 <div id="s4" class="dialog">
 
-Guru:
+Guru berjalan mendekati siswa.
+
+Guru
 Pada pertemuan sebelumnya kita telah mempelajari sistem komputer.
 Masih ingat terdiri dari apa saja?
 
-Siswa:
+Siswa
 Hardware, Software, Brainware.
 
-Guru:
+Guru
 Bagus sekali.
 
-Hari ini kita akan mempelajari salah satu komponen tersebut
-yaitu perangkat lunak atau software.
+Hari ini kita akan mempelajari salah satu komponen tersebut yaitu perangkat lunak atau software.
+
 </div>
 
-<!-- STEP 5 -->
-<button onclick="toggle('s5')">STEP 5 — Pertanyaan Pemantik</button>
+
+<button onclick="buka('s5')">STEP 5 — Pertanyaan Pemantik</button>
 <div id="s5" class="dialog">
 
-Guru:
+Guru
 Siapa di sini yang setiap hari menggunakan HP?
 
-(Siswa mengangkat tangan)
+Siswa mengangkat tangan.
 
-Guru:
+Guru
 Aplikasi apa saja yang sering kalian gunakan?
 
-Siswa:
+Siswa
 WhatsApp, Instagram, Game, Chrome.
 
-Guru:
+Guru
 Semua aplikasi tersebut sebenarnya termasuk software.
+
 </div>
 
-<!-- STEP 6 -->
-<button onclick="toggle('s6')">STEP 6 — Tujuan Pembelajaran</button>
+
+<button onclick="buka('s6')">STEP 6 — Motivasi & Karakter</button>
 <div id="s6" class="dialog">
 
-Hari ini kita akan mempelajari tentang perangkat lunak atau software.
+Guru berjalan ke tengah kelas.
 
-Tujuan pembelajaran:
+Di era digital seperti sekarang teknologi dapat membantu kita belajar dan berkarya.
+
+Namun kita juga harus menggunakan teknologi secara bijak dan bertanggung jawab.
+
+Sebagai pelajar Indonesia kita harus memiliki karakter yang baik seperti jujur dan bertanggung jawab.
+
+</div>
+
+
+<button onclick="buka('s7')">STEP 7 — Tujuan Pembelajaran</button>
+<div id="s7" class="dialog">
+
+Tujuan pembelajaran hari ini:
 
 1. Memahami pengertian software
 2. Mengenali jenis-jenis software
 3. Menganalisis fungsi software dalam kehidupan sehari-hari
 
 Kegiatan pembelajaran:
-- Mengamati contoh software
-- Diskusi kelompok
-- Presentasi hasil diskusi
+mengamati
+diskusi kelompok
+presentasi
+
 </div>
 
-<!-- STEP 7 -->
-<button onclick="toggle('s7')">STEP 7 — Stimulus (Pengamatan)</button>
-<div id="s7" class="dialog">
 
-Guru menampilkan gambar:
+<button onclick="buka('s8')">STEP 8 — Stimulus</button>
+<div id="s8" class="dialog">
+
+Guru menampilkan logo software:
 
 Windows
 Android
@@ -187,121 +205,184 @@ Microsoft Word
 Chrome
 Instagram
 
-Guru:
-Perhatikan gambar software berikut.
+Guru
+Sekarang perhatikan gambar berikut.
+
 </div>
 
-<!-- STEP 8 -->
-<button onclick="toggle('s8')">STEP 8 — Identifikasi Masalah</button>
-<div id="s8" class="dialog">
 
-Guru:
-Apakah semua software ini memiliki fungsi yang sama?
-
-Siswa:
-Tidak.
-
-Guru:
-Apa perbedaannya?
-
-Siswa:
-Windows untuk menjalankan komputer,
-Word untuk mengetik.
-</div>
-
-<!-- STEP 9 -->
-<button onclick="toggle('s9')">STEP 9 — Diskusi Kelompok</button>
+<button onclick="buka('s9')">STEP 9 — Identifikasi Masalah</button>
 <div id="s9" class="dialog">
 
-Tugas Kelompok:
+Guru
+Apakah semua software ini memiliki fungsi yang sama?
 
-1. Mengelompokkan software
-2. Menentukan mana sistem operasi
-3. Menentukan mana aplikasi
-4. Menjawab pertanyaan:
+Siswa
+Tidak.
+
+Guru
+Apa perbedaannya?
+
+Siswa
+Windows menjalankan komputer
+Word untuk mengetik.
+
+</div>
+
+
+<button onclick="buka('s10')">STEP 10 — Studi Kasus Etika Digital</button>
+<div id="s10" class="dialog">
+
+Guru sedikit serius.
+
+Misalnya ada seorang siswa yang menyebarkan berita yang belum tentu benar di media sosial.
+
+Menurut kalian apakah itu penggunaan teknologi yang baik?
+
+Siswa
+Tidak.
+
+Guru
+Betul sekali.
+Itulah sebabnya kita harus memiliki etika digital.
+
+</div>
+
+
+<button onclick="buka('s11')">STEP 11 — Diskusi Kelompok</button>
+<div id="s11" class="dialog">
+
+Tugas LKPD
+
+1 Mengelompokkan software
+2 Menentukan sistem operasi
+3 Menentukan aplikasi
+4 Menjawab pertanyaan
 
 Apa yang terjadi jika komputer tidak memiliki sistem operasi?
 
-Diskusikan bersama kelompok kalian.
 </div>
 
-<!-- STEP 10 -->
-<button onclick="toggle('s10')">STEP 10 — Presentasi</button>
-<div id="s10" class="dialog">
 
-Guru:
-Kelompok pertama silakan mempresentasikan hasil diskusinya.
+<button onclick="buka('s12')">STEP 12 — CASEL</button>
+<div id="s12" class="dialog">
 
-Siswa:
-Sistem Operasi:
-Windows, Android, Linux
+Sebelum diskusi:
 
-Aplikasi:
-Word, Chrome, Instagram
+- Saling menghargai pendapat
+- Mendengarkan teman
+- Bekerja sama
+- Membantu teman yang kesulitan
 
-Guru:
-Bagus sekali.
 </div>
 
-<!-- STEP 11 -->
-<button onclick="toggle('s11')">STEP 11 — Penguatan Konsep</button>
-<div id="s11" class="dialog">
 
-Software adalah program yang digunakan untuk menjalankan komputer
-dan membantu pengguna melakukan berbagai pekerjaan.
+<button onclick="buka('s13')">STEP 13 — Diferensiasi TaRL</button>
+<div id="s13" class="dialog">
+
+Jika kelompok sudah selesai
+silakan menganalisis fungsi software.
+
+Jika masih kesulitan
+bisa membaca kembali LKPD
+atau bertanya kepada guru.
+
+</div>
+
+
+<button onclick="buka('s14')">STEP 14 — Asesmen Tablet</button>
+<div id="s14" class="dialog">
+
+Guru berkeliling membawa tablet.
+
+Guru
+Menurut kalian Windows termasuk apa?
+
+Siswa
+Sistem operasi.
+
+Guru mencatat skor pada tablet.
+
+Ini adalah asesmen formatif.
+
+</div>
+
+
+<button onclick="buka('s15')">STEP 15 — Presentasi</button>
+<div id="s15" class="dialog">
+
+Kelompok pertama mempresentasikan.
+
+Sistem operasi
+Windows
+Android
+Linux
+
+Aplikasi
+Word
+Chrome
+Instagram
+
+</div>
+
+
+<button onclick="buka('s16')">STEP 16 — Penguatan Konsep</button>
+<div id="s16" class="dialog">
+
+Software adalah program yang digunakan untuk menjalankan komputer.
 
 Jenis software:
 
-1. Sistem Operasi
-Contoh:
+Sistem Operasi
 Windows
 Linux
 Android
 iOS
 
-2. Aplikasi
-Contoh:
-Microsoft Word
+Aplikasi
+Word
 Excel
-Google Chrome
+Chrome
 Instagram
+
 </div>
 
-<!-- STEP 12 -->
-<button onclick="toggle('s12')">STEP 12 — Refleksi</button>
-<div id="s12" class="dialog">
 
-Guru:
+<button onclick="buka('s17')">STEP 17 — Refleksi</button>
+<div id="s17" class="dialog">
+
+Guru
 Apa manfaat software dalam kehidupan sehari-hari?
 
-Siswa:
+Siswa
 Membantu belajar
 Mengetik tugas
 Mencari informasi
+
 </div>
 
-<!-- STEP 13 -->
-<button onclick="toggle('s13')">STEP 13 — Kesimpulan</button>
-<div id="s13" class="dialog">
 
-Kesimpulan:
+<button onclick="buka('s18')">STEP 18 — Kesimpulan</button>
+<div id="s18" class="dialog">
 
-- Software membantu komputer bekerja
-- Software terdiri dari sistem operasi dan aplikasi
-- Software membantu manusia dalam kehidupan sehari-hari
+Kesimpulan
+
+software membantu komputer bekerja
+software terdiri dari sistem operasi dan aplikasi
+software membantu manusia dalam kehidupan sehari-hari
+
 </div>
 
-<!-- STEP 14 -->
-<button onclick="toggle('s14')">STEP 14 — Penutup</button>
-<div id="s14" class="dialog">
 
-Guru:
+<button onclick="buka('s19')">STEP 19 — Penutup</button>
+<div id="s19" class="dialog">
+
+Guru
 Terima kasih atas partisipasi kalian.
 
 Tetap gunakan teknologi secara bijak dan bertanggung jawab.
 
 Wassalamu’alaikum warahmatullahi wabarakatuh.
-</div>
 
 </div>
 
