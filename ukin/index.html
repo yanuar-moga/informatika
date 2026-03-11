@@ -103,6 +103,8 @@ schedule=[]
 
 rows.forEach(r=>{
 
+r=r.replace("\r","")
+
 let c=r.split(",")
 
 if(c.length>=3){
@@ -117,6 +119,10 @@ activity:c[2]
 
 })
 
+/* urutkan schedule */
+
+schedule.sort((a,b)=>a.minute-b.minute)
+
 }
 
 function startTimer(){
@@ -124,6 +130,10 @@ function startTimer(){
 running=true
 startTime=new Date()
 used={}
+
+/* cek kegiatan menit 0 */
+
+checkSchedule(0)
 
 }
 
