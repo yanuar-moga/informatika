@@ -9,7 +9,7 @@
 body{
 margin:0;
 background:#0f172a;
-font-family:Segoe UI;
+font-family:Segoe UI,Arial;
 color:white;
 display:flex;
 justify-content:center;
@@ -22,41 +22,47 @@ text-align:center;
 width:90%;
 }
 
-#elapsed{
-font-size:90px;
-font-weight:bold;
+#label{
+font-size:32px;
+color:#38bdf8;
 }
 
-#label{
-font-size:30px;
-color:#38bdf8;
+#elapsed{
+font-size:100px;
+font-weight:bold;
+margin-top:10px;
 }
 
 #activity{
 font-size:60px;
-margin-top:30px;
+margin-top:40px;
 color:#facc15;
 }
 
 #countdown{
-font-size:120px;
+font-size:130px;
 margin-top:20px;
 color:#ef4444;
+font-weight:bold;
 }
 
 #buttons{
-margin-top:40px;
+margin-top:50px;
 }
 
 button{
 font-size:24px;
-padding:12px 40px;
+padding:14px 45px;
 margin:10px;
 border-radius:12px;
 border:none;
 background:#f1f5f9;
 color:black;
 cursor:pointer;
+}
+
+button:hover{
+background:#e2e8f0;
 }
 
 </style>
@@ -71,7 +77,6 @@ cursor:pointer;
 <div id="elapsed">00:00</div>
 
 <div id="activity"></div>
-
 <div id="countdown"></div>
 
 <div id="buttons">
@@ -83,7 +88,7 @@ cursor:pointer;
 
 <script>
 
-const SHEET_URL="https://docs.google.com/spreadsheets/d/1482QVxSy6BcsBgWXVjf_BUqpWYmdlsEDkDhfvZpj0vQ/gviz/tq?tqx=out:csv"
+const SHEET_URL="https://docs.google.com/spreadsheets/d/1482QVxSy6BcsBgWXVjf_BUqpWYmdlsEDkDhfvZpj0vQ/export?format=csv"
 
 let schedule=[]
 let running=false
@@ -92,38 +97,62 @@ let active=false
 let countdown=0
 let used={}
 
+/* LOAD DATA GOOGLE SHEET */
+
 async function loadSchedule(){
+
+try{
 
 let res=await fetch(SHEET_URL)
 let text=await res.text()
 
-let rows=text.split("\n").slice(1)
+let rows=text.split("\n")
 
 schedule=[]
 
-rows.forEach(r=>{
+for(let i=1;i<rows.length;i++){
 
-r=r.replace("\r","")
+let r=rows[i].trim()
 
-let c=r.split(",")
+if(r==="") continue
 
-if(c.length>=3){
+let cols=r.split(",")
+
+if(cols.length<3){
+cols=r.split(";")
+}
+
+let minute=parseInt(cols[0])
+let duration=parseInt(cols[1])
+let activity=cols[2]
+
+if(!isNaN(minute)){
 
 schedule.push({
-minute:parseInt(c[0]),
-duration:parseInt(c[1]),
-activity:c[2]
+minute:minute,
+duration:duration,
+activity:activity
 })
 
 }
 
-})
+}
 
-/* urutkan schedule */
+/* urutkan timeline */
 
 schedule.sort((a,b)=>a.minute-b.minute)
 
+console.log("Schedule Loaded:",schedule)
+
+}catch(e){
+
+console.log("Error loading sheet",e)
+
 }
+
+}
+
+/* START TIMER */
 
 function startTimer(){
 
@@ -137,15 +166,19 @@ checkSchedule(0)
 
 }
 
+/* STOP TIMER */
+
 function stopTimer(){
 
 running=false
 active=false
 
-document.getElementById("countdown").innerText=""
 document.getElementById("activity").innerText=""
+document.getElementById("countdown").innerText=""
 
 }
+
+/* UPDATE TIMER */
 
 function updateTimer(){
 
@@ -155,13 +188,14 @@ let now=new Date()
 
 let diff=Math.floor((now-startTime)/1000)
 
-let m=Math.floor(diff/60)
-let s=diff%60
+let minutes=Math.floor(diff/60)
+let seconds=diff%60
 
 document.getElementById("elapsed").innerText=
-String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")
+String(minutes).padStart(2,"0")+":"+
+String(seconds).padStart(2,"0")
 
-checkSchedule(m)
+checkSchedule(minutes)
 
 }
 
@@ -169,11 +203,13 @@ setTimeout(updateTimer,1000)
 
 }
 
+/* CEK KEGIATAN BERDASARKAN MENIT */
+
 function checkSchedule(currentMinute){
 
 if(active) return
 
-schedule.forEach(item=>{
+for(let item of schedule){
 
 if(item.minute===currentMinute && !used[item.minute]){
 
@@ -185,11 +221,15 @@ document.getElementById("activity").innerText=item.activity
 
 runCountdown()
 
-}
-
-})
+break
 
 }
+
+}
+
+}
+
+/* COUNTDOWN KEGIATAN */
 
 function runCountdown(){
 
@@ -199,7 +239,8 @@ let m=Math.floor(countdown/60)
 let s=countdown%60
 
 document.getElementById("countdown").innerText=
-String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")
+String(m).padStart(2,"0")+":"+
+String(s).padStart(2,"0")
 
 countdown--
 
@@ -214,6 +255,8 @@ document.getElementById("activity").innerText=""
 }
 
 }
+
+/* INIT */
 
 async function init(){
 
