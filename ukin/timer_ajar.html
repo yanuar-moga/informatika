@@ -23,8 +23,6 @@ max-width:1200px;
 text-align:center;
 }
 
-/* GLASS PANEL */
-
 .panel{
 background:rgba(255,255,255,0.08);
 backdrop-filter:blur(14px);
@@ -34,15 +32,11 @@ box-shadow:0 25px 50px rgba(0,0,0,0.5);
 margin-bottom:25px;
 }
 
-/* LABEL */
-
 #label{
 font-size:26px;
 color:#38bdf8;
 margin-bottom:10px;
 }
-
-/* ELAPSED TIME */
 
 #elapsed{
 font-size:110px;
@@ -52,15 +46,11 @@ color:white;
 text-shadow:0 0 20px rgba(255,255,255,0.35);
 }
 
-/* ACTIVITY */
-
 #activity{
 font-size:50px;
 margin-top:20px;
 color:#facc15;
 }
-
-/* COUNTDOWN */
 
 #countdown{
 font-size:120px;
@@ -68,8 +58,6 @@ margin-top:10px;
 color:#ef4444;
 font-weight:700;
 }
-
-/* BUTTONS */
 
 button{
 font-size:18px;
@@ -80,15 +68,12 @@ border-radius:12px;
 background:white;
 color:#111;
 cursor:pointer;
-transition:all .2s;
 }
 
 button:hover{
 transform:translateY(-2px);
 box-shadow:0 6px 12px rgba(0,0,0,0.25);
 }
-
-/* TABLE */
 
 table{
 width:100%;
@@ -98,7 +83,6 @@ margin-top:10px;
 
 th{
 color:#94a3b8;
-font-weight:500;
 padding:8px;
 }
 
@@ -242,7 +226,7 @@ renderTable()
 
 }
 
-/* DELETE */
+/* DELETE ROW */
 
 function deleteRow(i){
 
@@ -252,7 +236,7 @@ renderTable()
 
 }
 
-/* SAVE TIMELINE */
+/* SAVE */
 
 function saveTimeline(){
 
@@ -278,11 +262,11 @@ schedule.sort((a,b)=>a.minute-b.minute)
 
 localStorage.setItem("teachingTimeline",JSON.stringify(schedule))
 
-alert("Timeline tersimpan!")
+alert("Timeline tersimpan")
 
 }
 
-/* START TIMER */
+/* START */
 
 function startTimer(){
 
@@ -294,7 +278,7 @@ checkSchedule(0)
 
 }
 
-/* STOP TIMER */
+/* STOP */
 
 function stopTimer(){
 
@@ -320,7 +304,8 @@ let m=Math.floor(diff/60)
 let s=diff%60
 
 document.getElementById("elapsed").innerText=
-String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")
+String(m).padStart(2,"0")+":"+
+String(s).padStart(2,"0")
 
 checkSchedule(m)
 
