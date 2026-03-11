@@ -226,7 +226,7 @@ renderTable()
 
 }
 
-/* DELETE ROW */
+/* DELETE */
 
 function deleteRow(i){
 
@@ -274,8 +274,6 @@ running=true
 startTime=new Date()
 used={}
 
-checkSchedule(0)
-
 }
 
 /* STOP */
@@ -290,11 +288,11 @@ document.getElementById("activity").innerText=""
 
 }
 
-/* UPDATE TIMER */
+/* TIMER LOOP */
 
 function updateTimer(){
 
-if(running){
+if(running && startTime){
 
 let now=new Date()
 
@@ -308,6 +306,10 @@ String(m).padStart(2,"0")+":"+
 String(s).padStart(2,"0")
 
 checkSchedule(m)
+
+}else{
+
+document.getElementById("elapsed").innerText="00:00"
 
 }
 
