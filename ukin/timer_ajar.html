@@ -27,26 +27,40 @@ text-align:center;
 
 .panel{
 background:rgba(255,255,255,0.08);
-backdrop-filter:blur(12px);
-border-radius:18px;
-padding:30px;
-box-shadow:0 20px 40px rgba(0,0,0,0.4);
+backdrop-filter:blur(14px);
+border-radius:20px;
+padding:35px;
+box-shadow:0 25px 50px rgba(0,0,0,0.5);
 margin-bottom:25px;
 }
 
-/* TIMER */
+/* LABEL */
+
+#label{
+font-size:26px;
+color:#38bdf8;
+margin-bottom:10px;
+}
+
+/* ELAPSED TIME */
 
 #elapsed{
 font-size:110px;
 font-weight:700;
 letter-spacing:4px;
+color:white;
+text-shadow:0 0 20px rgba(255,255,255,0.35);
 }
+
+/* ACTIVITY */
 
 #activity{
 font-size:50px;
 margin-top:20px;
 color:#facc15;
 }
+
+/* COUNTDOWN */
 
 #countdown{
 font-size:120px;
@@ -62,7 +76,7 @@ font-size:18px;
 padding:12px 30px;
 margin:8px;
 border:none;
-border-radius:10px;
+border-radius:12px;
 background:white;
 color:#111;
 cursor:pointer;
@@ -113,7 +127,7 @@ color:white;
 
 <div class="panel">
 
-<div style="font-size:24px;color:#38bdf8">Waktu Berjalan</div>
+<div id="label">Waktu Berjalan</div>
 
 <div id="elapsed">00:00</div>
 
@@ -167,7 +181,7 @@ let active=false
 let countdown=0
 let used={}
 
-/* LOAD DATA LOCAL */
+/* LOAD DATA */
 
 function loadTimeline(){
 
@@ -238,7 +252,7 @@ renderTable()
 
 }
 
-/* SAVE */
+/* SAVE TIMELINE */
 
 function saveTimeline(){
 
@@ -268,7 +282,7 @@ alert("Timeline tersimpan!")
 
 }
 
-/* START */
+/* START TIMER */
 
 function startTimer(){
 
@@ -280,7 +294,7 @@ checkSchedule(0)
 
 }
 
-/* STOP */
+/* STOP TIMER */
 
 function stopTimer(){
 
@@ -292,7 +306,7 @@ document.getElementById("activity").innerText=""
 
 }
 
-/* TIMER */
+/* UPDATE TIMER */
 
 function updateTimer(){
 
