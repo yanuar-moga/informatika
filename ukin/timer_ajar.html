@@ -8,43 +8,22 @@
 
 body{
 margin:0;
-font-family:Segoe UI;
-background:linear-gradient(135deg,#0f172a,#1e293b);
+background:#0f172a;
+font-family:Segoe UI,Arial;
 color:white;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-}
-
-#app{
-width:90%;
-max-width:1100px;
 text-align:center;
 }
 
-.panel{
-background:rgba(255,255,255,0.08);
-backdrop-filter:blur(12px);
-padding:40px;
-border-radius:20px;
-margin-bottom:20px;
-box-shadow:0 20px 40px rgba(0,0,0,0.5);
-}
-
-/* ELAPSED TIME */
-
-#elapsedLabel{
-font-size:20px;
-color:#38bdf8;
+#container{
+width:90%;
+margin:auto;
+margin-top:40px;
 }
 
 #elapsed{
-font-size:70px;
-margin-top:5px;
+font-size:90px;
+font-weight:bold;
 }
-
-/* ACTIVITY */
 
 #activity{
 font-size:50px;
@@ -52,54 +31,47 @@ margin-top:20px;
 color:#facc15;
 }
 
-/* COUNTDOWN */
-
 #countdown{
 font-size:120px;
-color:#ef4444;
 margin-top:10px;
+color:#ef4444;
 }
 
 button{
-padding:12px 30px;
-margin:10px;
+font-size:18px;
+padding:10px 20px;
+margin:5px;
 border-radius:10px;
 border:none;
+background:#f1f5f9;
+color:black;
 cursor:pointer;
-font-size:18px;
 }
 
 table{
 width:100%;
-margin-top:20px;
+margin-top:40px;
 border-collapse:collapse;
 }
 
 th,td{
+border:1px solid #334155;
 padding:8px;
 }
 
 input{
 width:90%;
-padding:6px;
-}
-
-.delete{
-background:#ef4444;
-color:white;
+padding:5px;
 }
 
 </style>
-
 </head>
 
 <body>
 
-<div id="app">
+<div id="container">
 
-<div class="panel">
-
-<div id="elapsedLabel">Waktu Berjalan</div>
+<h2>Teaching Timeline Timer</h2>
 
 <div id="elapsed">00:00</div>
 
@@ -114,21 +86,19 @@ color:white;
 
 </div>
 
-</div>
-
-<div class="panel">
-
-<h2>Timeline Editor</h2>
+<h3>Pengaturan Timeline</h3>
 
 <table id="timeline">
 
 <thead>
+
 <tr>
 <th>Menit</th>
 <th>Durasi</th>
 <th>Kegiatan</th>
-<th></th>
+<th>Hapus</th>
 </tr>
+
 </thead>
 
 <tbody></tbody>
@@ -137,10 +107,8 @@ color:white;
 
 <br>
 
-<button onclick="addRow()">Tambah</button>
+<button onclick="addRow()">Tambah Kegiatan</button>
 <button onclick="saveTimeline()">Simpan Timeline</button>
-
-</div>
 
 </div>
 
@@ -152,6 +120,8 @@ let startTime=null
 let active=false
 let countdown=0
 let used={}
+
+/* LOAD DATA DARI LOCAL STORAGE */
 
 function loadTimeline(){
 
@@ -165,7 +135,8 @@ schedule=JSON.parse(data)
 
 schedule=[
 {minute:0,duration:2,activity:"Salam dan Pembukaan"},
-{minute:2,duration:3,activity:"Apersepsi"}
+{minute:2,duration:3,activity:"Apersepsi"},
+{minute:5,duration:10,activity:"Penyampaian Materi"}
 ]
 
 }
@@ -173,6 +144,8 @@ schedule=[
 renderTable()
 
 }
+
+/* TAMPILKAN TABEL */
 
 function renderTable(){
 
@@ -182,20 +155,22 @@ tbody.innerHTML=""
 
 schedule.forEach((item,i)=>{
 
-let tr=document.createElement("tr")
+let row=document.createElement("tr")
 
-tr.innerHTML=`
+row.innerHTML=`
 <td><input value="${item.minute}"></td>
 <td><input value="${item.duration}"></td>
 <td><input value="${item.activity}"></td>
-<td><button class="delete" onclick="deleteRow(${i})">X</button></td>
+<td><button onclick="deleteRow(${i})">X</button></td>
 `
 
-tbody.appendChild(tr)
+tbody.appendChild(row)
 
 })
 
 }
+
+/* TAMBAH ROW */
 
 function addRow(){
 
@@ -205,6 +180,8 @@ renderTable()
 
 }
 
+/* HAPUS ROW */
+
 function deleteRow(i){
 
 schedule.splice(i,1)
@@ -212,6 +189,8 @@ schedule.splice(i,1)
 renderTable()
 
 }
+
+/* SIMPAN TIMELINE */
 
 function saveTimeline(){
 
@@ -237,9 +216,11 @@ schedule.sort((a,b)=>a.minute-b.minute)
 
 localStorage.setItem("teachingTimeline",JSON.stringify(schedule))
 
-alert("Timeline tersimpan")
+alert("Timeline tersimpan!")
 
 }
+
+/* START TIMER */
 
 function startTimer(){
 
@@ -247,17 +228,23 @@ running=true
 startTime=new Date()
 used={}
 
+checkSchedule(0)
+
 }
+
+/* STOP TIMER */
 
 function stopTimer(){
 
 running=false
 active=false
 
-document.getElementById("activity").innerText=""
 document.getElementById("countdown").innerText=""
+document.getElementById("activity").innerText=""
 
 }
+
+/* UPDATE TIMER */
 
 function updateTimer(){
 
@@ -280,6 +267,8 @@ checkSchedule(m)
 setTimeout(updateTimer,1000)
 
 }
+
+/* CEK SCHEDULE */
 
 function checkSchedule(currentMinute){
 
@@ -305,6 +294,8 @@ break
 
 }
 
+/* COUNTDOWN */
+
 function runCountdown(){
 
 if(countdown>=0 && active){
@@ -322,6 +313,8 @@ setTimeout(runCountdown,1000)
 }else{
 
 active=false
+document.getElementById("countdown").innerText=""
+document.getElementById("activity").innerText=""
 
 }
 
