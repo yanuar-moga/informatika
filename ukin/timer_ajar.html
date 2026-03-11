@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Teaching Timeline Timer</title>
+
+<style>
+
+body{
+margin:0;
+background:#0f172a;
+font-family:Segoe UI,Arial;
+color:white;
+text-align:center;
+}
+
+#container{
+width:90%;
+margin:auto;
+margin-top:40px;
+}
+
+#elapsed{
+font-size:90px;
+font-weight:bold;
+}
+
+#activity{
+font-size:50px;
+margin-top:20px;
+color:#facc15;
+}
+
+#countdown{
+font-size:120px;
+margin-top:10px;
+color:#ef4444;
+}
+
+button{
+font-size:18px;
+padding:10px 20px;
+margin:5px;
+border-radius:10px;
+border:none;
+background:#f1f5f9;
+color:black;
+cursor:pointer;
+}
+
+table{
+width:100%;
+margin-top:40px;
+border-collapse:collapse;
+}
+
+th,td{
+border:1px solid #334155;
+padding:8px;
+}
+
+input{
+width:90%;
+padding:5px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="container">
+
+<h2>Teaching Timeline Timer</h2>
+
+<div id="elapsed">00:00</div>
+
+<div id="activity"></div>
+
+<div id="countdown"></div>
+
+<div>
+
+<button onclick="startTimer()">START</button>
+<button onclick="stopTimer()">STOP</button>
+
+</div>
+
+<h3>Pengaturan Timeline</h3>
+
+<table id="timeline">
+
+<thead>
+
+<tr>
+<th>Menit</th>
+<th>Durasi</th>
+<th>Kegiatan</th>
+<th>Hapus</th>
+</tr>
+
+</thead>
+
+<tbody></tbody>
+
+</table>
+
+<br>
+
+<button onclick="addRow()">Tambah Kegiatan</button>
+<button onclick="saveTimeline()">Simpan Timeline</button>
+
+</div>
+
+<script>
+
+let schedule=[]
+let running=false
+let startTime=null
+let active=false
+let countdown=0
+let used={}
+
+/* LOAD DATA DARI LOCAL STORAGE */
+
+function loadTimeline(){
+
+let data=localStorage.getItem("teachingTimeline")
+
+if(data){
+
+schedule=JSON.parse(data)
+
+}else{
+
+schedule=[
+{minute:0,duration:2,activity:"Salam dan Pembukaan"},
+{minute:2,duration:3,activity:"Apersepsi"},
+{minute:5,duration:10,activity:"Penyampaian Materi"}
+]
+
+}
+
+renderTable()
+
+}
+
+/* TAMPILKAN TABEL */
+
+function renderTable(){
+
+let tbody=document.querySelector("#timeline tbody")
+
+tbody.innerHTML=""
+
+schedule.forEach((item,i)=>{
+
+let row=document.createElement("tr")
+
+row.innerHTML=`
+<td><input value="${item.minute}"></td>
+<td><input value="${item.duration}"></td>
+<td><input value="${item.activity}"></td>
+<td><button onclick="deleteRow(${i})">X</button></td>
+`
+
+tbody.appendChild(row)
+
+})
+
+}
+
+/* TAMBAH ROW */
+
+function addRow(){
+
+schedule.push({minute:0,duration:1,activity:"Kegiatan Baru"})
+
+renderTable()
+
+}
+
+/* HAPUS ROW */
+
+function deleteRow(i){
+
+schedule.splice(i,1)
+
+renderTable()
+
+}
+
+/* SIMPAN TIMELINE */
+
+function saveTimeline(){
+
+let rows=document.querySelectorAll("#timeline tbody tr")
+
+schedule=[]
+
+rows.forEach(r=>{
+
+let inputs=r.querySelectorAll("input")
+
+schedule.push({
+
+minute:parseInt(inputs[0].value),
+duration:parseInt(inputs[1].value),
+activity:inputs[2].value
+
+})
+
+})
+
+schedule.sort((a,b)=>a.minute-b.minute)
+
+localStorage.setItem("teachingTimeline",JSON.stringify(schedule))
+
+alert("Timeline tersimpan!")
+
+}
+
+/* START TIMER */
+
+function startTimer(){
+
+running=true
+startTime=new Date()
+used={}
+
+checkSchedule(0)
+
+}
+
+/* STOP TIMER */
+
+function stopTimer(){
+
+running=false
+active=false
+
+document.getElementById("countdown").innerText=""
+document.getElementById("activity").innerText=""
+
+}
+
+/* UPDATE TIMER */
+
+function updateTimer(){
+
+if(running){
+
+let now=new Date()
+
+let diff=Math.floor((now-startTime)/1000)
+
+let m=Math.floor(diff/60)
+let s=diff%60
+
+document.getElementById("elapsed").innerText=
+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")
+
+checkSchedule(m)
+
+}
+
+setTimeout(updateTimer,1000)
+
+}
+
+/* CEK SCHEDULE */
+
+function checkSchedule(currentMinute){
+
+if(active) return
+
+for(let item of schedule){
+
+if(item.minute===currentMinute && !used[item.minute]){
+
+countdown=item.duration*60
+active=true
+used[item.minute]=true
+
+document.getElementById("activity").innerText=item.activity
+
+runCountdown()
+
+break
+
+}
+
+}
+
+}
+
+/* COUNTDOWN */
+
+function runCountdown(){
+
+if(countdown>=0 && active){
+
+let m=Math.floor(countdown/60)
+let s=countdown%60
+
+document.getElementById("countdown").innerText=
+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")
+
+countdown--
+
+setTimeout(runCountdown,1000)
+
+}else{
+
+active=false
+document.getElementById("countdown").innerText=""
+document.getElementById("activity").innerText=""
+
+}
+
+}
+
+loadTimeline()
+updateTimer()
+
+</script>
+
+</body>
+</html>
