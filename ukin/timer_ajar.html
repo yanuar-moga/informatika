@@ -8,21 +8,38 @@
 
 body{
 margin:0;
-background:#0f172a;
 font-family:Segoe UI,Arial;
+background:linear-gradient(135deg,#0f172a,#1e293b);
 color:white;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+#app{
+width:90%;
+max-width:1200px;
 text-align:center;
 }
 
-#container{
-width:90%;
-margin:auto;
-margin-top:40px;
+/* GLASS PANEL */
+
+.panel{
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(12px);
+border-radius:18px;
+padding:30px;
+box-shadow:0 20px 40px rgba(0,0,0,0.4);
+margin-bottom:25px;
 }
 
+/* TIMER */
+
 #elapsed{
-font-size:90px;
-font-weight:bold;
+font-size:110px;
+font-weight:700;
+letter-spacing:4px;
 }
 
 #activity{
@@ -35,33 +52,56 @@ color:#facc15;
 font-size:120px;
 margin-top:10px;
 color:#ef4444;
+font-weight:700;
 }
+
+/* BUTTONS */
 
 button{
 font-size:18px;
-padding:10px 20px;
-margin:5px;
-border-radius:10px;
+padding:12px 30px;
+margin:8px;
 border:none;
-background:#f1f5f9;
-color:black;
+border-radius:10px;
+background:white;
+color:#111;
 cursor:pointer;
+transition:all .2s;
 }
+
+button:hover{
+transform:translateY(-2px);
+box-shadow:0 6px 12px rgba(0,0,0,0.25);
+}
+
+/* TABLE */
 
 table{
 width:100%;
-margin-top:40px;
 border-collapse:collapse;
+margin-top:10px;
 }
 
-th,td{
-border:1px solid #334155;
+th{
+color:#94a3b8;
+font-weight:500;
+padding:8px;
+}
+
+td{
 padding:8px;
 }
 
 input{
-width:90%;
-padding:5px;
+width:95%;
+padding:6px;
+border-radius:6px;
+border:none;
+}
+
+.delete{
+background:#ef4444;
+color:white;
 }
 
 </style>
@@ -69,9 +109,11 @@ padding:5px;
 
 <body>
 
-<div id="container">
+<div id="app">
 
-<h2>Teaching Timeline Timer</h2>
+<div class="panel">
+
+<div style="font-size:24px;color:#38bdf8">Waktu Berjalan</div>
 
 <div id="elapsed">00:00</div>
 
@@ -79,26 +121,28 @@ padding:5px;
 
 <div id="countdown"></div>
 
-<div>
+<div style="margin-top:20px">
 
 <button onclick="startTimer()">START</button>
 <button onclick="stopTimer()">STOP</button>
 
 </div>
 
-<h3>Pengaturan Timeline</h3>
+</div>
+
+<div class="panel">
+
+<h2 style="margin-top:0">Timeline Editor</h2>
 
 <table id="timeline">
 
 <thead>
-
 <tr>
 <th>Menit</th>
 <th>Durasi</th>
 <th>Kegiatan</th>
-<th>Hapus</th>
+<th></th>
 </tr>
-
 </thead>
 
 <tbody></tbody>
@@ -107,8 +151,10 @@ padding:5px;
 
 <br>
 
-<button onclick="addRow()">Tambah Kegiatan</button>
+<button onclick="addRow()">Tambah</button>
 <button onclick="saveTimeline()">Simpan Timeline</button>
+
+</div>
 
 </div>
 
@@ -121,7 +167,7 @@ let active=false
 let countdown=0
 let used={}
 
-/* LOAD DATA DARI LOCAL STORAGE */
+/* LOAD DATA LOCAL */
 
 function loadTimeline(){
 
@@ -145,7 +191,7 @@ renderTable()
 
 }
 
-/* TAMPILKAN TABEL */
+/* RENDER TABLE */
 
 function renderTable(){
 
@@ -155,22 +201,24 @@ tbody.innerHTML=""
 
 schedule.forEach((item,i)=>{
 
-let row=document.createElement("tr")
+let tr=document.createElement("tr")
 
-row.innerHTML=`
+tr.innerHTML=`
+
 <td><input value="${item.minute}"></td>
 <td><input value="${item.duration}"></td>
 <td><input value="${item.activity}"></td>
-<td><button onclick="deleteRow(${i})">X</button></td>
+<td><button class="delete" onclick="deleteRow(${i})">X</button></td>
+
 `
 
-tbody.appendChild(row)
+tbody.appendChild(tr)
 
 })
 
 }
 
-/* TAMBAH ROW */
+/* ADD ROW */
 
 function addRow(){
 
@@ -180,7 +228,7 @@ renderTable()
 
 }
 
-/* HAPUS ROW */
+/* DELETE */
 
 function deleteRow(i){
 
@@ -190,7 +238,7 @@ renderTable()
 
 }
 
-/* SIMPAN TIMELINE */
+/* SAVE */
 
 function saveTimeline(){
 
@@ -220,7 +268,7 @@ alert("Timeline tersimpan!")
 
 }
 
-/* START TIMER */
+/* START */
 
 function startTimer(){
 
@@ -232,7 +280,7 @@ checkSchedule(0)
 
 }
 
-/* STOP TIMER */
+/* STOP */
 
 function stopTimer(){
 
@@ -244,7 +292,7 @@ document.getElementById("activity").innerText=""
 
 }
 
-/* UPDATE TIMER */
+/* TIMER */
 
 function updateTimer(){
 
@@ -268,7 +316,7 @@ setTimeout(updateTimer,1000)
 
 }
 
-/* CEK SCHEDULE */
+/* CHECK SCHEDULE */
 
 function checkSchedule(currentMinute){
 
@@ -304,7 +352,8 @@ let m=Math.floor(countdown/60)
 let s=countdown%60
 
 document.getElementById("countdown").innerText=
-String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")
+String(m).padStart(2,"0")+":"+
+String(s).padStart(2,"0")
 
 countdown--
 
