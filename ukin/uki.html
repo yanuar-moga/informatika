@@ -19,34 +19,44 @@ text-align:center;
 }
 
 #container{
-width:90%;
+width:85%;
+max-width:1400px;
 }
 
 #label{
-font-size:32px;
+font-size:30px;
 color:#38bdf8;
 }
 
 #elapsed{
-font-size:100px;
+font-size:90px;
 font-weight:bold;
 margin-top:10px;
 }
 
+/* KEGIATAN */
+
 #activity{
-font-size:55px;
+font-size:44px;
 margin-top:30px;
 color:#facc15;
+line-height:1.3;
+word-wrap:break-word;
 }
+
+/* SLIDE */
 
 #slide{
-font-size:38px;
-margin-top:10px;
-color:#a5f3fc;
+font-size:32px;
+margin-top:15px;
+color:#67e8f9;
+line-height:1.4;
 }
 
+/* COUNTDOWN */
+
 #countdown{
-font-size:120px;
+font-size:110px;
 margin-top:20px;
 color:#ef4444;
 font-weight:bold;
@@ -57,10 +67,10 @@ margin-top:40px;
 }
 
 button{
-font-size:24px;
-padding:14px 45px;
+font-size:22px;
+padding:12px 40px;
 margin:10px;
-border-radius:12px;
+border-radius:10px;
 border:none;
 background:#f1f5f9;
 color:black;
@@ -72,7 +82,6 @@ background:#e2e8f0;
 }
 
 </style>
-
 </head>
 
 <body>
@@ -105,7 +114,7 @@ let active=false
 let countdown=0
 let used={}
 
-/* LOAD DATA GOOGLE SHEET */
+/* LOAD GOOGLE SHEET */
 
 async function loadSchedule(){
 
@@ -124,18 +133,14 @@ let r=rows[i].trim()
 
 if(r==="") continue
 
-let cols=r.split(",")
+/* split hanya 3 koma pertama agar teks tidak rusak */
 
-if(cols.length<4){
-cols=r.split(";")
-}
+let cols=r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
 
-let minuteText=cols[0]
+let minute=parseInt(cols[0])
 let duration=parseInt(cols[1])
 let activity=cols[2]
 let slide=cols[3]
-
-let minute=parseInt(minuteText)
 
 if(!isNaN(minute)){
 
@@ -152,17 +157,17 @@ slide:slide
 
 schedule.sort((a,b)=>a.minute-b.minute)
 
-console.log("Schedule Loaded:",schedule)
+console.log(schedule)
 
 }catch(e){
 
-console.log("Error loading sheet",e)
+console.log("Error load sheet",e)
 
 }
 
 }
 
-/* START TIMER */
+/* START */
 
 function startTimer(){
 
@@ -174,7 +179,7 @@ checkSchedule(0)
 
 }
 
-/* STOP TIMER */
+/* STOP */
 
 function stopTimer(){
 
@@ -187,7 +192,7 @@ document.getElementById("countdown").innerText=""
 
 }
 
-/* UPDATE TIMER */
+/* TIMER */
 
 function updateTimer(){
 
@@ -227,7 +232,7 @@ active=true
 used[item.minute]=true
 
 document.getElementById("activity").innerText=item.activity
-document.getElementById("slide").innerText=item.slide
+document.getElementById("slide").innerText="Slide: "+item.slide
 
 runCountdown()
 
@@ -260,8 +265,6 @@ setTimeout(runCountdown,1000)
 
 active=false
 document.getElementById("countdown").innerText=""
-document.getElementById("activity").innerText=""
-document.getElementById("slide").innerText=""
 
 }
 
