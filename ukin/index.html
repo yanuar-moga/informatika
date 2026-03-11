@@ -2,14 +2,14 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Presentation Timer</title>
+<title>Teaching Timeline Timer</title>
 
 <style>
 
 body{
 margin:0;
-font-family:Segoe UI, Arial;
 background:#0f172a;
+font-family:Segoe UI;
 color:white;
 display:flex;
 justify-content:center;
@@ -22,20 +22,19 @@ text-align:center;
 width:90%;
 }
 
-#clock{
-font-size:80px;
+#elapsed{
+font-size:90px;
 font-weight:bold;
 }
 
-#elapsed{
+#label{
 font-size:30px;
 color:#38bdf8;
-margin-top:10px;
 }
 
 #activity{
-font-size:50px;
-margin-top:40px;
+font-size:60px;
+margin-top:30px;
 color:#facc15;
 }
 
@@ -43,7 +42,6 @@ color:#facc15;
 font-size:120px;
 margin-top:20px;
 color:#ef4444;
-font-weight:bold;
 }
 
 #buttons{
@@ -52,17 +50,13 @@ margin-top:40px;
 
 button{
 font-size:24px;
-padding:12px 30px;
+padding:12px 40px;
 margin:10px;
 border-radius:12px;
 border:none;
 background:#f1f5f9;
 color:black;
 cursor:pointer;
-}
-
-button:hover{
-background:#e2e8f0;
 }
 
 </style>
@@ -73,8 +67,8 @@ background:#e2e8f0;
 
 <div id="container">
 
-<div id="clock">00:00:00</div>
-<div id="elapsed">Elapsed: 00:00</div>
+<div id="label">Waktu Berjalan</div>
+<div id="elapsed">00:00</div>
 
 <div id="activity"></div>
 
@@ -114,7 +108,7 @@ let c=r.split(",")
 if(c.length>=3){
 
 schedule.push({
-time:c[0].trim(),
+minute:parseInt(c[0]),
 duration:parseInt(c[1]),
 activity:c[2]
 })
@@ -122,34 +116,6 @@ activity:c[2]
 }
 
 })
-
-}
-
-function updateClock(){
-
-let now=new Date()
-
-let h=String(now.getHours()).padStart(2,"0")
-let m=String(now.getMinutes()).padStart(2,"0")
-let s=String(now.getSeconds()).padStart(2,"0")
-
-document.getElementById("clock").innerText=`${h}:${m}:${s}`
-
-if(running){
-
-let diff=Math.floor((now-startTime)/1000)
-
-let em=Math.floor(diff/60)
-let es=diff%60
-
-document.getElementById("elapsed").innerText=
-`Elapsed: ${String(em).padStart(2,"0")}:${String(es).padStart(2,"0")}`
-
-checkSchedule()
-
-}
-
-setTimeout(updateClock,1000)
 
 }
 
@@ -171,23 +137,39 @@ document.getElementById("activity").innerText=""
 
 }
 
-function checkSchedule(){
+function updateTimer(){
 
-if(active) return
+if(running){
 
 let now=new Date()
 
-let key=
-String(now.getHours()).padStart(2,"0")+":"+
-String(now.getMinutes()).padStart(2,"0")
+let diff=Math.floor((now-startTime)/1000)
+
+let m=Math.floor(diff/60)
+let s=diff%60
+
+document.getElementById("elapsed").innerText=
+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")
+
+checkSchedule(m)
+
+}
+
+setTimeout(updateTimer,1000)
+
+}
+
+function checkSchedule(currentMinute){
+
+if(active) return
 
 schedule.forEach(item=>{
 
-if(item.time===key && !used[key]){
+if(item.minute===currentMinute && !used[item.minute]){
 
 countdown=item.duration*60
 active=true
-used[key]=true
+used[item.minute]=true
 
 document.getElementById("activity").innerText=item.activity
 
@@ -226,7 +208,7 @@ document.getElementById("activity").innerText=""
 async function init(){
 
 await loadSchedule()
-updateClock()
+updateTimer()
 
 }
 
