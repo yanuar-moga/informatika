@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Presentation Timer</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Segoe UI;
+background:transparent;
+}
+
+#widget{
+position:fixed;
+right:10px;
+bottom:10px;
+width:260px;
+background:rgba(0,0,0,0.9);
+color:white;
+padding:12px;
+border-radius:12px;
+text-align:center;
+}
+
+#clock{
+font-size:14px;
+}
+
+#elapsed{
+color:cyan;
+margin-left:5px;
+}
+
+#activity{
+font-size:15px;
+color:yellow;
+margin-top:5px;
+}
+
+#countdown{
+font-size:28px;
+color:red;
+margin-top:5px;
+}
+
+#buttons{
+margin-top:8px;
+display:none;
+}
+
+#widget:hover #buttons{
+display:block;
+}
+
+button{
+border-radius:8px;
+padding:4px 10px;
+border:1px solid #ccc;
+background:#f0f0f0;
+color:black;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="widget">
+
+<div>
+<span id="clock">00:00:00</span>
+<span id="elapsed">| 00:00</span>
+</div>
+
+<div id="activity"></div>
+<div id="countdown"></div>
+
+<div id="buttons">
+<button onclick="startTimer()">Start</button>
+<button onclick="stopTimer()">Stop</button>
+</div>
+
+</div>
+
+<script>
+
+const SHEET_URL="https://docs.google.com/spreadsheets/d/1482QVxSy6BcsBgWXVjf_BUqpWYmdlsEDkDhfvZpj0vQ/gviz/tq?tqx=out:csv"
+
+let schedule=[]
+let running=false
+let startTime=null
+let active=false
+let countdown=0
+let used={}
+
+async function loadSchedule(){
+
+let res=await fetch(SHEET_URL)
+let text=await res.text()
+
+let rows=text.split("\n").slice(1)
+
+schedule=[]
+
+rows.forEach(r=>{
+
+let c=r.split(",")
+
+if(c.length>=3){
+
+schedule.push({
+time:c[0].trim(),
+duration:parseInt(c[1]),
+activity:c[2]
+})
+
+}
+
+})
+
+}
+
+function updateClock(){
+
+let now=new Date()
+
+let h=String(now.getHours()).padStart(2,"0")
+let m=String(now.getMinutes()).padStart(2,"0")
+let s=String(now.getSeconds()).padStart(2,"0")
+
+document.getElementById("clock").innerText=`${h}:${m}:${s}`
+
+if(running){
+
+let diff=Math.floor((now-startTime)/1000)
+
+let em=Math.floor(diff/60)
+let es=diff%60
+
+document.getElementById("elapsed").innerText=
+`| ${String(em).padStart(2,"0")}:${String(es).padStart(2,"0")}`
+
+checkSchedule()
+
+}
+
+setTimeout(updateClock,1000)
+
+}
+
+function startTimer(){
+
+running=true
+startTime=new Date()
+used={}
+
+}
+
+function stopTimer(){
+
+running=false
+active=false
+
+document.getElementById("countdown").innerText=""
+document.getElementById("activity").innerText=""
+
+}
+
+function checkSchedule(){
+
+if(active) return
+
+let now=new Date()
+
+let key=
+String(now.getHours()).padStart(2,"0")+":"+
+String(now.getMinutes()).padStart(2,"0")
+
+schedule.forEach(item=>{
+
+if(item.time===key && !used[key]){
+
+countdown=item.duration*60
+active=true
+used[key]=true
+
+document.getElementById("activity").innerText=item.activity
+
+runCountdown()
+
+}
+
+})
+
+}
+
+function runCountdown(){
+
+if(countdown>=0 && active){
+
+let m=Math.floor(countdown/60)
+let s=countdown%60
+
+document.getElementById("countdown").innerText=
+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")
+
+countdown--
+
+setTimeout(runCountdown,1000)
+
+}else{
+
+active=false
+document.getElementById("countdown").innerText=""
+document.getElementById("activity").innerText=""
+
+}
+
+}
+
+async function init(){
+
+await loadSchedule()
+updateClock()
+
+}
+
+init()
+
+</script>
+
+</body>
+</html>
