@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asesmen Siswa</title>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
+.wrapper { display:flex; height:100vh; }
+.sidebar {
+  width:260px; background:#fff; padding:10px;
+  border-right:1px solid #ddd; overflow:auto;
+}
+.sidebar li {
+  list-style:none;
+  padding:8px;
+  margin:4px 0;
+  border-radius:8px;
+  cursor:pointer;
+  text-transform:uppercase;
+}
+.sidebar li.active {
+  background:#009688;
+  color:#fff;
+}
+.sidebar li.belum {
+  border:2px solid #dc2626;
+  background:#fff5f5;
+  color:#dc2626;
+}
+
+.main { flex:1; display:flex; flex-direction:column; }
+.header { background:#0d47a1; color:#fff; padding:14px; text-align:center; }
+.filter { padding:10px; background:#eee; text-align:center; }
+.content { flex:1; padding:20px; overflow:auto; }
+
+.nama { font-size:26px; font-weight:bold; text-align:center; }
+.nilai { font-size:34px; text-align:center; margin:10px 0; }
+
+.hijau { color:#16a34a }
+.orange { color:#f97316 }
+
+.qa { background:#fff; padding:12px; border-radius:12px; margin-bottom:12px; }
+.soal { display:flex; justify-content:space-between; padding:4px 0; }
+.benar { color:#16a34a; font-weight:bold; }
+.salah { color:#dc2626; font-weight:bold; }
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+  <div class="sidebar">
+    <h3>Daftar Siswa</h3>
+    <ul id="siswaList"></ul>
+  </div>
+
+  <div class="main">
+    <div class="header">PENILAIAN ASESMEN</div>
+
+    <div class="filter">
+      <select id="kelasSelect"></select>
+      <button onclick="tampilkanData()">Tampilkan</button>
+      <button onclick="downloadExcelPerKelas()">Download Excel</button>
+    </div>
+
+    <div class="content">
+      <div id="nama" class="nama">Pilih Kelas</div>
+      <div id="qaList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+/* ===================== KONFIG ===================== */
+const sheetId = "1wYkp-mZ96BXEin8mF8F3Z9brSjkPeFtB5k2IFm5Qxjc";
+const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+
+const kunci = [
+  "Kumpulan informasi yang dapat diolah",
+  "Jumlah siswa di kelas",
+  "Data primer",
+  "Membantu keputusan tepat",
+  "Jumlah meja dan kursi",
+  "SUM","AVERAGE","MAX","MIN","=SUM(A1:A5)",
+  "Keputusan bersyarat",
+  "=IF(B2>=75,\"LULUS\",\"REMIDI\")",
+  "Logika","REMIDI","Keputusan otomatis",
+  "Memudahkan mengolah data",
+  "Menganalisis","Tersusun rapi",
+  "Pengambilan keputusan","Jujur dan teliti"
+];
+
+let rows = [], allSiswa = [], filtered = [], index = 0;
+
+/* ===================== LOAD ===================== */
+fetch(url)
+.then(r=>r.text())
+.then(t=>{
+  const json = JSON.parse(t.substring(47).slice(0,-2));
+  rows = json.table.rows.map(r=>r.c.map(c=>c?c.v:""));
+  allSiswa = rows.map(r=>({ nama:r[2], kelas:r[4], row:r }));
+  isiKelas();
+});
+
+/* ===================== DROPDOWN ===================== */
+function isiKelas(){
+
+  const kelasMap = {};
+
+  allSiswa.forEach(s=>{
+    if(!s.kelas || !s.nama) return;
+    if(!kelasMap[s.kelas]) kelasMap[s.kelas] = new Set();
+    kelasMap[s.kelas].add(s.nama.toUpperCase());
+  });
+
+  const kelasList = Object.keys(kelasMap).sort((a,b)=>a.localeCompare(b));
+
+  kelasSelect.innerHTML = '<option value="">Pilih Kelas</option>';
+  kelasList.forEach(k=>{
+    kelasSelect.innerHTML += `<option value="${k}">${k} (${kelasMap[k].size} siswa)</option>`;
+  });
+}
+
+/* ===================== TAMPIL DATA ===================== */
+function tampilkanData(){
+
+  const kelas = kelasSelect.value;
+
+  const siswaKelas = allSiswa
+    .filter(s=>s.kelas===kelas)
+    .map(s=>s.nama.toUpperCase());
+
+  const pengirim = new Set(
+    rows.filter(r=>r[4]===kelas && r.slice(5,25).some(v=>String(v).trim()!==""))
+        .map(r=>r[2].toUpperCase())
+  );
+
+  filtered = siswaKelas.map(nama=>{
+    const data = rows.find(r=>r[2].toUpperCase()===nama && r[4]===kelas);
+    return data || [,"",nama,"",kelas];
+  }).sort((a,b)=>a[2].localeCompare(b[2]));
+
+  index = 0;
+  renderSidebar(pengirim);
+  render(pengirim);
+}
+
+/* ===================== SIDEBAR ===================== */
+function renderSidebar(pengirim){
+
+  siswaList.innerHTML="";
+
+  filtered.forEach((r,i)=>{
+    const li=document.createElement("li");
+    li.textContent=r[2];
+
+    if(!pengirim.has(r[2].toUpperCase())) li.classList.add("belum");
+
+    li.onclick=()=>{ index=i; render(pengirim); };
+    siswaList.appendChild(li);
+  });
+}
+
+/* ===================== NILAI ===================== */
+function nilaiTP(start,end,row){
+  let benar=0;
+  for(let i=start;i<=end;i++){
+    if(String(row[5+i]).trim()===String(kunci[i]).trim()) benar++;
+  }
+  return benar*20;
+}
+
+/* ===================== RENDER ===================== */
+function render(pengirim){
+
+  const r=filtered[index];
+  if(!r) return;
+
+  nama.innerText=r[2].toUpperCase();
+
+  if(!pengirim.has(r[2].toUpperCase())){
+    qaList.innerHTML=`
+      <div class="nilai orange">BELUM MENGIRIM JAWABAN</div>
+      <div class="qa">STATUS : <b>REMIDI</b></div>
+    `;
+    return;
+  }
+
+  const tp1=nilaiTP(0,4,r);
+  const tp2=nilaiTP(5,9,r);
+  const tp3=nilaiTP(10,14,r);
+  const tp4=nilaiTP(15,19,r);
+
+  const total=Math.round((tp1+tp2+tp3+tp4)/4);
+  const status=total>=78?"TUNTAS":"REMIDI";
+
+  let detail="";
+  for(let i=0;i<20;i++){
+    const benar=String(r[5+i]).trim()===String(kunci[i]).trim();
+    detail+=`
+      <div class="soal">
+        <span>Soal ${i+1}</span>
+        <span class="${benar?'benar':'salah'}">
+          ${benar?'✅ Benar (+20)':'❌ Salah (0)'}
+        </span>
+      </div>`;
+  }
+
+  qaList.innerHTML=`
+    <div class="nilai ${total>=78?'hijau':'orange'}">TOTAL NILAI : ${total}</div>
+    <div class="qa">STATUS : <b>${status}</b></div>
+    <div class="qa">TP1 : ${tp1}</div>
+    <div class="qa">TP2 : ${tp2}</div>
+    <div class="qa">TP3 : ${tp3}</div>
+    <div class="qa">TP4 : ${tp4}</div>
+    <div class="qa"><b>Detail Jawaban</b>${detail}</div>
+  `;
+}
+
+/* ===================== EXPORT EXCEL (BERDASARKAN TABEL HIJAU) ===================== */
+function downloadExcelPerKelas(){
+
+  const kelas = kelasSelect.value;
+
+  if(!kelas){
+    alert("Pilih kelas terlebih dahulu!");
+    return;
+  }
+
+  if(filtered.length === 0){
+    alert("Klik tombol Tampilkan dulu!");
+    return;
+  }
+
+  let dataExcel = [];
+
+  dataExcel.push([
+    "Nama Siswa",
+    "Nilai TP1",
+    "Nilai TP2",
+    "Nilai TP3",
+    "Nilai TP4",
+    "Total Nilai"
+  ]);
+
+  filtered.forEach(r=>{
+
+    const nama = r[2].toUpperCase();
+
+    const adaJawaban = r.slice(5,25).some(v=>String(v).trim()!=="");
+
+    if(!adaJawaban){
+      dataExcel.push([nama,"","","","",""]);
+      return;
+    }
+
+    const tp1=nilaiTP(0,4,r);
+    const tp2=nilaiTP(5,9,r);
+    const tp3=nilaiTP(10,14,r);
+    const tp4=nilaiTP(15,19,r);
+
+    const total=Math.round((tp1+tp2+tp3+tp4)/4);
+
+    dataExcel.push([
+      nama,
+      tp1,
+      tp2,
+      tp3,
+      tp4,
+      total
+    ]);
+
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(dataExcel);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, kelas);
+
+  XLSX.writeFile(wb, `Nilai_${kelas}.xlsx`);
+}
+
+</script>
+
+</body>
+</html>
