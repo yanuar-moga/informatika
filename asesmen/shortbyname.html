@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Asesmen Siswa</title>
+<title>Asesmen Siswa - Final Sekolah</title>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
@@ -22,10 +22,7 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
   cursor:pointer;
   text-transform:uppercase;
 }
-.sidebar li.active {
-  background:#009688;
-  color:#fff;
-}
+.sidebar li.active { background:#009688; color:#fff; }
 .sidebar li.belum {
   border:2px solid #dc2626;
   background:#fff5f5;
@@ -97,7 +94,7 @@ const kunci = [
 
 let rows = [], allSiswa = [], filtered = [], index = 0;
 
-/* ===================== LOAD ===================== */
+/* ===================== LOAD DATA ===================== */
 fetch(url)
 .then(r=>r.text())
 .then(t=>{
@@ -107,22 +104,44 @@ fetch(url)
   isiKelas();
 });
 
+/* ===================== MASTER OTOMATIS ===================== */
+function buatMasterDariData(){
+
+  const master = {};
+
+  rows.forEach(r=>{
+
+    const nama = String(r[2]).toUpperCase().trim();
+    const kelas = String(r[4]).trim();
+
+    if(!nama || !kelas) return;
+
+    if(!master[kelas]) master[kelas] = [];
+
+    if(!master[kelas].includes(nama)){
+      master[kelas].push(nama);
+    }
+
+  });
+
+  return master;
+}
+
 /* ===================== DROPDOWN ===================== */
 function isiKelas(){
 
-  const kelasMap = {};
+  const kelasSet = new Set();
 
   allSiswa.forEach(s=>{
-    if(!s.kelas || !s.nama) return;
-    if(!kelasMap[s.kelas]) kelasMap[s.kelas] = new Set();
-    kelasMap[s.kelas].add(s.nama.toUpperCase());
+    if(s.kelas) kelasSet.add(s.kelas);
   });
 
-  const kelasList = Object.keys(kelasMap).sort((a,b)=>a.localeCompare(b));
+  const kelasList = Array.from(kelasSet).sort((a,b)=>a.localeCompare(b));
 
   kelasSelect.innerHTML = '<option value="">Pilih Kelas</option>';
+
   kelasList.forEach(k=>{
-    kelasSelect.innerHTML += `<option value="${k}">${k} (${kelasMap[k].size} siswa)</option>`;
+    kelasSelect.innerHTML += `<option value="${k}">${k}</option>`;
   });
 }
 
@@ -131,19 +150,34 @@ function tampilkanData(){
 
   const kelas = kelasSelect.value;
 
-  const siswaKelas = allSiswa
-    .filter(s=>s.kelas===kelas)
-    .map(s=>s.nama.toUpperCase());
+  if(!kelas){
+    alert("Pilih kelas dulu!");
+    return;
+  }
+
+  const masterKelas = buatMasterDariData();
+  const masterNama = masterKelas[kelas];
+
+  if(!masterNama){
+    alert("Data kelas tidak ditemukan!");
+    return;
+  }
 
   const pengirim = new Set(
     rows.filter(r=>r[4]===kelas && r.slice(5,25).some(v=>String(v).trim()!==""))
         .map(r=>r[2].toUpperCase())
   );
 
-  filtered = siswaKelas.map(nama=>{
-    const data = rows.find(r=>r[2].toUpperCase()===nama && r[4]===kelas);
+  filtered = masterNama.map(nama=>{
+
+    const data = rows.find(r =>
+      r[2].toUpperCase()===nama &&
+      r[4]===kelas
+    );
+
     return data || [,"",nama,"",kelas];
-  }).sort((a,b)=>a[2].localeCompare(b[2]));
+
+  });
 
   index = 0;
   renderSidebar(pengirim);
@@ -166,7 +200,7 @@ function renderSidebar(pengirim){
   });
 }
 
-/* ===================== NILAI ===================== */
+/* ===================== HITUNG NILAI ===================== */
 function nilaiTP(start,end,row){
   let benar=0;
   for(let i=start;i<=end;i++){
@@ -222,7 +256,7 @@ function render(pengirim){
   `;
 }
 
-/* ===================== EXPORT EXCEL (BERDASARKAN TABEL HIJAU) ===================== */
+/* ===================== EXPORT EXCEL ===================== */
 function downloadExcelPerKelas(){
 
   const kelas = kelasSelect.value;
@@ -233,29 +267,23 @@ function downloadExcelPerKelas(){
   }
 
   if(filtered.length === 0){
-    alert("Klik tombol Tampilkan dulu!");
+    alert("Klik Tampilkan dulu!");
     return;
   }
 
   let dataExcel = [];
 
   dataExcel.push([
-    "Nama Siswa",
-    "Nilai TP1",
-    "Nilai TP2",
-    "Nilai TP3",
-    "Nilai TP4",
-    "Total Nilai"
+    "Nama Siswa","TP1","TP2","TP3","TP4","Total","Status"
   ]);
 
   filtered.forEach(r=>{
 
     const nama = r[2].toUpperCase();
-
     const adaJawaban = r.slice(5,25).some(v=>String(v).trim()!=="");
 
     if(!adaJawaban){
-      dataExcel.push([nama,"","","","",""]);
+      dataExcel.push([nama,"","","","","","REMIDI"]);
       return;
     }
 
@@ -265,15 +293,9 @@ function downloadExcelPerKelas(){
     const tp4=nilaiTP(15,19,r);
 
     const total=Math.round((tp1+tp2+tp3+tp4)/4);
+    const status=total>=78?"TUNTAS":"REMIDI";
 
-    dataExcel.push([
-      nama,
-      tp1,
-      tp2,
-      tp3,
-      tp4,
-      total
-    ]);
+    dataExcel.push([nama,tp1,tp2,tp3,tp4,total,status]);
 
   });
 
@@ -281,7 +303,7 @@ function downloadExcelPerKelas(){
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, kelas);
 
-  XLSX.writeFile(wb, `Nilai_${kelas}.xlsx`);
+  XLSX.writeFile(wb, `Rekap_Nilai_${kelas}.xlsx`);
 }
 
 </script>
