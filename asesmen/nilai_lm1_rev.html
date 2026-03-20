@@ -64,6 +64,7 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
     <div class="filter">
       <select id="kelasSelect"></select>
       <button onclick="tampilkanData()">Tampilkan</button>
+      <button onclick="downloadExcelPerKelas()">Download Excel</button>
     </div>
 
     <div class="content">
@@ -74,6 +75,7 @@ body { margin:0; font-family:Segoe UI, Arial; background:#f4f7fb; }
 </div>
 
 <script>
+
 /* ===================== KONFIG ===================== */
 const sheetId = "1wYkp-mZ96BXEin8mF8F3Z9brSjkPeFtB5k2IFm5Qxjc";
 const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
@@ -189,11 +191,14 @@ function render(pengirim){
     return;
   }
 
-  const tp1=nilaiTP(0,4,r);
-  const tp2=nilaiTP(5,9,r);
-  const tp3=nilaiTP(10,14,r);
-  const tp4=nilaiTP(15,19,r);
-  const total=Math.round((tp1+tp2+tp3+tp4)/4);
+  const tp1=nilaiTP(0,3,r);
+  const tp2=nilaiTP(4,7,r);
+  const tp3=nilaiTP(8,11,r);
+  const tp4=nilaiTP(12,15,r);
+  const tp5=nilaiTP(16,17,r);
+  const tp6=nilaiTP(18,19,r);
+
+  const total=Math.round((tp1+tp2+tp3+tp4+tp5+tp6)/6);
   const status=total>=78?"TUNTAS":"REMIDI";
 
   let detail="";
@@ -215,9 +220,82 @@ function render(pengirim){
     <div class="qa">TP2 : ${tp2}</div>
     <div class="qa">TP3 : ${tp3}</div>
     <div class="qa">TP4 : ${tp4}</div>
+    <div class="qa">TP5 : ${tp5}</div>
+    <div class="qa">TP6 : ${tp6}</div>
     <div class="qa"><b>Detail Jawaban</b>${detail}</div>
   `;
 }
+
+/* ===================== EXPORT EXCEL ===================== */
+function downloadExcelPerKelas(){
+
+  const kelas = kelasSelect.value;
+
+  if(!kelas){
+    alert("Pilih kelas terlebih dahulu!");
+    return;
+  }
+
+  const siswaKelas = allSiswa
+    .filter(s=>s.kelas===kelas)
+    .map(s=>s.nama.toUpperCase());
+
+  let dataExcel = [];
+
+  dataExcel.push([
+    "Nama Siswa",
+    "Nilai TP1",
+    "Nilai TP2",
+    "Nilai TP3",
+    "Nilai TP4",
+    "Nilai TP5",
+    "Nilai TP6",
+    "Total Nilai"
+  ]);
+
+  siswaKelas.forEach(nama=>{
+
+    const r = rows.find(row =>
+      row[2].toUpperCase()===nama &&
+      row[4]===kelas
+    );
+
+    if(!r || !r.slice(5,25).some(v=>String(v).trim()!=="")){
+      dataExcel.push([nama,0,0,0,0,0,0,0]);
+      return;
+    }
+
+    const tp1 = nilaiTP(0,3,r);
+    const tp2 = nilaiTP(4,7,r);
+    const tp3 = nilaiTP(8,11,r);
+    const tp4 = nilaiTP(12,15,r);
+    const tp5 = nilaiTP(16,17,r);
+    const tp6 = nilaiTP(18,19,r);
+
+    const total = Math.round((tp1+tp2+tp3+tp4+tp5+tp6)/6);
+
+    dataExcel.push([
+      nama,
+      tp1,
+      tp2,
+      tp3,
+      tp4,
+      tp5,
+      tp6,
+      total
+    ]);
+
+  });
+
+  dataExcel = [dataExcel[0], ...dataExcel.slice(1).sort((a,b)=>a[0].localeCompare(b[0]))];
+
+  const ws = XLSX.utils.aoa_to_sheet(dataExcel);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, kelas);
+
+  XLSX.writeFile(wb, `Nilai_${kelas}.xlsx`);
+}
+
 </script>
 
 </body>
