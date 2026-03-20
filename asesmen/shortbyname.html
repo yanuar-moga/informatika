@@ -92,136 +92,187 @@ const kunci = [
   "Pengambilan keputusan","Jujur dan teliti"
 ];
 
-let rows = [], allSiswa = [], filtered = [], index = 0;
+/* ===================== MASTER KELAS ===================== */
+const masterKelas = {
 
-/* ===================== LOAD DATA ===================== */
+"Kelas 7A":[
+"ABIL WAFA AZMANI","ADINDA PUTRI QIRANA","AHMAD BANYU AJI MAGHRIBI","ALIYATUL NAJMAH",
+"ATIYA MAOLAYA SYIFA","AULIYA ATHTHOIFATUL MANSHUROH","AYASHA BINTANG ADIRI","AYU NABILA UROHMAH",
+"BANYU PUTRA AL GHIFARI","CHILLA ANUSHREE BATRISYA BOEDIARTO","DAVA ARDIANSYAH","DILA MAFELA",
+"GINA NAILA SALMA","HAIDAR AULIA AZHAR","JHIO DIRGA IQHSYANI AKBAR","KARAN PRAMUDYA AZZAKY",
+"KHOIRUNIA SALSABILA","KUNII SA'ADAH","LAELATUL AROFAH","MUHAMAD FAIZ ZAKARIA",
+"MUHAMAD JANKI DAUSAT","MUHAMMAD ADIB AFNAN","MUHAMMAD ALI MUSYAFA","MUHAMMAD ARJU SYAFA'ATA",
+"MUHAMMAD SALIK BAHTIAR","MUHAMMAD WILDAN SYAHPUTRA","NADIEN AISHA ZAHRA","NAJMI AULINA SYAKIRA",
+"RADITYA KENZIE PRADANA","RAYHAN ALIF HIDAYAT","TASYA HUSNA KAMILA","ZAHIRA QOLBI SYARIFAH"
+],
+
+"Kelas 7B":[
+"ADAM YASFI RIDHO","AMELIA RAMADHANI","ANISA EKA PERTIWI","CALLYSTA AIRA CAREENA",
+"ERLANGGA CAHAYA PURNAMA","HAFIZH PRASETYO","KAMELA KHAIRUNNISA","KHALIFA ARKANANTA JANGKARU WARDANI",
+"KIREINA ESKA NUGROHO","KUNI KHUSNA FAODA","LEKHA MEISA","M.FARID",
+"MINKA AYUDYA ASSAQEB","MUHAMAD ARSYA FEBRIAN","MUHAMAD MAULANA AJIZAN","MUHAMMAD DHIA'ULAMI",
+"MUHAMMAD NAJMI ALFARISI","MUKHAMMAD FABIYAN PRATAMA","NAELA PUTRI OKTA AZAHIRA","NAJWA PUTRI NAFILA",
+"NARGHIS KHOTUN","NAZAR QIDA NANDIYANSYAH","PRADIPTA AZQA LAZUARDI","SALSA ZASKIA ROFIKOH",
+"SATRIA REZCKY UTAMA","SHIDQI MARWAN SANUSI","SILVI AULIA","SITI NUR RAHMAWATI",
+"SYARIFANA FATIMAH","TALITA APRILIA PUTRI","YUNI SHIDQIYA ALIFA","ZIDNA AZKIA"
+],
+
+"Kelas 7C":[
+"ADELIA WIDI NUR LAELI","AFIK BINA PRATAMA","AHZA DANISH SAPUTRA","ALYA AZZAHRA",
+"AMIRA GHAIDA METIZA YUDOYAHNO","ANNISA ZHUKRUF","ANZILNA MINKA KAROMATIKA","DAFA ARYA ARIF PRADANA",
+"GALUH EKADIANTI","HAIDAR MUSYAFFA KHAIRULLAH","IKHDA FAIRUZ","KENISHA NAIA ANANDITA",
+"KHARISA QATHRUN NADA","KHARISMA ARISQIA","LABIB MAULANA ABRISAM","MILA SAROTUNISA",
+"MOHAMMAD RIFQI ATONIAMI","MUAZAROTUL HUSNA","MUHAMAD ABID KHAMDANI","MUHAMAD FARDAN AL FATIR",
+"MUHAMAD SULTONUNADIF","MUHAMMAD ABU YAZID","MUHAMMAD NUR ALFIAN SAPUTRA","MUTIA FA'IQOTU RAMADHANI",
+"NADHIF ANDRIAN KHAKIM","NAFIZYAH RAHMADHINA","NAYA KURNIYA","RASYA AZKADIA ALFATH",
+"STEVEN BAGUSPUTRA KURNIA","TAFRIKHA TA'NISILIALI","WIDIA NINGSIH","YUMNA AYUNINGTYAS"
+],
+
+"Kelas 7D":[
+"ADINDA NUR AENI","ADRIAN ASA MULYO","AISHA TALITA ZAHRAN","ALWAN MUWAFFAQ CAHYA",
+"BAEHAQI AZZA AZWAR","DANIS MUMTAZAH RIZKIYANI","DZAKIRA TALITA ZAHRA","FAIZ MAULANA RIZKI",
+"GALANG GONDO PRASOJO","HANIFAH SORAYA","HANUM SALSABILA PRAMUDYA","HASAN MAULANA AZWAR",
+"IRGIAWAN SUTANTO","KANAYA NABILLA SYAFIRA","KAYLA NUZULA KAMALI","KHARISA KAYASFA",
+"KHAURA AZKIA","MAULANA SAFA ADITYA","MIZLA SASI RAMADHAN","MUHAMMAD ALZAM FAEYZA",
+"MUHAMMAD NAHDIYA ZAKI","MUHFIDAH VEBRIANTI","NAURA NABILATUSSANIA","RAIHAN ARROHNI",
+"RIZQYA RAMADHANI","SALMAN AL FARIZI","SASKIA LAELA FITRI","SIFA RHASS MUKHAMAD",
+"SORAYA FITRI AL KHUMAIRA","ULIF FIYA ROF'UN SHIL","WILDAN PALANI","ZILDA AULIA QOTHRUN NADA"
+],
+
+"Kelas 7E":[
+"AENA TALITA ZAHRANI","ANIF SIDQI ABRORI","AZZAHRA RAHMA DHANI","BINTA TSANIA JAMILA",
+"BIRLYAN LIDZIA FUAIDA","CARISSA KAFANA RIZQI","DIAZ DWI ANDIKA","FARIQ FABYAN SYARIEF",
+"FATIMAH AZZAHRA","FITRIA NAJWA","HAFIZ AGHA TANZILA","HISBAN FAEZA BUDAERI",
+"ILMAN NUR HIDAYAT","ILMIA NAURA HISANA","IQLIMA KAMILA PUTRI","MAQDISI DINDA VIONA",
+"MUHAMAD ZAENUL MUSTAKIN","MUHAMMAD AHDIKA TRISYA PERMANA","MUHAMMAD AWALUL HUSNA",
+"MUHAMMAD FATIH ABIYYU AL GHIFARIY","MUHAMMAD HIKAM MUWAFIQ","MUHAMMAD RIDHO REVAN",
+"NASIMAH AZBAH SAMIA","QUENSHA AUREL VALENCIA","SALMA AISYATUN NASIKHAH","SALMA NABILA",
+"SATRIA YUDA BUWANA","SILVIA NUR AINI","SITTI NUR HALIMATUSSA'DIYAH","VEGA RISDIAN",
+"ZAHRA ALMIRA RAHMANI","ZAHWANA ERLISATUL MALIKA"
+],
+
+"Kelas 7F":[
+"AHMAD RAMADANI","AKHMA AMIRA","ALLEA ZAHRA FEBRIANA","ANGGITA SALSABILLA ANNI'MAH",
+"ANISA","APRILLIO DHANNDY PRAWIRA","AQILA ITQIYANA","CAHYA NIRANI SALSABILA",
+"DAFA GHOSSAN ATHAYA","DEA AMALIA ARFAN","DINI NUR FITRI AMELYA","FITRIA BAROKAH",
+"IMAM MARZUKI","IRVA HUMAIDA ZAHRA","LITA","MINA AYU KAOSARI",
+"MUHAMAD AZAM IKHLASUL AMAL","MUHAMAD BINTANG SAPUTRA","MUHAMAD FAZANUL PUTRA",
+"MUHAMAD RESKI MUAMALA","MUHAMAD YASIN ALFADHIL","MUHAMAD ZAEDAN ILMI",
+"MUHAMMAD DANISH ABIYASA","MUHAMMAD FARAZ FIRJATULLAH","NASDYTI DAYNAR AULIANA",
+"NUR INTAN MAULIDIA","PUTRI AFIATA SILMI CAHYANI","RIKA PUJI RAHAYU",
+"SABRINA NUR MAULIDA","SITI MADINA RAHMAWATI ZAKIYAH","YOKO TRI KHURNIADI",
+"ZULFIKAR ZUHDUL AULIA"
+],
+
+"Kelas 7G":[
+"ABDUL MUGHNI FAQIH FADLI","AGUS MUHAMMAD RAMADLAN","AIZYA FITRI RAHMADANI","ALENKA ILMA SAFITRI",
+"ALFIANA NAJWA KAMILA","ALYA SYAHIDAH TOYIBAH","ASSYAFAA ANGGYTA APRILIA","ATANA RAHMA FATIMAH",
+"ATAYA FITRA MUNADHIL","BALQIS UFAIRA MUSYAFFA","DIA NATASYA ABAZZAHRA","DIKA AJI SAPUTRA",
+"FADIA CHASNA MAULIDA","FARAH NUR MILATI","GORA ABI GYANDRA","LATIFA QOT RUNNADA",
+"MAULA IKRIMA","MAULIDA NADIFA","MUHAMAD AKASYAH MUNGGARAN","MUHAMAD FATKHUL YASA",
+"MUHAMAD IQBAL BAIHAQI","MUHAMAD KHAFID SAFA","MUHAMMAD NAJMY BAIHAQI KAIZAN AL-JAMAL",
+"MUHAMMAD NUZLUL RAMADHANI","MUHAMMAD RASYA ADITIYA PRATAMA","MUHAMMAD UWAIS ALTAF",
+"MUKHAMAD ARFAUL ARKHAM","NADHIRA RIFATUL AESI","NADIN KHOIRUNNAJWA","NATASYA ADZIKRI ANINDA",
+"QAISTIA ANZILNA SEPTIANI","SHIDQIYA SHOFIANA PUTRI"
+],
+
+"Kelas 7H":[
+"AHMAD AL IRSYAD","ATINA AZZAH HAYATI","AULIA IZZATUNNISA","CAMELIA AZAHRA KHUMAIRA",
+"FATHAN GUSTOMY","IBTISAM ARIFA","INAYATI AENA","IQBAL WICAKSONO","IRMA NOVIANA",
+"MELIYA EKA NUR AFRIANI","MUHAMAD AFKARUL ISLAM","MUHAMAD FAIQ IMAMMILLAH","MUHAMAD HABIBI",
+"MUHAMAD REHAN FARDAN","MUHAMAD SYAUQI ASYROFAL KHABIBI","MUHAMAD ZULMI FAKHRI",
+"MUHAMMAD 'IZZA KURNIAWAN","MUHAMMAD ZIYYA AHLUNNAZA","MUKHAMAD BAYU MAULID","MUTIARA SILMI",
+"NAFISA IKLIMA AZZAHRA","NASY'ATUL MAHYA","NAUFAL HISAM PRATAMA","NUR WANIFA",
+"PUTRI AFHIKA RAMADHANI","RISQIA KHILMI RAMADHANI","SIFA NUR AFIANI","SYARIFAH NUR AINI",
+"TSABHITA TSAMARA ZAFIRA","ZAHROTUL UYUN","ZAKIA WULAN RAMADHANI","ZIDNI AL CHUSNA"
+],
+
+"Kelas 7I":[
+"ADESYA ANGGRAENI","AFFAN MAULA","AFIKA YUMNA","AHKAM CHAERUL UMAM ALBARD",
+"ALIYA AOLAL INSA","ARKAN NAYMAR AJI","ATHA NAUFAL HILMI AQIB","ATHA SHUBI",
+"AYASI KENZO AFRIZAL","AZKEYSA MICHAELLA FRISYA","CIKAL DZAKIAH TALITA SAKHI",
+"DAFFA RASYID IQBAL MUBARAK DARU JATI","DANISH AL FATHIR FAHRIANA","FEBRIAR FIKRI AZIZI",
+"GENDHIS RADISTYA EFENDHI","HANAN ARKAN FAEYZA","KANAIRA ARLIA PUTRI","KAYLA RIZKA FEBRIA",
+"KHOEROTUN NISA","LAELATUL ITKIA","MELODY ANINDYA KAHILA PUTRI","MUHAMMAD ASYRAF SYAFI AZMI",
+"MUHAMMAD BENZEMA","MUHAMMAD FATHI NURIZAM","MUHAMMAD FAYROUZ ADEEBA",
+"NAUVALIN RAIKHAN SAPUTRA","NIA KURNIATI","QORINAYA NUFUS SAWALIA",
+"REGAN RAMSEY MUHAMMAD XAVIER WIYANTO","RIO ABIMANYU","SALMA NURUL KHANIFAH",
+"VENA SAUQY AL AZIZI"
+]
+
+};
+
+let rows=[],filtered=[],index=0;
+
+function normalisasiNama(n){
+  return String(n).toUpperCase().trim().replace(/\s+/g," ");
+}
+
 fetch(url)
 .then(r=>r.text())
 .then(t=>{
-  const json = JSON.parse(t.substring(47).slice(0,-2));
-  rows = json.table.rows.map(r=>r.c.map(c=>c?c.v:""));
-  allSiswa = rows.map(r=>({ nama:r[2], kelas:r[4], row:r }));
+  const json=JSON.parse(t.substring(47).slice(0,-2));
+  rows=json.table.rows.map(r=>r.c.map(c=>c?c.v:""));
   isiKelas();
 });
 
-/* ===================== MASTER OTOMATIS ===================== */
-function buatMasterDariData(){
-
-  const master = {};
-
-  rows.forEach(r=>{
-
-    const nama = String(r[2]).toUpperCase().trim();
-    const kelas = String(r[4]).trim();
-
-    if(!nama || !kelas) return;
-
-    if(!master[kelas]) master[kelas] = [];
-
-    if(!master[kelas].includes(nama)){
-      master[kelas].push(nama);
-    }
-
-  });
-
-  return master;
-}
-
-/* ===================== DROPDOWN ===================== */
 function isiKelas(){
-
-  const kelasSet = new Set();
-
-  allSiswa.forEach(s=>{
-    if(s.kelas) kelasSet.add(s.kelas);
-  });
-
-  const kelasList = Array.from(kelasSet).sort((a,b)=>a.localeCompare(b));
-
-  kelasSelect.innerHTML = '<option value="">Pilih Kelas</option>';
-
-  kelasList.forEach(k=>{
-    kelasSelect.innerHTML += `<option value="${k}">${k}</option>`;
+  kelasSelect.innerHTML='<option value="">Pilih Kelas</option>';
+  Object.keys(masterKelas).forEach(k=>{
+    kelasSelect.innerHTML+=`<option value="${k}">${k}</option>`;
   });
 }
 
-/* ===================== TAMPIL DATA ===================== */
 function tampilkanData(){
 
-  const kelas = kelasSelect.value;
+  const kelas=kelasSelect.value;
+  if(!kelas) return alert("Pilih kelas dulu!");
 
-  if(!kelas){
-    alert("Pilih kelas dulu!");
-    return;
-  }
+  const master=masterKelas[kelas];
 
-  const masterKelas = buatMasterDariData();
-  const masterNama = masterKelas[kelas];
-
-  if(!masterNama){
-    alert("Data kelas tidak ditemukan!");
-    return;
-  }
-
-  const pengirim = new Set(
+  const pengirim=new Set(
     rows.filter(r=>r[4]===kelas && r.slice(5,25).some(v=>String(v).trim()!==""))
-        .map(r=>r[2].toUpperCase())
+    .map(r=>normalisasiNama(r[2]))
   );
 
-  filtered = masterNama.map(nama=>{
-
-    const data = rows.find(r =>
-      r[2].toUpperCase()===nama &&
-      r[4]===kelas
-    );
-
-    return data || [,"",nama,"",kelas];
-
+  filtered=master.map(n=>{
+    const d=rows.find(r=>normalisasiNama(r[2])===normalisasiNama(n)&&r[4]===kelas);
+    return d||[,"",n,"",kelas];
   });
 
-  index = 0;
+  index=0;
   renderSidebar(pengirim);
   render(pengirim);
 }
 
-/* ===================== SIDEBAR ===================== */
 function renderSidebar(pengirim){
-
   siswaList.innerHTML="";
-
   filtered.forEach((r,i)=>{
     const li=document.createElement("li");
     li.textContent=r[2];
-
-    if(!pengirim.has(r[2].toUpperCase())) li.classList.add("belum");
-
-    li.onclick=()=>{ index=i; render(pengirim); };
+    if(!pengirim.has(normalisasiNama(r[2]))) li.classList.add("belum");
+    li.onclick=()=>{index=i;render(pengirim);};
     siswaList.appendChild(li);
   });
 }
 
-/* ===================== HITUNG NILAI ===================== */
-function nilaiTP(start,end,row){
-  let benar=0;
-  for(let i=start;i<=end;i++){
-    if(String(row[5+i]).trim()===String(kunci[i]).trim()) benar++;
+function nilaiTP(s,e,row){
+  let b=0;
+  for(let i=s;i<=e;i++){
+    if(String(row[5+i]).trim()===String(kunci[i]).trim()) b++;
   }
-  return benar*20;
+  return b*20;
 }
 
-/* ===================== RENDER ===================== */
 function render(pengirim){
 
   const r=filtered[index];
   if(!r) return;
 
-  nama.innerText=r[2].toUpperCase();
+  nama.innerText=r[2];
 
-  if(!pengirim.has(r[2].toUpperCase())){
-    qaList.innerHTML=`
-      <div class="nilai orange">BELUM MENGIRIM JAWABAN</div>
-      <div class="qa">STATUS : <b>REMIDI</b></div>
-    `;
+  if(!pengirim.has(normalisasiNama(r[2]))){
+    qaList.innerHTML=`<div class="nilai orange">BELUM MENGIRIM</div>`;
     return;
   }
 
@@ -231,79 +282,26 @@ function render(pengirim){
   const tp4=nilaiTP(15,19,r);
 
   const total=Math.round((tp1+tp2+tp3+tp4)/4);
-  const status=total>=78?"TUNTAS":"REMIDI";
 
-  let detail="";
-  for(let i=0;i<20;i++){
-    const benar=String(r[5+i]).trim()===String(kunci[i]).trim();
-    detail+=`
-      <div class="soal">
-        <span>Soal ${i+1}</span>
-        <span class="${benar?'benar':'salah'}">
-          ${benar?'✅ Benar (+20)':'❌ Salah (0)'}
-        </span>
-      </div>`;
-  }
-
-  qaList.innerHTML=`
-    <div class="nilai ${total>=78?'hijau':'orange'}">TOTAL NILAI : ${total}</div>
-    <div class="qa">STATUS : <b>${status}</b></div>
-    <div class="qa">TP1 : ${tp1}</div>
-    <div class="qa">TP2 : ${tp2}</div>
-    <div class="qa">TP3 : ${tp3}</div>
-    <div class="qa">TP4 : ${tp4}</div>
-    <div class="qa"><b>Detail Jawaban</b>${detail}</div>
-  `;
+  qaList.innerHTML=`<div class="nilai">${total}</div>`;
 }
 
-/* ===================== EXPORT EXCEL ===================== */
 function downloadExcelPerKelas(){
 
-  const kelas = kelasSelect.value;
+  const kelas=kelasSelect.value;
+  if(!kelas) return alert("Pilih kelas!");
 
-  if(!kelas){
-    alert("Pilih kelas terlebih dahulu!");
-    return;
-  }
-
-  if(filtered.length === 0){
-    alert("Klik Tampilkan dulu!");
-    return;
-  }
-
-  let dataExcel = [];
-
-  dataExcel.push([
-    "Nama Siswa","TP1","TP2","TP3","TP4","Total","Status"
-  ]);
+  let data=[["Nama","Total"]];
 
   filtered.forEach(r=>{
-
-    const nama = r[2].toUpperCase();
-    const adaJawaban = r.slice(5,25).some(v=>String(v).trim()!=="");
-
-    if(!adaJawaban){
-      dataExcel.push([nama,"","","","","","REMIDI"]);
-      return;
-    }
-
-    const tp1=nilaiTP(0,4,r);
-    const tp2=nilaiTP(5,9,r);
-    const tp3=nilaiTP(10,14,r);
-    const tp4=nilaiTP(15,19,r);
-
-    const total=Math.round((tp1+tp2+tp3+tp4)/4);
-    const status=total>=78?"TUNTAS":"REMIDI";
-
-    dataExcel.push([nama,tp1,tp2,tp3,tp4,total,status]);
-
+    const total=nilaiTP(0,19,r);
+    data.push([r[2],total]);
   });
 
-  const ws = XLSX.utils.aoa_to_sheet(dataExcel);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, kelas);
-
-  XLSX.writeFile(wb, `Rekap_Nilai_${kelas}.xlsx`);
+  const ws=XLSX.utils.aoa_to_sheet(data);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,kelas);
+  XLSX.writeFile(wb,`Rekap_${kelas}.xlsx`);
 }
 
 </script>
