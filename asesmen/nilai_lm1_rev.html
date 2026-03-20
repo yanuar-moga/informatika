@@ -191,14 +191,12 @@ function render(pengirim){
     return;
   }
 
-  const tp1=nilaiTP(0,3,r);
-  const tp2=nilaiTP(4,7,r);
-  const tp3=nilaiTP(8,11,r);
-  const tp4=nilaiTP(12,15,r);
-  const tp5=nilaiTP(16,17,r);
-  const tp6=nilaiTP(18,19,r);
+  const tp1=nilaiTP(0,4,r);
+  const tp2=nilaiTP(5,9,r);
+  const tp3=nilaiTP(10,14,r);
+  const tp4=nilaiTP(15,19,r);
 
-  const total=Math.round((tp1+tp2+tp3+tp4+tp5+tp6)/6);
+  const total=Math.round((tp1+tp2+tp3+tp4)/4);
   const status=total>=78?"TUNTAS":"REMIDI";
 
   let detail="";
@@ -220,8 +218,6 @@ function render(pengirim){
     <div class="qa">TP2 : ${tp2}</div>
     <div class="qa">TP3 : ${tp3}</div>
     <div class="qa">TP4 : ${tp4}</div>
-    <div class="qa">TP5 : ${tp5}</div>
-    <div class="qa">TP6 : ${tp6}</div>
     <div class="qa"><b>Detail Jawaban</b>${detail}</div>
   `;
 }
@@ -248,8 +244,6 @@ function downloadExcelPerKelas(){
     "Nilai TP2",
     "Nilai TP3",
     "Nilai TP4",
-    "Nilai TP5",
-    "Nilai TP6",
     "Total Nilai"
   ]);
 
@@ -261,18 +255,16 @@ function downloadExcelPerKelas(){
     );
 
     if(!r || !r.slice(5,25).some(v=>String(v).trim()!=="")){
-      dataExcel.push([nama,0,0,0,0,0,0,0]);
+      dataExcel.push([nama,0,0,0,0,0]);
       return;
     }
 
-    const tp1 = nilaiTP(0,3,r);
-    const tp2 = nilaiTP(4,7,r);
-    const tp3 = nilaiTP(8,11,r);
-    const tp4 = nilaiTP(12,15,r);
-    const tp5 = nilaiTP(16,17,r);
-    const tp6 = nilaiTP(18,19,r);
+    const tp1=nilaiTP(0,4,r);
+    const tp2=nilaiTP(5,9,r);
+    const tp3=nilaiTP(10,14,r);
+    const tp4=nilaiTP(15,19,r);
 
-    const total = Math.round((tp1+tp2+tp3+tp4+tp5+tp6)/6);
+    const total = Math.round((tp1+tp2+tp3+tp4)/4);
 
     dataExcel.push([
       nama,
@@ -280,8 +272,6 @@ function downloadExcelPerKelas(){
       tp2,
       tp3,
       tp4,
-      tp5,
-      tp6,
       total
     ]);
 
