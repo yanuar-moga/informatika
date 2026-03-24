@@ -41,15 +41,16 @@ margin:auto;
 text-align:left;
 }
 
-/* LABEL NORMAL */
+/* LABEL */
 .loginBox label{
 display:block;
 margin-top:14px;
 font-weight:500;
 }
 
-.loginBox select,
-.loginBox input[type="password"]{
+/* 🔥 INPUT FIX (TIDAK TERGANTUNG TYPE) */
+.inputBox,
+.loginBox select{
 width:100%;
 padding:10px;
 border-radius:8px;
@@ -58,7 +59,7 @@ margin-top:4px;
 box-sizing:border-box;
 }
 
-/* 🔥 FIX CHECKBOX */
+/* 🔥 CHECKBOX */
 .passwordCheck{
 margin-top:10px;
 display:flex;
@@ -78,7 +79,7 @@ font-weight:normal;
 display:inline;
 }
 
-/* 🔥 BUTTON CENTER */
+/* 🔥 BUTTON */
 .loginBtn{
 text-align:center;
 margin-top:20px;
@@ -157,9 +158,9 @@ margin-top:30px;
 <select id="nama"></select>
 
 <label>Password</label>
-<input type="password" id="password">
+<input type="password" id="password" class="inputBox">
 
-<!-- 🔥 CHECKBOX FIX TOTAL -->
+<!-- 🔥 CHECKBOX FIX -->
 <div class="passwordCheck">
 <input type="checkbox" id="showPass" onclick="lihatPassword()">
 <label for="showPass">Tampilkan Password</label>
@@ -202,7 +203,7 @@ margin-top:30px;
 
 <script>
 
-// ✅ URL SCRIPT
+// URL GAS
 var URL_SCRIPT = "https://script.google.com/macros/s/AKfycby9jy6eP8_N9HZdDGgh4arWhjZ0LvwvhxmeBgZgSrUisEqzBk0rhVx5uJr1S1XlRugrlg/dev";
 
 var soal=[];
