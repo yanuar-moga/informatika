@@ -57,13 +57,33 @@ margin-top:4px;
 box-sizing:border-box;
 }
 
+/* 🔥 CHECKBOX RAPI */
+.passwordCheck{
+margin-top:10px;
+text-align:left;
+font-size:14px;
+}
+
+.passwordCheck label{
+display:flex;
+align-items:center;
+gap:6px;
+cursor:pointer;
+}
+
+/* 🔥 BUTTON */
 button{
 background:#2563eb;
 color:white;
 border:none;
-padding:10px 20px;
+padding:10px 25px;
 border-radius:8px;
 cursor:pointer;
+font-weight:500;
+}
+
+button:hover{
+background:#1d4ed8;
 }
 
 #nomor span{
@@ -127,12 +147,17 @@ margin-top:30px;
 <label>Password</label>
 <input type="password" id="password">
 
-<div style="margin-top:10px;">
+<!-- 🔥 CHECKBOX FIX -->
+<div class="passwordCheck">
+<label>
 <input type="checkbox" onclick="lihatPassword()"> Tampilkan Password
+</label>
 </div>
 
-<br>
+<!-- 🔥 BUTTON CENTER -->
+<div style="text-align:center; margin-top:20px;">
 <button onclick="login()">Login</button>
+</div>
 
 </div>
 
@@ -166,7 +191,7 @@ margin-top:30px;
 
 <script>
 
-// ✅ URL SUDAH DIISI
+// ✅ URL SCRIPT
 var URL_SCRIPT = "https://script.google.com/macros/s/AKfycby9jy6eP8_N9HZdDGgh4arWhjZ0LvwvhxmeBgZgSrUisEqzBk0rhVx5uJr1S1XlRugrlg/dev";
 
 var soal=[];
