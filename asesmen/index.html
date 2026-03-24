@@ -3,34 +3,82 @@
 <head>
 
 <meta charset="UTF-8">
-
-<title>CBT Sekolah</title>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>CBT Ujian Sekolah</title>
 
 <style>
 
 body{
-font-family:'Segoe UI',sans-serif;
-background:#f3f4f6;
+font-family:'Segoe UI';
+background:#f1f5f9;
 margin:0;
 }
 
 .container{
-width:1000px;
+width:900px;
 margin:auto;
 margin-top:40px;
 background:white;
 padding:30px;
 border-radius:12px;
-box-shadow:0 10px 30px rgba(0,0,0,0.1);
+box-shadow:0 5px 20px rgba(0,0,0,0.1);
 }
 
-select,input{
+/* LOGO */
+
+.logo{
+display:block;
+margin:auto;
+width:120px;
+margin-bottom:10px;
+}
+
+h2{
+text-align:center;
+margin-bottom:30px;
+}
+
+/* LOGIN */
+
+.loginBox{
+width:320px;
+margin:auto;
+text-align:left;
+}
+
+.loginBox label{
+display:block;
+margin-top:14px;
+font-weight:500;
+}
+
+.loginBox select,
+.loginBox input{
+width:100%;
 padding:10px;
 border-radius:8px;
 border:1px solid #ccc;
+margin-top:4px;
+box-sizing:border-box;
 }
+
+.loginBox select:focus,
+.loginBox input:focus{
+outline:none;
+border:1px solid #2563eb;
+box-shadow:0 0 5px rgba(37,99,235,0.4);
+}
+
+.passwordCheck{
+margin-top:8px;
+font-size:14px;
+}
+
+.passwordCheck input{
+width:auto;
+margin-right:6px;
+}
+
+/* BUTTON */
 
 button{
 background:#2563eb;
@@ -41,6 +89,12 @@ border-radius:8px;
 cursor:pointer;
 }
 
+button:hover{
+background:#1d4ed8;
+}
+
+/* NOMOR SOAL */
+
 #nomor span{
 display:inline-flex;
 align-items:center;
@@ -49,19 +103,17 @@ width:35px;
 height:35px;
 background:#e5e7eb;
 border-radius:8px;
-margin:3px;
+margin:4px;
 cursor:pointer;
-}
-
-.aktif{
-background:#2563eb!important;
-color:white;
+font-weight:bold;
 }
 
 .dijawab{
 background:#22c55e!important;
 color:white;
 }
+
+/* PROGRESS */
 
 #progressBox{
 width:100%;
@@ -77,6 +129,19 @@ background:#2563eb;
 border-radius:10px;
 }
 
+/* NAV BUTTON */
+
+.navBtn{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-top:30px;
+}
+
+.navBtn button:nth-child(2){
+margin:auto;
+}
+
 </style>
 
 </head>
@@ -85,30 +150,38 @@ border-radius:10px;
 
 <div class="container">
 
-<h2>CBT ASESMEN</h2>
+<img class="logo" src="https://yanuar-moga.github.io/informatika/asesmen/assets/logo.png">
 
-<div id="login">
+<h2>CBT Ujian Sekolah</h2>
 
+<div id="login" class="loginBox">
+
+<label>Kelas</label>
 <select id="kelas"></select>
 
-<br><br>
-
+<label>Nama</label>
 <select id="nama"></select>
 
-<br><br>
+<label>Password</label>
+<input type="password" id="password">
 
-<input type="password" id="password" placeholder="Password">
-
-<br><br>
-
-<button onclick="login()">Login</button>
-
+<div class="passwordCheck">
+<label>
+<input type="checkbox" onclick="lihatPassword()"> Tampilkan Password
+</label>
 </div>
 
+<div style="text-align:center;margin-top:20px;">
+<button onclick="login()">Login</button>
+</div>
+
+</div>
 
 <div id="ujian" style="display:none">
 
 <div id="timer"></div>
+
+<br>
 
 <div id="progressBox">
 <div id="progressBar"></div>
@@ -118,27 +191,23 @@ border-radius:10px;
 
 <div id="nomor"></div>
 
-<div id="soal"></div>
-
 <br>
 
+<div id="soal"></div>
+
+<div class="navBtn">
+
 <button onclick="prev()">Prev</button>
-<button onclick="next()">Next</button>
+
 <button onclick="kirim()">Selesai</button>
 
-</div>
-
-
-<div id="dashboard" style="display:none">
-
-<h2>Dashboard Nilai</h2>
-
-<canvas id="chartNilai"></canvas>
+<button onclick="next()">Next</button>
 
 </div>
 
 </div>
 
+</div>
 
 <script>
 
@@ -152,16 +221,33 @@ var kelas;
 
 var waktu=1800;
 
+/* PASSWORD */
+
+function lihatPassword(){
+
+var p=document.getElementById("password");
+
+if(p.type==="password"){
+p.type="text";
+}else{
+p.type="password";
+}
+
+}
+
+/* LOAD KELAS */
+
 function loadKelas(){
 
 google.script.run.withSuccessHandler(function(data){
 
 var k=document.getElementById("kelas");
 
+k.innerHTML="<option value=''>Pilih Kelas</option>";
+
 data.forEach(function(x){
 
 var o=document.createElement("option");
-
 o.value=x;
 o.text=x;
 
@@ -173,21 +259,23 @@ k.appendChild(o);
 
 }
 
+/* LOAD NAMA */
 
 function loadNama(){
 
 kelas=document.getElementById("kelas").value;
 
+if(kelas=="") return;
+
 google.script.run.withSuccessHandler(function(data){
 
 var n=document.getElementById("nama");
 
-n.innerHTML="";
+n.innerHTML="<option value=''>Pilih Nama</option>";
 
 data.forEach(function(x){
 
 var o=document.createElement("option");
-
 o.value=x;
 o.text=x;
 
@@ -199,11 +287,17 @@ n.appendChild(o);
 
 }
 
+/* LOGIN */
 
 function login(){
 
 nama=document.getElementById("nama").value;
 var password=document.getElementById("password").value;
+
+if(nama=="" || password==""){
+alert("Lengkapi login terlebih dahulu");
+return;
+}
 
 google.script.run.withSuccessHandler(function(res){
 
@@ -228,6 +322,7 @@ alert("Login gagal");
 
 }
 
+/* LOAD SOAL */
 
 function loadSoal(){
 
@@ -250,6 +345,7 @@ tampil();
 
 }
 
+/* TAMPIL SOAL */
 
 function tampil(){
 
@@ -263,7 +359,9 @@ html+="<img src='"+s.gambar+"' style='max-width:400px'><br>";
 
 s.opsi.forEach(function(o){
 
-html+="<label><input type='radio' name='j' value='"+o.key+"' onclick='jawab(\""+o.key+"\")'> "+o.text+"</label><br>";
+var cek = jawaban[no]==o.key ? "checked" : "";
+
+html+="<label><input type='radio' name='j' value='"+o.key+"' "+cek+" onclick='jawab(\""+o.key+"\")'> "+o.text+"</label><br>";
 
 });
 
@@ -271,6 +369,7 @@ document.getElementById("soal").innerHTML=html;
 
 }
 
+/* JAWAB */
 
 function jawab(v){
 
@@ -282,19 +381,14 @@ updateProgress();
 
 }
 
+/* NAVIGASI */
 
 function next(){
-if(no<soal.length-1){
-no++;
-tampil();
-}
+if(no<soal.length-1){no++;tampil();}
 }
 
 function prev(){
-if(no>0){
-no--;
-tampil();
-}
+if(no>0){no--;tampil();}
 }
 
 function goto(n){
@@ -302,6 +396,7 @@ no=n;
 tampil();
 }
 
+/* PROGRESS */
 
 function updateProgress(){
 
@@ -313,12 +408,13 @@ document.getElementById("progressBar").style.width=persen+"%";
 
 }
 
+/* KIRIM */
 
 function kirim(){
 
 google.script.run.withSuccessHandler(function(nilai){
 
-alert("Nilai anda : "+nilai);
+alert("Nilai Anda : "+nilai);
 
 location.reload();
 
@@ -326,6 +422,7 @@ location.reload();
 
 }
 
+/* TIMER */
 
 function timer(){
 
@@ -346,10 +443,9 @@ kirim();
 
 }
 
+document.getElementById("kelas").addEventListener("change",loadNama);
 
-document.getElementById("kelas").onchange=loadNama;
-
-loadKelas();
+window.onload=loadKelas;
 
 </script>
 
