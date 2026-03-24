@@ -166,8 +166,8 @@ margin-top:30px;
 
 <script>
 
-// 🔥 GANTI DENGAN URL WEB APP KAMU
-var URL_SCRIPT = "https://script.google.com/macros/s/ISI_URL_KAMU/exec";
+// ✅ URL SUDAH DIISI
+var URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwH1jZ1y-zEh-M_Y_j2-XpR8GUsIFnOllJBQcjNWWEa/dev";
 
 var soal=[];
 var jawaban=[];
@@ -187,7 +187,11 @@ method:"POST",
 body:JSON.stringify({func:func,data:data})
 })
 .then(res=>res.json())
-.then(callback);
+.then(callback)
+.catch(err=>{
+alert("Gagal koneksi ke server");
+console.error(err);
+});
 
 }
 
