@@ -6,6 +6,8 @@
 
 <title>CBT Sekolah</title>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 
 body{
@@ -15,7 +17,6 @@ margin:0;
 }
 
 .container{
-
 width:1000px;
 margin:auto;
 margin-top:40px;
@@ -23,30 +24,24 @@ background:white;
 padding:30px;
 border-radius:12px;
 box-shadow:0 10px 30px rgba(0,0,0,0.1);
-
 }
 
 select,input{
-
 padding:10px;
 border-radius:8px;
 border:1px solid #ccc;
-
 }
 
 button{
-
 background:#2563eb;
 color:white;
 border:none;
 padding:10px 20px;
 border-radius:8px;
 cursor:pointer;
-
 }
 
 #nomor span{
-
 display:inline-flex;
 align-items:center;
 justify-content:center;
@@ -56,39 +51,30 @@ background:#e5e7eb;
 border-radius:8px;
 margin:3px;
 cursor:pointer;
-
 }
 
 .aktif{
-
 background:#2563eb!important;
 color:white;
-
 }
 
 .dijawab{
-
 background:#22c55e!important;
 color:white;
-
 }
 
 #progressBox{
-
 width:100%;
 height:10px;
 background:#e5e7eb;
 border-radius:10px;
-
 }
 
 #progressBar{
-
 height:10px;
 width:0%;
 background:#2563eb;
 border-radius:10px;
-
 }
 
 </style>
@@ -142,6 +128,15 @@ border-radius:10px;
 
 </div>
 
+
+<div id="dashboard" style="display:none">
+
+<h2>Dashboard Nilai</h2>
+
+<canvas id="chartNilai"></canvas>
+
+</div>
+
 </div>
 
 
@@ -179,7 +174,6 @@ k.appendChild(o);
 }
 
 
-
 function loadNama(){
 
 kelas=document.getElementById("kelas").value;
@@ -204,7 +198,6 @@ n.appendChild(o);
 }).getNama(kelas);
 
 }
-
 
 
 function login(){
@@ -236,7 +229,6 @@ alert("Login gagal");
 }
 
 
-
 function loadSoal(){
 
 google.script.run.withSuccessHandler(function(data){
@@ -259,7 +251,6 @@ tampil();
 }
 
 
-
 function tampil(){
 
 var s=soal[no];
@@ -267,9 +258,7 @@ var s=soal[no];
 var html="<h3>"+(no+1)+". "+s.pertanyaan+"</h3>";
 
 if(s.gambar){
-
 html+="<img src='"+s.gambar+"' style='max-width:400px'><br>";
-
 }
 
 s.opsi.forEach(function(o){
@@ -283,7 +272,6 @@ document.getElementById("soal").innerHTML=html;
 }
 
 
-
 function jawab(v){
 
 jawaban[no]=v;
@@ -295,41 +283,24 @@ updateProgress();
 }
 
 
-
 function next(){
-
 if(no<soal.length-1){
-
 no++;
 tampil();
-
 }
-
 }
-
-
 
 function prev(){
-
 if(no>0){
-
 no--;
 tampil();
-
 }
-
 }
-
-
 
 function goto(n){
-
 no=n;
-
 tampil();
-
 }
-
 
 
 function updateProgress(){
@@ -341,7 +312,6 @@ var persen=(answered/soal.length)*100;
 document.getElementById("progressBar").style.width=persen+"%";
 
 }
-
 
 
 function kirim(){
@@ -357,7 +327,6 @@ location.reload();
 }
 
 
-
 function timer(){
 
 setInterval(function(){
@@ -370,15 +339,12 @@ var d=waktu%60;
 document.getElementById("timer").innerHTML="Timer : "+m+":"+d;
 
 if(waktu<=0){
-
 kirim();
-
 }
 
 },1000);
 
 }
-
 
 
 document.getElementById("kelas").onchange=loadNama;
