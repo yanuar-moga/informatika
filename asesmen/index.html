@@ -3,6 +3,7 @@
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CBT Ujian Sekolah</title>
 
 <style>
@@ -13,30 +14,50 @@ background:#f1f5f9;
 margin:0;
 }
 
+/* CONTAINER RESPONSIVE */
 .container{
-width:900px;
+max-width:900px;
+width:95%;
 margin:auto;
-margin-top:40px;
+margin-top:20px;
 background:white;
-padding:30px;
+padding:20px;
 border-radius:12px;
 box-shadow:0 5px 20px rgba(0,0,0,0.1);
 }
 
+/* HEADER USER */
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+}
+
+.userInfo{
+font-size:14px;
+font-weight:500;
+color:#1e293b;
+}
+
+/* LOGO */
 .logo{
 display:block;
 margin:auto;
-width:120px;
+width:100px;
 margin-bottom:10px;
 }
 
+/* TITLE */
 h2{
 text-align:center;
-margin-bottom:30px;
+margin-bottom:20px;
 }
 
+/* LOGIN BOX */
 .loginBox{
-width:320px;
+width:100%;
+max-width:320px;
 margin:auto;
 text-align:left;
 }
@@ -48,7 +69,7 @@ margin-top:14px;
 font-weight:500;
 }
 
-/* 🔥 INPUT FIX (TIDAK TERGANTUNG TYPE) */
+/* INPUT */
 .inputBox,
 .loginBox select{
 width:100%;
@@ -59,12 +80,11 @@ margin-top:4px;
 box-sizing:border-box;
 }
 
-/* 🔥 CHECKBOX */
+/* CHECKBOX */
 .passwordCheck{
 margin-top:10px;
 display:flex;
 align-items:center;
-justify-content:flex-start;
 gap:8px;
 }
 
@@ -73,13 +93,7 @@ width:auto;
 margin:0;
 }
 
-.passwordCheck label{
-margin:0;
-font-weight:normal;
-display:inline;
-}
-
-/* 🔥 BUTTON */
+/* BUTTON */
 .loginBtn{
 text-align:center;
 margin-top:20px;
@@ -89,7 +103,7 @@ button{
 background:#2563eb;
 color:white;
 border:none;
-padding:10px 25px;
+padding:10px 20px;
 border-radius:8px;
 cursor:pointer;
 font-weight:500;
@@ -99,8 +113,14 @@ button:hover{
 background:#1d4ed8;
 }
 
+/* NOMOR SOAL */
+#nomor{
+display:flex;
+flex-wrap:wrap;
+}
+
 #nomor span{
-display:inline-flex;
+display:flex;
 align-items:center;
 justify-content:center;
 width:35px;
@@ -117,6 +137,7 @@ background:#22c55e!important;
 color:white;
 }
 
+/* PROGRESS */
 #progressBox{
 width:100%;
 height:10px;
@@ -131,10 +152,45 @@ background:#2563eb;
 border-radius:10px;
 }
 
+/* NAV BUTTON */
 .navBtn{
 display:flex;
 justify-content:space-between;
-margin-top:30px;
+margin-top:20px;
+flex-wrap:wrap;
+gap:10px;
+}
+
+.navBtn button{
+flex:1;
+}
+
+/* RESPONSIVE HP */
+@media(max-width:600px){
+
+h2{
+font-size:18px;
+}
+
+.logo{
+width:80px;
+}
+
+.container{
+padding:15px;
+}
+
+button{
+padding:10px;
+font-size:14px;
+}
+
+#nomor span{
+width:30px;
+height:30px;
+font-size:12px;
+}
+
 }
 
 </style>
@@ -144,6 +200,12 @@ margin-top:30px;
 <body>
 
 <div class="container">
+
+<!-- HEADER -->
+<div class="header">
+<div></div>
+<div class="userInfo" id="userInfo"></div>
+</div>
 
 <img class="logo" src="https://yanuar-moga.github.io/informatika/asesmen/assets/logo.png">
 
@@ -160,13 +222,11 @@ margin-top:30px;
 <label>Password</label>
 <input type="password" id="password" class="inputBox">
 
-<!-- 🔥 CHECKBOX FIX -->
 <div class="passwordCheck">
 <input type="checkbox" id="showPass" onclick="lihatPassword()">
 <label for="showPass">Tampilkan Password</label>
 </div>
 
-<!-- 🔥 BUTTON CENTER -->
 <div class="loginBtn">
 <button onclick="login()">Login</button>
 </div>
@@ -300,6 +360,10 @@ kelas=res.kelas;
 document.getElementById("login").style.display="none";
 document.getElementById("ujian").style.display="block";
 
+/* TAMPIL USER */
+document.getElementById("userInfo").innerHTML =
+"👤 " + nama + " | " + kelas;
+
 loadSoal();
 timer();
 
@@ -344,7 +408,7 @@ var s=soal[no];
 var html="<h3>"+(no+1)+". "+s.pertanyaan+"</h3>";
 
 if(s.gambar){
-html+="<img src='"+s.gambar+"' style='max-width:400px'><br>";
+html+="<img src='"+s.gambar+"' style='max-width:100%'><br>";
 }
 
 s.opsi.forEach(function(o){
