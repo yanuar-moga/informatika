@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBT Ujian Sekolah</title>
+
+<style>
+
+body{
+font-family:'Segoe UI';
+background:#f1f5f9;
+margin:0;
+}
+
+/* CONTAINER RESPONSIVE */
+.container{
+max-width:900px;
+width:95%;
+margin:auto;
+margin-top:20px;
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
+
+/* HEADER USER */
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+}
+
+.userInfo{
+font-size:14px;
+font-weight:500;
+color:#1e293b;
+}
+
+/* LOGO */
+.logo{
+display:block;
+margin:auto;
+width:100px;
+margin-bottom:10px;
+}
+
+/* TITLE */
+h2{
+text-align:center;
+margin-bottom:20px;
+}
+
+/* LOGIN BOX */
+.loginBox{
+width:100%;
+max-width:320px;
+margin:auto;
+text-align:left;
+}
+
+/* LABEL */
+.loginBox label{
+display:block;
+margin-top:14px;
+font-weight:500;
+}
+
+/* INPUT */
+.inputBox,
+.loginBox select{
+width:100%;
+padding:10px;
+border-radius:8px;
+border:1px solid #ccc;
+margin-top:4px;
+box-sizing:border-box;
+}
+
+/* CHECKBOX */
+.passwordCheck{
+margin-top:10px;
+display:flex;
+align-items:center;
+gap:8px;
+}
+
+.passwordCheck input{
+width:auto;
+margin:0;
+}
+
+/* BUTTON */
+.loginBtn{
+text-align:center;
+margin-top:20px;
+}
+
+button{
+background:#2563eb;
+color:white;
+border:none;
+padding:10px 20px;
+border-radius:8px;
+cursor:pointer;
+font-weight:500;
+}
+
+button:hover{
+background:#1d4ed8;
+}
+
+/* NOMOR SOAL */
+#nomor{
+display:flex;
+flex-wrap:wrap;
+}
+
+#nomor span{
+display:flex;
+align-items:center;
+justify-content:center;
+width:35px;
+height:35px;
+background:#e5e7eb;
+border-radius:8px;
+margin:4px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.dijawab{
+background:#22c55e!important;
+color:white;
+}
+
+/* PROGRESS */
+#progressBox{
+width:100%;
+height:10px;
+background:#e5e7eb;
+border-radius:10px;
+}
+
+#progressBar{
+height:10px;
+width:0%;
+background:#2563eb;
+border-radius:10px;
+}
+
+/* NAV BUTTON */
+.navBtn{
+display:flex;
+justify-content:space-between;
+margin-top:20px;
+flex-wrap:wrap;
+gap:10px;
+}
+
+.navBtn button{
+flex:1;
+}
+
+/* RESPONSIVE HP */
+@media(max-width:600px){
+
+h2{
+font-size:18px;
+}
+
+.logo{
+width:80px;
+}
+
+.container{
+padding:15px;
+}
+
+button{
+padding:10px;
+font-size:14px;
+}
+
+#nomor span{
+width:30px;
+height:30px;
+font-size:12px;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- HEADER -->
+<div class="header">
+<div></div>
+<div class="userInfo" id="userInfo"></div>
+</div>
+
+<img class="logo" src="https://yanuar-moga.github.io/informatika/asesmen/assets/logo.png">
+
+<h2>CBT Ujian Sekolah</h2>
+
+<div id="login" class="loginBox">
+
+<label>Kelas</label>
+<select id="kelas"></select>
+
+<label>Nama</label>
+<select id="nama"></select>
+
+<label>Password</label>
+<input type="password" id="password" class="inputBox">
+
+<div class="passwordCheck">
+<input type="checkbox" id="showPass" onclick="lihatPassword()">
+<label for="showPass">Tampilkan Password</label>
+</div>
+
+<div class="loginBtn">
+<button onclick="login()">Login</button>
+</div>
+
+</div>
+
+<div id="ujian" style="display:none">
+
+<div id="timer"></div>
+
+<br>
+
+<div id="progressBox">
+<div id="progressBar"></div>
+</div>
+
+<br>
+
+<div id="nomor"></div>
+
+<br>
+
+<div id="soal"></div>
+
+<div class="navBtn">
+<button onclick="prev()">Prev</button>
+<button onclick="kirim()">Selesai</button>
+<button onclick="next()">Next</button>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+// URL GAS
+var URL_SCRIPT = "https://script.google.com/macros/s/AKfycby9jy6eP8_N9HZdDGgh4arWhjZ0LvwvhxmeBgZgSrUisEqzBk0rhVx5uJr1S1XlRugrlg/dev";
+
+var soal=[];
+var jawaban=[];
+var no=0;
+
+var nama;
+var jk;
+var kelas;
+
+var waktu=1800;
+
+/* FETCH */
+function gas(func,data,callback){
+
+fetch(URL_SCRIPT,{
+method:"POST",
+body:JSON.stringify({func:func,data:data})
+})
+.then(res=>res.json())
+.then(callback)
+.catch(err=>{
+alert("Gagal koneksi ke server");
+console.error(err);
+});
+
+}
+
+/* PASSWORD */
+function lihatPassword(){
+var p=document.getElementById("password");
+p.type = (p.type==="password") ? "text" : "password";
+}
+
+/* LOAD KELAS */
+function loadKelas(){
+
+gas("getKelas",{},function(data){
+
+var k=document.getElementById("kelas");
+k.innerHTML="<option value=''>Pilih Kelas</option>";
+
+data.forEach(function(x){
+var o=document.createElement("option");
+o.value=x;
+o.text=x;
+k.appendChild(o);
+});
+
+});
+
+}
+
+/* LOAD NAMA */
+function loadNama(){
+
+kelas=document.getElementById("kelas").value;
+if(!kelas) return;
+
+gas("getNama",{kelas:kelas},function(data){
+
+var n=document.getElementById("nama");
+n.innerHTML="<option value=''>Pilih Nama</option>";
+
+data.forEach(function(x){
+var o=document.createElement("option");
+o.value=x;
+o.text=x;
+n.appendChild(o);
+});
+
+});
+
+}
+
+/* LOGIN */
+function login(){
+
+nama=document.getElementById("nama").value;
+var password=document.getElementById("password").value;
+
+if(!nama || !password){
+alert("Lengkapi login!");
+return;
+}
+
+gas("login",{nama:nama,password:password},function(res){
+
+if(res.status=="ok"){
+
+jk=res.jk;
+kelas=res.kelas;
+
+document.getElementById("login").style.display="none";
+document.getElementById("ujian").style.display="block";
+
+/* TAMPIL USER */
+document.getElementById("userInfo").innerHTML =
+"👤 " + nama + " | " + kelas;
+
+loadSoal();
+timer();
+
+}else{
+alert("Login gagal");
+}
+
+});
+
+}
+
+/* LOAD SOAL */
+function loadSoal(){
+
+gas("getSoal",{},function(data){
+
+soal=data;
+jawaban=[];
+
+document.getElementById("nomor").innerHTML="";
+
+data.forEach(function(s,i){
+
+jawaban.push("");
+
+document.getElementById("nomor").innerHTML+=
+"<span id='n"+i+"' onclick='goto("+i+")'>"+(i+1)+"</span>";
+
+});
+
+tampil();
+
+});
+
+}
+
+/* TAMPIL */
+function tampil(){
+
+var s=soal[no];
+
+var html="<h3>"+(no+1)+". "+s.pertanyaan+"</h3>";
+
+if(s.gambar){
+html+="<img src='"+s.gambar+"' style='max-width:100%'><br>";
+}
+
+s.opsi.forEach(function(o){
+
+var cek = jawaban[no]==o.key ? "checked" : "";
+
+html+="<label><input type='radio' name='j' value='"+o.key+"' "+cek+" onclick='jawab(\""+o.key+"\")'> "+o.text+"</label><br>";
+
+});
+
+document.getElementById("soal").innerHTML=html;
+
+}
+
+/* JAWAB */
+function jawab(v){
+jawaban[no]=v;
+document.getElementById("n"+no).classList.add("dijawab");
+updateProgress();
+}
+
+/* NAV */
+function next(){ if(no<soal.length-1){no++;tampil();} }
+function prev(){ if(no>0){no--;tampil();} }
+function goto(n){ no=n; tampil(); }
+
+/* PROGRESS */
+function updateProgress(){
+var answered=jawaban.filter(x=>x!="").length;
+var persen=(answered/soal.length)*100;
+document.getElementById("progressBar").style.width=persen+"%";
+}
+
+/* KIRIM */
+function kirim(){
+
+gas("submitJawaban",{
+jawaban:jawaban,
+nama:nama,
+jk:jk,
+kelas:kelas
+},function(nilai){
+
+alert("Nilai Anda : "+nilai);
+location.reload();
+
+});
+
+}
+
+/* TIMER */
+function timer(){
+
+setInterval(function(){
+
+waktu--;
+
+var m=Math.floor(waktu/60);
+var d=waktu%60;
+
+document.getElementById("timer").innerHTML="Timer : "+m+":"+d;
+
+if(waktu<=0){
+kirim();
+}
+
+},1000);
+
+}
+
+document.getElementById("kelas").addEventListener("change",loadNama);
+window.onload=loadKelas;
+
+</script>
+
+</body>
+</html>
