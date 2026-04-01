@@ -66,7 +66,7 @@ width:90px;
 margin-bottom:10px;
 }
 
-/* 🔥 FIX JUDUL */
+/* JUDUL */
 h2{
 text-align:center;
 margin-bottom:20px;
@@ -85,12 +85,24 @@ display:block;
 margin-top:12px;
 }
 
-.inputBox, select{
+/* 🔥 FIX INPUT SAMA PANJANG */
+.inputBox,
+select{
 width:100%;
 padding:10px;
 border-radius:8px;
 border:1px solid #ccc;
 margin-top:4px;
+box-sizing:border-box;
+display:block;
+}
+
+/* Hilangkan style default select biar konsisten */
+select{
+appearance:none;
+-webkit-appearance:none;
+-moz-appearance:none;
+background:white;
 }
 
 /* BUTTON */
@@ -339,12 +351,10 @@ var s=soal[no];
 
 var html="<h3>"+(no+1)+". "+s.pertanyaan+"</h3>";
 
-/* GAMBAR SOAL */
 if(s.gambar && s.gambar.trim()!=""){
 html+="<img src='"+s.gambar+"' style='max-width:100%;margin:10px 0;border-radius:10px'><br>";
 }
 
-/* OPSI SESUAI SPREADSHEET (TIDAK DIACAK) */
 s.opsi.forEach(o=>{
 var cek=jawaban[no]==o.key?"checked":"";
 html+="<label><input type='radio' name='soal"+no+"' value='"+o.key+"' "+cek+" onclick='jawab(\""+o.key+"\")'> "+o.text+"</label><br>";
