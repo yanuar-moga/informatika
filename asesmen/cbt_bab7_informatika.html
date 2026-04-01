@@ -66,6 +66,14 @@ width:90px;
 margin-bottom:10px;
 }
 
+/* 🔥 FIX JUDUL */
+h2{
+text-align:center;
+margin-bottom:20px;
+font-weight:700;
+color:#1e293b;
+}
+
 /* LOGIN */
 .loginBox{
 max-width:320px;
@@ -336,7 +344,7 @@ if(s.gambar && s.gambar.trim()!=""){
 html+="<img src='"+s.gambar+"' style='max-width:100%;margin:10px 0;border-radius:10px'><br>";
 }
 
-/* OPSI TIDAK DIACAK */
+/* OPSI SESUAI SPREADSHEET (TIDAK DIACAK) */
 s.opsi.forEach(o=>{
 var cek=jawaban[no]==o.key?"checked":"";
 html+="<label><input type='radio' name='soal"+no+"' value='"+o.key+"' "+cek+" onclick='jawab(\""+o.key+"\")'> "+o.text+"</label><br>";
