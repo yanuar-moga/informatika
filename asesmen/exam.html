@@ -179,13 +179,12 @@ border-radius:10px;
 margin-top:15px;
 }
 
-/* SOAL TEXT */
 .soalText{
 text-align:justify;
 line-height:1.6;
 }
 
-/* OPSI BARU (RAPI) */
+/* OPSI */
 .opsi{
 display:flex;
 align-items:flex-start;
@@ -194,6 +193,7 @@ padding:10px;
 border-radius:10px;
 cursor:pointer;
 margin-bottom:6px;
+transition:0.2s;
 }
 
 .opsi:hover{
@@ -213,6 +213,12 @@ font-weight:bold;
 flex:1;
 text-align:justify;
 line-height:1.5;
+}
+
+/* OPSI AKTIF */
+.opsi.aktif{
+background:#dbeafe;
+border:2px solid #60a5fa;
 }
 
 /* NAV */
@@ -240,7 +246,6 @@ flex:1;
 
 <div class="container">
 
-<!-- HEADER -->
 <div class="header">
 <div></div>
 
@@ -256,7 +261,6 @@ flex:1;
 
 <h2>CBT Ujian Sekolah</h2>
 
-<!-- LOGIN -->
 <div id="login" class="loginBox">
 
 <label>Kelas</label>
@@ -278,7 +282,6 @@ flex:1;
 
 </div>
 
-<!-- UJIAN -->
 <div id="ujian" style="display:none">
 
 <div id="timer"></div>
@@ -310,7 +313,6 @@ var nama,jk,kelas;
 var waktu=1800;
 var sudahSubmit=false;
 
-/* FETCH */
 function gas(func,data,callback){
 fetch(URL_SCRIPT,{
 method:"POST",
@@ -320,13 +322,11 @@ body:JSON.stringify({func:func,data:data})
 .then(callback);
 }
 
-/* SHOW PASSWORD */
 function lihatPassword(){
 var p=document.getElementById("password");
 p.type = (p.type==="password") ? "text" : "password";
 }
 
-/* LOGIN */
 function login(){
 
 nama=document.getElementById("nama").value;
@@ -361,7 +361,6 @@ timer();
 
 }
 
-/* LOAD */
 function loadKelas(){
 gas("getKelas",{},function(data){
 var k=document.getElementById("kelas");
@@ -387,7 +386,6 @@ n.appendChild(o);
 });
 }
 
-/* SOAL */
 function loadSoal(){
 
 gas("getSoal",{},function(data){
@@ -409,7 +407,6 @@ tampil();
 
 }
 
-/* TAMPIL */
 function tampil(){
 
 var s=soal[no];
@@ -424,34 +421,37 @@ var huruf=["A","B","C","D","E"];
 
 s.opsi.forEach((o,i)=>{
 var cek=jawaban[no]==o.key?"checked":"";
-html+="<label class='opsi'><input type='radio' name='soal"+no+"' value='"+o.key+"' "+cek+" onclick='jawab(\""+o.key+"\")'><span class='huruf'>"+huruf[i]+".</span><span class='teks'>"+o.text+"</span></label>";
+var aktif=jawaban[no]==o.key?"aktif":"";
+html+="<label class='opsi "+aktif+"'><input type='radio' name='soal"+no+"' value='"+o.key+"' "+cek+" onclick='jawab(\""+o.key+"\",this)'><span class='huruf'>"+huruf[i]+".</span><span class='teks'>"+o.text+"</span></label>";
 });
 
 document.getElementById("soal").innerHTML=html;
 
 }
 
-/* JAWAB */
-function jawab(v){
+function jawab(v,el){
+
 jawaban[no]=v;
+
+document.querySelectorAll(".opsi").forEach(x=>x.classList.remove("aktif"));
+el.closest(".opsi").classList.add("aktif");
+
 document.getElementById("n"+no).classList.add("dijawab");
 
 localStorage.setItem("jawaban",JSON.stringify(jawaban));
 updateProgress();
+
 }
 
-/* NAV */
 function next(){if(no<soal.length-1){no++;tampil();}}
 function prev(){if(no>0){no--;tampil();}}
 function goto(n){no=n;tampil();}
 
-/* PROGRESS */
 function updateProgress(){
 var j=jawaban.filter(x=>x!="").length;
 document.getElementById("progressBar").style.width=(j/soal.length*100)+"%";
 }
 
-/* KIRIM */
 function kirim(){
 
 if(sudahSubmit) return;
@@ -475,7 +475,6 @@ document.getElementById("statusUjian").classList.add("sudah");
 
 }
 
-/* TIMER */
 function timer(){
 setInterval(()=>{
 waktu--;
@@ -487,7 +486,6 @@ if(waktu<=0) kirim();
 },1000);
 }
 
-/* LOGOUT */
 function logout(){
 if(confirm("Logout?")){
 localStorage.clear();
@@ -495,7 +493,6 @@ location.reload();
 }
 }
 
-/* AUTO LOGIN */
 window.onload=function(){
 
 loadKelas();
