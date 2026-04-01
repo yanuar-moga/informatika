@@ -161,6 +161,21 @@ button:disabled{
   margin-top:15px;
 }
 
+/* OPSI */
+.opsi{
+  display:block;
+  padding:10px;
+  margin:6px 0;
+  background:#f8fafc;
+  border-radius:8px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.opsi:hover{
+  background:#e2e8f0;
+}
+
 /* NAV */
 .navBtn{
   display:flex;
@@ -239,7 +254,6 @@ button:disabled{
 
 <script>
 
-/* 🔥 URL SUDAH DIPERBAIKI */
 var URL_SCRIPT="https://script.google.com/macros/s/AKfycbwH1jZ1y-zEh-M_Y_j2-XpR8GUsIFnOllJBQcjNWWEa/dev";
 
 var soal=[], jawaban=[], no=0;
@@ -265,6 +279,7 @@ function lihatPassword(){
 
 /* LOGIN */
 function login(){
+
   nama=document.getElementById("nama").value;
   var password=document.getElementById("password").value;
 
@@ -274,6 +289,7 @@ function login(){
   }
 
   gas("login",{nama:nama,password:password},function(res){
+
     if(res.status=="ok"){
 
       kelas=res.kelas;
@@ -292,7 +308,9 @@ function login(){
       timer();
 
     }else alert("Login gagal");
+
   });
+
 }
 
 /* LOAD */
@@ -343,20 +361,20 @@ function tampil(){
   var s=soal[no];
   var huruf=["A","B","C","D","E"];
 
-  var html=`<h3>${no+1}. ${s.pertanyaan}</h3>`;
+  var html="<h3>"+(no+1)+". "+s.pertanyaan+"</h3>";
 
   if(s.gambar){
-    html+=`<img src="${s.gambar}" style="max-width:100%;margin:10px 0;border-radius:10px">`;
+    html+="<img src='"+s.gambar+"' style='max-width:100%;margin:10px 0;border-radius:10px'>";
   }
 
   s.opsi.forEach((o,i)=>{
     var cek=jawaban[no]==o.key?"checked":"";
 
     html+=`
-    <label>
+    <label class="opsi">
       <input type="radio" name="soal${no}" value="${o.key}" ${cek} onclick="jawab('${o.key}')">
       ${huruf[i]}. ${o.text}
-    </label><br>`;
+    </label>`;
   });
 
   document.getElementById("soal").innerHTML=html;
@@ -384,9 +402,11 @@ function updateProgress(){
 
 /* KIRIM */
 function kirim(){
+
   if(sudahSubmit) return;
 
   gas("submitJawaban",{jawaban:jawaban,nama:nama,kelas:kelas},function(nilai){
+
     alert("Nilai Anda : "+nilai);
 
     sudahSubmit=true;
@@ -394,9 +414,10 @@ function kirim(){
 
     var st=document.getElementById("statusUjian");
     st.innerHTML="Sudah Mengerjakan";
-    st.classList.remove("belum");
     st.classList.add("sudah");
+
   });
+
 }
 
 /* TIMER */
@@ -420,7 +441,6 @@ function logout(){
   }
 }
 
-/* AUTO */
 window.onload=function(){
   loadKelas();
 }
