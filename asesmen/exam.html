@@ -188,22 +188,55 @@ line-height:1.6;
 .opsi{
 display:flex;
 align-items:flex-start;
-gap:10px;
-padding:10px;
+gap:12px;
+padding:12px;
 border-radius:10px;
 cursor:pointer;
-margin-bottom:6px;
+margin-bottom:8px;
 transition:0.2s;
+border:2px solid transparent;
 }
 
 .opsi:hover{
 background:#f1f5f9;
 }
 
-.opsi input{
-margin-top:5px;
+/* RADIO CUSTOM */
+.opsi input[type="radio"]{
+appearance:none;
+width:20px;
+height:20px;
+border:2px solid #94a3b8;
+border-radius:50%;
+position:relative;
+cursor:pointer;
+margin-top:3px;
 }
 
+/* BULATAN DALAM */
+.opsi input[type="radio"]::before{
+content:"";
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%) scale(0);
+width:10px;
+height:10px;
+background:#2563eb;
+border-radius:50%;
+transition:0.2s;
+}
+
+/* SAAT TERPILIH */
+.opsi input[type="radio"]:checked{
+border:2px solid #2563eb;
+}
+
+.opsi input[type="radio"]:checked::before{
+transform:translate(-50%,-50%) scale(1.2);
+}
+
+/* TEXT */
 .huruf{
 min-width:25px;
 font-weight:bold;
@@ -306,6 +339,7 @@ flex:1;
 
 <script>
 
+/* JS TIDAK DIUBAH */
 var URL_SCRIPT="https://script.google.com/macros/s/AKfycbyfmlPkyhY6uz9Whhvp-Qp7TbnbeVPJzE207gSE7CpmR0jROwpkJyRdI4Bbb2c_1mc/exec";
 
 var soal=[],jawaban=[],no=0;
