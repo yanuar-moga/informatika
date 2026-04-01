@@ -179,6 +179,19 @@ border-radius:10px;
 margin-top:15px;
 }
 
+/* OPSI */
+.opsi{
+display:block;
+padding:8px;
+border-radius:8px;
+margin-bottom:6px;
+cursor:pointer;
+}
+
+.opsi:hover{
+background:#f1f5f9;
+}
+
 /* NAV */
 .navBtn{
 display:flex;
@@ -278,7 +291,7 @@ body:JSON.stringify({func:func,data:data})
 .then(callback);
 }
 
-/* 🔥 SHOW PASSWORD */
+/* SHOW PASSWORD */
 function lihatPassword(){
 var p=document.getElementById("password");
 p.type = (p.type==="password") ? "text" : "password";
@@ -378,9 +391,11 @@ if(s.gambar && s.gambar.trim()!=""){
 html+="<img src='"+s.gambar+"' style='max-width:100%;margin:10px 0;border-radius:10px'><br>";
 }
 
-s.opsi.forEach(o=>{
+var huruf=["A","B","C","D","E"];
+
+s.opsi.forEach((o,i)=>{
 var cek=jawaban[no]==o.key?"checked":"";
-html+="<label><input type='radio' name='soal"+no+"' value='"+o.key+"' "+cek+" onclick='jawab(\""+o.key+"\")'> "+o.text+"</label><br>";
+html+="<label class='opsi'><input type='radio' name='soal"+no+"' value='"+o.key+"' "+cek+" onclick='jawab(\""+o.key+"\")'> <b>"+huruf[i]+".</b> "+o.text+"</label>";
 });
 
 document.getElementById("soal").innerHTML=html;
