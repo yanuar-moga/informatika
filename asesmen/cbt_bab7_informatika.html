@@ -85,7 +85,7 @@ display:block;
 margin-top:12px;
 }
 
-/* 🔥 FIX INPUT SAMA PANJANG */
+/* INPUT FIX */
 .inputBox,
 select{
 width:100%;
@@ -97,12 +97,24 @@ box-sizing:border-box;
 display:block;
 }
 
-/* Hilangkan style default select biar konsisten */
 select{
 appearance:none;
 -webkit-appearance:none;
 -moz-appearance:none;
 background:white;
+}
+
+/* CHECKBOX PASSWORD */
+.passwordCheck{
+margin-top:8px;
+display:flex;
+align-items:center;
+gap:8px;
+font-size:13px;
+}
+
+.passwordCheck input{
+width:auto;
 }
 
 /* BUTTON */
@@ -214,7 +226,12 @@ flex:1;
 <label>Password</label>
 <input type="password" id="password" class="inputBox">
 
-<br><br>
+<div class="passwordCheck">
+<input type="checkbox" id="showPass" onclick="lihatPassword()">
+<label for="showPass">Tampilkan Password</label>
+</div>
+
+<br>
 <button onclick="login()">Login</button>
 
 </div>
@@ -259,6 +276,12 @@ body:JSON.stringify({func:func,data:data})
 })
 .then(res=>res.json())
 .then(callback);
+}
+
+/* 🔥 SHOW PASSWORD */
+function lihatPassword(){
+var p=document.getElementById("password");
+p.type = (p.type==="password") ? "text" : "password";
 }
 
 /* LOGIN */
