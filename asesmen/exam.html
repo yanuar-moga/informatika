@@ -187,61 +187,36 @@ line-height:1.6;
 /* OPSI */
 .opsi{
 display:flex;
-align-items:flex-start;
+align-items:center;
 gap:12px;
 padding:12px;
-border-radius:10px;
+border-radius:12px;
 cursor:pointer;
-margin-bottom:8px;
-transition:0.2s;
-border:2px solid transparent;
+margin-bottom:10px;
+transition:0.25s;
+border:2px solid #e2e8f0;
 }
 
+/* HOVER */
 .opsi:hover{
-background:#f1f5f9;
+background:#f8fafc;
 }
 
-/* RADIO CUSTOM */
-.opsi input[type="radio"]{
-appearance:none;
-width:20px;
-height:20px;
+/* LINGKARAN HURUF */
+.circle{
+width:34px;
+height:34px;
+border-radius:50%;
 border:2px solid #94a3b8;
-border-radius:50%;
-position:relative;
-cursor:pointer;
-margin-top:3px;
-}
-
-/* BULATAN DALAM */
-.opsi input[type="radio"]::before{
-content:"";
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%) scale(0);
-width:10px;
-height:10px;
-background:#2563eb;
-border-radius:50%;
-transition:0.2s;
-}
-
-/* SAAT TERPILIH */
-.opsi input[type="radio"]:checked{
-border:2px solid #2563eb;
-}
-
-.opsi input[type="radio"]:checked::before{
-transform:translate(-50%,-50%) scale(1.2);
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+color:#334155;
+transition:0.25s;
 }
 
 /* TEXT */
-.huruf{
-min-width:25px;
-font-weight:bold;
-}
-
 .teks{
 flex:1;
 text-align:justify;
@@ -250,8 +225,27 @@ line-height:1.5;
 
 /* OPSI AKTIF */
 .opsi.aktif{
-background:#dbeafe;
-border:2px solid #60a5fa;
+border:2px solid #2563eb;
+background:#eff6ff;
+}
+
+/* LINGKARAN AKTIF */
+.opsi.aktif .circle{
+background:#2563eb;
+color:white;
+border-color:#2563eb;
+}
+
+/* ANIMASI BOUNCE */
+@keyframes bounceClick{
+0%{transform:scale(1);}
+30%{transform:scale(1.2);}
+60%{transform:scale(0.9);}
+100%{transform:scale(1);}
+}
+
+.bounce{
+animation:bounceClick 0.3s ease;
 }
 
 /* NAV */
@@ -287,7 +281,6 @@ flex:1;
 <div class="status belum" id="statusUjian">Belum Mengerjakan</div>
 <button id="btnLogout" onclick="logout()">Logout</button>
 </div>
-
 </div>
 
 <img class="logo" src="https://yanuar-moga.github.io/informatika/asesmen/assets/logo.png">
@@ -339,7 +332,6 @@ flex:1;
 
 <script>
 
-/* JS TIDAK DIUBAH */
 var URL_SCRIPT="https://script.google.com/macros/s/AKfycbyfmlPkyhY6uz9Whhvp-Qp7TbnbeVPJzE207gSE7CpmR0jROwpkJyRdI4Bbb2c_1mc/exec";
 
 var soal=[],jawaban=[],no=0;
@@ -454,9 +446,14 @@ html+="<img src='"+s.gambar+"' style='max-width:100%;margin:10px 0;border-radius
 var huruf=["A","B","C","D","E"];
 
 s.opsi.forEach((o,i)=>{
-var cek=jawaban[no]==o.key?"checked":"";
 var aktif=jawaban[no]==o.key?"aktif":"";
-html+="<label class='opsi "+aktif+"'><input type='radio' name='soal"+no+"' value='"+o.key+"' "+cek+" onclick='jawab(\""+o.key+"\",this)'><span class='huruf'>"+huruf[i]+".</span><span class='teks'>"+o.text+"</span></label>";
+
+html+=`
+<div class="opsi ${aktif}" onclick="jawab('${o.key}', this)">
+    <div class="circle">${huruf[i]}</div>
+    <div class="teks">${o.text}</div>
+</div>
+`;
 });
 
 document.getElementById("soal").innerHTML=html;
@@ -468,7 +465,13 @@ function jawab(v,el){
 jawaban[no]=v;
 
 document.querySelectorAll(".opsi").forEach(x=>x.classList.remove("aktif"));
-el.closest(".opsi").classList.add("aktif");
+el.classList.add("aktif");
+
+/* bounce animasi */
+var c = el.querySelector(".circle");
+c.classList.remove("bounce");
+void c.offsetWidth;
+c.classList.add("bounce");
 
 document.getElementById("n"+no).classList.add("dijawab");
 
