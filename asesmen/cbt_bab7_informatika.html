@@ -85,7 +85,7 @@ display:block;
 margin-top:12px;
 }
 
-/* INPUT FIX */
+/* INPUT */
 .inputBox,
 select{
 width:100%;
@@ -179,17 +179,73 @@ border-radius:10px;
 margin-top:15px;
 }
 
-/* OPSI */
-.opsi{
-display:block;
-padding:8px;
-border-radius:8px;
-margin-bottom:6px;
-cursor:pointer;
+.soalText{
+text-align:justify;
+line-height:1.6;
 }
 
+/* OPSI */
+.opsi{
+display:flex;
+align-items:center;
+gap:12px;
+padding:12px;
+border-radius:12px;
+cursor:pointer;
+margin-bottom:10px;
+transition:0.25s;
+border:2px solid #e2e8f0;
+}
+
+/* HOVER */
 .opsi:hover{
-background:#f1f5f9;
+background:#f8fafc;
+}
+
+/* LINGKARAN HURUF */
+.circle{
+width:34px;
+height:34px;
+border-radius:50%;
+border:2px solid #94a3b8;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+color:#334155;
+transition:0.25s;
+}
+
+/* TEXT */
+.teks{
+flex:1;
+text-align:justify;
+line-height:1.5;
+}
+
+/* OPSI AKTIF */
+.opsi.aktif{
+border:2px solid #2563eb;
+background:#eff6ff;
+}
+
+/* LINGKARAN AKTIF */
+.opsi.aktif .circle{
+background:#2563eb;
+color:white;
+border-color:#2563eb;
+}
+
+/* ANIMASI BOUNCE */
+@keyframes bounceClick{
+0%{transform:scale(1);}
+30%{transform:scale(1.2);}
+60%{transform:scale(0.9);}
+100%{transform:scale(1);}
+}
+
+.bounce{
+animation:bounceClick 0.3s ease;
 }
 
 /* NAV */
@@ -203,6 +259,12 @@ margin-top:15px;
 flex:1;
 }
 
+/* RESPONSIVE */
+@media(max-width:600px){
+.soalText{font-size:14px;}
+.teks{font-size:14px;}
+}
+
 </style>
 
 </head>
@@ -211,7 +273,6 @@ flex:1;
 
 <div class="container">
 
-<!-- HEADER -->
 <div class="header">
 <div></div>
 
@@ -220,14 +281,12 @@ flex:1;
 <div class="status belum" id="statusUjian">Belum Mengerjakan</div>
 <button id="btnLogout" onclick="logout()">Logout</button>
 </div>
-
 </div>
 
 <img class="logo" src="https://yanuar-moga.github.io/informatika/asesmen/assets/logo.png">
 
 <h2>CBT Ujian Sekolah</h2>
 
-<!-- LOGIN -->
 <div id="login" class="loginBox">
 
 <label>Kelas</label>
@@ -249,7 +308,6 @@ flex:1;
 
 </div>
 
-<!-- UJIAN -->
 <div id="ujian" style="display:none">
 
 <div id="timer"></div>
@@ -281,7 +339,6 @@ var nama,jk,kelas;
 var waktu=1800;
 var sudahSubmit=false;
 
-/* FETCH */
 function gas(func,data,callback){
 fetch(URL_SCRIPT,{
 method:"POST",
@@ -291,13 +348,11 @@ body:JSON.stringify({func:func,data:data})
 .then(callback);
 }
 
-/* SHOW PASSWORD */
 function lihatPassword(){
 var p=document.getElementById("password");
 p.type = (p.type==="password") ? "text" : "password";
 }
 
-/* LOGIN */
 function login(){
 
 nama=document.getElementById("nama").value;
@@ -332,7 +387,6 @@ timer();
 
 }
 
-/* LOAD */
 function loadKelas(){
 gas("getKelas",{},function(data){
 var k=document.getElementById("kelas");
@@ -358,7 +412,6 @@ n.appendChild(o);
 });
 }
 
-/* SOAL */
 function loadSoal(){
 
 gas("getSoal",{},function(data){
@@ -380,12 +433,11 @@ tampil();
 
 }
 
-/* TAMPIL */
 function tampil(){
 
 var s=soal[no];
 
-var html="<h3>"+(no+1)+". "+s.pertanyaan+"</h3>";
+var html="<div class='soalText'><b>"+(no+1)+".</b> "+s.pertanyaan+"</div>";
 
 if(s.gambar && s.gambar.trim()!=""){
 html+="<img src='"+s.gambar+"' style='max-width:100%;margin:10px 0;border-radius:10px'><br>";
@@ -394,35 +446,49 @@ html+="<img src='"+s.gambar+"' style='max-width:100%;margin:10px 0;border-radius
 var huruf=["A","B","C","D","E"];
 
 s.opsi.forEach((o,i)=>{
-var cek=jawaban[no]==o.key?"checked":"";
-html+="<label class='opsi'><input type='radio' name='soal"+no+"' value='"+o.key+"' "+cek+" onclick='jawab(\""+o.key+"\")'> <b>"+huruf[i]+".</b> "+o.text+"</label>";
+var aktif=jawaban[no]==o.key?"aktif":"";
+
+html+=`
+<div class="opsi ${aktif}" onclick="jawab('${o.key}', this)">
+    <div class="circle">${huruf[i]}</div>
+    <div class="teks">${o.text}</div>
+</div>
+`;
 });
 
 document.getElementById("soal").innerHTML=html;
 
 }
 
-/* JAWAB */
-function jawab(v){
+function jawab(v,el){
+
 jawaban[no]=v;
+
+document.querySelectorAll(".opsi").forEach(x=>x.classList.remove("aktif"));
+el.classList.add("aktif");
+
+/* bounce animasi */
+var c = el.querySelector(".circle");
+c.classList.remove("bounce");
+void c.offsetWidth;
+c.classList.add("bounce");
+
 document.getElementById("n"+no).classList.add("dijawab");
 
 localStorage.setItem("jawaban",JSON.stringify(jawaban));
 updateProgress();
+
 }
 
-/* NAV */
 function next(){if(no<soal.length-1){no++;tampil();}}
 function prev(){if(no>0){no--;tampil();}}
 function goto(n){no=n;tampil();}
 
-/* PROGRESS */
 function updateProgress(){
 var j=jawaban.filter(x=>x!="").length;
 document.getElementById("progressBar").style.width=(j/soal.length*100)+"%";
 }
 
-/* KIRIM */
 function kirim(){
 
 if(sudahSubmit) return;
@@ -446,7 +512,6 @@ document.getElementById("statusUjian").classList.add("sudah");
 
 }
 
-/* TIMER */
 function timer(){
 setInterval(()=>{
 waktu--;
@@ -458,7 +523,6 @@ if(waktu<=0) kirim();
 },1000);
 }
 
-/* LOGOUT */
 function logout(){
 if(confirm("Logout?")){
 localStorage.clear();
@@ -466,7 +530,6 @@ location.reload();
 }
 }
 
-/* AUTO LOGIN */
 window.onload=function(){
 
 loadKelas();
