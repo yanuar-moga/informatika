@@ -239,7 +239,8 @@ button:disabled{
 
 <script>
 
-var URL_SCRIPT="https://script.google.com/macros/s/AKfycby9jy6eP8_N9HZdDGgh4arWhjZ0LvwvhxmeBgZgSrUisEqzBk0rhVx5uJr1S1XlRugrlg/dev";
+/* 🔥 URL SUDAH DIPERBAIKI */
+var URL_SCRIPT="https://script.google.com/macros/s/AKfycbwH1jZ1y-zEh-M_Y_j2-XpR8GUsIFnOllJBQcjNWWEa/dev";
 
 var soal=[], jawaban=[], no=0;
 var nama, kelas;
@@ -280,12 +281,12 @@ function login(){
       localStorage.setItem("nama",nama);
       localStorage.setItem("kelas",kelas);
 
-      login.style.display="none";
-      ujian.style.display="block";
+      document.getElementById("login").style.display="none";
+      document.getElementById("ujian").style.display="block";
 
-      userInfo.innerHTML="👤 "+nama+" | "+kelas;
-      btnLogout.style.display="block";
-      statusUjian.style.display="block";
+      document.getElementById("userInfo").innerHTML="👤 "+nama+" | "+kelas;
+      document.getElementById("btnLogout").style.display="block";
+      document.getElementById("statusUjian").style.display="block";
 
       loadSoal();
       timer();
@@ -297,18 +298,22 @@ function login(){
 /* LOAD */
 function loadKelas(){
   gas("getKelas",{},function(data){
-    kelas.innerHTML="<option>Pilih Kelas</option>";
+    var el=document.getElementById("kelas");
+    el.innerHTML="<option>Pilih Kelas</option>";
     data.forEach(x=>{
-      kelas.innerHTML+=`<option>${x}</option>`;
+      el.innerHTML+=`<option>${x}</option>`;
     });
   });
 }
 
 function loadNama(){
-  gas("getNama",{kelas:kelas.value},function(data){
-    nama.innerHTML="<option>Pilih Nama</option>";
+  var k=document.getElementById("kelas").value;
+
+  gas("getNama",{kelas:k},function(data){
+    var el=document.getElementById("nama");
+    el.innerHTML="<option>Pilih Nama</option>";
     data.forEach(x=>{
-      nama.innerHTML+=`<option>${x}</option>`;
+      el.innerHTML+=`<option>${x}</option>`;
     });
   });
 }
@@ -320,18 +325,19 @@ function loadSoal(){
     soal=data;
     jawaban=[];
 
-    nomor.innerHTML="";
+    var nomorEl=document.getElementById("nomor");
+    nomorEl.innerHTML="";
 
     data.forEach((s,i)=>{
       jawaban.push("");
-      nomor.innerHTML+=`<span id="n${i}" onclick="goto(${i})">${i+1}</span>`;
+      nomorEl.innerHTML+=`<span id="n${i}" onclick="goto(${i})">${i+1}</span>`;
     });
 
     tampil();
   });
 }
 
-/* TAMPIL (ADA A B C D E) */
+/* TAMPIL */
 function tampil(){
 
   var s=soal[no];
@@ -353,7 +359,7 @@ function tampil(){
     </label><br>`;
   });
 
-  soal.innerHTML=html;
+  document.getElementById("soal").innerHTML=html;
 }
 
 /* JAWAB */
@@ -373,7 +379,7 @@ function goto(n){ no=n; tampil(); }
 /* PROGRESS */
 function updateProgress(){
   var j=jawaban.filter(x=>x!="").length;
-  progressBar.style.width=(j/soal.length*100)+"%";
+  document.getElementById("progressBar").style.width=(j/soal.length*100)+"%";
 }
 
 /* KIRIM */
@@ -384,10 +390,12 @@ function kirim(){
     alert("Nilai Anda : "+nilai);
 
     sudahSubmit=true;
-    btnKirim.disabled=true;
+    document.getElementById("btnKirim").disabled=true;
 
-    statusUjian.innerHTML="Sudah Mengerjakan";
-    statusUjian.classList.add("sudah");
+    var st=document.getElementById("statusUjian");
+    st.innerHTML="Sudah Mengerjakan";
+    st.classList.remove("belum");
+    st.classList.add("sudah");
   });
 }
 
@@ -398,7 +406,7 @@ function timer(){
     var m=Math.floor(waktu/60);
     var d=waktu%60;
 
-    timer.innerHTML="⏱️ "+m+":"+(d<10?"0"+d:d);
+    document.getElementById("timer").innerHTML="⏱️ "+m+":"+(d<10?"0"+d:d);
 
     if(waktu<=0) kirim();
   },1000);
@@ -417,7 +425,7 @@ window.onload=function(){
   loadKelas();
 }
 
-kelas.addEventListener("change",loadNama);
+document.getElementById("kelas").addEventListener("change",loadNama);
 
 </script>
 
