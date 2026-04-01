@@ -204,7 +204,10 @@ font-size:12px;
 <!-- HEADER -->
 <div class="header">
 <div></div>
+<div style="text-align:right">
 <div class="userInfo" id="userInfo"></div>
+<button onclick="logout()" style="margin-top:5px;background:#ef4444">Logout</button>
+</div>
 </div>
 
 <img class="logo" src="https://yanuar-moga.github.io/informatika/asesmen/assets/logo.png">
@@ -357,6 +360,11 @@ if(res.status=="ok"){
 jk=res.jk;
 kelas=res.kelas;
 
+/* SIMPAN LOGIN */
+localStorage.setItem("nama", nama);
+localStorage.setItem("kelas", kelas);
+localStorage.setItem("jk", jk);
+
 document.getElementById("login").style.display="none";
 document.getElementById("ujian").style.display="block";
 
@@ -428,6 +436,9 @@ function jawab(v){
 jawaban[no]=v;
 document.getElementById("n"+no).classList.add("dijawab");
 updateProgress();
+
+/* SIMPAN JAWABAN */
+localStorage.setItem("jawaban", JSON.stringify(jawaban));
 }
 
 /* NAV */
@@ -453,7 +464,6 @@ kelas:kelas
 },function(nilai){
 
 alert("Nilai Anda : "+nilai);
-location.reload();
 
 });
 
@@ -469,7 +479,9 @@ waktu--;
 var m=Math.floor(waktu/60);
 var d=waktu%60;
 
-document.getElementById("timer").innerHTML="Timer : "+m+":"+d;
+d = d < 10 ? "0"+d : d;
+
+document.getElementById("timer").innerHTML="⏱️ "+m+":"+d;
 
 if(waktu<=0){
 kirim();
@@ -479,8 +491,56 @@ kirim();
 
 }
 
+/* LOGOUT */
+function logout(){
+
+if(confirm("Yakin ingin logout?")){
+localStorage.clear();
+location.reload();
+}
+
+}
+
+/* AUTO LOGIN */
+window.onload=function(){
+
+loadKelas();
+
+var n = localStorage.getItem("nama");
+var k = localStorage.getItem("kelas");
+var j = localStorage.getItem("jk");
+
+if(n && k){
+
+nama=n;
+kelas=k;
+jk=j;
+
+document.getElementById("login").style.display="none";
+document.getElementById("ujian").style.display="block";
+
+document.getElementById("userInfo").innerHTML =
+"👤 " + nama + " | " + kelas;
+
+/* LOAD JAWABAN */
+var jwb = localStorage.getItem("jawaban");
+if(jwb){
+jawaban = JSON.parse(jwb);
+}
+
+loadSoal();
+timer();
+
+}
+
+/* WARNING RELOAD */
+window.onbeforeunload=function(){
+return "Ujian sedang berlangsung!";
+}
+
+}
+
 document.getElementById("kelas").addEventListener("change",loadNama);
-window.onload=loadKelas;
 
 </script>
 
