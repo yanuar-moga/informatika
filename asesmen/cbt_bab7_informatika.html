@@ -34,7 +34,8 @@ align-items:center;
 }
 
 .userBox{
-text-align:right;
+text-align:center;
+min-width:150px;
 }
 
 .userInfo{
@@ -45,6 +46,7 @@ font-weight:600;
 .status{
 font-size:13px;
 margin-top:4px;
+display:none;
 }
 
 .status.belum{
@@ -276,6 +278,9 @@ document.getElementById("ujian").style.display="block";
 document.getElementById("userInfo").innerHTML="👤 "+nama+" | "+kelas;
 document.getElementById("btnLogout").style.display="block";
 
+/* TAMPILKAN STATUS */
+document.getElementById("statusUjian").style.display="block";
+
 loadSoal();
 timer();
 
@@ -342,7 +347,7 @@ var html="<h3>"+(no+1)+". "+s.pertanyaan+"</h3>";
 
 s.opsi.forEach(o=>{
 var cek=jawaban[no]==o.key?"checked":"";
-html+="<label><input type='radio' "+cek+" onclick='jawab(\""+o.key+"\")'> "+o.text+"</label><br>";
+html+="<label><input type='radio' name='soal"+no+"' "+cek+" onclick='jawab(\""+o.key+"\")'> "+o.text+"</label><br>";
 });
 
 document.getElementById("soal").innerHTML=html;
@@ -433,6 +438,7 @@ document.getElementById("ujian").style.display="block";
 
 document.getElementById("userInfo").innerHTML="👤 "+nama+" | "+kelas;
 document.getElementById("btnLogout").style.display="block";
+document.getElementById("statusUjian").style.display="block";
 
 /* LOAD JAWABAN */
 var jwb=localStorage.getItem("jawaban");
