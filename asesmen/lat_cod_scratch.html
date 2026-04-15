@@ -16,18 +16,19 @@ body {
     height: 100vh;
 }
 
-/* LEFT PANEL */
+/* LEFT PANEL (DIPERSEMPIT) */
 .left {
-    width: 40%;
+    flex: 1;
+    max-width: 300px;
     background: #ffffff;
-    padding: 20px;
+    padding: 15px;
     border-right: 4px solid #2196f3;
 }
 
-/* RIGHT PANEL */
+/* RIGHT PANEL (DIPERBESAR) */
 .right {
-    width: 60%;
-    padding: 20px;
+    flex: 3;
+    padding: 25px 30px;
 }
 
 /* CARD */
@@ -58,7 +59,7 @@ button {
 /* IMAGE */
 #imgJawaban {
     width: 100%;
-    height: 220px;
+    height: 260px;
     object-fit: contain;
     background: #f0f0f0;
     border-radius: 8px;
@@ -66,7 +67,7 @@ button {
 
 /* TIMER */
 .timer {
-    font-size: 26px;
+    font-size: 28px;
     font-weight: bold;
     color: #d32f2f;
 }
@@ -80,13 +81,9 @@ button {
     font-weight: bold;
 }
 
-.rank-even {
-    background: #e3f2fd;
-}
+.rank-even { background: #e3f2fd; }
+.rank-odd { background: #f5f5f5; }
 
-.rank-odd {
-    background: #f5f5f5;
-}
 </style>
 </head>
 
@@ -102,7 +99,7 @@ button {
 <button class="btn-blue" onclick="toggleJawaban()">Spoiler Jawaban</button>
 <button class="btn-green" onclick="tambahSkor()">+ Skor</button>
 <button class="btn-red" onclick="resetSkor()">Reset Skor</button>
-<button class="btn-orange" onclick="fullscreen()">Full Screen</button>
+<button class="btn-orange" onclick="toggleFullscreen()">Full Screen</button>
 </div>
 
 <div class="card">
@@ -143,10 +140,30 @@ button {
 <script>
 const kelompok = ["Kelompok 1","Kelompok 2","Kelompok 3","Kelompok 4","Kelompok 5","Kelompok 6"];
 
+/* QUEUE KELOMPOK */
+let kelompokQueue = [];
+
+function shuffle(array){
+for (let i = array.length - 1; i > 0; i--) {
+let j = Math.floor(Math.random() * (i + 1));
+[array[i], array[j]] = [array[j], array[i]];
+}
+return array;
+}
+
+function getNextKelompok(){
+if(kelompokQueue.length === 0){
+kelompokQueue = shuffle([...kelompok]);
+}
+return kelompokQueue.shift();
+}
+
+/* SKOR */
 let skor = JSON.parse(localStorage.getItem("skor")) || {
 "K1":0,"K2":0,"K3":0,"K4":0,"K5":0,"K6":0
 };
 
+/* SOAL */
 let soalList = [
 {soal:"Buat sprite bergerak ke kanan saat bendera hijau diklik", guide:"when green flag clicked → move 10 steps (repeat)", img:"assets/jawaban1.png"},
 {soal:"Buat sprite berbicara Halo teman!", guide:"when green flag clicked → say 'Halo teman!' for 2 seconds", img:"assets/jawaban2.png"},
@@ -187,7 +204,7 @@ document.getElementById("ranking").innerHTML=html;
 function acak(){
 if(soalList.length==0){alert("Soal habis");return;}
 
-let k = kelompok[Math.floor(Math.random()*kelompok.length)];
+let k = getNextKelompok();
 let i = Math.floor(Math.random()*soalList.length);
 let s = soalList.splice(i,1)[0];
 
@@ -227,7 +244,7 @@ localStorage.clear();
 location.reload();
 }
 
-/* TIMER 5 MENIT */
+/* TIMER */
 function startTimer(){
 clearInterval(timer);
 timeLeft = 300;
@@ -252,9 +269,13 @@ alert("⏰ Waktu habis!");
 },1000);
 }
 
-/* FULLSCREEN */
-function fullscreen(){
+/* FULLSCREEN TOGGLE */
+function toggleFullscreen(){
+if (!document.fullscreenElement) {
 document.documentElement.requestFullscreen();
+} else {
+document.exitFullscreen();
+}
 }
 
 updateRanking();
