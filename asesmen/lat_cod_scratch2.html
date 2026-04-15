@@ -25,6 +25,14 @@ button {
     font-weight:bold; cursor:pointer;
 }
 
+select {
+    width:100%;
+    padding:10px;
+    margin-top:8px;
+    border-radius:8px;
+    font-weight:bold;
+}
+
 .btn-blue{background:#2196f3;color:white;}
 .btn-green{background:#4caf50;color:white;}
 .btn-red{background:#f44336;color:white;}
@@ -50,6 +58,14 @@ button {
 
 <div class="card">
 <h3>🎯 Kontrol</h3>
+
+<select id="level">
+<option value="dasar">🟢 Dasar</option>
+<option value="menengah">🔵 Menengah</option>
+<option value="logika">🟡 Logika</option>
+<option value="lanjutan">🔴 Lanjutan</option>
+</select>
+
 <button class="btn-blue" onclick="acak()">🎲 Acak</button>
 <button class="btn-green" onclick="tambahSkor()">+ Skor</button>
 <button class="btn-red" onclick="resetSkor()">Reset</button>
@@ -67,7 +83,7 @@ button {
 
 <div class="card">
 <h2 id="kelompok">Kelompok: -</h2>
-<h3 id="soal">Klik acak untuk mulai</h3>
+<h3 id="soal">Pilih level lalu klik acak</h3>
 <div class="timer">⏱ <span id="time">5:00</span></div>
 </div>
 
@@ -103,56 +119,37 @@ let skor=JSON.parse(localStorage.getItem("skor"))||{
 "K1":0,"K2":0,"K3":0,"K4":0,"K5":0,"K6":0
 };
 
-let soalList=[
-
-// LEVEL DASAR
-{soal:"Pergi ke meja 1 lalu duduk",
-guide:"move steps -> turn -> go to position -> sit"},
-{soal:"Pergi ke meja 5 lalu berhenti",
-guide:"move steps -> stop"},
-{soal:"Pergi ke meja 10 lalu berdiri",
-guide:"move steps -> stand"},
-{soal:"Pergi ke meja 14 lalu duduk",
-guide:"move steps -> turn -> sit"},
-{soal:"Pergi ke meja 20 lalu berhenti",
-guide:"move steps -> stop"},
-
-// MENENGAH
-{soal:"Saat mulai, pergi ke meja 12 lalu ambil laptop",
-guide:"when green flag clicked -> go to position -> pick object"},
-{soal:"Saat dipanggil, pergi ke meja 9 lalu duduk",
-guide:"when event -> move -> sit"},
-{soal:"Saat disentuh teman, pergi ke meja 7",
-guide:"when touching sprite -> go to position"},
-{soal:"Saat diklik, pergi ke meja 3 lalu berbicara Halo",
-guide:"when sprite clicked -> move -> say Halo"},
-{soal:"Pergi ke meja 11 lalu letakkan laptop",
-guide:"move -> drop object"},
-
-// LOGIKA
-{soal:"Pergi ke meja 30, jika ada kursi duduk",
-guide:"if condition -> sit"},
-{soal:"Bergerak sampai ke meja 35 lalu berhenti",
-guide:"repeat until position reached"},
-{soal:"Pergi ke meja 31, jika salah arah perbaiki",
-guide:"if wrong direction -> adjust"},
-{soal:"Pergi ke meja 29 tanpa menabrak meja lain",
-guide:"avoid obstacle"},
-{soal:"Ulangi gerakan sampai meja 36",
-guide:"repeat until"},
-
-// LANJUTAN
-{soal:"Ambil laptop di meja 15 lalu bawa ke meja 2",
-guide:"go to -> pick -> go to -> drop"},
-{soal:"Pergi ke meja 25 lalu ke 26 lalu ke 27",
-guide:"sequence multiple steps"},
-{soal:"Ambil benda di meja 23 hindari meja 24 lalu ke 17",
-guide:"avoid obstacle -> multi step"},
-{soal:"Pergi ke meja 33 lalu kembali ke posisi awal",
-guide:"store position -> return"},
-{soal:"Ambil 2 laptop dari meja 21 dan 22 lalu ke meja 1",
-guide:"repeat -> pick object twice"}
-];
+/* SOAL PER LEVEL */
+const soalData = {
+dasar:[
+{soal:"Pergi ke meja 1 lalu duduk", guide:"move steps -> turn -> sit"},
+{soal:"Pergi ke meja 5 lalu berhenti", guide:"move steps -> stop"},
+{soal:"Pergi ke meja 10 lalu berdiri", guide:"move steps -> stand"},
+{soal:"Pergi ke meja 14 lalu duduk", guide:"move steps -> turn -> sit"},
+{soal:"Pergi ke meja 20 lalu berhenti", guide:"move steps -> stop"}
+],
+menengah:[
+{soal:"Saat mulai, pergi ke meja 12 lalu ambil laptop", guide:"when green flag clicked -> move -> pick"},
+{soal:"Saat dipanggil, pergi ke meja 9 lalu duduk", guide:"when event -> move -> sit"},
+{soal:"Saat disentuh teman, pergi ke meja 7", guide:"when touching -> move"},
+{soal:"Saat diklik, pergi ke meja 3 lalu berbicara Halo", guide:"when sprite clicked -> say Halo"},
+{soal:"Pergi ke meja 11 lalu letakkan laptop", guide:"move -> drop"}
+],
+logika:[
+{soal:"Pergi ke meja 30, jika ada kursi duduk", guide:"if condition -> sit"},
+{soal:"Bergerak sampai ke meja 35 lalu berhenti", guide:"repeat until"},
+{soal:"Pergi ke meja 31, jika salah arah perbaiki", guide:"if wrong -> adjust"},
+{soal:"Pergi ke meja 29 tanpa menabrak meja lain", guide:"avoid obstacle"},
+{soal:"Ulangi gerakan sampai meja 36", guide:"repeat until"}
+],
+lanjutan:[
+{soal:"Ambil laptop di meja 15 lalu bawa ke meja 2", guide:"pick -> move -> drop"},
+{soal:"Pergi ke meja 25 lalu ke 26 lalu ke 27", guide:"sequence"},
+{soal:"Ambil benda di meja 23 hindari meja 24 lalu ke 17", guide:"avoid + multi step"},
+{soal:"Pergi ke meja 33 lalu kembali ke posisi awal", guide:"store position"},
+{soal:"Ambil 2 laptop dari meja 21 dan 22 lalu ke meja 1", guide:"repeat pick"}
+]
+};
 
 let currentKelompok="";
 let timer;
@@ -178,11 +175,14 @@ document.getElementById("ranking").innerHTML=html;
 }
 
 function acak(){
-if(soalList.length==0){alert("Soal habis");return;}
+let level = document.getElementById("level").value;
+let soalList = soalData[level];
+
+if(soalList.length===0){alert("Soal habis di level ini");return;}
 
 let k=getNextKelompok();
 let i=Math.floor(Math.random()*soalList.length);
-let s=soalList.splice(i,1)[0];
+let s=soalList[i];
 
 currentKelompok=k;
 
