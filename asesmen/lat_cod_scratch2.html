@@ -50,6 +50,17 @@ select {
 }
 .rank-even{background:#e3f2fd;}
 .rank-odd{background:#f5f5f5;}
+
+/* MODE SCRATCH */
+.scratch-box {
+    margin-top:10px;
+    padding:10px;
+    background:#f1f8ff;
+    border-left:5px solid #2196f3;
+    border-radius:8px;
+    font-family:monospace;
+    white-space:pre-line;
+}
 </style>
 
 <div class="container">
@@ -88,9 +99,13 @@ select {
 </div>
 
 <div class="card">
-<h3>💡 Coding Guide</h3>
-<button class="btn-blue" onclick="toggleGuide()">Tampilkan Hint</button>
+<h3>💡 Petunjuk</h3>
+<button class="btn-blue" onclick="toggleGuide()">Tampilkan Petunjuk</button>
+
 <p id="guide" style="display:none;"></p>
+
+<div id="scratch" class="scratch-box" style="display:none;"></div>
+
 </div>
 
 </div>
@@ -119,35 +134,74 @@ let skor=JSON.parse(localStorage.getItem("skor"))||{
 "K1":0,"K2":0,"K3":0,"K4":0,"K5":0,"K6":0
 };
 
-/* SOAL PER LEVEL */
 const soalData = {
 dasar:[
-{soal:"Pergi ke meja 1 lalu duduk", guide:"move steps -> turn -> sit"},
-{soal:"Pergi ke meja 5 lalu berhenti", guide:"move steps -> stop"},
-{soal:"Pergi ke meja 10 lalu berdiri", guide:"move steps -> stand"},
-{soal:"Pergi ke meja 14 lalu duduk", guide:"move steps -> turn -> sit"},
-{soal:"Pergi ke meja 20 lalu berhenti", guide:"move steps -> stop"}
+{
+soal:"Pergi ke meja 1 lalu duduk",
+guide:"Gerakkan sprite ke arah meja, lalu lakukan aksi duduk",
+scratch:`when green flag clicked
+move steps
+turn to direction
+say "duduk"`
+},
+{
+soal:"Pergi ke meja 5 lalu berhenti",
+guide:"Gerakkan sprite lalu hentikan",
+scratch:`when green flag clicked
+move steps
+stop`
+}
 ],
 menengah:[
-{soal:"Saat mulai, pergi ke meja 12 lalu ambil laptop", guide:"when green flag clicked -> move -> pick"},
-{soal:"Saat dipanggil, pergi ke meja 9 lalu duduk", guide:"when event -> move -> sit"},
-{soal:"Saat disentuh teman, pergi ke meja 7", guide:"when touching -> move"},
-{soal:"Saat diklik, pergi ke meja 3 lalu berbicara Halo", guide:"when sprite clicked -> say Halo"},
-{soal:"Pergi ke meja 11 lalu letakkan laptop", guide:"move -> drop"}
+{
+soal:"Saat mulai, pergi ke meja 12 lalu ambil laptop",
+guide:"Gunakan event mulai lalu aksi ambil",
+scratch:`when green flag clicked
+go to x:y
+say "ambil laptop"`
+},
+{
+soal:"Saat diklik, pergi ke meja 3 lalu berbicara Halo",
+guide:"Gunakan event klik lalu blok say",
+scratch:`when this sprite clicked
+go to x:y
+say "Halo teman!" for 2 seconds`
+}
 ],
 logika:[
-{soal:"Pergi ke meja 30, jika ada kursi duduk", guide:"if condition -> sit"},
-{soal:"Bergerak sampai ke meja 35 lalu berhenti", guide:"repeat until"},
-{soal:"Pergi ke meja 31, jika salah arah perbaiki", guide:"if wrong -> adjust"},
-{soal:"Pergi ke meja 29 tanpa menabrak meja lain", guide:"avoid obstacle"},
-{soal:"Ulangi gerakan sampai meja 36", guide:"repeat until"}
+{
+soal:"Pergi ke meja 30, jika ada kursi duduk",
+guide:"Gunakan kondisi if",
+scratch:`when green flag clicked
+if touching kursi then
+say "duduk"`
+},
+{
+soal:"Bergerak sampai ke meja 35 lalu berhenti",
+guide:"Gunakan repeat until",
+scratch:`when green flag clicked
+repeat until touching meja 35
+move steps`
+}
 ],
 lanjutan:[
-{soal:"Ambil laptop di meja 15 lalu bawa ke meja 2", guide:"pick -> move -> drop"},
-{soal:"Pergi ke meja 25 lalu ke 26 lalu ke 27", guide:"sequence"},
-{soal:"Ambil benda di meja 23 hindari meja 24 lalu ke 17", guide:"avoid + multi step"},
-{soal:"Pergi ke meja 33 lalu kembali ke posisi awal", guide:"store position"},
-{soal:"Ambil 2 laptop dari meja 21 dan 22 lalu ke meja 1", guide:"repeat pick"}
+{
+soal:"Ambil laptop di meja 15 lalu bawa ke meja 2",
+guide:"Gabungkan beberapa langkah",
+scratch:`when green flag clicked
+go to meja 15
+say "ambil"
+go to meja 2
+say "letakkan"`
+},
+{
+soal:"Pergi ke meja 25 lalu ke 26 lalu ke 27",
+guide:"Gunakan urutan langkah",
+scratch:`when green flag clicked
+go to meja 25
+go to meja 26
+go to meja 27`
+}
 ]
 };
 
@@ -167,7 +221,7 @@ let style=(i%2==0)?"rank-item rank-even":"rank-item rank-odd";
 html+=`
 <div class="${style}">
 <span>${medal} K${i+1}</span>
-<span>${d[1]} pts</span>
+<span>${d[1]} poin</span>
 </div>`;
 });
 
@@ -175,10 +229,8 @@ document.getElementById("ranking").innerHTML=html;
 }
 
 function acak(){
-let level = document.getElementById("level").value;
-let soalList = soalData[level];
-
-if(soalList.length===0){alert("Soal habis di level ini");return;}
+let level=document.getElementById("level").value;
+let soalList=soalData[level];
 
 let k=getNextKelompok();
 let i=Math.floor(Math.random()*soalList.length);
@@ -189,14 +241,22 @@ currentKelompok=k;
 document.getElementById("kelompok").innerText=k;
 document.getElementById("soal").innerText=s.soal;
 document.getElementById("guide").innerText=s.guide;
+document.getElementById("scratch").innerText=s.scratch;
+
 document.getElementById("guide").style.display="none";
+document.getElementById("scratch").style.display="none";
 
 startTimer();
 }
 
 function toggleGuide(){
 let g=document.getElementById("guide");
-g.style.display=g.style.display==="none"?"block":"none";
+let s=document.getElementById("scratch");
+
+let visible = g.style.display==="block";
+
+g.style.display = visible?"none":"block";
+s.style.display = visible?"none":"block";
 }
 
 function tambahSkor(){
