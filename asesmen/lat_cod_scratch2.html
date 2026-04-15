@@ -1,0 +1,238 @@
+<style>
+body { margin:0; font-family:Arial; background:#e3f2fd; }
+
+.container { display:flex; height:100vh; }
+
+.left {
+    flex:1; max-width:280px;
+    background:#fff; padding:15px;
+    border-right:4px solid #2196f3;
+}
+
+.right { flex:3; padding:25px; }
+
+.card {
+    background:white; padding:15px;
+    margin-bottom:15px;
+    border-radius:10px;
+    box-shadow:0 0 8px rgba(0,0,0,0.1);
+}
+
+button {
+    width:100%; padding:10px;
+    margin-top:8px;
+    border:none; border-radius:8px;
+    font-weight:bold; cursor:pointer;
+}
+
+.btn-blue{background:#2196f3;color:white;}
+.btn-green{background:#4caf50;color:white;}
+.btn-red{background:#f44336;color:white;}
+.btn-orange{background:#ff9800;color:white;}
+
+#kelompok { font-size:38px; color:#0d47a1; }
+#soal { font-size:32px; font-weight:bold; line-height:1.5; }
+
+.timer { font-size:34px; color:red; font-weight:bold; }
+
+.rank-item {
+    display:flex; justify-content:space-between;
+    padding:10px; margin:5px 0;
+    border-radius:10px; border:1px solid #000;
+}
+.rank-even{background:#e3f2fd;}
+.rank-odd{background:#f5f5f5;}
+</style>
+
+<div class="container">
+
+<div class="left">
+
+<div class="card">
+<h3>🎯 Kontrol</h3>
+<button class="btn-blue" onclick="acak()">🎲 Acak</button>
+<button class="btn-green" onclick="tambahSkor()">+ Skor</button>
+<button class="btn-red" onclick="resetSkor()">Reset</button>
+<button class="btn-orange" onclick="fullscreen()">Full Screen</button>
+</div>
+
+<div class="card">
+<h3>🏆 Ranking</h3>
+<div id="ranking"></div>
+</div>
+
+</div>
+
+<div class="right">
+
+<div class="card">
+<h2 id="kelompok">Kelompok: -</h2>
+<h3 id="soal">Klik acak untuk mulai</h3>
+<div class="timer">⏱ <span id="time">5:00</span></div>
+</div>
+
+<div class="card">
+<h3>💡 Coding Guide</h3>
+<button class="btn-blue" onclick="toggleGuide()">Tampilkan Hint</button>
+<p id="guide" style="display:none;"></p>
+</div>
+
+</div>
+</div>
+
+<script>
+const kelompok=["Kelompok 1","Kelompok 2","Kelompok 3","Kelompok 4","Kelompok 5","Kelompok 6"];
+let kelompokQueue=[];
+
+function shuffle(a){
+for(let i=a.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[a[i],a[j]]=[a[j],a[i]];
+}
+return a;
+}
+
+function getNextKelompok(){
+if(kelompokQueue.length===0){
+kelompokQueue=shuffle([...kelompok]);
+}
+return kelompokQueue.shift();
+}
+
+let skor=JSON.parse(localStorage.getItem("skor"))||{
+"K1":0,"K2":0,"K3":0,"K4":0,"K5":0,"K6":0
+};
+
+let soalList=[
+
+// LEVEL DASAR
+{soal:"Pergi ke meja 1 lalu duduk",
+guide:"move steps -> turn -> go to position -> sit"},
+{soal:"Pergi ke meja 5 lalu berhenti",
+guide:"move steps -> stop"},
+{soal:"Pergi ke meja 10 lalu berdiri",
+guide:"move steps -> stand"},
+{soal:"Pergi ke meja 14 lalu duduk",
+guide:"move steps -> turn -> sit"},
+{soal:"Pergi ke meja 20 lalu berhenti",
+guide:"move steps -> stop"},
+
+// MENENGAH
+{soal:"Saat mulai, pergi ke meja 12 lalu ambil laptop",
+guide:"when green flag clicked -> go to position -> pick object"},
+{soal:"Saat dipanggil, pergi ke meja 9 lalu duduk",
+guide:"when event -> move -> sit"},
+{soal:"Saat disentuh teman, pergi ke meja 7",
+guide:"when touching sprite -> go to position"},
+{soal:"Saat diklik, pergi ke meja 3 lalu berbicara Halo",
+guide:"when sprite clicked -> move -> say Halo"},
+{soal:"Pergi ke meja 11 lalu letakkan laptop",
+guide:"move -> drop object"},
+
+// LOGIKA
+{soal:"Pergi ke meja 30, jika ada kursi duduk",
+guide:"if condition -> sit"},
+{soal:"Bergerak sampai ke meja 35 lalu berhenti",
+guide:"repeat until position reached"},
+{soal:"Pergi ke meja 31, jika salah arah perbaiki",
+guide:"if wrong direction -> adjust"},
+{soal:"Pergi ke meja 29 tanpa menabrak meja lain",
+guide:"avoid obstacle"},
+{soal:"Ulangi gerakan sampai meja 36",
+guide:"repeat until"},
+
+// LANJUTAN
+{soal:"Ambil laptop di meja 15 lalu bawa ke meja 2",
+guide:"go to -> pick -> go to -> drop"},
+{soal:"Pergi ke meja 25 lalu ke 26 lalu ke 27",
+guide:"sequence multiple steps"},
+{soal:"Ambil benda di meja 23 hindari meja 24 lalu ke 17",
+guide:"avoid obstacle -> multi step"},
+{soal:"Pergi ke meja 33 lalu kembali ke posisi awal",
+guide:"store position -> return"},
+{soal:"Ambil 2 laptop dari meja 21 dan 22 lalu ke meja 1",
+guide:"repeat -> pick object twice"}
+];
+
+let currentKelompok="";
+let timer;
+let timeLeft=300;
+
+function updateRanking(){
+localStorage.setItem("skor",JSON.stringify(skor));
+let data=Object.entries(skor).sort((a,b)=>b[1]-a[1]);
+
+let html="";
+data.forEach((d,i)=>{
+let medal=["🥇","🥈","🥉"][i]||"🎖";
+let style=(i%2==0)?"rank-item rank-even":"rank-item rank-odd";
+
+html+=`
+<div class="${style}">
+<span>${medal} K${i+1}</span>
+<span>${d[1]} pts</span>
+</div>`;
+});
+
+document.getElementById("ranking").innerHTML=html;
+}
+
+function acak(){
+if(soalList.length==0){alert("Soal habis");return;}
+
+let k=getNextKelompok();
+let i=Math.floor(Math.random()*soalList.length);
+let s=soalList.splice(i,1)[0];
+
+currentKelompok=k;
+
+document.getElementById("kelompok").innerText=k;
+document.getElementById("soal").innerText=s.soal;
+document.getElementById("guide").innerText=s.guide;
+document.getElementById("guide").style.display="none";
+
+startTimer();
+}
+
+function toggleGuide(){
+let g=document.getElementById("guide");
+g.style.display=g.style.display==="none"?"block":"none";
+}
+
+function tambahSkor(){
+let key="K"+(kelompok.indexOf(currentKelompok)+1);
+skor[key]++;
+updateRanking();
+}
+
+function resetSkor(){
+localStorage.clear();
+location.reload();
+}
+
+function startTimer(){
+clearInterval(timer);
+timeLeft=300;
+
+timer=setInterval(()=>{
+let m=Math.floor(timeLeft/60);
+let s=timeLeft%60;
+if(s<10)s="0"+s;
+
+document.getElementById("time").innerText=m+":"+s;
+
+timeLeft--;
+
+if(timeLeft<0){
+clearInterval(timer);
+alert("⏰ Waktu habis!");
+}
+},1000);
+}
+
+function fullscreen(){
+document.documentElement.requestFullscreen();
+}
+
+updateRanking();
+</script>
