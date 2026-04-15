@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Random Kelompok & Skenario Scratch</title>
+
+<style>
+    body {
+        font-family: Arial;
+        text-align: center;
+        background: #eef2f7;
+        padding: 20px;
+    }
+    .box {
+        background: white;
+        padding: 25px;
+        margin: auto;
+        width: 60%;
+        border-radius: 12px;
+        box-shadow: 0 0 12px rgba(0,0,0,0.15);
+    }
+    button {
+        padding: 10px 18px;
+        margin: 10px;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    .btn-acak { background: #4CAF50; color: white; }
+    .btn-jawaban { background: #2196F3; color: white; }
+
+    #jawaban {
+        display: none;
+        margin-top: 20px;
+    }
+
+    img {
+        margin-top: 10px;
+        max-width: 300px;
+        border-radius: 8px;
+    }
+</style>
+</head>
+
+<body>
+
+<h1>🎲 Random Kelompok & Skenario Scratch</h1>
+
+<div class="box">
+    <h2 id="kelompok">Kelompok: -</h2>
+    <h3 id="soal">Klik tombol untuk mulai</h3>
+
+    <button class="btn-acak" onclick="acak()">🎯 Acak</button>
+    <button class="btn-jawaban" onclick="toggleJawaban()">👁 Jawaban</button>
+
+    <div id="jawaban">
+        <img id="imgJawaban" src="">
+    </div>
+</div>
+
+<script>
+const kelompok = [
+    "Kelompok 1","Kelompok 2","Kelompok 3",
+    "Kelompok 4","Kelompok 5","Kelompok 6"
+];
+
+const skenario = [
+    { soal: "Buat sprite bergerak ke kanan saat bendera hijau diklik", img: "assets/jawaban1.jpg" },
+    { soal: "Buat sprite berbicara 'Halo teman!'", img: "assets/jawaban2.jpg" },
+    { soal: "Buat sprite bergerak naik saat diklik", img: "assets/jawaban3.jpg" },
+    { soal: "Buat sprite berubah warna saat diklik", img: "assets/jawaban4.jpg" },
+    { soal: "Buat sprite bergerak terus dan memantul", img: "assets/jawaban5.jpg" },
+    { soal: "Buat sprite mengikuti mouse", img: "assets/jawaban6.jpg" },
+    { soal: "Buat sprite berpindah ke posisi acak", img: "assets/jawaban7.jpg" },
+    { soal: "Buat sprite berbunyi saat diklik", img: "assets/jawaban8.jpg" },
+    { soal: "Buat animasi berjalan (ganti kostum)", img: "assets/jawaban9.jpg" },
+    { soal: "Buat sprite berhenti saat menyentuh tepi", img: "assets/jawaban10.jpg" }
+];
+
+function acak() {
+    let k = kelompok[Math.floor(Math.random() * kelompok.length)];
+    let s = skenario[Math.floor(Math.random() * skenario.length)];
+
+    document.getElementById("kelompok").innerText = k;
+    document.getElementById("soal").innerText = s.soal;
+    document.getElementById("imgJawaban").src = s.img;
+
+    document.getElementById("jawaban").style.display = "none";
+}
+
+function toggleJawaban() {
+    let j = document.getElementById("jawaban");
+    j.style.display = (j.style.display === "none") ? "block" : "none";
+}
+</script>
+
+</body>
+</html>
