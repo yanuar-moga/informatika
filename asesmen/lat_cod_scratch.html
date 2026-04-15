@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Scratch Game SMP</title>
+<title>Game Scratch SMP</title>
 
 <style>
 body {
@@ -24,6 +24,7 @@ body {
     border-right: 4px solid #2196f3;
 }
 
+/* RIGHT PANEL */
 .right {
     width: 60%;
     padding: 20px;
@@ -54,21 +55,37 @@ button {
 .btn-orange { background: #ff9800; color: white; }
 .btn-red { background: #f44336; color: white; }
 
+/* IMAGE */
 #imgJawaban {
     width: 100%;
     height: 220px;
     object-fit: contain;
     background: #f0f0f0;
+    border-radius: 8px;
 }
 
-/* RANK */
-.rank {
-    font-size: 18px;
-}
-
+/* TIMER */
 .timer {
-    font-size: 24px;
-    color: red;
+    font-size: 26px;
+    font-weight: bold;
+    color: #d32f2f;
+}
+
+/* RANKING */
+.rank-item {
+    padding: 10px;
+    margin: 6px 0;
+    border-radius: 10px;
+    border: 1px solid #000;
+    font-weight: bold;
+}
+
+.rank-even {
+    background: #e3f2fd;
+}
+
+.rank-odd {
+    background: #f5f5f5;
 }
 </style>
 </head>
@@ -90,7 +107,7 @@ button {
 
 <div class="card">
 <h3>🏆 Ranking</h3>
-<div id="ranking" class="rank"></div>
+<div id="ranking"></div>
 </div>
 
 </div>
@@ -101,12 +118,13 @@ button {
 <div class="card">
 <h2 id="kelompok">Kelompok: -</h2>
 <h3 id="soal">Klik acak untuk mulai</h3>
-<div class="timer">⏱ <span id="time">60</span></div>
+<div class="timer">⏱ <span id="time">5:00</span></div>
 </div>
 
 <div class="card">
-<h3>📘 Coding Guide (English)</h3>
-<p id="guide"></p>
+<h3>📘 Coding Guide (Hint)</h3>
+<button class="btn-blue" onclick="toggleGuide()">Tampilkan Hint</button>
+<p id="guide" style="display:none; margin-top:10px;"></p>
 </div>
 
 <div class="card">
@@ -130,74 +148,42 @@ let skor = JSON.parse(localStorage.getItem("skor")) || {
 };
 
 let soalList = [
-{
-soal:"Buat sprite bergerak ke kanan saat bendera hijau diklik",
-guide:"when green flag clicked → move 10 steps (repeat)",
-img:"assets/jawaban1.png"
-},
-{
-soal:"Buat sprite berbicara Halo teman!",
-guide:"when green flag clicked → say 'Halo teman!' for 2 seconds",
-img:"assets/jawaban2.png"
-},
-{
-soal:"Buat sprite bergerak naik saat diklik",
-guide:"when this sprite clicked → move y 10 steps",
-img:"assets/jawaban3.png"
-},
-{
-soal:"Buat sprite berubah warna saat diklik",
-guide:"when this sprite clicked → change color effect by 25",
-img:"assets/jawaban4.png"
-},
-{
-soal:"Buat sprite bergerak terus dan memantul",
-guide:"when green flag clicked → forever → move 10 steps → if on edge, bounce",
-img:"assets/jawaban5.png"
-},
-{
-soal:"Buat sprite mengikuti mouse",
-guide:"when green flag clicked → forever → go to mouse pointer",
-img:"assets/jawaban6.png"
-},
-{
-soal:"Buat sprite berpindah ke posisi acak",
-guide:"when green flag clicked → forever → go to random position",
-img:"assets/jawaban7.png"
-},
-{
-soal:"Buat sprite berbunyi saat diklik",
-guide:"when this sprite clicked → play sound 'meow'",
-img:"assets/jawaban8.png"
-},
-{
-soal:"Buat animasi berjalan",
-guide:"when green flag clicked → forever → next costume → wait 0.5 seconds",
-img:"assets/jawaban9.png"
-},
-{
-soal:"Buat sprite berhenti saat menyentuh tepi",
-guide:"when green flag clicked → repeat until touching edge → move 10 steps",
-img:"assets/jawaban10.png"
-}
+{soal:"Buat sprite bergerak ke kanan saat bendera hijau diklik", guide:"when green flag clicked → move 10 steps (repeat)", img:"assets/jawaban1.png"},
+{soal:"Buat sprite berbicara Halo teman!", guide:"when green flag clicked → say 'Halo teman!' for 2 seconds", img:"assets/jawaban2.png"},
+{soal:"Buat sprite bergerak naik saat diklik", guide:"when this sprite clicked → move y 10 steps", img:"assets/jawaban3.png"},
+{soal:"Buat sprite berubah warna saat diklik", guide:"when this sprite clicked → change color effect by 25", img:"assets/jawaban4.png"},
+{soal:"Buat sprite bergerak terus dan memantul", guide:"when green flag clicked → forever → move 10 steps → if on edge, bounce", img:"assets/jawaban5.png"},
+{soal:"Buat sprite mengikuti mouse", guide:"when green flag clicked → forever → go to mouse pointer", img:"assets/jawaban6.png"},
+{soal:"Buat sprite berpindah ke posisi acak", guide:"when green flag clicked → forever → go to random position", img:"assets/jawaban7.png"},
+{soal:"Buat sprite berbunyi saat diklik", guide:"when this sprite clicked → play sound 'meow'", img:"assets/jawaban8.png"},
+{soal:"Buat animasi berjalan", guide:"when green flag clicked → forever → next costume → wait 0.5 seconds", img:"assets/jawaban9.png"},
+{soal:"Buat sprite berhenti saat menyentuh tepi", guide:"when green flag clicked → repeat until touching edge → move 10 steps", img:"assets/jawaban10.png"}
 ];
 
 let currentKelompok="";
 let timer;
-let timeLeft=60;
+let timeLeft=300;
 
+/* RANKING */
 function updateRanking(){
 localStorage.setItem("skor", JSON.stringify(skor));
+
 let data = Object.entries(skor).sort((a,b)=>b[1]-a[1]);
 
 let html="";
 data.forEach((d,i)=>{
 let medal=["🥇","🥈","🥉"][i]||"🎖";
-html += medal+" Kelompok "+(i+1)+" : "+d[1]+"<br>";
+let style=(i%2==0)?"rank-item rank-even":"rank-item rank-odd";
+
+html += `<div class="${style}">
+${medal} Kelompok ${i+1} : ${d[1]}
+</div>`;
 });
+
 document.getElementById("ranking").innerHTML=html;
 }
 
+/* ACAK */
 function acak(){
 if(soalList.length==0){alert("Soal habis");return;}
 
@@ -213,15 +199,23 @@ document.getElementById("guide").innerText=s.guide;
 document.getElementById("imgJawaban").src=s.img;
 
 document.getElementById("jawaban").style.display="none";
+document.getElementById("guide").style.display="none";
 
 startTimer();
 }
 
+/* TOGGLE */
 function toggleJawaban(){
 let j=document.getElementById("jawaban");
 j.style.display = j.style.display==="none"?"block":"none";
 }
 
+function toggleGuide(){
+let g=document.getElementById("guide");
+g.style.display = g.style.display==="none"?"block":"none";
+}
+
+/* SKOR */
 function tambahSkor(){
 let key="K"+(kelompok.indexOf(currentKelompok)+1);
 skor[key]++;
@@ -233,23 +227,34 @@ localStorage.clear();
 location.reload();
 }
 
-function fullscreen(){
-document.documentElement.requestFullscreen();
-}
-
+/* TIMER 5 MENIT */
 function startTimer(){
 clearInterval(timer);
-timeLeft=60;
+timeLeft = 300;
 
 timer=setInterval(()=>{
-document.getElementById("time").innerText=timeLeft;
+let m = Math.floor(timeLeft/60);
+let s = timeLeft%60;
+s = s<10 ? "0"+s : s;
+
+document.getElementById("time").innerText = m+":"+s;
+
+if(timeLeft <= 10){
+document.getElementById("time").style.color="red";
+}
+
 timeLeft--;
 
 if(timeLeft<0){
 clearInterval(timer);
-alert("Waktu habis!");
+alert("⏰ Waktu habis!");
 }
 },1000);
+}
+
+/* FULLSCREEN */
+function fullscreen(){
+document.documentElement.requestFullscreen();
 }
 
 updateRanking();
