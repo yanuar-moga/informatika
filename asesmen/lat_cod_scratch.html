@@ -2,181 +2,254 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Game Scratch PRO</title>
+<title>Scratch Game SMP</title>
 
 <style>
 body {
+    margin: 0;
     font-family: Arial;
-    text-align: center;
-    background: #1e293b;
-    color: white;
+    background: #e3f2fd;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+/* LEFT PANEL */
+.left {
+    width: 40%;
+    background: #ffffff;
+    padding: 20px;
+    border-right: 4px solid #2196f3;
+}
+
+.right {
+    width: 60%;
     padding: 20px;
 }
-.box {
-    background: #334155;
-    padding: 25px;
-    margin: auto;
-    width: 70%;
-    border-radius: 12px;
+
+/* CARD */
+.card {
+    background: white;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
 }
+
+/* BUTTON */
 button {
-    padding: 10px 15px;
-    margin: 8px;
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    font-weight: bold;
 }
-.btn-acak { background: #22c55e; }
-.btn-jawaban { background: #3b82f6; }
-.btn-skor { background: #f59e0b; }
-.btn-reset { background: #ef4444; }
+
+.btn-blue { background: #2196f3; color: white; }
+.btn-green { background: #4caf50; color: white; }
+.btn-orange { background: #ff9800; color: white; }
+.btn-red { background: #f44336; color: white; }
 
 #imgJawaban {
-    width: 320px;
+    width: 100%;
     height: 220px;
     object-fit: contain;
-    background: white;
-    border-radius: 8px;
+    background: #f0f0f0;
 }
 
-#jawaban { display: none; }
+/* RANK */
+.rank {
+    font-size: 18px;
+}
 
 .timer {
-    font-size: 26px;
-    color: #f87171;
-}
-
-.ranking {
-    margin-top: 20px;
-    font-size: 18px;
+    font-size: 24px;
+    color: red;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🎮 GAME SCRATCH PRO</h1>
+<div class="container">
 
-<div class="box">
-    <h2 id="kelompok">Kelompok: -</h2>
-    <h3 id="soal">Klik mulai</h3>
+<!-- LEFT -->
+<div class="left">
 
-    <div class="timer">⏱ <span id="time">60</span></div>
+<div class="card">
+<h3>🎯 Kontrol</h3>
+<button class="btn-blue" onclick="toggleJawaban()">Spoiler Jawaban</button>
+<button class="btn-green" onclick="tambahSkor()">+ Skor</button>
+<button class="btn-red" onclick="resetSkor()">Reset Skor</button>
+<button class="btn-orange" onclick="fullscreen()">Full Screen</button>
+</div>
 
-    <button class="btn-acak" onclick="acak()">🎯 Acak</button>
-    <button class="btn-jawaban" onclick="toggleJawaban()">👁 Jawaban</button>
-    <button class="btn-skor" onclick="tambahSkor()">➕ Skor</button>
-    <button class="btn-reset" onclick="resetGame()">🔄 Reset</button>
-    <button onclick="fullscreen()">📱 Fullscreen</button>
+<div class="card">
+<h3>🏆 Ranking</h3>
+<div id="ranking" class="rank"></div>
+</div>
 
-    <div id="jawaban">
-        <img id="imgJawaban" src="">
-    </div>
+</div>
 
-    <div class="ranking">
-        <h3>🏆 Ranking</h3>
-        <div id="rankingText"></div>
-    </div>
+<!-- RIGHT -->
+<div class="right">
+
+<div class="card">
+<h2 id="kelompok">Kelompok: -</h2>
+<h3 id="soal">Klik acak untuk mulai</h3>
+<div class="timer">⏱ <span id="time">60</span></div>
+</div>
+
+<div class="card">
+<h3>📘 Coding Guide (English)</h3>
+<p id="guide"></p>
+</div>
+
+<div class="card">
+<button class="btn-blue" onclick="acak()">🎲 Acak</button>
+</div>
+
+<div class="card" id="jawaban" style="display:none;">
+<h3>✔ Jawaban</h3>
+<img id="imgJawaban">
+</div>
+
+</div>
+
 </div>
 
 <script>
 const kelompok = ["Kelompok 1","Kelompok 2","Kelompok 3","Kelompok 4","Kelompok 5","Kelompok 6"];
 
 let skor = JSON.parse(localStorage.getItem("skor")) || {
-    "Kelompok 1": 0,
-    "Kelompok 2": 0,
-    "Kelompok 3": 0,
-    "Kelompok 4": 0,
-    "Kelompok 5": 0,
-    "Kelompok 6": 0
+"K1":0,"K2":0,"K3":0,"K4":0,"K5":0,"K6":0
 };
 
 let soalList = [
-    { soal: "Buat sprite bergerak ke kanan saat bendera hijau diklik", img: "assets/jawaban1.png" },
-    { soal: "Buat sprite berbicara 'Halo teman!'", img: "assets/jawaban2.png" },
-    { soal: "Buat sprite bergerak naik saat diklik", img: "assets/jawaban3.png" },
-    { soal: "Buat sprite berubah warna saat diklik", img: "assets/jawaban4.png" },
-    { soal: "Buat sprite bergerak terus dan memantul", img: "assets/jawaban5.png" },
-    { soal: "Buat sprite mengikuti mouse", img: "assets/jawaban6.png" },
-    { soal: "Buat sprite berpindah ke posisi acak", img: "assets/jawaban7.png" },
-    { soal: "Buat sprite berbunyi saat diklik", img: "assets/jawaban8.png" },
-    { soal: "Buat animasi berjalan", img: "assets/jawaban9.png" },
-    { soal: "Buat sprite berhenti saat menyentuh tepi", img: "assets/jawaban10.png" }
+{
+soal:"Buat sprite bergerak ke kanan saat bendera hijau diklik",
+guide:"when green flag clicked → move 10 steps (repeat)",
+img:"assets/jawaban1.png"
+},
+{
+soal:"Buat sprite berbicara Halo teman!",
+guide:"when green flag clicked → say 'Halo teman!' for 2 seconds",
+img:"assets/jawaban2.png"
+},
+{
+soal:"Buat sprite bergerak naik saat diklik",
+guide:"when this sprite clicked → move y 10 steps",
+img:"assets/jawaban3.png"
+},
+{
+soal:"Buat sprite berubah warna saat diklik",
+guide:"when this sprite clicked → change color effect by 25",
+img:"assets/jawaban4.png"
+},
+{
+soal:"Buat sprite bergerak terus dan memantul",
+guide:"when green flag clicked → forever → move 10 steps → if on edge, bounce",
+img:"assets/jawaban5.png"
+},
+{
+soal:"Buat sprite mengikuti mouse",
+guide:"when green flag clicked → forever → go to mouse pointer",
+img:"assets/jawaban6.png"
+},
+{
+soal:"Buat sprite berpindah ke posisi acak",
+guide:"when green flag clicked → forever → go to random position",
+img:"assets/jawaban7.png"
+},
+{
+soal:"Buat sprite berbunyi saat diklik",
+guide:"when this sprite clicked → play sound 'meow'",
+img:"assets/jawaban8.png"
+},
+{
+soal:"Buat animasi berjalan",
+guide:"when green flag clicked → forever → next costume → wait 0.5 seconds",
+img:"assets/jawaban9.png"
+},
+{
+soal:"Buat sprite berhenti saat menyentuh tepi",
+guide:"when green flag clicked → repeat until touching edge → move 10 steps",
+img:"assets/jawaban10.png"
+}
 ];
 
-let currentKelompok = "";
+let currentKelompok="";
 let timer;
-let timeLeft = 60;
+let timeLeft=60;
 
-function updateRanking() {
-    localStorage.setItem("skor", JSON.stringify(skor));
+function updateRanking(){
+localStorage.setItem("skor", JSON.stringify(skor));
+let data = Object.entries(skor).sort((a,b)=>b[1]-a[1]);
 
-    let sorted = Object.entries(skor).sort((a,b) => b[1]-a[1]);
-
-    let html = "";
-    sorted.forEach((item, i) => {
-        let medal = ["🥇","🥈","🥉"][i] || "🎖";
-        html += `${medal} ${item[0]} : ${item[1]}<br>`;
-    });
-
-    document.getElementById("rankingText").innerHTML = html;
+let html="";
+data.forEach((d,i)=>{
+let medal=["🥇","🥈","🥉"][i]||"🎖";
+html += medal+" Kelompok "+(i+1)+" : "+d[1]+"<br>";
+});
+document.getElementById("ranking").innerHTML=html;
 }
 
-function acak() {
-    if (soalList.length === 0) {
-        alert("Soal habis!");
-        return;
-    }
+function acak(){
+if(soalList.length==0){alert("Soal habis");return;}
 
-    let k = kelompok[Math.floor(Math.random() * kelompok.length)];
-    let index = Math.floor(Math.random() * soalList.length);
-    let s = soalList.splice(index, 1)[0];
+let k = kelompok[Math.floor(Math.random()*kelompok.length)];
+let i = Math.floor(Math.random()*soalList.length);
+let s = soalList.splice(i,1)[0];
 
-    currentKelompok = k;
+currentKelompok=k;
 
-    document.getElementById("kelompok").innerText = k;
-    document.getElementById("soal").innerText = s.soal;
-    document.getElementById("imgJawaban").src = s.img;
+document.getElementById("kelompok").innerText=k;
+document.getElementById("soal").innerText=s.soal;
+document.getElementById("guide").innerText=s.guide;
+document.getElementById("imgJawaban").src=s.img;
 
-    document.getElementById("jawaban").style.display = "none";
+document.getElementById("jawaban").style.display="none";
 
-    startTimer();
+startTimer();
 }
 
-function toggleJawaban() {
-    let j = document.getElementById("jawaban");
-    j.style.display = (j.style.display === "none") ? "block" : "none";
+function toggleJawaban(){
+let j=document.getElementById("jawaban");
+j.style.display = j.style.display==="none"?"block":"none";
 }
 
-function tambahSkor() {
-    if (currentKelompok !== "") {
-        skor[currentKelompok]++;
-        updateRanking();
-    }
+function tambahSkor(){
+let key="K"+(kelompok.indexOf(currentKelompok)+1);
+skor[key]++;
+updateRanking();
 }
 
-function startTimer() {
-    clearInterval(timer);
-    timeLeft = 60;
-
-    timer = setInterval(() => {
-        document.getElementById("time").innerText = timeLeft;
-        timeLeft--;
-
-        if (timeLeft < 0) {
-            clearInterval(timer);
-            alert("⏰ Waktu habis!");
-        }
-    }, 1000);
+function resetSkor(){
+localStorage.clear();
+location.reload();
 }
 
-function resetGame() {
-    localStorage.clear();
-    location.reload();
+function fullscreen(){
+document.documentElement.requestFullscreen();
 }
 
-function fullscreen() {
-    document.documentElement.requestFullscreen();
+function startTimer(){
+clearInterval(timer);
+timeLeft=60;
+
+timer=setInterval(()=>{
+document.getElementById("time").innerText=timeLeft;
+timeLeft--;
+
+if(timeLeft<0){
+clearInterval(timer);
+alert("Waktu habis!");
+}
+},1000);
 }
 
 updateRanking();
