@@ -16,7 +16,7 @@ body {
     height: 100vh;
 }
 
-/* LEFT PANEL (DIPERSEMPIT) */
+/* LEFT PANEL */
 .left {
     flex: 1;
     max-width: 300px;
@@ -25,7 +25,7 @@ body {
     border-right: 4px solid #2196f3;
 }
 
-/* RIGHT PANEL (DIPERBESAR) */
+/* RIGHT PANEL */
 .right {
     flex: 3;
     padding: 25px 30px;
@@ -56,10 +56,28 @@ button {
 .btn-orange { background: #ff9800; color: white; }
 .btn-red { background: #f44336; color: white; }
 
+/* TEXT BESAR (PENTING) */
+#kelompok {
+    font-size: 36px;
+    font-weight: bold;
+    color: #0d47a1;
+}
+
+#soal {
+    font-size: 30px;
+    font-weight: bold;
+    line-height: 1.6;
+}
+
+#guide {
+    font-size: 22px;
+    line-height: 1.5;
+}
+
 /* IMAGE */
 #imgJawaban {
     width: 100%;
-    height: 260px;
+    height: 300px;
     object-fit: contain;
     background: #f0f0f0;
     border-radius: 8px;
@@ -67,7 +85,7 @@ button {
 
 /* TIMER */
 .timer {
-    font-size: 28px;
+    font-size: 34px;
     font-weight: bold;
     color: #d32f2f;
 }
@@ -83,6 +101,27 @@ button {
 
 .rank-even { background: #e3f2fd; }
 .rank-odd { background: #f5f5f5; }
+
+/* 🔥 FULLSCREEN MODE (AUTO BESAR) */
+:fullscreen #soal {
+    font-size: 40px;
+}
+
+:fullscreen #kelompok {
+    font-size: 46px;
+}
+
+:fullscreen .timer {
+    font-size: 42px;
+}
+
+:fullscreen #guide {
+    font-size: 26px;
+}
+
+:fullscreen #imgJawaban {
+    height: 400px;
+}
 
 </style>
 </head>
@@ -140,7 +179,6 @@ button {
 <script>
 const kelompok = ["Kelompok 1","Kelompok 2","Kelompok 3","Kelompok 4","Kelompok 5","Kelompok 6"];
 
-/* QUEUE KELOMPOK */
 let kelompokQueue = [];
 
 function shuffle(array){
@@ -158,12 +196,10 @@ kelompokQueue = shuffle([...kelompok]);
 return kelompokQueue.shift();
 }
 
-/* SKOR */
 let skor = JSON.parse(localStorage.getItem("skor")) || {
 "K1":0,"K2":0,"K3":0,"K4":0,"K5":0,"K6":0
 };
 
-/* SOAL */
 let soalList = [
 {soal:"Buat sprite bergerak ke kanan saat bendera hijau diklik", guide:"when green flag clicked → move 10 steps (repeat)", img:"assets/jawaban1.png"},
 {soal:"Buat sprite berbicara Halo teman!", guide:"when green flag clicked → say 'Halo teman!' for 2 seconds", img:"assets/jawaban2.png"},
@@ -181,7 +217,6 @@ let currentKelompok="";
 let timer;
 let timeLeft=300;
 
-/* RANKING */
 function updateRanking(){
 localStorage.setItem("skor", JSON.stringify(skor));
 
@@ -200,7 +235,6 @@ ${medal} Kelompok ${i+1} : ${d[1]}
 document.getElementById("ranking").innerHTML=html;
 }
 
-/* ACAK */
 function acak(){
 if(soalList.length==0){alert("Soal habis");return;}
 
@@ -221,7 +255,6 @@ document.getElementById("guide").style.display="none";
 startTimer();
 }
 
-/* TOGGLE */
 function toggleJawaban(){
 let j=document.getElementById("jawaban");
 j.style.display = j.style.display==="none"?"block":"none";
@@ -229,10 +262,9 @@ j.style.display = j.style.display==="none"?"block":"none";
 
 function toggleGuide(){
 let g=document.getElementById("guide");
-g.style.display = g.style.display==="none"?"block":"none";
+g.style.display = g.style.display==="none"?"block":"block";
 }
 
-/* SKOR */
 function tambahSkor(){
 let key="K"+(kelompok.indexOf(currentKelompok)+1);
 skor[key]++;
@@ -244,7 +276,6 @@ localStorage.clear();
 location.reload();
 }
 
-/* TIMER */
 function startTimer(){
 clearInterval(timer);
 timeLeft = 300;
@@ -269,7 +300,6 @@ alert("⏰ Waktu habis!");
 },1000);
 }
 
-/* FULLSCREEN TOGGLE */
 function toggleFullscreen(){
 if (!document.fullscreenElement) {
 document.documentElement.requestFullscreen();
