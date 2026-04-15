@@ -2,97 +2,184 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Random Kelompok & Skenario Scratch</title>
+<title>Game Scratch PRO</title>
 
 <style>
-    body {
-        font-family: Arial;
-        text-align: center;
-        background: #eef2f7;
-        padding: 20px;
-    }
-    .box {
-        background: white;
-        padding: 25px;
-        margin: auto;
-        width: 60%;
-        border-radius: 12px;
-        box-shadow: 0 0 12px rgba(0,0,0,0.15);
-    }
-    button {
-        padding: 10px 18px;
-        margin: 10px;
-        font-size: 16px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-    }
-    .btn-acak { background: #4CAF50; color: white; }
-    .btn-jawaban { background: #2196F3; color: white; }
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #1e293b;
+    color: white;
+    padding: 20px;
+}
+.box {
+    background: #334155;
+    padding: 25px;
+    margin: auto;
+    width: 70%;
+    border-radius: 12px;
+}
+button {
+    padding: 10px 15px;
+    margin: 8px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.btn-acak { background: #22c55e; }
+.btn-jawaban { background: #3b82f6; }
+.btn-skor { background: #f59e0b; }
+.btn-reset { background: #ef4444; }
 
-    #jawaban {
-        display: none;
-        margin-top: 20px;
-    }
+#imgJawaban {
+    width: 320px;
+    height: 220px;
+    object-fit: contain;
+    background: white;
+    border-radius: 8px;
+}
 
-    img {
-        margin-top: 10px;
-        max-width: 300px;
-        border-radius: 8px;
-    }
+#jawaban { display: none; }
+
+.timer {
+    font-size: 26px;
+    color: #f87171;
+}
+
+.ranking {
+    margin-top: 20px;
+    font-size: 18px;
+}
 </style>
 </head>
 
 <body>
 
-<h1>🎲 Random Kelompok & Skenario Scratch</h1>
+<h1>🎮 GAME SCRATCH PRO</h1>
 
 <div class="box">
     <h2 id="kelompok">Kelompok: -</h2>
-    <h3 id="soal">Klik tombol untuk mulai</h3>
+    <h3 id="soal">Klik mulai</h3>
+
+    <div class="timer">⏱ <span id="time">60</span></div>
 
     <button class="btn-acak" onclick="acak()">🎯 Acak</button>
     <button class="btn-jawaban" onclick="toggleJawaban()">👁 Jawaban</button>
+    <button class="btn-skor" onclick="tambahSkor()">➕ Skor</button>
+    <button class="btn-reset" onclick="resetGame()">🔄 Reset</button>
+    <button onclick="fullscreen()">📱 Fullscreen</button>
 
     <div id="jawaban">
         <img id="imgJawaban" src="">
     </div>
+
+    <div class="ranking">
+        <h3>🏆 Ranking</h3>
+        <div id="rankingText"></div>
+    </div>
 </div>
 
 <script>
-const kelompok = [
-    "Kelompok 1","Kelompok 2","Kelompok 3",
-    "Kelompok 4","Kelompok 5","Kelompok 6"
+const kelompok = ["Kelompok 1","Kelompok 2","Kelompok 3","Kelompok 4","Kelompok 5","Kelompok 6"];
+
+let skor = JSON.parse(localStorage.getItem("skor")) || {
+    "Kelompok 1": 0,
+    "Kelompok 2": 0,
+    "Kelompok 3": 0,
+    "Kelompok 4": 0,
+    "Kelompok 5": 0,
+    "Kelompok 6": 0
+};
+
+let soalList = [
+    { soal: "Buat sprite bergerak ke kanan saat bendera hijau diklik", img: "assets/jawaban1.png" },
+    { soal: "Buat sprite berbicara 'Halo teman!'", img: "assets/jawaban2.png" },
+    { soal: "Buat sprite bergerak naik saat diklik", img: "assets/jawaban3.png" },
+    { soal: "Buat sprite berubah warna saat diklik", img: "assets/jawaban4.png" },
+    { soal: "Buat sprite bergerak terus dan memantul", img: "assets/jawaban5.png" },
+    { soal: "Buat sprite mengikuti mouse", img: "assets/jawaban6.png" },
+    { soal: "Buat sprite berpindah ke posisi acak", img: "assets/jawaban7.png" },
+    { soal: "Buat sprite berbunyi saat diklik", img: "assets/jawaban8.png" },
+    { soal: "Buat animasi berjalan", img: "assets/jawaban9.png" },
+    { soal: "Buat sprite berhenti saat menyentuh tepi", img: "assets/jawaban10.png" }
 ];
 
-const skenario = [
-    { soal: "Buat sprite bergerak ke kanan saat bendera hijau diklik", img: "assets/jawaban1.jpg" },
-    { soal: "Buat sprite berbicara 'Halo teman!'", img: "assets/jawaban2.jpg" },
-    { soal: "Buat sprite bergerak naik saat diklik", img: "assets/jawaban3.jpg" },
-    { soal: "Buat sprite berubah warna saat diklik", img: "assets/jawaban4.jpg" },
-    { soal: "Buat sprite bergerak terus dan memantul", img: "assets/jawaban5.jpg" },
-    { soal: "Buat sprite mengikuti mouse", img: "assets/jawaban6.jpg" },
-    { soal: "Buat sprite berpindah ke posisi acak", img: "assets/jawaban7.jpg" },
-    { soal: "Buat sprite berbunyi saat diklik", img: "assets/jawaban8.jpg" },
-    { soal: "Buat animasi berjalan (ganti kostum)", img: "assets/jawaban9.jpg" },
-    { soal: "Buat sprite berhenti saat menyentuh tepi", img: "assets/jawaban10.jpg" }
-];
+let currentKelompok = "";
+let timer;
+let timeLeft = 60;
+
+function updateRanking() {
+    localStorage.setItem("skor", JSON.stringify(skor));
+
+    let sorted = Object.entries(skor).sort((a,b) => b[1]-a[1]);
+
+    let html = "";
+    sorted.forEach((item, i) => {
+        let medal = ["🥇","🥈","🥉"][i] || "🎖";
+        html += `${medal} ${item[0]} : ${item[1]}<br>`;
+    });
+
+    document.getElementById("rankingText").innerHTML = html;
+}
 
 function acak() {
+    if (soalList.length === 0) {
+        alert("Soal habis!");
+        return;
+    }
+
     let k = kelompok[Math.floor(Math.random() * kelompok.length)];
-    let s = skenario[Math.floor(Math.random() * skenario.length)];
+    let index = Math.floor(Math.random() * soalList.length);
+    let s = soalList.splice(index, 1)[0];
+
+    currentKelompok = k;
 
     document.getElementById("kelompok").innerText = k;
     document.getElementById("soal").innerText = s.soal;
     document.getElementById("imgJawaban").src = s.img;
 
     document.getElementById("jawaban").style.display = "none";
+
+    startTimer();
 }
 
 function toggleJawaban() {
     let j = document.getElementById("jawaban");
     j.style.display = (j.style.display === "none") ? "block" : "none";
 }
+
+function tambahSkor() {
+    if (currentKelompok !== "") {
+        skor[currentKelompok]++;
+        updateRanking();
+    }
+}
+
+function startTimer() {
+    clearInterval(timer);
+    timeLeft = 60;
+
+    timer = setInterval(() => {
+        document.getElementById("time").innerText = timeLeft;
+        timeLeft--;
+
+        if (timeLeft < 0) {
+            clearInterval(timer);
+            alert("⏰ Waktu habis!");
+        }
+    }, 1000);
+}
+
+function resetGame() {
+    localStorage.clear();
+    location.reload();
+}
+
+function fullscreen() {
+    document.documentElement.requestFullscreen();
+}
+
+updateRanking();
 </script>
 
 </body>
