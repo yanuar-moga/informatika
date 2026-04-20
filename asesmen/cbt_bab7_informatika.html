@@ -189,7 +189,7 @@ Ya, saya yakin akan kirim jawaban
 <br><br>
 
 <button onclick="tutupPopup()">Batal</button>
-<button onclick="submitFinal()">Kirim</button>
+<button id="btnKirim" onclick="submitFinal()">Kirim</button>
 
 </div>
 </div>
@@ -408,13 +408,27 @@ function kirim(){
 
 if(sudahSubmit) return;
 
+var btn=document.getElementById("btnKirim");
+btn.disabled=true;
+btn.innerText="Mengirim...";
+
 gas("submitJawaban",{
 jawaban:jawaban,
 nama:nama,
+jk:jk,
 kelas:kelas
-},function(nilai){
+},function(res){
 
-alert("Nilai Anda : "+nilai);
+if(res.status==="blocked"){
+alert(res.msg);
+btn.disabled=false;
+btn.innerText="Kirim";
+return;
+}
+
+if(res.status==="ok"){
+
+alert("Nilai Anda : "+res.nilai);
 
 sudahSubmit=true;
 
@@ -422,6 +436,7 @@ document.getElementById("statusUjian").innerHTML="Sudah Mengerjakan";
 document.getElementById("statusUjian").classList.remove("belum");
 document.getElementById("statusUjian").classList.add("sudah");
 
+}
 });
 }
 
