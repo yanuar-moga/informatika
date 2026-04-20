@@ -54,7 +54,7 @@ padding:10px;border-radius:8px;cursor:pointer;width:100%;
 display:flex;
 flex-wrap:wrap;
 margin-top:10px;
-margin-bottom:20px; /* perbaikan jarak */
+margin-bottom:20px;
 }
 
 #nomor span{
@@ -72,7 +72,7 @@ font-size:13px;
 margin-top:10px;
 padding:15px;
 border-radius:12px;
-background:#f8fafc; /* pembeda area soal */
+background:#f8fafc;
 }
 
 .soalText{
@@ -92,9 +92,7 @@ border:2px solid #e2e8f0;
 transition:0.2s;
 }
 
-.opsi:hover{
-background:#f1f5f9;
-}
+.opsi:hover{background:#f1f5f9;}
 
 .opsi.aktif{border:2px solid #2563eb;background:#eff6ff;}
 
@@ -230,7 +228,6 @@ var URL_SCRIPT="https://script.google.com/macros/s/AKfycbyfmlPkyhY6uz9Whhvp-Qp7T
 var soal=[], jawaban=[], no=0;
 var nama="", kelas="", jk="";
 var waktu=1800;
-var sudahSubmit=false;
 
 function gas(func,data,callback){
 fetch(URL_SCRIPT,{
@@ -256,14 +253,11 @@ if(!nama||!password){alert("Lengkapi login!");return;}
 gas("login",{nama:nama,password:password},function(res){
 
 if(res.status=="ok"){
-
 jk=res.jk;
 kelas=res.kelas;
 
 localStorage.setItem("nama",nama);
 localStorage.setItem("kelas",kelas);
-localStorage.setItem("jk",jk);
-
 start();
 
 }else alert("Login gagal");
@@ -272,7 +266,6 @@ start();
 }
 
 function start(){
-
 document.getElementById("login").style.display="none";
 document.getElementById("ujian").style.display="block";
 
@@ -374,10 +367,7 @@ localStorage.setItem("jawaban", JSON.stringify(jawaban));
 updateProgress();
 }
 
-function goto(n){
-no=n;
-tampil();
-}
+function goto(n){ no=n; tampil(); }
 
 function updateNav(){
 
@@ -398,44 +388,22 @@ btnNext.innerText="Selanjutnya";
 }
 }
 
-function next(){
-if(no<soal.length-1){
-no++;
-tampil();
-}else{
-bukaPopup();
-}
-}
+function next(){ if(no<soal.length-1){no++; tampil();} else{bukaPopup();} }
+function prev(){ if(no>0){no--; tampil();} }
 
-function prev(){
-if(no>0){
-no--;
-tampil();
-}
-}
-
-function bukaPopup(){
-document.getElementById("popup").style.display="flex";
-}
-
-function tutupPopup(){
-document.getElementById("popup").style.display="none";
-}
+function bukaPopup(){ document.getElementById("popup").style.display="flex"; }
+function tutupPopup(){ document.getElementById("popup").style.display="none"; }
 
 function submitFinal(){
-
 if(!document.getElementById("cekKirim").checked){
 alert("Centang konfirmasi terlebih dahulu!");
 return;
 }
-
 kirim();
 tutupPopup();
 }
 
 function kirim(){
-
-if(sudahSubmit) return;
 
 var btn=document.getElementById("btnKirim");
 btn.disabled=true;
@@ -449,9 +417,22 @@ kelas:kelas
 },function(res){
 
 if(res.status==="blocked"){
-alert(res.msg);
+
+var sisa=15;
+btn.innerText="Tunggu "+sisa+" detik";
+
+var interval=setInterval(()=>{
+sisa--;
+btn.innerText="Tunggu "+sisa+" detik";
+
+if(sisa<=0){
+clearInterval(interval);
 btn.disabled=false;
 btn.innerText="Kirim";
+}
+},1000);
+
+alert(res.msg);
 return;
 }
 
@@ -459,7 +440,8 @@ if(res.status==="ok"){
 
 alert("Nilai Anda : "+res.nilai);
 
-sudahSubmit=true;
+btn.disabled=false;
+btn.innerText="Kirim";
 
 document.getElementById("statusUjian").innerHTML="Sudah Mengerjakan";
 document.getElementById("statusUjian").classList.remove("belum");
