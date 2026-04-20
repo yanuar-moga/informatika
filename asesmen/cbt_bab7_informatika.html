@@ -8,7 +8,7 @@
 
 <style>
 
-/* === CSS TIDAK DIUBAH === */
+/* === CSS ASLI + TAMBAHAN NAV === */
 body{
 font-family:'Segoe UI';
 background:#f1f5f9;
@@ -177,6 +177,25 @@ background:#2563eb;
 color:white;
 }
 
+/* 🔥 NAVBAR FIX */
+.navBtn{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-top:15px;
+}
+
+.navBtn button{
+width:auto;        /* ⬅️ penting */
+padding:10px 16px;
+flex:none;
+}
+
+/* tombol tengah */
+#btnKirim{
+margin:0 auto;
+}
+
 </style>
 
 </head>
@@ -231,9 +250,9 @@ color:white;
 <div id="soal"></div>
 
 <div class="navBtn">
-<button onclick="prev()">Prev</button>
+<button onclick="prev()">Sebelumnya</button>
 <button id="btnKirim" onclick="kirim()">Selesai</button>
-<button onclick="next()">Next</button>
+<button onclick="next()">Selanjutnya</button>
 </div>
 
 </div>
@@ -345,7 +364,7 @@ n.appendChild(o);
 }
 
 /* ======================
-SOAL (FIX UTAMA)
+SOAL
 ====================== */
 function loadSoal(){
 
@@ -376,7 +395,6 @@ if(s.gambar){
 html+="<img src='"+s.gambar+"' style='max-width:100%;margin:10px 0;border-radius:10px'>";
 }
 
-/* 🔥 PENTING: pakai key asli, bukan index */
 s.opsi.forEach(o=>{
 
 var aktif=jawaban[no]==o.key?"aktif":"";
@@ -394,6 +412,9 @@ document.getElementById("soal").innerHTML=html;
 updateProgress();
 }
 
+/* ======================
+JAWAB
+====================== */
 function jawab(v,el){
 
 jawaban[no]=v;
