@@ -258,6 +258,7 @@ kelas=res.kelas;
 
 localStorage.setItem("nama",nama);
 localStorage.setItem("kelas",kelas);
+
 start();
 
 }else alert("Login gagal");
@@ -469,8 +470,12 @@ if(waktu<=0) kirim();
 
 function logout(){
 if(confirm("Logout?")){
+
+gas("logout",{nama:nama},function(){
 localStorage.clear();
 location.reload();
+});
+
 }
 }
 
