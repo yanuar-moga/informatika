@@ -8,192 +8,111 @@
 
 <style>
 
-/* === CSS ASLI + TAMBAHAN NAV === */
-body{
-font-family:'Segoe UI';
-background:#f1f5f9;
-margin:0;
-}
+/* === CSS ASLI + TAMBAHAN POPUP === */
+body{font-family:'Segoe UI';background:#f1f5f9;margin:0;}
 
 .container{
-max-width:900px;
-width:95%;
-margin:auto;
-margin-top:20px;
-background:white;
-padding:20px;
-border-radius:16px;
+max-width:900px;width:95%;margin:auto;margin-top:20px;
+background:white;padding:20px;border-radius:16px;
 box-shadow:0 10px 30px rgba(0,0,0,0.08);
 }
 
-.header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
+.header{display:flex;justify-content:space-between;align-items:center;}
 
-.userBox{
-text-align:center;
-min-width:160px;
-}
+.userBox{text-align:center;min-width:160px;}
 
-.userInfo{
-font-size:14px;
-font-weight:600;
-}
+.userInfo{font-size:14px;font-weight:600;}
 
-.status{
-font-size:13px;
-margin-top:4px;
-display:none;
-}
-
+.status{font-size:13px;margin-top:4px;display:none;}
 .status.belum{color:#f59e0b;}
 .status.sudah{color:#22c55e;}
 
-#btnLogout{
-margin-top:6px;
-background:#ef4444;
-display:none;
-}
+#btnLogout{margin-top:6px;background:#ef4444;display:none;}
 
-.logo{
-display:block;
-margin:auto;
-width:90px;
-margin-bottom:10px;
-}
+.logo{display:block;margin:auto;width:90px;margin-bottom:10px;}
 
-h2{
-text-align:center;
-margin-bottom:20px;
-font-weight:700;
-color:#1e293b;
-}
+h2{text-align:center;margin-bottom:20px;font-weight:700;color:#1e293b;}
 
-.loginBox{
-max-width:320px;
-margin:auto;
-}
+.loginBox{max-width:320px;margin:auto;}
 
-.loginBox label{
-display:block;
-margin-top:12px;
-}
+.loginBox label{display:block;margin-top:12px;}
 
 .inputBox,select{
-width:100%;
-padding:10px;
-border-radius:8px;
-border:1px solid #ccc;
-margin-top:4px;
-box-sizing:border-box;
+width:100%;padding:10px;border-radius:8px;border:1px solid #ccc;
+margin-top:4px;box-sizing:border-box;
 }
 
 .passwordCheck{
-margin-top:8px;
-display:flex;
-align-items:center;
-gap:8px;
-font-size:13px;
+margin-top:8px;display:flex;align-items:center;gap:8px;font-size:13px;
 }
 
 button{
-background:#2563eb;
-color:white;
-border:none;
-padding:10px;
-border-radius:8px;
-cursor:pointer;
-width:100%;
+background:#2563eb;color:white;border:none;
+padding:10px;border-radius:8px;cursor:pointer;width:100%;
 }
 
-#nomor{
-display:flex;
-flex-wrap:wrap;
-margin-top:10px;
-}
+#nomor{display:flex;flex-wrap:wrap;margin-top:10px;}
 
 #nomor span{
-width:32px;
-height:32px;
-display:flex;
-align-items:center;
-justify-content:center;
-margin:3px;
-background:#e2e8f0;
-border-radius:6px;
-cursor:pointer;
+width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+margin:3px;background:#e2e8f0;border-radius:6px;cursor:pointer;
 }
 
-.dijawab{
-background:#22c55e!important;
-color:white;
-}
+.dijawab{background:#22c55e!important;color:white;}
 
-#progressBox{
-height:8px;
-background:#e5e7eb;
-border-radius:10px;
-margin-top:10px;
-}
-
-#progressBar{
-height:8px;
-width:0%;
-background:#2563eb;
-border-radius:10px;
-}
+#progressBox{height:8px;background:#e5e7eb;border-radius:10px;margin-top:10px;}
+#progressBar{height:8px;width:0%;background:#2563eb;border-radius:10px;}
 
 .opsi{
-display:flex;
-align-items:center;
-gap:12px;
-padding:12px;
-border-radius:12px;
-cursor:pointer;
-margin-bottom:10px;
-border:2px solid #e2e8f0;
+display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;
+cursor:pointer;margin-bottom:10px;border:2px solid #e2e8f0;
 }
 
-.opsi.aktif{
-border:2px solid #2563eb;
-background:#eff6ff;
-}
+.opsi.aktif{border:2px solid #2563eb;background:#eff6ff;}
 
 .circle{
-width:34px;
-height:34px;
-border-radius:50%;
+width:34px;height:34px;border-radius:50%;
 border:2px solid #94a3b8;
-display:flex;
-align-items:center;
-justify-content:center;
-font-weight:bold;
+display:flex;align-items:center;justify-content:center;font-weight:bold;
 }
 
-.opsi.aktif .circle{
-background:#2563eb;
-color:white;
-}
+.opsi.aktif .circle{background:#2563eb;color:white;}
 
-/* 🔥 NAVBAR FIX */
+/* NAV */
 .navBtn{
 display:flex;
 justify-content:space-between;
-align-items:center;
 margin-top:15px;
 }
 
 .navBtn button{
-width:auto;        /* ⬅️ penting */
+width:auto;
 padding:10px 16px;
-flex:none;
 }
 
-/* tombol tengah */
-#btnKirim{
-margin:0 auto;
+/* POPUP */
+#popup{
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:rgba(0,0,0,0.5);
+display:none;
+align-items:center;
+justify-content:center;
+}
+
+.popupBox{
+background:white;
+padding:20px;
+border-radius:12px;
+width:320px;
+text-align:center;
+}
+
+.popupBox button{
+width:auto;
+margin:5px;
+padding:8px 16px;
 }
 
 </style>
@@ -250,33 +169,47 @@ margin:0 auto;
 <div id="soal"></div>
 
 <div class="navBtn">
-<button onclick="prev()">Sebelumnya</button>
-<button id="btnKirim" onclick="kirim()">Selesai</button>
-<button onclick="next()">Selanjutnya</button>
+<button id="btnPrev" onclick="prev()">Sebelumnya</button>
+<button id="btnNext" onclick="next()">Selanjutnya</button>
 </div>
 
 </div>
 
+</div>
+
+<!-- POPUP -->
+<div id="popup">
+<div class="popupBox">
+
+<h3>Konfirmasi</h3>
+
+<p>Yakin ingin mengirim jawaban?</p>
+
+<label>
+<input type="checkbox" id="cekKirim">
+Ya, saya yakin akan kirim jawaban
+</label>
+
+<br><br>
+
+<button onclick="tutupPopup()">Batal</button>
+<button onclick="submitFinal()">Kirim</button>
+
+</div>
 </div>
 
 <script>
 
-/* ======================
-CONFIG
-====================== */
+/* CONFIG */
 var URL_SCRIPT="https://script.google.com/macros/s/AKfycbyfmlPkyhY6uz9Whhvp-Qp7TbnbeVPJzE207gSE7CpmR0jROwpkJyRdI4Bbb2c_1mc/exec";
 
-/* ======================
-STATE
-====================== */
+/* STATE */
 var soal=[], jawaban=[], no=0;
 var nama="", kelas="", jk="";
 var waktu=1800;
 var sudahSubmit=false;
 
-/* ======================
-API
-====================== */
+/* API */
 function gas(func,data,callback){
 fetch(URL_SCRIPT,{
 method:"POST",
@@ -286,17 +219,13 @@ body:JSON.stringify({func:func,data:data})
 .then(callback);
 }
 
-/* ======================
-UTIL
-====================== */
+/* UTIL */
 function lihatPassword(){
 var p=document.getElementById("password");
 p.type = p.type==="password"?"text":"password";
 }
 
-/* ======================
-LOGIN
-====================== */
+/* LOGIN */
 function login(){
 
 nama=document.getElementById("nama").value;
@@ -335,9 +264,7 @@ loadSoal();
 timer();
 }
 
-/* ======================
-LOAD DATA
-====================== */
+/* LOAD */
 function loadKelas(){
 gas("getKelas",{},function(data){
 var k=document.getElementById("kelas");
@@ -363,9 +290,7 @@ n.appendChild(o);
 });
 }
 
-/* ======================
-SOAL
-====================== */
+/* SOAL */
 function loadSoal(){
 
 gas("getSoal",{},function(data){
@@ -396,57 +321,78 @@ html+="<img src='"+s.gambar+"' style='max-width:100%;margin:10px 0;border-radius
 }
 
 s.opsi.forEach(o=>{
-
 var aktif=jawaban[no]==o.key?"aktif":"";
 
 html+=`
 <div class="opsi ${aktif}" onclick="jawab('${o.key}',this)">
 <div class="circle">${o.key}</div>
 <div class="teks">${o.text}</div>
-</div>
-`;
-
+</div>`;
 });
 
 document.getElementById("soal").innerHTML=html;
+
+updateNav();
 updateProgress();
 }
 
-/* ======================
-JAWAB
-====================== */
-function jawab(v,el){
+/* NAV LOGIC */
+function updateNav(){
 
-jawaban[no]=v;
+var btnPrev=document.getElementById("btnPrev");
+var btnNext=document.getElementById("btnNext");
 
-document.querySelectorAll(".opsi").forEach(x=>x.classList.remove("aktif"));
-el.classList.add("aktif");
-
-document.getElementById("n"+no).classList.add("dijawab");
-
-localStorage.setItem("jawaban",JSON.stringify(jawaban));
-
-updateProgress();
+if(no==0){
+btnPrev.style.display="none";
+btnNext.innerText="Selanjutnya";
+}
+else if(no==soal.length-1){
+btnPrev.style.display="inline-block";
+btnNext.innerText="Selesai";
+}
+else{
+btnPrev.style.display="inline-block";
+btnNext.innerText="Selanjutnya";
+}
 }
 
-/* ======================
-NAV
-====================== */
-function next(){if(no<soal.length-1){no++;tampil();}}
-function prev(){if(no>0){no--;tampil();}}
-function goto(n){no=n;tampil();}
-
-/* ======================
-PROGRESS
-====================== */
-function updateProgress(){
-var j=jawaban.filter(x=>x!="").length;
-document.getElementById("progressBar").style.width=(j/soal.length*100)+"%";
+function next(){
+if(no<soal.length-1){
+no++;
+tampil();
+}else{
+bukaPopup();
+}
 }
 
-/* ======================
-SUBMIT
-====================== */
+function prev(){
+if(no>0){
+no--;
+tampil();
+}
+}
+
+/* POPUP */
+function bukaPopup(){
+document.getElementById("popup").style.display="flex";
+}
+
+function tutupPopup(){
+document.getElementById("popup").style.display="none";
+}
+
+/* SUBMIT */
+function submitFinal(){
+
+if(!document.getElementById("cekKirim").checked){
+alert("Centang konfirmasi terlebih dahulu!");
+return;
+}
+
+kirim();
+tutupPopup();
+}
+
 function kirim(){
 
 if(sudahSubmit) return;
@@ -460,7 +406,6 @@ kelas:kelas
 alert("Nilai Anda : "+nilai);
 
 sudahSubmit=true;
-document.getElementById("btnKirim").disabled=true;
 
 document.getElementById("statusUjian").innerHTML="Sudah Mengerjakan";
 document.getElementById("statusUjian").classList.remove("belum");
@@ -469,9 +414,13 @@ document.getElementById("statusUjian").classList.add("sudah");
 });
 }
 
-/* ======================
-TIMER
-====================== */
+/* PROGRESS */
+function updateProgress(){
+var j=jawaban.filter(x=>x!="").length;
+document.getElementById("progressBar").style.width=(j/soal.length*100)+"%";
+}
+
+/* TIMER */
 function timer(){
 setInterval(()=>{
 waktu--;
@@ -483,9 +432,7 @@ if(waktu<=0) kirim();
 },1000);
 }
 
-/* ======================
-LOGOUT
-====================== */
+/* LOGOUT */
 function logout(){
 if(confirm("Logout?")){
 localStorage.clear();
@@ -493,9 +440,7 @@ location.reload();
 }
 }
 
-/* ======================
-INIT
-====================== */
+/* INIT */
 window.onload=function(){
 
 loadKelas();
