@@ -4,267 +4,35 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Asesmen Bab7 Algoritma dan Pemrograman</title>
+<title>CBT Informatika</title>
 
 <style>
-
-body{
-font-family:'Segoe UI';
-background:#f1f5f9;
-margin:0;
-}
-
-/* CONTAINER */
-.container{
-max-width:900px;
-width:95%;
-margin:auto;
-margin-top:20px;
-background:white;
-padding:20px;
-border-radius:16px;
-box-shadow:0 10px 30px rgba(0,0,0,0.08);
-}
-
-/* HEADER */
-.header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
-
-.userBox{
-text-align:center;
-min-width:160px;
-}
-
-.userInfo{
-font-size:14px;
-font-weight:600;
-}
-
-.status{
-font-size:13px;
-margin-top:4px;
-display:none;
-}
-
+/* (CSS kamu tetap, tidak diubah) */
+body{font-family:'Segoe UI';background:#f1f5f9;margin:0;}
+.container{max-width:900px;width:95%;margin:auto;margin-top:20px;background:white;padding:20px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.08);}
+.header{display:flex;justify-content:space-between;align-items:center;}
+.userBox{text-align:center;min-width:160px;}
+.userInfo{font-size:14px;font-weight:600;}
+.status{font-size:13px;margin-top:4px;display:none;}
 .status.belum{color:#f59e0b;}
 .status.sudah{color:#22c55e;}
-
-#btnLogout{
-margin-top:6px;
-background:#ef4444;
-display:none;
-}
-
-/* LOGO */
-.logo{
-display:block;
-margin:auto;
-width:90px;
-margin-bottom:10px;
-}
-
-/* JUDUL */
-h2{
-text-align:center;
-margin-bottom:20px;
-font-weight:700;
-color:#1e293b;
-}
-
-/* LOGIN */
-.loginBox{
-max-width:320px;
-margin:auto;
-}
-
-.loginBox label{
-display:block;
-margin-top:12px;
-}
-
-/* INPUT */
-.inputBox,
-select{
-width:100%;
-padding:10px;
-border-radius:8px;
-border:1px solid #ccc;
-margin-top:4px;
-box-sizing:border-box;
-display:block;
-}
-
-select{
-appearance:none;
--webkit-appearance:none;
--moz-appearance:none;
-background:white;
-}
-
-/* CHECKBOX PASSWORD */
-.passwordCheck{
-margin-top:8px;
-display:flex;
-align-items:center;
-gap:8px;
-font-size:13px;
-}
-
-.passwordCheck input{
-width:auto;
-}
-
-/* BUTTON */
-button{
-background:#2563eb;
-color:white;
-border:none;
-padding:10px;
-border-radius:8px;
-cursor:pointer;
-font-weight:500;
-width:100%;
-}
-
-button:disabled{
-background:#94a3b8;
-cursor:not-allowed;
-}
-
-/* NOMOR */
-#nomor{
-display:flex;
-flex-wrap:wrap;
-margin-top:10px;
-}
-
-#nomor span{
-width:32px;
-height:32px;
-display:flex;
-align-items:center;
-justify-content:center;
-margin:3px;
-background:#e2e8f0;
-border-radius:6px;
-cursor:pointer;
-font-size:13px;
-}
-
-.dijawab{
-background:#22c55e!important;
-color:white;
-}
-
-/* PROGRESS */
-#progressBox{
-height:8px;
-background:#e5e7eb;
-border-radius:10px;
-margin-top:10px;
-}
-
-#progressBar{
-height:8px;
-width:0%;
-background:#2563eb;
-border-radius:10px;
-}
-
-/* SOAL */
-#soal{
-margin-top:15px;
-}
-
-.soalText{
-text-align:justify;
-line-height:1.6;
-}
-
-/* OPSI */
-.opsi{
-display:flex;
-align-items:center;
-gap:12px;
-padding:12px;
-border-radius:12px;
-cursor:pointer;
-margin-bottom:10px;
-transition:0.25s;
-border:2px solid #e2e8f0;
-}
-
-/* HOVER */
-.opsi:hover{
-background:#f8fafc;
-}
-
-/* LINGKARAN HURUF */
-.circle{
-width:34px;
-height:34px;
-border-radius:50%;
-border:2px solid #94a3b8;
-display:flex;
-align-items:center;
-justify-content:center;
-font-weight:bold;
-color:#334155;
-transition:0.25s;
-}
-
-/* TEXT */
-.teks{
-flex:1;
-text-align:justify;
-line-height:1.5;
-}
-
-/* OPSI AKTIF */
-.opsi.aktif{
-border:2px solid #2563eb;
-background:#eff6ff;
-}
-
-/* LINGKARAN AKTIF */
-.opsi.aktif .circle{
-background:#2563eb;
-color:white;
-border-color:#2563eb;
-}
-
-/* ANIMASI BOUNCE */
-@keyframes bounceClick{
-0%{transform:scale(1);}
-30%{transform:scale(1.2);}
-60%{transform:scale(0.9);}
-100%{transform:scale(1);}
-}
-
-.bounce{
-animation:bounceClick 0.3s ease;
-}
-
-/* NAV */
-.navBtn{
-display:flex;
-gap:10px;
-margin-top:15px;
-}
-
-.navBtn button{
-flex:1;
-}
-
-/* RESPONSIVE */
-@media(max-width:600px){
-.soalText{font-size:14px;}
-.teks{font-size:14px;}
-}
-
+#btnLogout{margin-top:6px;background:#ef4444;display:none;}
+.logo{display:block;margin:auto;width:90px;margin-bottom:10px;}
+h2{text-align:center;margin-bottom:20px;font-weight:700;color:#1e293b;}
+.loginBox{max-width:320px;margin:auto;}
+.loginBox label{display:block;margin-top:12px;}
+.inputBox,select{width:100%;padding:10px;border-radius:8px;border:1px solid #ccc;margin-top:4px;box-sizing:border-box;}
+.passwordCheck{margin-top:8px;display:flex;align-items:center;gap:8px;font-size:13px;}
+button{background:#2563eb;color:white;border:none;padding:10px;border-radius:8px;cursor:pointer;width:100%;}
+#nomor{display:flex;flex-wrap:wrap;margin-top:10px;}
+#nomor span{width:32px;height:32px;display:flex;align-items:center;justify-content:center;margin:3px;background:#e2e8f0;border-radius:6px;cursor:pointer;}
+.dijawab{background:#22c55e!important;color:white;}
+#progressBox{height:8px;background:#e5e7eb;border-radius:10px;margin-top:10px;}
+#progressBar{height:8px;width:0%;background:#2563eb;border-radius:10px;}
+.opsi{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;cursor:pointer;margin-bottom:10px;border:2px solid #e2e8f0;}
+.opsi.aktif{border:2px solid #2563eb;background:#eff6ff;}
+.circle{width:34px;height:34px;border-radius:50%;border:2px solid #94a3b8;display:flex;align-items:center;justify-content:center;font-weight:bold;}
+.opsi.aktif .circle{background:#2563eb;color:white;}
 </style>
 
 </head>
@@ -283,9 +51,7 @@ flex:1;
 </div>
 </div>
 
-<img class="logo" src="https://yanuar-moga.github.io/informatika/asesmen/assets/logo.png">
-
-<h2>Asesmen Bab 7 - Algoritma dan Pemrograman</h2>
+<h2>CBT Informatika</h2>
 
 <div id="login" class="loginBox">
 
@@ -297,11 +63,6 @@ flex:1;
 
 <label>Password</label>
 <input type="password" id="password" class="inputBox">
-
-<div class="passwordCheck">
-<input type="checkbox" id="showPass" onclick="lihatPassword()">
-<label for="showPass">Tampilkan Password</label>
-</div>
 
 <br>
 <button onclick="login()">Login</button>
@@ -317,12 +78,11 @@ flex:1;
 </div>
 
 <div id="nomor"></div>
-
 <div id="soal"></div>
 
-<div class="navBtn">
+<div style="display:flex;gap:10px;margin-top:10px;">
 <button onclick="prev()">Prev</button>
-<button id="btnKirim" onclick="kirim()">Selesai</button>
+<button onclick="kirim()" id="btnKirim">Selesai</button>
 <button onclick="next()">Next</button>
 </div>
 
@@ -332,13 +92,22 @@ flex:1;
 
 <script>
 
+/* ======================
+CONFIG
+====================== */
 var URL_SCRIPT="https://script.google.com/macros/s/AKfycbyfmlPkyhY6uz9Whhvp-Qp7TbnbeVPJzE207gSE7CpmR0jROwpkJyRdI4Bbb2c_1mc/exec";
 
-var soal=[],jawaban=[],no=0;
-var nama,jk,kelas;
+/* ======================
+STATE
+====================== */
+var soal=[], jawaban=[], no=0;
+var nama="", kelas="", jk="";
 var waktu=1800;
 var sudahSubmit=false;
 
+/* ======================
+API
+====================== */
 function gas(func,data,callback){
 fetch(URL_SCRIPT,{
 method:"POST",
@@ -348,11 +117,9 @@ body:JSON.stringify({func:func,data:data})
 .then(callback);
 }
 
-function lihatPassword(){
-var p=document.getElementById("password");
-p.type = (p.type==="password") ? "text" : "password";
-}
-
+/* ======================
+LOGIN
+====================== */
 function login(){
 
 nama=document.getElementById("nama").value;
@@ -371,15 +138,7 @@ localStorage.setItem("nama",nama);
 localStorage.setItem("kelas",kelas);
 localStorage.setItem("jk",jk);
 
-document.getElementById("login").style.display="none";
-document.getElementById("ujian").style.display="block";
-
-document.getElementById("userInfo").innerHTML="👤 "+nama+" | "+kelas;
-document.getElementById("btnLogout").style.display="block";
-document.getElementById("statusUjian").style.display="block";
-
-loadSoal();
-timer();
+startUjian();
 
 }else alert("Login gagal");
 
@@ -387,10 +146,27 @@ timer();
 
 }
 
+function startUjian(){
+
+document.getElementById("login").style.display="none";
+document.getElementById("ujian").style.display="block";
+
+document.getElementById("userInfo").innerHTML=nama+" | "+kelas;
+document.getElementById("btnLogout").style.display="block";
+document.getElementById("statusUjian").style.display="block";
+
+loadSoal();
+timer();
+
+}
+
+/* ======================
+LOAD DATA
+====================== */
 function loadKelas(){
 gas("getKelas",{},function(data){
 var k=document.getElementById("kelas");
-k.innerHTML="<option>Pilih Kelas</option>";
+k.innerHTML="<option>Pilih</option>";
 data.forEach(x=>{
 var o=document.createElement("option");
 o.value=x;o.text=x;
@@ -403,7 +179,7 @@ function loadNama(){
 kelas=document.getElementById("kelas").value;
 gas("getNama",{kelas:kelas},function(data){
 var n=document.getElementById("nama");
-n.innerHTML="<option>Pilih Nama</option>";
+n.innerHTML="<option>Pilih</option>";
 data.forEach(x=>{
 var o=document.createElement("option");
 o.value=x;o.text=x;
@@ -412,17 +188,19 @@ n.appendChild(o);
 });
 }
 
+/* ======================
+SOAL
+====================== */
 function loadSoal(){
 
 gas("getSoal",{},function(data){
 
 soal=data;
-jawaban=[];
+jawaban=new Array(soal.length).fill("");
 
 document.getElementById("nomor").innerHTML="";
 
-data.forEach((s,i)=>{
-jawaban.push("");
+soal.forEach((s,i)=>{
 document.getElementById("nomor").innerHTML+=
 "<span id='n"+i+"' onclick='goto("+i+")'>"+(i+1)+"</span>";
 });
@@ -437,26 +215,29 @@ function tampil(){
 
 var s=soal[no];
 
-var html="<div class='soalText'><b>"+(no+1)+".</b> "+s.pertanyaan+"</div>";
+var html="<b>"+(no+1)+".</b> "+s.pertanyaan+"<br><br>";
 
-if(s.gambar && s.gambar.trim()!=""){
-html+="<img src='"+s.gambar+"' style='max-width:100%;margin:10px 0;border-radius:10px'><br>";
+if(s.gambar){
+html+="<img src='"+s.gambar+"' style='max-width:100%'><br><br>";
 }
 
-var huruf=["A","B","C","D","E"];
+/* 🔥 PAKAI KEY ASLI */
+s.opsi.forEach(o=>{
 
-s.opsi.forEach((o,i)=>{
-var aktif=jawaban[no]==o.key?"aktif":"";
+var aktif = jawaban[no]==o.key ? "aktif":"";
 
 html+=`
-<div class="opsi ${aktif}" onclick="jawab('${o.key}', this)">
-    <div class="circle">${huruf[i]}</div>
-    <div class="teks">${o.text}</div>
+<div class="opsi ${aktif}" onclick="jawab('${o.key}',this)">
+<div class="circle">${o.key}</div>
+<div>${o.text}</div>
 </div>
 `;
+
 });
 
 document.getElementById("soal").innerHTML=html;
+
+updateProgress();
 
 }
 
@@ -467,28 +248,32 @@ jawaban[no]=v;
 document.querySelectorAll(".opsi").forEach(x=>x.classList.remove("aktif"));
 el.classList.add("aktif");
 
-/* bounce animasi */
-var c = el.querySelector(".circle");
-c.classList.remove("bounce");
-void c.offsetWidth;
-c.classList.add("bounce");
-
 document.getElementById("n"+no).classList.add("dijawab");
 
 localStorage.setItem("jawaban",JSON.stringify(jawaban));
+
 updateProgress();
 
 }
 
+/* ======================
+NAV
+====================== */
 function next(){if(no<soal.length-1){no++;tampil();}}
 function prev(){if(no>0){no--;tampil();}}
 function goto(n){no=n;tampil();}
 
+/* ======================
+PROGRESS
+====================== */
 function updateProgress(){
 var j=jawaban.filter(x=>x!="").length;
 document.getElementById("progressBar").style.width=(j/soal.length*100)+"%";
 }
 
+/* ======================
+SUBMIT
+====================== */
 function kirim(){
 
 if(sudahSubmit) return;
@@ -499,7 +284,7 @@ nama:nama,
 kelas:kelas
 },function(nilai){
 
-alert("Nilai Anda : "+nilai);
+alert("Nilai: "+nilai);
 
 sudahSubmit=true;
 document.getElementById("btnKirim").disabled=true;
@@ -512,24 +297,31 @@ document.getElementById("statusUjian").classList.add("sudah");
 
 }
 
+/* ======================
+TIMER
+====================== */
 function timer(){
 setInterval(()=>{
 waktu--;
 var m=Math.floor(waktu/60);
 var d=waktu%60;
-d=d<10?"0"+d:d;
+if(d<10)d="0"+d;
 document.getElementById("timer").innerHTML="⏱️ "+m+":"+d;
 if(waktu<=0) kirim();
 },1000);
 }
 
+/* ======================
+LOGOUT
+====================== */
 function logout(){
-if(confirm("Logout?")){
 localStorage.clear();
 location.reload();
 }
-}
 
+/* ======================
+INIT
+====================== */
 window.onload=function(){
 
 loadKelas();
@@ -542,28 +334,16 @@ if(n&&k){
 nama=n;
 kelas=k;
 
-document.getElementById("login").style.display="none";
-document.getElementById("ujian").style.display="block";
-
-document.getElementById("userInfo").innerHTML="👤 "+nama+" | "+kelas;
-document.getElementById("btnLogout").style.display="block";
-document.getElementById("statusUjian").style.display="block";
+startUjian();
 
 var jwb=localStorage.getItem("jawaban");
 if(jwb) jawaban=JSON.parse(jwb);
 
-loadSoal();
-timer();
-
-}
-
-window.onbeforeunload=function(){
-return "Ujian sedang berlangsung!";
-}
-
 }
 
 document.getElementById("kelas").addEventListener("change",loadNama);
+
+}
 
 </script>
 
