@@ -139,25 +139,44 @@ margin:5px;
 padding:8px 16px;
 }
 
-/* TAMBAHAN RAPIH DATA */
+/* ===== PERBAIKAN RAPIH DATA ===== */
 .dataUser{
   margin-top:15px;
   font-size:14px;
 }
 
 .row{
-  display:grid;
-  grid-template-columns:140px 10px 1fr;
+  display:flex;
   margin-bottom:6px;
 }
 
+.label{
+  width:180px;
+  white-space:nowrap;
+}
+
 .label::after{
-  content:":";
-  text-align:center;
+  content:" :";
 }
 
 .value{
-  padding-left:5px;
+  flex:1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* RESPONSIVE */
+@media(max-width:480px){
+  .row{
+    flex-direction:column;
+  }
+  .label{
+    width:auto;
+  }
+  .value{
+    white-space:normal;
+  }
 }
 
 </style>
@@ -203,7 +222,7 @@ padding:8px 16px;
 
 </div>
 
-<!-- HALAMAN TOKEN -->
+<!-- TOKEN -->
 <div id="tokenPage" class="loginBox" style="display:none">
 
 <h3 style="text-align:center;">Selamat Datang</h3>
@@ -248,8 +267,8 @@ padding:8px 16px;
 <div id="soal"></div>
 
 <div class="navBtn">
-<button id="btnPrev" onclick="prev()">Sebelumnya</button>
-<button id="btnNext" onclick="next()">Selanjutnya</button>
+<button onclick="prev()">Sebelumnya</button>
+<button onclick="next()">Selanjutnya</button>
 </div>
 
 </div>
@@ -266,7 +285,7 @@ Ya, saya yakin akan kirim jawaban
 </label>
 <br><br>
 <button onclick="tutupPopup()">Batal</button>
-<button id="btnKirim" onclick="submitFinal()">Kirim</button>
+<button onclick="submitFinal()">Kirim</button>
 </div>
 </div>
 
@@ -340,7 +359,7 @@ document.getElementById("userInfo").innerHTML="👤 "+nama+" | "+kelas;
 
 function cekToken(){
 
-var token = document.getElementById("token").value;
+var token=document.getElementById("token").value;
 
 if(!token){
 alert("Masukkan token!");
@@ -348,13 +367,8 @@ return;
 }
 
 gas("cekToken",{kelas:kelas,token:token},function(res){
-
-if(res.status){
-start();
-}else{
-alert(res.msg);
-}
-
+if(res.status){start();}
+else{alert(res.msg);}
 });
 }
 
@@ -389,7 +403,7 @@ k.appendChild(o);
 
 function loadNama(){
 kelas=document.getElementById("kelas").value;
-if(!kelas) return;
+if(!kelas)return;
 
 gas("getNama",{kelas:kelas},function(data){
 var n=document.getElementById("nama");
