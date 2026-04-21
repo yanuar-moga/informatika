@@ -9,138 +9,40 @@
 <style>
 
 body{font-family:'Segoe UI';background:#f1f5f9;margin:0;}
-
-.container{
-max-width:900px;width:95%;margin:auto;margin-top:20px;
-background:white;padding:20px;border-radius:16px;
-box-shadow:0 10px 30px rgba(0,0,0,0.08);
-}
-
+.container{max-width:900px;width:95%;margin:auto;margin-top:20px;background:white;padding:20px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.08);}
 .header{display:flex;justify-content:space-between;align-items:center;}
-
 .userBox{text-align:center;min-width:160px;}
-
 .userInfo{font-size:14px;font-weight:600;}
-
 .status{font-size:13px;margin-top:4px;display:none;}
 .status.belum{color:#f59e0b;}
 .status.sudah{color:#22c55e;}
-
 #btnLogout{margin-top:6px;background:#ef4444;display:none;}
-
 .logo{display:block;margin:auto;width:90px;margin-bottom:10px;}
-
 h2{text-align:center;margin-bottom:20px;font-weight:700;color:#1e293b;}
-
 .loginBox{max-width:320px;margin:auto;}
-
 .loginBox label{display:block;margin-top:12px;}
-
-.inputBox,select{
-width:100%;padding:10px;border-radius:8px;border:1px solid #ccc;
-margin-top:4px;box-sizing:border-box;
-}
-
-.passwordCheck{
-margin-top:8px;display:flex;align-items:center;gap:8px;font-size:13px;
-}
-
-button{
-background:#2563eb;color:white;border:none;
-padding:10px;border-radius:8px;cursor:pointer;width:100%;
-}
-
-#nomor{
-display:flex;
-flex-wrap:wrap;
-margin-top:10px;
-margin-bottom:20px;
-}
-
-#nomor span{
-width:32px;height:32px;display:flex;align-items:center;justify-content:center;
-margin:3px;background:#e2e8f0;border-radius:6px;cursor:pointer;
-font-size:13px;
-}
-
+.inputBox,select{width:100%;padding:10px;border-radius:8px;border:1px solid #ccc;margin-top:4px;box-sizing:border-box;}
+.passwordCheck{margin-top:8px;display:flex;align-items:center;gap:8px;font-size:13px;}
+button{background:#2563eb;color:white;border:none;padding:10px;border-radius:8px;cursor:pointer;width:100%;}
+#nomor{display:flex;flex-wrap:wrap;margin-top:10px;margin-bottom:20px;}
+#nomor span{width:32px;height:32px;display:flex;align-items:center;justify-content:center;margin:3px;background:#e2e8f0;border-radius:6px;cursor:pointer;font-size:13px;}
 .dijawab{background:#22c55e!important;color:white;}
-
 #progressBox{height:8px;background:#e5e7eb;border-radius:10px;margin-top:10px;}
 #progressBar{height:8px;width:0%;background:#2563eb;border-radius:10px;}
-
-#soal{
-margin-top:10px;
-padding:15px;
-border-radius:12px;
-background:#f8fafc;
-}
-
-.soalText{
-line-height:1.6;
-margin-bottom:15px;
-}
-
-.opsi{
-display:flex;
-align-items:flex-start;
-gap:12px;
-padding:14px;
-border-radius:12px;
-cursor:pointer;
-margin-bottom:12px;
-border:2px solid #e2e8f0;
-transition:0.2s;
-}
-
+#soal{margin-top:10px;padding:15px;border-radius:12px;background:#f8fafc;}
+.soalText{line-height:1.6;margin-bottom:15px;}
+.opsi{display:flex;align-items:flex-start;gap:12px;padding:14px;border-radius:12px;cursor:pointer;margin-bottom:12px;border:2px solid #e2e8f0;transition:0.2s;}
 .opsi:hover{background:#f1f5f9;}
-
 .opsi.aktif{border:2px solid #2563eb;background:#eff6ff;}
-
-.circle{
-width:34px;height:34px;border-radius:50%;
-border:2px solid #94a3b8;
-display:flex;align-items:center;justify-content:center;font-weight:bold;
-}
-
+.circle{width:34px;height:34px;border-radius:50%;border:2px solid #94a3b8;display:flex;align-items:center;justify-content:center;font-weight:bold;}
 .opsi.aktif .circle{background:#2563eb;color:white;}
-
-.navBtn{
-display:flex;
-justify-content:space-between;
-margin-top:15px;
-}
-
-.navBtn button{
-width:auto;
-padding:10px 16px;
-}
-
-#popup{
-position:fixed;
-top:0;left:0;
-width:100%;height:100%;
-background:rgba(0,0,0,0.5);
-display:none;
-align-items:center;
-justify-content:center;
-}
-
-.popupBox{
-background:white;
-padding:20px;
-border-radius:12px;
-width:320px;
-text-align:center;
-}
-
-.popupBox button{
-width:auto;
-margin:5px;
-padding:8px 16px;
-}
+.navBtn{display:flex;justify-content:space-between;margin-top:15px;}
+.navBtn button{width:auto;padding:10px 16px;}
+#popup{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;}
+.popupBox{background:white;padding:20px;border-radius:12px;width:320px;text-align:center;}
+.popupBox button{width:auto;margin:5px;padding:8px 16px;}
 
 </style>
-
 </head>
 
 <body>
@@ -149,7 +51,6 @@ padding:8px 16px;
 
 <div class="header">
 <div></div>
-
 <div class="userBox">
 <div class="userInfo" id="userInfo"></div>
 <div class="status belum" id="statusUjian">Belum Mengerjakan</div>
@@ -163,11 +64,8 @@ padding:8px 16px;
 
 <div id="login" class="loginBox">
 
-<label>Kelas</label>
-<select id="kelas"></select>
-
-<label>Nama</label>
-<select id="nama"></select>
+<label>ID</label>
+<input type="text" id="id" class="inputBox">
 
 <label>Password</label>
 <input type="password" id="password" class="inputBox">
@@ -177,19 +75,18 @@ padding:8px 16px;
 </div>
 
 <br>
-<button onclick="login()">Login</button>
+<button id="btnLogin" onclick="login()">Login</button>
+
 <div style="text-align:center;margin-top:15px;font-size:13px;color:#64748b;">
 © 2026 MB All Rights Reserved
 </div>
+
 </div>
 
 <div id="ujian" style="display:none">
-
 <div id="timer"></div>
 
-<div id="progressBox">
-<div id="progressBar"></div>
-</div>
+<div id="progressBox"><div id="progressBar"></div></div>
 
 <div id="nomor"></div>
 <div id="soal"></div>
@@ -198,16 +95,13 @@ padding:8px 16px;
 <button id="btnPrev" onclick="prev()">Sebelumnya</button>
 <button id="btnNext" onclick="next()">Selanjutnya</button>
 </div>
-
 </div>
 
 </div>
 
 <div id="popup">
 <div class="popupBox">
-
 <h3>Konfirmasi</h3>
-
 <p>Yakin ingin mengirim jawaban?</p>
 
 <label>
@@ -228,7 +122,7 @@ Ya, saya yakin akan kirim jawaban
 var URL_SCRIPT="https://script.google.com/macros/s/AKfycbyfmlPkyhY6uz9Whhvp-Qp7TbnbeVPJzE207gSE7CpmR0jROwpkJyRdI4Bbb2c_1mc/exec";
 
 var soal=[], jawaban=[], no=0;
-var nama="", kelas="", jk="";
+var id="", nama="", kelas="", jk="";
 var waktu=1800;
 
 function gas(func,data,callback){
@@ -247,23 +141,39 @@ p.type = p.type==="password"?"text":"password";
 
 function login(){
 
-nama=document.getElementById("nama").value;
+var btn=document.getElementById("btnLogin");
+btn.disabled=true;
+
+id=document.getElementById("id").value;
 var password=document.getElementById("password").value;
 
-if(!nama||!password){alert("Lengkapi login!");return;}
+if(!id||!password){
+alert("Lengkapi login!");
+btn.disabled=false;
+return;
+}
 
-gas("login",{nama:nama,password:password},function(res){
+gas("login",{id:id,password:password},function(res){
+
+btn.disabled=false;
 
 if(res.status=="ok"){
-jk=res.jk;
-kelas=res.kelas;
 
+nama=res.nama;
+kelas=res.kelas;
+jk=res.jk;
+
+localStorage.setItem("id",id);
 localStorage.setItem("nama",nama);
 localStorage.setItem("kelas",kelas);
 
 start();
 
-}else alert("Login gagal");
+}else if(res.status=="sudah_login"){
+alert("Akun sudah login di device lain");
+}else{
+alert("Login gagal");
+}
 
 });
 }
@@ -280,31 +190,6 @@ loadSoal();
 timer();
 }
 
-function loadKelas(){
-gas("getKelas",{},function(data){
-var k=document.getElementById("kelas");
-k.innerHTML="<option>Pilih Kelas</option>";
-data.forEach(x=>{
-var o=document.createElement("option");
-o.value=x;o.text=x;
-k.appendChild(o);
-});
-});
-}
-
-function loadNama(){
-kelas=document.getElementById("kelas").value;
-gas("getNama",{kelas:kelas},function(data){
-var n=document.getElementById("nama");
-n.innerHTML="<option>Pilih Nama</option>";
-data.forEach(x=>{
-var o=document.createElement("option");
-o.value=x;o.text=x;
-n.appendChild(o);
-});
-});
-}
-
 function loadSoal(){
 
 gas("getSoal",{},function(data){
@@ -312,11 +197,7 @@ gas("getSoal",{},function(data){
 soal=data;
 
 var simpan = localStorage.getItem("jawaban");
-if(simpan){
-jawaban = JSON.parse(simpan);
-}else{
-jawaban=new Array(soal.length).fill("");
-}
+jawaban = simpan ? JSON.parse(simpan) : new Array(soal.length).fill("");
 
 document.getElementById("nomor").innerHTML="";
 
@@ -373,7 +254,6 @@ updateProgress();
 function goto(n){ no=n; tampil(); }
 
 function updateNav(){
-
 var btnPrev=document.getElementById("btnPrev");
 var btnNext=document.getElementById("btnNext");
 
@@ -414,14 +294,12 @@ btn.innerText="Mengirim...";
 
 gas("submitJawaban",{
 jawaban:jawaban,
-nama:nama,
-jk:jk,
-kelas:kelas
+id:id
 },function(res){
 
 if(res.status==="blocked"){
 
-var sisa=15;
+var sisa=5;
 btn.innerText="Tunggu "+sisa+" detik";
 
 var interval=setInterval(()=>{
@@ -472,29 +350,25 @@ if(waktu<=0) kirim();
 
 function logout(){
 if(confirm("Logout?")){
-
-gas("logout",{nama:nama},function(){
+gas("logout",{id:id},function(){
 localStorage.clear();
 location.reload();
 });
-
 }
 }
 
 window.onload=function(){
 
-loadKelas();
+var savedId=localStorage.getItem("id");
+var savedNama=localStorage.getItem("nama");
+var savedKelas=localStorage.getItem("kelas");
 
-var n=localStorage.getItem("nama");
-var k=localStorage.getItem("kelas");
-
-if(n&&k){
-nama=n;
-kelas=k;
+if(savedId && savedNama){
+id=savedId;
+nama=savedNama;
+kelas=savedKelas;
 start();
 }
-
-document.getElementById("kelas").addEventListener("change",loadNama);
 
 window.onbeforeunload=function(){
 return "Ujian sedang berlangsung!";
