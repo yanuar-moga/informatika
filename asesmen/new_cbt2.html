@@ -7,7 +7,6 @@
 <title>Asesmen Bab7 Algoritma dan Pemrograman</title>
 
 <style>
-
 body{font-family:'Segoe UI';background:#f1f5f9;margin:0;}
 
 .container{
@@ -17,9 +16,7 @@ box-shadow:0 10px 30px rgba(0,0,0,0.08);
 }
 
 .header{display:flex;justify-content:space-between;align-items:center;}
-
 .userBox{text-align:center;min-width:160px;}
-
 .userInfo{font-size:14px;font-weight:600;}
 
 .status{font-size:13px;margin-top:4px;display:none;}
@@ -50,59 +47,6 @@ background:#2563eb;color:white;border:none;
 padding:10px;border-radius:8px;cursor:pointer;width:100%;
 }
 
-#nomor{
-display:flex;
-flex-wrap:wrap;
-margin-top:10px;
-margin-bottom:20px;
-}
-
-#nomor span{
-width:32px;height:32px;display:flex;align-items:center;justify-content:center;
-margin:3px;background:#e2e8f0;border-radius:6px;cursor:pointer;
-font-size:13px;
-}
-
-.dijawab{background:#22c55e!important;color:white;}
-
-#progressBox{height:8px;background:#e5e7eb;border-radius:10px;margin-top:10px;}
-#progressBar{height:8px;width:0%;background:#2563eb;border-radius:10px;}
-
-#soal{
-margin-top:10px;
-padding:15px;
-border-radius:12px;
-background:#f8fafc;
-}
-
-.soalText{line-height:1.6;margin-bottom:15px;}
-
-.opsi{
-display:flex;
-align-items:flex-start;
-gap:12px;
-padding:14px;
-border-radius:12px;
-cursor:pointer;
-margin-bottom:12px;
-border:2px solid #e2e8f0;
-transition:0.2s;
-}
-
-.opsi:hover{background:#f1f5f9;}
-.opsi.aktif{border:2px solid #2563eb;background:#eff6ff;}
-
-.circle{
-width:34px;height:34px;border-radius:50%;
-border:2px solid #94a3b8;
-display:flex;align-items:center;justify-content:center;font-weight:bold;
-}
-
-.opsi.aktif .circle{background:#2563eb;color:white;}
-
-.navBtn{display:flex;justify-content:space-between;margin-top:15px;}
-.navBtn button{width:auto;padding:10px 16px;}
-
 #popup{
 position:fixed;top:0;left:0;width:100%;height:100%;
 background:rgba(0,0,0,0.5);display:none;
@@ -114,16 +58,11 @@ background:white;padding:20px;border-radius:12px;
 width:320px;text-align:center;
 }
 
-.popupBox button{width:auto;margin:5px;padding:8px 16px;}
-
 .dataUser{margin-top:15px;font-size:14px;}
-
 .row{display:flex;margin-bottom:6px;}
-
-.label{width:180px;white-space:nowrap;}
+.label{width:180px;}
 .label::after{content:" :";}
 .value{flex:1;}
-
 </style>
 
 </head>
@@ -186,29 +125,6 @@ width:320px;text-align:center;
 
 </div>
 
-<!-- UJIAN -->
-<div id="ujian" style="display:none">
-<div id="timer"></div>
-<div id="progressBox"><div id="progressBar"></div></div>
-<div id="nomor"></div>
-<div id="soal"></div>
-<div class="navBtn">
-<button onclick="prev()">Sebelumnya</button>
-<button onclick="next()">Selanjutnya</button>
-</div>
-</div>
-
-</div>
-
-<div id="popup">
-<div class="popupBox">
-<h3>Konfirmasi</h3>
-<p>Yakin ingin mengirim jawaban?</p>
-<label><input type="checkbox" id="cekKirim"> Ya, saya yakin</label>
-<br><br>
-<button onclick="tutupPopup()">Batal</button>
-<button onclick="submitFinal()">Kirim</button>
-</div>
 </div>
 
 <script>
@@ -217,13 +133,19 @@ var URL_SCRIPT="https://script.google.com/macros/s/AKfycbwwl3rKiOqpV6sF8sFmH8IFL
 
 var nama="",kelas="",jk="",id="";
 
+/* ================= FETCH FIX ================= */
 function gas(func,data,callback){
 fetch(URL_SCRIPT,{
 method:"POST",
+headers:{ "Content-Type":"application/json" },
 body:JSON.stringify({func:func,data:data})
 })
 .then(res=>res.json())
-.then(callback);
+.then(callback)
+.catch(err=>{
+console.error(err);
+alert("Koneksi ke server gagal!");
+});
 }
 
 function lihatPassword(){
@@ -231,7 +153,7 @@ var p=document.getElementById("password");
 p.type = p.type==="password"?"text":"password";
 }
 
-/* LOGIN FIX */
+/* ================= LOGIN FINAL ================= */
 function login(){
 
 nama=document.getElementById("nama").value.trim();
@@ -245,7 +167,7 @@ return;
 
 gas("login",{nama:nama,kelas:kelas,password:password},function(res){
 
-if(res.status=="ok"){
+if(res.status==="ok"){
 
 id=res.id;
 nama=res.nama;
@@ -258,10 +180,10 @@ localStorage.setItem("kelas",kelas);
 
 tampilToken();
 
-}else if(res.status=="sudah_login"){
+}else if(res.status==="sudah_login"){
 alert("Akun sedang login di perangkat lain!");
 }else{
-alert("Login gagal");
+alert("Login gagal (cek nama / password)");
 }
 
 });
@@ -281,7 +203,6 @@ document.getElementById("userInfo").innerHTML="👤 "+nama+" | "+kelas;
 }
 
 function cekToken(){
-
 var token=document.getElementById("token").value.trim();
 
 if(!token){
@@ -290,15 +211,12 @@ return;
 }
 
 gas("cekToken",{kelas:kelas,token:token},function(res){
-if(res.status){start();}
-else{alert(res.msg);}
-});
+if(res.status){
+alert("Token valid, mulai ujian!");
+}else{
+alert(res.msg);
 }
-
-function start(){
-document.getElementById("tokenPage").style.display="none";
-document.getElementById("ujian").style.display="block";
-document.getElementById("statusUjian").style.display="block";
+});
 }
 
 function logout(){
@@ -336,6 +254,7 @@ n.appendChild(o);
 }
 
 window.onload=function(){
+
 loadKelas();
 
 var n=localStorage.getItem("nama");
@@ -348,6 +267,7 @@ tampilToken();
 }
 
 document.getElementById("kelas").addEventListener("change",loadNama);
+
 }
 
 </script>
