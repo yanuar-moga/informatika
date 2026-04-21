@@ -75,10 +75,7 @@ border-radius:12px;
 background:#f8fafc;
 }
 
-.soalText{
-line-height:1.6;
-margin-bottom:15px;
-}
+.soalText{line-height:1.6;margin-bottom:15px;}
 
 .opsi{
 display:flex;
@@ -93,7 +90,6 @@ transition:0.2s;
 }
 
 .opsi:hover{background:#f1f5f9;}
-
 .opsi.aktif{border:2px solid #2563eb;background:#eff6ff;}
 
 .circle{
@@ -104,80 +100,29 @@ display:flex;align-items:center;justify-content:center;font-weight:bold;
 
 .opsi.aktif .circle{background:#2563eb;color:white;}
 
-.navBtn{
-display:flex;
-justify-content:space-between;
-margin-top:15px;
-}
-
-.navBtn button{
-width:auto;
-padding:10px 16px;
-}
+.navBtn{display:flex;justify-content:space-between;margin-top:15px;}
+.navBtn button{width:auto;padding:10px 16px;}
 
 #popup{
-position:fixed;
-top:0;left:0;
-width:100%;height:100%;
-background:rgba(0,0,0,0.5);
-display:none;
-align-items:center;
-justify-content:center;
+position:fixed;top:0;left:0;width:100%;height:100%;
+background:rgba(0,0,0,0.5);display:none;
+align-items:center;justify-content:center;
 }
 
 .popupBox{
-background:white;
-padding:20px;
-border-radius:12px;
-width:320px;
-text-align:center;
+background:white;padding:20px;border-radius:12px;
+width:320px;text-align:center;
 }
 
-.popupBox button{
-width:auto;
-margin:5px;
-padding:8px 16px;
-}
+.popupBox button{width:auto;margin:5px;padding:8px 16px;}
 
-/* ===== PERBAIKAN RAPIH DATA ===== */
-.dataUser{
-  margin-top:15px;
-  font-size:14px;
-}
+.dataUser{margin-top:15px;font-size:14px;}
 
-.row{
-  display:flex;
-  margin-bottom:6px;
-}
+.row{display:flex;margin-bottom:6px;}
 
-.label{
-  width:180px;
-  white-space:nowrap;
-}
-
-.label::after{
-  content:" :";
-}
-
-.value{
-  flex:1;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-/* RESPONSIVE */
-@media(max-width:480px){
-  .row{
-    flex-direction:column;
-  }
-  .label{
-    width:auto;
-  }
-  .value{
-    white-space:normal;
-  }
-}
+.label{width:180px;white-space:nowrap;}
+.label::after{content:" :";}
+.value{flex:1;}
 
 </style>
 
@@ -189,7 +134,6 @@ padding:8px 16px;
 
 <div class="header">
 <div></div>
-
 <div class="userBox">
 <div class="userInfo" id="userInfo"></div>
 <div class="status belum" id="statusUjian">Belum Mengerjakan</div>
@@ -228,22 +172,10 @@ padding:8px 16px;
 <h3 style="text-align:center;">Selamat Datang</h3>
 
 <div class="dataUser">
-  <div class="row">
-    <div class="label">Nama</div>
-    <div class="value" id="t_nama"></div>
-  </div>
-  <div class="row">
-    <div class="label">Kelas</div>
-    <div class="value" id="t_kelas"></div>
-  </div>
-  <div class="row">
-    <div class="label">Jenis Kelamin</div>
-    <div class="value" id="t_jk"></div>
-  </div>
-  <div class="row">
-    <div class="label">ID</div>
-    <div class="value" id="t_id"></div>
-  </div>
+<div class="row"><div class="label">Nama</div><div class="value" id="t_nama"></div></div>
+<div class="row"><div class="label">Kelas</div><div class="value" id="t_kelas"></div></div>
+<div class="row"><div class="label">Jenis Kelamin</div><div class="value" id="t_jk"></div></div>
+<div class="row"><div class="label">ID</div><div class="value" id="t_id"></div></div>
 </div>
 
 <label style="margin-top:15px;">Token Ujian</label>
@@ -256,21 +188,14 @@ padding:8px 16px;
 
 <!-- UJIAN -->
 <div id="ujian" style="display:none">
-
 <div id="timer"></div>
-
-<div id="progressBox">
-<div id="progressBar"></div>
-</div>
-
+<div id="progressBox"><div id="progressBar"></div></div>
 <div id="nomor"></div>
 <div id="soal"></div>
-
 <div class="navBtn">
 <button onclick="prev()">Sebelumnya</button>
 <button onclick="next()">Selanjutnya</button>
 </div>
-
 </div>
 
 </div>
@@ -279,10 +204,7 @@ padding:8px 16px;
 <div class="popupBox">
 <h3>Konfirmasi</h3>
 <p>Yakin ingin mengirim jawaban?</p>
-<label>
-<input type="checkbox" id="cekKirim">
-Ya, saya yakin akan kirim jawaban
-</label>
+<label><input type="checkbox" id="cekKirim"> Ya, saya yakin</label>
 <br><br>
 <button onclick="tutupPopup()">Batal</button>
 <button onclick="submitFinal()">Kirim</button>
@@ -293,9 +215,7 @@ Ya, saya yakin akan kirim jawaban
 
 var URL_SCRIPT="https://script.google.com/macros/s/AKfycbwwl3rKiOqpV6sF8sFmH8IFLv7KcFNYXf_y3nsmr7L8PyGx-tJi5U3cXQb2tei5DTbfWw/exec";
 
-var soal=[], jawaban=[], no=0;
-var nama="", kelas="", jk="", id="";
-var waktu=1800;
+var nama="",kelas="",jk="",id="";
 
 function gas(func,data,callback){
 fetch(URL_SCRIPT,{
@@ -311,11 +231,12 @@ var p=document.getElementById("password");
 p.type = p.type==="password"?"text":"password";
 }
 
+/* LOGIN FIX */
 function login(){
 
-nama=document.getElementById("nama").value;
-kelas=document.getElementById("kelas").value;
-var password=document.getElementById("password").value;
+nama=document.getElementById("nama").value.trim();
+kelas=document.getElementById("kelas").value.trim();
+var password=document.getElementById("password").value.trim();
 
 if(!nama||!kelas||!password){
 alert("Lengkapi login!");
@@ -326,8 +247,10 @@ gas("login",{nama:nama,kelas:kelas,password:password},function(res){
 
 if(res.status=="ok"){
 
-id = res.id;
-jk = res.jk;
+id=res.id;
+nama=res.nama;
+kelas=res.kelas;
+jk=res.jk;
 
 localStorage.setItem("id",id);
 localStorage.setItem("nama",nama);
@@ -335,6 +258,8 @@ localStorage.setItem("kelas",kelas);
 
 tampilToken();
 
+}else if(res.status=="sudah_login"){
+alert("Akun sedang login di perangkat lain!");
 }else{
 alert("Login gagal");
 }
@@ -343,23 +268,21 @@ alert("Login gagal");
 }
 
 function tampilToken(){
-
 document.getElementById("login").style.display="none";
 document.getElementById("tokenPage").style.display="block";
 
-document.getElementById("t_nama").innerText = nama;
-document.getElementById("t_kelas").innerText = kelas;
-document.getElementById("t_jk").innerText = jk || "-";
-document.getElementById("t_id").innerText = id;
+document.getElementById("t_nama").innerText=nama;
+document.getElementById("t_kelas").innerText=kelas;
+document.getElementById("t_jk").innerText=jk||"-";
+document.getElementById("t_id").innerText=id;
 
 document.getElementById("btnLogout").style.display="block";
 document.getElementById("userInfo").innerHTML="👤 "+nama+" | "+kelas;
-
 }
 
 function cekToken(){
 
-var token=document.getElementById("token").value;
+var token=document.getElementById("token").value.trim();
 
 if(!token){
 alert("Masukkan token!");
@@ -375,18 +298,14 @@ else{alert(res.msg);}
 function start(){
 document.getElementById("tokenPage").style.display="none";
 document.getElementById("ujian").style.display="block";
-
-document.getElementById("userInfo").innerHTML="👤 "+nama+" | "+kelas;
-document.getElementById("btnLogout").style.display="block";
 document.getElementById("statusUjian").style.display="block";
-
-loadSoal();
-timer();
 }
 
 function logout(){
+gas("logout",{id:id},function(){
 localStorage.clear();
 location.reload();
+});
 }
 
 function loadKelas(){
@@ -417,7 +336,6 @@ n.appendChild(o);
 }
 
 window.onload=function(){
-
 loadKelas();
 
 var n=localStorage.getItem("nama");
@@ -425,18 +343,11 @@ var k=localStorage.getItem("kelas");
 var i=localStorage.getItem("id");
 
 if(n&&k&&i){
-nama=n;
-kelas=k;
-id=i;
+nama=n;kelas=k;id=i;
 tampilToken();
 }
 
 document.getElementById("kelas").addEventListener("change",loadNama);
-
-window.onbeforeunload=function(){
-return "Ujian sedang berlangsung!";
-}
-
 }
 
 </script>
