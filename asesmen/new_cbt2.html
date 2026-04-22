@@ -47,17 +47,6 @@ background:#2563eb;color:white;border:none;
 padding:10px;border-radius:8px;cursor:pointer;width:100%;
 }
 
-#popup{
-position:fixed;top:0;left:0;width:100%;height:100%;
-background:rgba(0,0,0,0.5);display:none;
-align-items:center;justify-content:center;
-}
-
-.popupBox{
-background:white;padding:20px;border-radius:12px;
-width:320px;text-align:center;
-}
-
 .dataUser{margin-top:15px;font-size:14px;}
 .row{display:flex;margin-bottom:6px;}
 .label{width:180px;}
@@ -133,27 +122,39 @@ var URL_SCRIPT="https://script.google.com/macros/s/AKfycbytJwOb6kEvvjsH6Bs-rUPFn
 
 var nama="",kelas="",jk="",id="";
 
-/* ================= FETCH FIX ================= */
+/* ================= FETCH SUPER STABIL ================= */
 function gas(func,data,callback){
+
 fetch(URL_SCRIPT,{
 method:"POST",
 headers:{ "Content-Type":"application/json" },
 body:JSON.stringify({func:func,data:data})
 })
-.then(res=>res.json())
-.then(callback)
+.then(res=>res.text())
+.then(txt=>{
+  console.log("SERVER:", txt);
+
+  try{
+    var json = JSON.parse(txt);
+    callback(json);
+  }catch(e){
+    alert("Server error (bukan JSON):\n"+txt);
+  }
+})
 .catch(err=>{
-console.error(err);
-alert("Koneksi ke server gagal!");
+  console.error("FETCH ERROR:", err);
+  alert("Koneksi gagal: "+err.message);
 });
+
 }
 
+/* ================= UI ================= */
 function lihatPassword(){
 var p=document.getElementById("password");
 p.type = p.type==="password"?"text":"password";
 }
 
-/* ================= LOGIN FINAL ================= */
+/* ================= LOGIN ================= */
 function login(){
 
 nama=document.getElementById("nama").value.trim();
@@ -183,13 +184,15 @@ tampilToken();
 }else if(res.status==="sudah_login"){
 alert("Akun sedang login di perangkat lain!");
 }else{
-alert("Login gagal (cek nama / password)");
+alert("Login gagal");
 }
 
 });
 }
 
+/* ================= TOKEN ================= */
 function tampilToken(){
+
 document.getElementById("login").style.display="none";
 document.getElementById("tokenPage").style.display="block";
 
@@ -200,9 +203,11 @@ document.getElementById("t_id").innerText=id;
 
 document.getElementById("btnLogout").style.display="block";
 document.getElementById("userInfo").innerHTML="👤 "+nama+" | "+kelas;
+
 }
 
 function cekToken(){
+
 var token=document.getElementById("token").value.trim();
 
 if(!token){
@@ -217,8 +222,10 @@ alert("Token valid, mulai ujian!");
 alert(res.msg);
 }
 });
+
 }
 
+/* ================= LOGOUT ================= */
 function logout(){
 gas("logout",{id:id},function(){
 localStorage.clear();
@@ -226,33 +233,47 @@ location.reload();
 });
 }
 
+/* ================= LOAD DATA ================= */
 function loadKelas(){
+
 gas("getKelas",{},function(data){
+
 var k=document.getElementById("kelas");
 k.innerHTML="<option value=''>Pilih Kelas</option>";
+
 data.forEach(x=>{
 var o=document.createElement("option");
-o.value=x;o.text=x;
+o.value=x;
+o.text=x;
 k.appendChild(o);
 });
+
 });
+
 }
 
 function loadNama(){
+
 kelas=document.getElementById("kelas").value;
 if(!kelas)return;
 
 gas("getNama",{kelas:kelas},function(data){
+
 var n=document.getElementById("nama");
 n.innerHTML="<option value=''>Pilih Nama</option>";
+
 data.forEach(x=>{
 var o=document.createElement("option");
-o.value=x;o.text=x;
+o.value=x;
+o.text=x;
 n.appendChild(o);
 });
+
 });
+
 }
 
+/* ================= INIT ================= */
 window.onload=function(){
 
 loadKelas();
@@ -262,7 +283,9 @@ var k=localStorage.getItem("kelas");
 var i=localStorage.getItem("id");
 
 if(n&&k&&i){
-nama=n;kelas=k;id=i;
+nama=n;
+kelas=k;
+id=i;
 tampilToken();
 }
 
