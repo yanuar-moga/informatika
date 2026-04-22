@@ -9,11 +9,15 @@
 body {
   font-family: Arial, sans-serif;
   background: linear-gradient(to bottom right, #b3c7d6, #d9e2ec);
+  margin: 0;
+}
+
+/* LOGIN */
+.container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  margin: 0;
 }
 
 .card {
@@ -27,19 +31,10 @@ body {
 
 .logo {
   width: 70px;
-  margin-bottom: 10px;
 }
 
 h2 {
   color: #1f4e94;
-  margin-bottom: 20px;
-}
-
-label {
-  display: block;
-  text-align: left;
-  margin-top: 10px;
-  font-size: 14px;
 }
 
 input, select {
@@ -48,7 +43,6 @@ input, select {
   margin-top: 5px;
   border-radius: 8px;
   border: 1px solid #ccc;
-  box-sizing: border-box;
 }
 
 .checkbox {
@@ -58,14 +52,9 @@ input, select {
   font-size: 13px;
 }
 
-.checkbox input {
-  width: auto;
-  margin-right: 8px;
-}
-
 button {
   width: 100%;
-  margin-top: 15px;
+  margin-top: 10px;
   padding: 12px;
   border: none;
   border-radius: 10px;
@@ -73,33 +62,41 @@ button {
   cursor: pointer;
 }
 
-.btn-login {
+.btn-login { background: #1f4e94; color:white; }
+.btn-jadwal { background: #d9534f; color:white; }
+.btn-logout { background: red; color:white; width:auto; padding:5px 10px; }
+
+/* DASHBOARD */
+#dashboard {
+  display: none;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background: #1f4e94;
   color: white;
+  padding: 10px;
+  border-radius: 10px;
 }
 
-.btn-login:hover {
-  background: #163c73;
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.btn-jadwal {
-  background: #d9534f;
-  color: white;
+.header-left img {
+  width: 40px;
 }
 
-.btn-jadwal:hover {
-  background: #c9302c;
-}
-
-#msg {
+.content {
+  background: white;
+  padding: 20px;
   margin-top: 10px;
-  font-size: 14px;
-}
-
-.footer {
-  margin-top: 15px;
-  font-size: 12px;
-  color: #666;
+  border-radius: 10px;
 }
 
 /* MODAL */
@@ -146,40 +143,73 @@ th, td {
 
 <body>
 
-<div class="card">
-  <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" class="logo">
+<!-- LOGIN -->
+<div class="container" id="loginPage">
+  <div class="card">
+    <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" class="logo">
 
-  <h2>Aplikasi Login Siswa</h2>
+    <h2>Aplikasi Login Siswa</h2>
 
-  <label>Kelas</label>
-  <select id="kelas">
-    <option value="">-- Pilih Kelas --</option>
-  </select>
+    <select id="kelas">
+      <option value="">-- Pilih Kelas --</option>
+    </select>
 
-  <label>Username</label>
-  <select id="username">
-    <option value="">-- Pilih Siswa --</option>
-  </select>
+    <select id="username">
+      <option value="">-- Pilih Siswa --</option>
+    </select>
 
-  <label>Password</label>
-  <input type="password" id="password" placeholder="Masukkan Password">
+    <input type="password" id="password" placeholder="Masukkan Password">
 
-  <div class="checkbox">
-    <input type="checkbox" onclick="togglePassword()">
-    Tampilkan Password
+    <div class="checkbox">
+      <input type="checkbox" onclick="togglePassword()"> Tampilkan Password
+    </div>
+
+    <input type="text" id="token" placeholder="Masukkan Token">
+
+    <button class="btn-login" onclick="login()">Masuk</button>
+    <button class="btn-jadwal" onclick="openModal()">Lihat Jadwal Token</button>
+
+    <p id="msg"></p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="header">
+    <div class="header-left">
+      <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png">
+      <div>
+        <b id="namaHeader"></b><br>
+        <span id="kelasHeader"></span><br>
+        <small id="tanggal"></small>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="logout()">Keluar</button>
   </div>
 
-  <label>Token</label>
-  <input type="text" id="token" placeholder="Masukkan Token">
+  <div class="content">
+    <h3>Selamat Datang</h3>
 
-  <button class="btn-login" onclick="login()">Masuk</button>
+    <p><b>Nama Siswa:</b> <span id="nama"></span></p>
+    <p><b>Kelas:</b> <span id="kelasUser"></span></p>
 
-  <button class="btn-jadwal" onclick="openModal()">Lihat Jadwal Token</button>
+    <hr>
 
-  <p id="msg"></p>
+    <h4>Informasi Ujian</h4>
+    <p>Jumlah soal: <b>40 soal</b></p>
+    <p>Pilihan Ganda: <b>30 soal</b></p>
+    <p>Essay: <b>10 soal</b></p>
+    <p>Durasi: <b>90 menit</b></p>
 
-  <div class="footer">
-    © 2026 MB All Rights Reserved
+    <hr>
+
+    <h4>Petunjuk Penting</h4>
+    <ul>
+      <li>Kerjakan dengan jujur</li>
+      <li>Jangan refresh saat ujian</li>
+      <li>Pastikan koneksi stabil</li>
+      <li>Waktu tetap berjalan</li>
+    </ul>
   </div>
 </div>
 
@@ -188,7 +218,6 @@ th, td {
   <div class="modal-content">
     <span class="close" onclick="closeModal()">&times;</span>
     <h3>Jadwal Token</h3>
-
     <table>
       <thead>
         <tr>
@@ -209,113 +238,127 @@ let siswaData = [];
 let ip = "";
 let userAgent = navigator.userAgent;
 
-// ambil IP
+// IP
 fetch("https://api.ipify.org?format=json")
-  .then(res => res.json())
-  .then(data => ip = data.ip);
+.then(res=>res.json())
+.then(d=>ip=d.ip);
 
-// ambil data siswa
+// siswa
 fetch(API_URL)
-  .then(res => res.json())
-  .then(data => {
-    siswaData = data;
+.then(res=>res.json())
+.then(data=>{
+  siswaData=data;
+  let kelasSet=new Set();
 
-    let kelasSet = new Set();
+  data.forEach(s=>kelasSet.add(s.kelas));
 
-    data.forEach(s => kelasSet.add(s.kelas));
-
-    let kelasSelect = document.getElementById("kelas");
-
-    kelasSet.forEach(k => {
-      let opt = document.createElement("option");
-      opt.value = k;
-      opt.text = k;
-      kelasSelect.appendChild(opt);
-    });
+  kelasSet.forEach(k=>{
+    let opt=document.createElement("option");
+    opt.value=k;
+    opt.text=k;
+    kelas.appendChild(opt);
   });
+});
 
-// filter username
-document.getElementById("kelas").addEventListener("change", function() {
-  let kelas = this.value;
-  let usernameSelect = document.getElementById("username");
-
-  usernameSelect.innerHTML = '<option value="">-- Pilih Siswa --</option>';
-
-  siswaData
-    .filter(s => s.kelas === kelas)
-    .forEach(s => {
-      let opt = document.createElement("option");
-      opt.value = s.username;
-      opt.text = s.nama;
-      usernameSelect.appendChild(opt);
-    });
+// filter user
+kelas.addEventListener("change",()=>{
+  username.innerHTML='<option value="">-- Pilih Siswa --</option>';
+  siswaData.filter(s=>s.kelas===kelas.value)
+  .forEach(s=>{
+    let opt=document.createElement("option");
+    opt.value=s.username;
+    opt.text=s.nama;
+    username.appendChild(opt);
+  });
 });
 
 // toggle password
-function togglePassword() {
-  let pass = document.getElementById("password");
-  pass.type = pass.type === "password" ? "text" : "password";
+function togglePassword(){
+  password.type = password.type==="password" ? "text":"password";
 }
 
 // login
-function login() {
-  const data = {
-    username: document.getElementById("username").value,
-    password: document.getElementById("password").value,
-    token: document.getElementById("token").value,
-    ip: ip,
-    userAgent: userAgent
-  };
-
-  fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify(data)
+function login(){
+  fetch(API_URL,{
+    method:"POST",
+    body: JSON.stringify({
+      username: username.value,
+      password: password.value,
+      token: token.value,
+      ip: ip,
+      userAgent: userAgent
+    })
   })
-  .then(res => res.json())
-  .then(res => {
-    let msg = document.getElementById("msg");
-
-    if (res.status === "success") {
-      msg.style.color = "green";
-      msg.innerText = "Login berhasil: " + res.nama;
-    } else {
-      msg.style.color = "red";
-      msg.innerText = res.msg;
+  .then(res=>res.json())
+  .then(res=>{
+    if(res.status==="success"){
+      localStorage.setItem("login", JSON.stringify(res));
+      showDashboard(res);
+    }else{
+      msg.innerText=res.msg;
     }
-  })
-  .catch(() => {
-    document.getElementById("msg").innerText = "Server error";
   });
 }
 
+// dashboard
+function showDashboard(user){
+  loginPage.style.display="none";
+  dashboard.style.display="block";
+
+  nama.innerText=user.nama;
+  kelasUser.innerText=user.kelas;
+
+  namaHeader.innerText=user.nama;
+  kelasHeader.innerText=user.kelas;
+
+  setTanggal();
+}
+
+// tanggal
+function setTanggal(){
+  const now=new Date();
+  const hari=["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+  const bulan=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+
+  tanggal.innerText = hari[now.getDay()] + ", " + now.getDate() + " " + bulan[now.getMonth()] + " " + now.getFullYear();
+}
+
+// logout
+function logout(){
+  localStorage.removeItem("login");
+  location.reload();
+}
+
+// auto login
+window.onload=()=>{
+  let s=localStorage.getItem("login");
+  if(s) showDashboard(JSON.parse(s));
+};
+
 // modal
-function openModal() {
-  document.getElementById("modalJadwal").style.display = "block";
+function openModal(){
+  modalJadwal.style.display="block";
   loadJadwal();
 }
-
-function closeModal() {
-  document.getElementById("modalJadwal").style.display = "none";
+function closeModal(){
+  modalJadwal.style.display="none";
 }
 
-// load jadwal (TANPA TOKEN)
-function loadJadwal() {
-  fetch(API_URL + "?mode=token")
-    .then(res => res.json())
-    .then(data => {
-      let tbody = document.getElementById("jadwalBody");
-      tbody.innerHTML = "";
-
-      data.forEach(d => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${d.kelas}</td>
-            <td>${d.mulai}</td>
-            <td>${d.selesai}</td>
-          </tr>
-        `;
-      });
+// jadwal
+function loadJadwal(){
+  fetch(API_URL+"?mode=token")
+  .then(res=>res.json())
+  .then(data=>{
+    jadwalBody.innerHTML="";
+    data.forEach(d=>{
+      jadwalBody.innerHTML+=`
+        <tr>
+          <td>${d.kelas}</td>
+          <td>${d.mulai}</td>
+          <td>${d.selesai}</td>
+        </tr>`;
     });
+  });
 }
 </script>
 
