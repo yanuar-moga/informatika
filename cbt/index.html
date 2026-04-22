@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Login Asesmen</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: linear-gradient(to right, #4facfe, #00f2fe);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .box {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #4facfe;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    #msg {
+      margin-top: 10px;
+      color: red;
+    }
+  </style>
+</head>
+
+<body>
+<div class="box">
+  <h3>LOGIN ASESMEN</h3>
+
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <input type="text" id="token" placeholder="Token Kelas">
+
+  <button onclick="login()">LOGIN</button>
+
+  <p id="msg"></p>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbxem9pXDrxnWLm_BpcVbqOicnzYEaQa6xJW9uL4ewdKT_hmGtVVvwubQpd46IDKGYJ0/exec";
+
+let userAgent = navigator.userAgent;
+let ip = "";
+
+// ambil IP
+fetch("https://api.ipify.org?format=json")
+  .then(res => res.json())
+  .then(data => ip = data.ip);
+
+function login() {
+  const data = {
+    username: document.getElementById("username").value,
+    password: document.getElementById("password").value,
+    token: document.getElementById("token").value,
+    ip: ip,
+    userAgent: userAgent
+  };
+
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify(data)
+  })
+  .then(res => res.json())
+  .then(res => {
+    if (res.status === "success") {
+      document.getElementById("msg").style.color = "green";
+      document.getElementById("msg").innerText =
+        "Login berhasil: " + res.nama;
+
+      // redirect ke soal
+      // window.location.href = "soal.html";
+    } else {
+      document.getElementById("msg").innerText = res.msg;
+    }
+  })
+  .catch(err => {
+    document.getElementById("msg").innerText = "Server error";
+  });
+}
+</script>
+
+</body>
+</html>
