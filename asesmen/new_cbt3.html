@@ -122,36 +122,35 @@ var URL_SCRIPT="https://script.google.com/macros/s/AKfycbwfB3oD4VmdyEdh7WfmDKRo0
 
 var nama="",kelas="",jk="",id="";
 
-/* ================= FETCH SUPER STABIL ================= */
+/* ================= FETCH FIX (ANTI CORS) ================= */
 function gas(func,data,callback){
+
+const form = new URLSearchParams();
+form.append("data", JSON.stringify({func:func,data:data}));
 
 fetch(URL_SCRIPT,{
 method:"POST",
-headers:{ "Content-Type":"application/json" },
-body:JSON.stringify({func:func,data:data})
+body: form
 })
-.then(res=>{
-  if(!res.ok) throw new Error("HTTP "+res.status);
-  return res.text();
-})
+.then(res=>res.text())
 .then(txt=>{
-  console.log("SERVER:", txt);
+console.log("SERVER:", txt);
 
-  if(!txt){
-    alert("Server kosong!");
-    return;
-  }
+if(!txt){
+alert("Server kosong!");
+return;
+}
 
-  try{
-    var json = JSON.parse(txt);
-    callback(json);
-  }catch(e){
-    alert("Response bukan JSON:\n"+txt);
-  }
+try{
+var json = JSON.parse(txt);
+callback(json);
+}catch(e){
+alert("Response bukan JSON:\n"+txt);
+}
 })
 .catch(err=>{
-  console.error("FETCH ERROR:", err);
-  alert("Koneksi gagal: "+err.message);
+console.error("FETCH ERROR:", err);
+alert("Koneksi gagal: "+err.message);
 });
 
 }
