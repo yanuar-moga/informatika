@@ -53,7 +53,7 @@ input, select {
   border: 1px solid #ccc;
 }
 
-/* CHECKBOX FIX */
+/* CHECKBOX */
 .checkbox {
   display: flex;
   align-items: center;
@@ -78,9 +78,31 @@ button {
 }
 
 .btn-login { background:#1f4e94; color:white; }
-.btn-jadwal { background:#d9534f; color:white; }
+.btn-login:hover { background:#163c73; }
 
-#msg { margin-top: 10px; }
+.btn-jadwal { background:#d9534f; color:white; }
+.btn-jadwal:hover { background:#c9302c; }
+
+.btn-start {
+  background:#ff5722;
+  color:white;
+  padding:14px;
+  font-size:16px;
+  margin-top:20px;
+}
+
+.btn-start:hover {
+  background:#e64a19;
+}
+
+.logout-btn {
+  margin-top:5px;
+  background:#ff5722;
+  color:white;
+  padding:6px 12px;
+  border:none;
+  border-radius:6px;
+}
 
 /* DASHBOARD */
 #dashboard { display:none; }
@@ -94,15 +116,6 @@ button {
 }
 
 .user-box { text-align:right; }
-
-.logout-btn {
-  margin-top:5px;
-  background:#ff5722;
-  color:white;
-  padding:6px 12px;
-  border:none;
-  border-radius:6px;
-}
 
 .content {
   text-align:center;
@@ -250,7 +263,25 @@ th, td {
 <li>Kerjakan dengan jujur</li>
 </ul>
 
+<button class="btn-start" onclick="openConfirm()">Kerjakan Ujian</button>
+
 </div>
+</div>
+</div>
+
+<!-- MODAL KONFIRMASI -->
+<div id="confirmModal" class="modal">
+<div class="modal-content">
+<h3>Konfirmasi Data</h3>
+<p>Pastikan data Anda sudah benar</p>
+
+<div class="checkbox">
+<input type="checkbox" id="checkData">
+<label for="checkData">Saya yakin data sudah benar</label>
+</div>
+
+<button onclick="lanjutUjian()">Next</button>
+<button onclick="closeConfirm()">Batal</button>
 </div>
 </div>
 
@@ -275,10 +306,12 @@ let siswaData = [];
 let ip = "";
 let userAgent = navigator.userAgent;
 
+/* GET IP */
 fetch("https://api.ipify.org?format=json")
 .then(res=>res.json())
 .then(data=>ip=data.ip);
 
+/* GET DATA SISWA */
 fetch(API_URL)
 .then(res=>res.json())
 .then(data=>{
@@ -295,6 +328,7 @@ fetch(API_URL)
   });
 });
 
+/* FILTER USERNAME */
 kelas.addEventListener("change",function(){
   username.innerHTML='<option>-- Pilih Siswa --</option>';
   siswaData.filter(s=>s.kelas===this.value)
@@ -306,10 +340,12 @@ kelas.addEventListener("change",function(){
   });
 });
 
+/* SHOW PASSWORD */
 function togglePassword(){
   password.type=password.type==="password"?"text":"password";
 }
 
+/* LOGIN */
 function login(){
   fetch(API_URL,{
     method:"POST",
@@ -332,6 +368,7 @@ function login(){
   });
 }
 
+/* DASHBOARD */
 function showDashboard(user){
   loginPage.style.display="none";
   dashboard.style.display="block";
@@ -345,6 +382,7 @@ function showDashboard(user){
   setInterval(getLocalTime,1000);
 }
 
+/* TANGGAL */
 function setTanggal(){
   const now=new Date();
   const hari=["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
@@ -353,17 +391,36 @@ function setTanggal(){
   tanggal.innerText=hari[now.getDay()]+", "+now.getDate()+" "+bulan[now.getMonth()]+" "+now.getFullYear();
 }
 
+/* JAM */
 function getLocalTime(){
   const now=new Date();
   jamServer.innerText="⏰ "+now.toLocaleTimeString()+" WIB";
 }
 
+/* LOGOUT */
 function logout(){
   localStorage.removeItem("user");
   location.reload();
 }
 
-/* MODAL */
+/* KONFIRMASI */
+function openConfirm(){
+  document.getElementById("confirmModal").style.display="block";
+}
+
+function closeConfirm(){
+  document.getElementById("confirmModal").style.display="none";
+}
+
+function lanjutUjian(){
+  if(!document.getElementById("checkData").checked){
+    alert("Centang dulu konfirmasi!");
+    return;
+  }
+  window.location.href="HALAMAN_SOAL_CBT.html";
+}
+
+/* MODAL JADWAL */
 function openModal(){
   document.getElementById("modalJadwal").style.display="block";
   loadJadwal();
