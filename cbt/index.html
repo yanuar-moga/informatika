@@ -138,6 +138,17 @@ button {
   margin-right:auto;
 }
 
+.box p {
+  margin:4px 0;
+  line-height:1.4;
+}
+
+#jamServer {
+  font-weight:bold;
+  color:#1f4e94;
+  margin-top:-5px;
+}
+
 .btn-start {
   background:#ff5722;
   color:white;
@@ -229,6 +240,7 @@ button {
 
 <div class="title">Asesmen CBT Informatika</div>
 <p id="tanggal"></p>
+<p id="jamServer"></p>
 
 <div class="box">
 <p>Nama : <b id="nama"></b></p>
@@ -347,14 +359,35 @@ function showDashboard(user){
   nama.innerText=user.nama;
   kelasUser.innerText=user.kelas;
   namaHeader.innerText=user.nama;
-  kelasHeader.innerText=user.kelas;
+  kelasHeader.innerText="Kelas : " + user.kelas;
 
   setTanggal();
+  getLocalTime();
+  setInterval(getLocalTime,1000);
 }
 
 function setTanggal(){
-  const now=new Date();
-  tanggal.innerText=now.toDateString();
+  const now = new Date();
+
+  const hari = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+  const bulan = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+
+  tanggal.innerText =
+    hari[now.getDay()] + ", " +
+    now.getDate() + " " +
+    bulan[now.getMonth()] + " " +
+    now.getFullYear();
+}
+
+function getLocalTime(){
+  const now = new Date();
+
+  const jam =
+    String(now.getHours()).padStart(2,'0') + ":" +
+    String(now.getMinutes()).padStart(2,'0') + ":" +
+    String(now.getSeconds()).padStart(2,'0');
+
+  document.getElementById("jamServer").innerText = "⏰ " + jam + " WIB";
 }
 
 function logout(){
@@ -381,7 +414,7 @@ function lanjutUjian(){
     alert("Centang dulu konfirmasi!");
     return;
   }
-  window.location.href="HALAMAN_SOAL_CBT.html"; // ganti sesuai URL kamu
+  window.location.href="HALAMAN_SOAL_CBT.html";
 }
 
 /* MODAL JADWAL */
