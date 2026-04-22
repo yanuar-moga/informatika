@@ -22,11 +22,11 @@ body {
 
 .card {
   background: #f2f2f2;
-  padding: 30px;
-  border-radius: 15px;
-  width: 320px;
+  padding: 28px;
+  border-radius: 16px;
+  width: 330px;
   text-align: center;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
 }
 
 .logo {
@@ -36,43 +36,81 @@ body {
 
 h2 {
   color: #1f4e94;
+  margin-bottom: 15px;
+}
+
+/* FORM */
+.form-group {
+  text-align: left;
+  margin-top: 12px;
 }
 
 label {
+  font-size: 14px;
   display: block;
-  text-align: left;
-  margin-top: 10px;
+  margin-bottom: 4px;
 }
 
 input, select {
   width: 100%;
   padding: 10px;
-  margin-top: 5px;
   border-radius: 8px;
   border: 1px solid #ccc;
+  font-size: 14px;
 }
 
+/* CHECKBOX RAPI */
 .checkbox {
   display: flex;
   align-items: center;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 10px;
   font-size: 13px;
 }
 
+.checkbox input {
+  width: auto;
+}
+
+.checkbox label {
+  margin: 0;
+  cursor: pointer;
+}
+
+/* BUTTON */
 button {
   width: 100%;
-  margin-top: 12px;
+  margin-top: 14px;
   padding: 12px;
   border-radius: 10px;
   border: none;
   font-weight: bold;
   cursor: pointer;
+  font-size: 14px;
 }
 
-.btn-login { background:#1f4e94; color:#fff; }
-.btn-jadwal { background:#d9534f; color:#fff; }
+.btn-login {
+  background:#1f4e94;
+  color:#fff;
+}
 
-#msg { margin-top:10px; }
+.btn-login:hover {
+  background:#163c73;
+}
+
+.btn-jadwal {
+  background:#d9534f;
+  color:#fff;
+}
+
+.btn-jadwal:hover {
+  background:#c9302c;
+}
+
+#msg {
+  margin-top: 10px;
+  font-size: 14px;
+}
 
 /* DASHBOARD */
 #dashboard {
@@ -82,9 +120,17 @@ button {
 .header {
   background: #1f4e94;
   color: white;
-  padding: 15px;
+  padding: 14px 18px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+}
+
+.header button {
+  width: auto;
+  padding: 8px 14px;
+  background: #fff;
+  color: #1f4e94;
 }
 
 .content {
@@ -93,15 +139,17 @@ button {
 
 .box {
   background: white;
-  padding: 20px;
+  padding: 18px;
   border-radius: 10px;
+  line-height: 1.6;
 }
 
 /* MODAL */
 .modal {
   display: none;
   position: fixed;
-  width:100%;height:100%;
+  width:100%;
+  height:100%;
   background: rgba(0,0,0,0.5);
 }
 
@@ -117,40 +165,51 @@ button {
 table {
   width:100%;
   border-collapse: collapse;
+  margin-top:10px;
 }
 
 th,td {
   border:1px solid #ccc;
   padding:6px;
   text-align:center;
+  font-size:13px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- ================= LOGIN ================= -->
+<!-- LOGIN -->
 <div id="loginPage" class="center">
 <div class="card">
 
 <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" class="logo">
 <h2>Aplikasi Login Siswa</h2>
 
+<div class="form-group">
 <label>Kelas</label>
 <select id="kelas"></select>
-
-<label>Username</label>
-<select id="username"></select>
-
-<label>Password</label>
-<input type="password" id="password">
-
-<div class="checkbox">
-<input type="checkbox" onclick="togglePassword()"> Tampilkan Password
 </div>
 
+<div class="form-group">
+<label>Username</label>
+<select id="username"></select>
+</div>
+
+<div class="form-group">
+<label>Password</label>
+<input type="password" id="password" placeholder="Masukkan Password">
+</div>
+
+<div class="checkbox">
+  <input type="checkbox" id="showPass" onclick="togglePassword()">
+  <label for="showPass">Tampilkan Password</label>
+</div>
+
+<div class="form-group">
 <label>Token</label>
-<input type="text" id="token">
+<input type="text" id="token" placeholder="Masukkan Token">
+</div>
 
 <button class="btn-login" onclick="login()">Masuk</button>
 <button class="btn-jadwal" onclick="openModal()">Lihat Jadwal</button>
@@ -160,7 +219,7 @@ th,td {
 </div>
 </div>
 
-<!-- ================= DASHBOARD ================= -->
+<!-- DASHBOARD -->
 <div id="dashboard">
 
 <div class="header">
@@ -175,7 +234,6 @@ th,td {
 <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" class="logo">
 
 <h2>Selamat Datang</h2>
-
 <p id="tanggal"></p>
 
 <div class="box">
@@ -198,13 +256,12 @@ th,td {
 <li>Jangan refresh saat ujian</li>
 <li>Kerjakan dengan jujur</li>
 </ul>
-
-</div>
 </div>
 
 </div>
+</div>
 
-<!-- ================= MODAL ================= -->
+<!-- MODAL -->
 <div id="modal" class="modal">
 <div class="modal-content">
 <h3>Jadwal Token</h3>
@@ -229,32 +286,33 @@ let siswaData = [];
 let ip = "";
 let userAgent = navigator.userAgent;
 
-// ambil IP
 fetch("https://api.ipify.org?format=json")
 .then(res=>res.json())
 .then(d=>ip=d.ip);
 
-// ambil siswa
 fetch(API_URL)
 .then(res=>res.json())
 .then(data=>{
   siswaData=data;
+
   let kelasSet=new Set();
   data.forEach(s=>kelasSet.add(s.kelas));
 
   let k=document.getElementById("kelas");
   k.innerHTML='<option value="">-- Pilih Kelas --</option>';
+
   kelasSet.forEach(v=>{
     let o=document.createElement("option");
-    o.value=v;o.text=v;
+    o.value=v;
+    o.text=v;
     k.appendChild(o);
   });
 });
 
-// filter siswa
 document.getElementById("kelas").addEventListener("change",function(){
   let kelas=this.value;
   let u=document.getElementById("username");
+
   u.innerHTML='<option value="">-- Pilih Siswa --</option>';
 
   siswaData.filter(s=>s.kelas===kelas)
@@ -266,13 +324,11 @@ document.getElementById("kelas").addEventListener("change",function(){
   });
 });
 
-// toggle pass
 function togglePassword(){
   let p=document.getElementById("password");
   p.type=p.type==="password"?"text":"password";
 }
 
-// LOGIN
 function login(){
   const data={
     username:username.value,
@@ -293,25 +349,23 @@ function login(){
       showDashboard(res);
     }else{
       msg.innerText=res.msg;
+      msg.style.color="red";
     }
   });
 }
 
-// DASHBOARD
 function showDashboard(user){
   loginPage.style.display="none";
   dashboard.style.display="block";
 
   nama.innerText=user.nama;
   kelasUser.innerText=user.kelas;
-
   namaHeader.innerText=user.nama;
   kelasHeader.innerText=user.kelas;
 
   setTanggal();
 }
 
-// tanggal
 function setTanggal(){
   const now=new Date();
   const hari=["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
@@ -324,13 +378,11 @@ function setTanggal(){
     now.getFullYear();
 }
 
-// LOGOUT
 function logout(){
   localStorage.removeItem("user");
   location.reload();
 }
 
-// AUTO LOGIN
 window.onload=function(){
   let user=localStorage.getItem("user");
   if(user){
@@ -338,16 +390,15 @@ window.onload=function(){
   }
 };
 
-// MODAL
 function openModal(){
   modal.style.display="block";
   loadJadwal();
 }
+
 function closeModal(){
   modal.style.display="none";
 }
 
-// jadwal
 function loadJadwal(){
   fetch(API_URL+"?mode=token")
   .then(r=>r.json())
