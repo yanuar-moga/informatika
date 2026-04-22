@@ -28,7 +28,10 @@ margin-top:10px;
 }
 
 .soalBox{margin-top:20px;}
-.opsi{margin:5px 0;padding:8px;border:1px solid #ccc;border-radius:8px;cursor:pointer;}
+.opsi{
+margin:5px 0;padding:8px;border:1px solid #ccc;
+border-radius:8px;cursor:pointer;
+}
 
 .navSoal{
 display:flex;flex-wrap:wrap;gap:5px;margin-top:15px;
@@ -40,8 +43,8 @@ width:40px;height:40px;
 .terjawab{background:#22c55e;color:white;}
 
 .timer{
-text-align:center;font-size:18px;font-weight:bold;color:#ef4444;
-margin-bottom:10px;
+text-align:center;font-size:18px;font-weight:bold;
+color:#ef4444;margin-bottom:10px;
 }
 
 /* LOADING */
@@ -67,8 +70,8 @@ animation:spin 1s linear infinite;
 <body>
 
 <div id="loading" class="loading hidden">
-<div class="spinner"></div>
-<p id="loadingText">Loading...</p>
+  <div class="spinner"></div>
+  <p id="loadingText">Loading...</p>
 </div>
 
 <div class="container">
@@ -106,200 +109,229 @@ animation:spin 1s linear infinite;
 
 <script>
 
-// ✅ URL SUDAH BENAR
+// =======================
+// URL WEB APP (WAJIB)
+// =======================
 var URL="https://script.google.com/macros/s/AKfycbzmUHUwVrpFHvC6UTQ_e7Yq3dtiDt0osbmGawV2pyfICxO23Mn0R81IzrKY79dw5IY/exec";
 
 var soal=[],jawaban=[];
 var indexSoal=0;
 var waktu=3600;
 
-/* LOADING */
+// =======================
+// LOADING
+// =======================
 function showLoading(t="Loading..."){
-document.getElementById("loadingText").innerText=t;
-document.getElementById("loading").classList.remove("hidden");
+  document.getElementById("loadingText").innerText=t;
+  document.getElementById("loading").classList.remove("hidden");
 }
 function hideLoading(){
-document.getElementById("loading").classList.add("hidden");
+  document.getElementById("loading").classList.add("hidden");
 }
 
-/* FETCH */
+// =======================
+// FETCH (FIX CORS)
+// =======================
 function gas(func,data,cb){
-showLoading();
-fetch(URL,{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({func:func,data:data})
-})
-.then(r=>r.text())
-.then(t=>{
-hideLoading();
-cb(JSON.parse(t));
-})
-.catch(e=>{
-hideLoading();
-alert("Error server: "+e.message);
-});
+  showLoading();
+
+  fetch(URL,{
+    method:"POST",
+    body: JSON.stringify({func:func,data:data}) // ✅ TANPA HEADER
+  })
+  .then(r=>r.text())
+  .then(t=>{
+    hideLoading();
+
+    try{
+      let json = JSON.parse(t);
+      cb(json);
+    }catch(e){
+      console.error("Response bukan JSON:", t);
+      alert("Server error (bukan JSON)");
+    }
+
+  })
+  .catch(e=>{
+    hideLoading();
+    console.error(e);
+    alert("Error server: "+e.message);
+  });
 }
 
-/* LOGIN */
+// =======================
+// LOGIN
+// =======================
 function login(){
-let n=document.getElementById("nama").value;
-let k=document.getElementById("kelas").value;
-let p=document.getElementById("password").value;
+  let n=kelas.value;
+  let nm=nama.value;
+  let p=password.value;
 
-if(!n||!k||!p){
-alert("Lengkapi data!");
-return;
+  if(!n||!nm||!p){
+    alert("Lengkapi data!");
+    return;
+  }
+
+  gas("login",{nama:nm,kelas:n,password:p},res=>{
+    if(res.status=="ok"){
+      localStorage.setItem("user",JSON.stringify(res));
+      loginPage.style.display="none";
+      tokenPage.style.display="block";
+    }else{
+      alert("Login gagal");
+    }
+  });
 }
 
-gas("login",{nama:n,kelas:k,password:p},res=>{
-if(res.status=="ok"){
-localStorage.setItem("user",JSON.stringify(res));
-document.getElementById("loginPage").style.display="none";
-document.getElementById("tokenPage").style.display="block";
-}else{
-alert("Login gagal");
-}
-});
-}
-
-/* TOKEN */
+// =======================
+// TOKEN
+// =======================
 function cekToken(){
-let t=document.getElementById("token").value;
+  let t=token.value;
 
-if(!t){
-alert("Masukkan token!");
-return;
+  if(!t){
+    alert("Masukkan token!");
+    return;
+  }
+
+  gas("cekToken",{token:t},res=>{
+    if(res.status=="OK"){
+      mulaiUjian();
+    }else{
+      alert("Token salah");
+    }
+  });
 }
 
-gas("cekToken",{token:t},res=>{
-if(res.status=="OK"){
-mulaiUjian();
-}else{
-alert("Token salah");
-}
-});
-}
-
-/* LOAD SOAL */
+// =======================
+// LOAD SOAL
+// =======================
 function mulaiUjian(){
-document.getElementById("tokenPage").style.display="none";
-document.getElementById("ujianPage").style.display="block";
+  tokenPage.style.display="none";
+  ujianPage.style.display="block";
 
-gas("getSoal",{},res=>{
-soal=res;
-jawaban=new Array(soal.length);
+  gas("getSoal",{},res=>{
+    soal=res;
+    jawaban=new Array(soal.length);
 
-// restore jawaban
-let saved=localStorage.getItem("jawaban");
-if(saved) jawaban=JSON.parse(saved);
+    let saved=localStorage.getItem("jawaban");
+    if(saved) jawaban=JSON.parse(saved);
 
-renderSoal();
-renderNav();
-startTimer();
-});
+    renderSoal();
+    renderNav();
+    startTimer();
+  });
 }
 
-/* RENDER SOAL */
+// =======================
+// RENDER SOAL
+// =======================
 function renderSoal(){
-let s=soal[indexSoal];
+  let s=soal[indexSoal];
 
-let html=`<div class='soalBox'>
-<b>Soal ${indexSoal+1}</b><br><br>
-${s.pertanyaan}<br><br>
-`;
+  let html=`<div class='soalBox'>
+  <b>Soal ${indexSoal+1}</b><br><br>
+  ${s.pertanyaan}<br><br>`;
 
-["A","B","C","D","E"].forEach(o=>{
-let aktif = jawaban[indexSoal]===o ? "style='background:#dbeafe'" : "";
-html+=`<div class='opsi' ${aktif} onclick='pilih("${o}")'>
-${o}. ${s.opsi[o]?.text||""}
-</div>`;
-});
+  ["A","B","C","D","E"].forEach(o=>{
+    let aktif = jawaban[indexSoal]===o ? "style='background:#dbeafe'" : "";
+    html+=`<div class='opsi' ${aktif} onclick='pilih("${o}")'>
+    ${o}. ${s.opsi[o]?.text||""}
+    </div>`;
+  });
 
-html+="</div>";
+  html+="</div>";
 
-document.getElementById("soalBox").innerHTML=html;
+  soalBox.innerHTML=html;
 }
 
-/* PILIH */
+// =======================
+// PILIH
+// =======================
 function pilih(o){
-jawaban[indexSoal]=o;
-localStorage.setItem("jawaban",JSON.stringify(jawaban));
-renderSoal();
-renderNav();
+  jawaban[indexSoal]=o;
+  localStorage.setItem("jawaban",JSON.stringify(jawaban));
+  renderSoal();
+  renderNav();
 }
 
-/* NAVIGASI */
+// =======================
+// NAVIGASI
+// =======================
 function renderNav(){
-let html="";
-for(let i=0;i<soal.length;i++){
-let cls="";
-if(i==indexSoal) cls="aktif";
-if(jawaban[i]) cls="terjawab";
-html+=`<button class='${cls}' onclick='goto(${i})'>${i+1}</button>`;
-}
-document.getElementById("navSoal").innerHTML=html;
+  let html="";
+  for(let i=0;i<soal.length;i++){
+    let cls="";
+    if(i==indexSoal) cls="aktif";
+    if(jawaban[i]) cls="terjawab";
+
+    html+=`<button class='${cls}' onclick='goto(${i})'>${i+1}</button>`;
+  }
+  navSoal.innerHTML=html;
 }
 
 function goto(i){
-indexSoal=i;
-renderSoal();
+  indexSoal=i;
+  renderSoal();
 }
 
-/* TIMER */
+// =======================
+// TIMER
+// =======================
 function startTimer(){
-setInterval(()=>{
-waktu--;
-let m=Math.floor(waktu/60);
-let s=waktu%60;
-document.getElementById("timer").innerText=
-`${m}:${s<10?"0":""}${s}`;
+  setInterval(()=>{
+    waktu--;
 
-if(waktu<=0) submitUjian();
-},1000);
+    let m=Math.floor(waktu/60);
+    let s=waktu%60;
+
+    timer.innerText=`${m}:${s<10?"0":""}${s}`;
+
+    if(waktu<=0) submitUjian();
+
+  },1000);
 }
 
-/* SUBMIT */
+// =======================
+// SUBMIT
+// =======================
 function submitUjian(){
-if(!confirm("Yakin submit?")) return;
+  if(!confirm("Yakin submit?")) return;
 
-let user=JSON.parse(localStorage.getItem("user"));
+  let user=JSON.parse(localStorage.getItem("user"));
 
-gas("submitToQueue",{
-user_id:user.user_id,
-jawaban:jawaban
-},res=>{
-alert("Jawaban dikirim!");
-localStorage.clear();
-location.reload();
-});
+  gas("submitToQueue",{
+    user_id:user.user_id,
+    jawaban:jawaban
+  },res=>{
+    alert("Jawaban dikirim!");
+    localStorage.clear();
+    location.reload();
+  });
 }
 
-/* INIT */
+// =======================
+// INIT
+// =======================
 window.onload=function(){
 
-gas("getKelas",{},data=>{
-let k=document.getElementById("kelas");
-k.innerHTML="<option value=''>Pilih Kelas</option>";
-data.forEach(x=>{
-k.innerHTML+=`<option>${x}</option>`;
-});
-});
+  gas("getKelas",{},data=>{
+    kelas.innerHTML="<option value=''>Pilih Kelas</option>";
+    data.forEach(x=>{
+      kelas.innerHTML+=`<option>${x}</option>`;
+    });
+  });
 
-document.getElementById("kelas").onchange=function(){
-let val=this.value;
-
-gas("getNama",{kelas:val},data=>{
-let n=document.getElementById("nama");
-n.innerHTML="<option value=''>Pilih Nama</option>";
-data.forEach(x=>{
-n.innerHTML+=`<option>${x}</option>`;
-});
-});
-};
+  kelas.onchange=function(){
+    gas("getNama",{kelas:kelas.value},data=>{
+      nama.innerHTML="<option value=''>Pilih Nama</option>";
+      data.forEach(x=>{
+        nama.innerHTML+=`<option>${x}</option>`;
+      });
+    });
+  };
 
 }
-
 </script>
 
 </body>
