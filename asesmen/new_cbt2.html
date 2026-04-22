@@ -130,15 +130,23 @@ method:"POST",
 headers:{ "Content-Type":"application/json" },
 body:JSON.stringify({func:func,data:data})
 })
-.then(res=>res.text())
+.then(res=>{
+  if(!res.ok) throw new Error("HTTP "+res.status);
+  return res.text();
+})
 .then(txt=>{
   console.log("SERVER:", txt);
+
+  if(!txt){
+    alert("Server kosong!");
+    return;
+  }
 
   try{
     var json = JSON.parse(txt);
     callback(json);
   }catch(e){
-    alert("Server error (bukan JSON):\n"+txt);
+    alert("Response bukan JSON:\n"+txt);
   }
 })
 .catch(err=>{
@@ -168,6 +176,8 @@ return;
 
 gas("login",{nama:nama,kelas:kelas,password:password},function(res){
 
+if(!res){ alert("Server tidak merespon"); return; }
+
 if(res.status==="ok"){
 
 id=res.id;
@@ -184,7 +194,7 @@ tampilToken();
 }else if(res.status==="sudah_login"){
 alert("Akun sedang login di perangkat lain!");
 }else{
-alert("Login gagal");
+alert("Login gagal (cek data)");
 }
 
 });
@@ -216,11 +226,15 @@ return;
 }
 
 gas("cekToken",{kelas:kelas,token:token},function(res){
+
+if(!res){ alert("Server error"); return; }
+
 if(res.status){
 alert("Token valid, mulai ujian!");
 }else{
-alert(res.msg);
+alert(res.msg || "Token tidak valid");
 }
+
 });
 
 }
@@ -237,6 +251,11 @@ location.reload();
 function loadKelas(){
 
 gas("getKelas",{},function(data){
+
+if(!Array.isArray(data)){
+alert("Data kelas error");
+return;
+}
 
 var k=document.getElementById("kelas");
 k.innerHTML="<option value=''>Pilih Kelas</option>";
@@ -258,6 +277,11 @@ kelas=document.getElementById("kelas").value;
 if(!kelas)return;
 
 gas("getNama",{kelas:kelas},function(data){
+
+if(!Array.isArray(data)){
+alert("Data nama error");
+return;
+}
 
 var n=document.getElementById("nama");
 n.innerHTML="<option value=''>Pilih Nama</option>";
