@@ -151,35 +151,29 @@ th, td {
 
   <h2>Aplikasi Login Siswa</h2>
 
-  <!-- KELAS -->
   <label>Kelas</label>
   <select id="kelas">
     <option value="">-- Pilih Kelas --</option>
   </select>
 
-  <!-- USERNAME -->
   <label>Username</label>
   <select id="username">
     <option value="">-- Pilih Siswa --</option>
   </select>
 
-  <!-- PASSWORD -->
   <label>Password</label>
   <input type="password" id="password" placeholder="Masukkan Password">
 
-  <!-- CHECKBOX (SUDAH DIPINDAH) -->
   <div class="checkbox">
     <input type="checkbox" onclick="togglePassword()">
     Tampilkan Password
   </div>
 
-  <!-- TOKEN -->
   <label>Token</label>
   <input type="text" id="token" placeholder="Masukkan Token">
 
   <button class="btn-login" onclick="login()">Masuk</button>
 
-  <!-- TOMBOL MERAH -->
   <button class="btn-jadwal" onclick="openModal()">Lihat Jadwal Token</button>
 
   <p id="msg"></p>
@@ -199,7 +193,6 @@ th, td {
       <thead>
         <tr>
           <th>Kelas</th>
-          <th>Token</th>
           <th>Mulai</th>
           <th>Selesai</th>
         </tr>
@@ -305,7 +298,7 @@ function closeModal() {
   document.getElementById("modalJadwal").style.display = "none";
 }
 
-// load jadwal
+// load jadwal (TANPA TOKEN)
 function loadJadwal() {
   fetch(API_URL + "?mode=token")
     .then(res => res.json())
@@ -317,7 +310,6 @@ function loadJadwal() {
         tbody.innerHTML += `
           <tr>
             <td>${d.kelas}</td>
-            <td>${d.token}</td>
             <td>${d.mulai}</td>
             <td>${d.selesai}</td>
           </tr>
