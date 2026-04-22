@@ -1,72 +1,196 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Login Asesmen</title>
-  <style>
-    body {
-      font-family: Arial;
-      background: linear-gradient(to right, #4facfe, #00f2fe);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login Asesmen</title>
 
-    .box {
-      background: white;
-      padding: 25px;
-      border-radius: 10px;
-      width: 300px;
-      text-align: center;
-    }
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to bottom right, #b3c7d6, #d9e2ec);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
 
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-    }
+.card {
+  background: #f2f2f2;
+  padding: 30px;
+  border-radius: 15px;
+  width: 320px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
 
-    button {
-      width: 100%;
-      padding: 10px;
-      background: #4facfe;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
+.logo {
+  width: 70px;
+  margin-bottom: 10px;
+}
 
-    #msg {
-      margin-top: 10px;
-      color: red;
-    }
-  </style>
+h2 {
+  color: #1f4e94;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  text-align: left;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+.checkbox input {
+  width: auto;
+  margin-right: 8px;
+}
+
+button {
+  width: 100%;
+  margin-top: 15px;
+  padding: 12px;
+  background: #1f4e94;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #163c73;
+}
+
+#msg {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.footer {
+  margin-top: 15px;
+  font-size: 12px;
+  color: #666;
+}
+</style>
 </head>
 
 <body>
-<div class="box">
-  <h3>LOGIN ASESMEN</h3>
 
-  <input type="text" id="username" placeholder="Username">
-  <input type="password" id="password" placeholder="Password">
-  <input type="text" id="token" placeholder="Token Kelas">
+<div class="card">
+  <!-- GANTI LOGO -->
+  <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" class="logo">
 
-  <button onclick="login()">LOGIN</button>
+  <h2>Aplikasi Login Siswa</h2>
+
+  <!-- KELAS -->
+  <label>Kelas</label>
+  <select id="kelas">
+    <option value="">-- Pilih Kelas --</option>
+  </select>
+
+  <!-- USERNAME -->
+  <label>Username</label>
+  <select id="username">
+    <option value="">-- Pilih Siswa --</option>
+  </select>
+
+  <!-- PASSWORD -->
+  <label>Password</label>
+  <input type="password" id="password" placeholder="Masukkan Password">
+
+  <!-- TOKEN -->
+  <label>Token</label>
+  <input type="text" id="token" placeholder="Masukkan Token">
+
+  <!-- SHOW PASSWORD -->
+  <div class="checkbox">
+    <input type="checkbox" onclick="togglePassword()">
+    Tampilkan Password
+  </div>
+
+  <button onclick="login()">Masuk</button>
 
   <p id="msg"></p>
+
+  <div class="footer">
+    © 2026 MB All Rights Reserved
+  </div>
 </div>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbxem9pXDrxnWLm_BpcVbqOicnzYEaQa6xJW9uL4ewdKT_hmGtVVvwubQpd46IDKGYJ0/exec";
 
-let userAgent = navigator.userAgent;
+let siswaData = [];
 let ip = "";
+let userAgent = navigator.userAgent;
 
 // ambil IP
 fetch("https://api.ipify.org?format=json")
   .then(res => res.json())
   .then(data => ip = data.ip);
 
+// ambil data siswa
+fetch(API_URL)
+  .then(res => res.json())
+  .then(data => {
+    siswaData = data;
+
+    let kelasSet = new Set();
+
+    data.forEach(s => kelasSet.add(s.kelas));
+
+    let kelasSelect = document.getElementById("kelas");
+
+    kelasSet.forEach(k => {
+      let opt = document.createElement("option");
+      opt.value = k;
+      opt.text = k;
+      kelasSelect.appendChild(opt);
+    });
+  });
+
+// filter username berdasarkan kelas
+document.getElementById("kelas").addEventListener("change", function() {
+  let kelas = this.value;
+  let usernameSelect = document.getElementById("username");
+
+  usernameSelect.innerHTML = '<option value="">-- Pilih Siswa --</option>';
+
+  siswaData
+    .filter(s => s.kelas === kelas)
+    .forEach(s => {
+      let opt = document.createElement("option");
+      opt.value = s.username;
+      opt.text = s.nama;
+      usernameSelect.appendChild(opt);
+    });
+});
+
+// toggle password
+function togglePassword() {
+  let pass = document.getElementById("password");
+  pass.type = pass.type === "password" ? "text" : "password";
+}
+
+// login
 function login() {
   const data = {
     username: document.getElementById("username").value,
@@ -82,18 +206,20 @@ function login() {
   })
   .then(res => res.json())
   .then(res => {
-    if (res.status === "success") {
-      document.getElementById("msg").style.color = "green";
-      document.getElementById("msg").innerText =
-        "Login berhasil: " + res.nama;
+    let msg = document.getElementById("msg");
 
-      // redirect ke soal
+    if (res.status === "success") {
+      msg.style.color = "green";
+      msg.innerText = "Login berhasil: " + res.nama;
+
+      // redirect ke soal (opsional)
       // window.location.href = "soal.html";
     } else {
-      document.getElementById("msg").innerText = res.msg;
+      msg.style.color = "red";
+      msg.innerText = res.msg;
     }
   })
-  .catch(err => {
+  .catch(() => {
     document.getElementById("msg").innerText = "Server error";
   });
 }
