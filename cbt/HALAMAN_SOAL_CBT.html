@@ -130,7 +130,7 @@
 
 <script>
     // URL API ANDA
-    const API_URL = "https://script.google.com/macros/s/AKfycbwf_Hza9uzl9mdE-iiYZExPQ1Q7e2NsrVKhy48Bn15YtKzZGw_OLRTM3AYDu0d5mx2X/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbwf_Hza9uzl9mdE-iiYZExPQ1Q7e2NsrVKhy48Bn15YtKzZGw_OLRTM3AYDu0d5mx2X/exec"; 
     const API_SOAL = "https://script.google.com/macros/s/AKfycbyP6AyagNPxUVcpV59JDCaVgqcD-yloDwicbwrv_wn6upZLqGzVWrpBhng4NkmunWM/exec";
 
     let currentIdx = 0;
@@ -189,27 +189,41 @@
     async function kirimJawaban() {
         closeModal();
         document.getElementById('loading').style.display = "flex";
-        document.getElementById('loadingText').innerText = "Sedang menghitung nilai...";
+        document.getElementById('loadingText').innerText = "Sedang mengirim jawaban...";
 
+        // Kalkulasi skor lokal untuk cadangan
         let benar = 0;
         listSoal.forEach(s => { if (jawabanSiswa[s.no] === s.kunci) benar++; });
         let skor = Math.round((benar / listSoal.length) * 100);
 
         try {
-            await fetch(API_URL, {
+            // Perbaikan: Menghapus no-cors agar data terbaca oleh GAS
+            const response = await fetch(API_URL, {
                 method: "POST",
-                mode: "no-cors",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify({
                     action: "kirimJawaban",
                     idLogin: userSession.idLogin,
                     nama: userSession.nama,
                     kelas: userSession.kelas,
-                    nilai: skor,
+                    jk: userSession.jk || "-",
                     jawaban: jawabanSiswa
                 })
             });
-            tampilkanHasil(skor);
-        } catch (e) { tampilkanHasil(skor); }
+
+            const result = await response.json();
+            
+            if (result.status === "success") {
+                tampilkanHasil(result.nilai);
+            } else {
+                alert("Gagal menyimpan: " + result.msg);
+                tampilkanHasil(skor);
+            }
+        } catch (e) { 
+            console.error(e);
+            alert("Koneksi bermasalah, data mungkin gagal terkirim.");
+            tampilkanHasil(skor); 
+        }
     }
 
     function tampilkanHasil(skor) {
@@ -218,7 +232,7 @@
         document.getElementById('halamanTerimaKasih').style.display = 'flex';
         document.getElementById('displayNilai').innerText = skor;
 
-        let detik = 60; // HITUNG MUNDUR 60 DETIK SESUAI PERMINTAAN
+        let detik = 60; 
         const intv = setInterval(() => {
             detik--;
             document.getElementById('timerKeluar').innerText = detik;
@@ -229,7 +243,7 @@
     function eksekusiLogoutTotal() {
         localStorage.clear();
         sessionStorage.clear();
-        window.location.replace("index.html"); // Proteksi tombol BACK
+        window.location.replace("index.html"); 
     }
 
     let s = 0;
