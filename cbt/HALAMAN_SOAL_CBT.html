@@ -84,7 +84,7 @@
         .kotak-nomor.sudah { background: var(--success) !important; color: white; }
         .kotak-nomor.aktif { border: 2px solid var(--gold); transform: scale(1.1); }
 
-        /* MODAL CUSTOM (Sama dengan Dashboard Login) */
+        /* MODAL CUSTOM */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); display: none;
@@ -255,22 +255,25 @@
 
     function lompatSoal(i) { currentIdx = i; renderSoal(); }
 
-    // FUNGSI MODAL
     function openModal() {
         const jml = Object.keys(jawabanSiswa).length;
         document.getElementById('modalText').innerHTML = `Anda telah menjawab <b>${jml}</b> dari <b>${listSoal.length}</b> soal.<br><br>Yakin ingin mengakhiri ujian?`;
         document.getElementById('modalConfirm').style.display = 'flex';
     }
+    
     function closeModal() { document.getElementById('modalConfirm').style.display = 'none'; }
 
     function laporMulaiUjian() {
         fetch(API_URL_SOAL, { method: "POST", body: JSON.stringify({ action: "mulaiUjian", idLogin: userSession.idLogin, nama: userSession.nama }) });
     }
 
+    // --- PERBAIKAN FUNGSI KIRIM JAWABAN (SINKRONISASI LOGOUT) ---
     function kirimJawaban() {
         closeModal();
         document.getElementById('loading').style.display = "flex";
-        document.getElementById('loading').innerHTML = "<p>Mengirim Jawaban...</p>";
+        document.getElementById('loading').innerHTML = "<p>Mengirim Jawaban & Menutup Sesi...</p>";
+        
+        // 1. Kirim Jawaban ke Spreadsheet Soal
         fetch(API_URL_SOAL, {
             method: "POST",
             body: JSON.stringify({
@@ -280,8 +283,20 @@
         })
         .then(res => res.json())
         .then(data => {
-            alert("Berhasil! Nilai Anda: " + data.nilai);
-            localStorage.clear(); window.location.href = "index.html";
+            // 2. Kirim sinyal Logout ke Spreadsheet Login agar status jadi OFF
+            return fetch(`${API_URL_LOGIN}?mode=logout&idLogin=${userSession.idLogin}`);
+        })
+        .then(() => {
+            // 3. Hapus memori lokal dan pindah halaman
+            alert("Ujian Selesai! Sesi Anda telah ditutup.");
+            localStorage.clear(); 
+            window.location.href = "index.html";
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Gagal menutup sesi secara otomatis. Jika tidak bisa login kembali, hubungi Admin.");
+            localStorage.clear();
+            window.location.href = "index.html";
         });
     }
 
