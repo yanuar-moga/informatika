@@ -290,7 +290,7 @@
         document.getElementById('app-content').classList.add('hidden');
         document.getElementById('halamanTerimaKasih').style.display = 'flex';
         
-        let detik = 7;
+        let detik = 60;
         const timerTxt = document.getElementById('timerKeluar');
         const interval = setInterval(() => {
             detik--;
@@ -304,7 +304,7 @@
 
     const keHalamanLogin = () => {
         localStorage.clear();
-        window.location.href = "index.html";
+        window.location.href = "index2.html";
     };
 
     // TIMER TRIGGER LOGOUT (60 DETIK)
