@@ -7,7 +7,7 @@
     <style>
         :root {
             --primary-blue: #1f4e94;
-            --btn-blue: #4472c4;
+            --btn-blue: #007bff; /* Biru cerah untuk Batal */
             --btn-red: #ed1c24;
             --gold: #d4af37;
             --light-bg: #f4f7fa;
@@ -47,11 +47,8 @@
             background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
             border-left: 5px solid var(--primary-blue);
         }
-        @media (min-width: 768px) { .soal-card { padding: 30px; } }
 
         .pertanyaan { font-size: 17px; font-weight: 600; margin-bottom: 20px; color: #333; line-height: 1.6; }
-        .gambar-soal { max-width: 100%; border-radius: 10px; margin-bottom: 20px; border: 1px solid #eee; }
-
         .opsi-container { display: flex; flex-direction: column; gap: 10px; }
         .opsi { 
             display: flex; align-items: center; padding: 12px; border: 1px solid #ddd; 
@@ -61,30 +58,28 @@
         .opsi.selected { background: #e1ecff; border-color: var(--primary-blue); font-weight: bold; }
         .opsi b { margin-right: 12px; color: var(--primary-blue); }
 
-        /* SIDEBAR & GRID */
-        .sidebar { flex: 1; width: 100%; }
-        .nav-card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .grid-nomor { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 15px; }
-        .kotak-nomor { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #e9ecef; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; border: 1px solid #ddd; }
-        @media (min-width: 768px) { .sidebar { min-width: 250px; } .nav-card { position: sticky; top: 90px; } .grid-nomor { grid-template-columns: repeat(5, 1fr); gap: 8px; } .kotak-nomor { font-size: 14px; } }
+        /* GRID NOMOR */
+        .grid-nomor { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 15px; }
+        .kotak-nomor { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #e9ecef; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; border: 1px solid #ddd; }
         .kotak-nomor.sudah { background: var(--success) !important; color: white; border-color: var(--success); }
-        .kotak-nomor.aktif { border: 2px solid var(--gold); transform: scale(1.05); background: #fff; }
+        .kotak-nomor.aktif { border: 2px solid var(--gold); background: #fff; }
 
         /* MODAL */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 15px; box-sizing: border-box; }
-        .modal-box { background: white; width: 100%; max-width: 400px; border-radius: 20px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.3); padding: 25px; box-sizing: border-box; animation: fadeIn 0.3s ease; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-box { background: white; width: 90%; max-width: 400px; border-radius: 20px; text-align: center; padding: 25px; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        #halamanTerimaKasih { display: none; justify-content: center; align-items: center; min-height: 70vh; }
-        .main-footer { background: #222; color: #ccc; text-align: center; padding: 20px 10px; font-size: 12px; line-height: 1.6; margin-top: auto; }
-        .footer-nav { background: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; position: fixed; bottom: 0; width: 100%; box-sizing: border-box; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); border-top: 3px solid var(--gold); z-index: 90; }
-        .btn { padding: 10px 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 13px; }
+        .footer-nav { background: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; position: fixed; bottom: 0; width: 100%; box-sizing: border-box; border-top: 3px solid var(--gold); z-index: 90; }
+        .btn { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-next { background: var(--primary-blue); color: white; }
         .btn-prev { background: #eee; color: #333; }
-        .btn-submit-final { background: var(--success); color: white; width: 100%; margin-top: 5px; font-size: 14px; padding: 12px; }
+        .btn-submit-final { background: var(--success); color: white; width: 100%; margin-top: 5px; padding: 12px; }
 
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
         .hidden { display: none !important; }
+        
+        /* NILAI BADGE */
+        .nilai-box { font-size: 48px; font-weight: bold; color: var(--primary-blue); margin: 15px 0; }
     </style>
 </head>
 <body>
@@ -96,14 +91,14 @@
 
 <div class="modal-overlay" id="modalConfirm">
     <div class="modal-box">
-        <h2 style="margin-top:0; color: #333; font-size: 22px;">Konfirmasi Jawaban</h2>
-        <p style="font-size: 16px; color: #555; line-height: 1.4;">Anda yakin sudah selesai mengerjakan tes?</p>
-        <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin: 25px 0; background: #f8f9fa; padding: 12px; border-radius: 10px;">
-            <input type="checkbox" id="checkYakin" onchange="toggleKirimBtn()" style="width:20px; height:20px; cursor:pointer;">
-            <label for="checkYakin" style="font-size: 14px; cursor:pointer; font-weight: 500;">Saya yakin sudah benar</label>
+        <h2 style="color: #333;">Konfirmasi Jawaban</h2>
+        <p>Anda yakin sudah selesai mengerjakan tes?</p>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin: 20px 0; background: #f8f9fa; padding: 10px; border-radius: 10px;">
+            <input type="checkbox" id="checkYakin" onchange="toggleKirimBtn()" style="width:18px; height:18px;">
+            <label for="checkYakin" style="font-size: 14px; cursor:pointer;">Saya yakin sudah benar</label>
         </div>
         <div style="display: flex; gap: 10px;">
-            <button class="btn" style="flex:1; background:#eee; color:#333;" onclick="closeModal()">Batal</button>
+            <button class="btn" style="flex:1; background:var(--btn-blue); color:white;" onclick="closeModal()">Batal</button>
             <button class="btn" id="btnFinalKirim" style="flex:1; background:var(--btn-red); color:white; opacity:0.4" disabled onclick="kirimJawaban()">Kirim</button>
         </div>
     </div>
@@ -112,8 +107,8 @@
 <div id="app-content">
     <div class="header">
         <div class="user-info">
-            <b id="displayNama">Siswa</b><br>
-            <small id="displayKelas">Kelas</small>
+            <b id="displayNama">Memuat...</b><br>
+            <small id="displayKelas">Kelas...</small>
         </div>
         <div class="timer" id="timerDisplay">00:00:00</div>
     </div>
@@ -123,8 +118,8 @@
             <div id="quizArea"></div>
         </div>
         <div class="sidebar">
-            <div class="nav-card">
-                <h4 style="margin:0 0 10px 0; color: var(--primary-blue); font-size: 15px;">Nomor Soal</h4>
+            <div class="nav-card" style="background:white; padding:15px; border-radius:15px;">
+                <h4 style="margin:0 0 10px 0;">Nomor Soal</h4>
                 <div id="gridNomor" class="grid-nomor"></div>
                 <button class="btn btn-submit-final" onclick="openModal()">SELESAI UJIAN</button>
             </div>
@@ -133,213 +128,152 @@
 
     <div class="footer-nav">
         <button class="btn btn-prev" id="btnPrev" onclick="changeSoal(-1)">⬅️ Back</button>
-        <div style="font-weight:bold; color:var(--primary-blue); font-size:11px" id="infoHalaman">Soal - / -</div>
+        <div style="font-weight:bold; color:var(--primary-blue);" id="infoHalaman">Soal - / -</div>
         <button class="btn btn-next" id="btnNext" onclick="changeSoal(1)">Next ➡️</button>
     </div>
 </div>
 
-<div id="halamanTerimaKasih" class="main-layout" style="display:none;">
-    <div class="soal-card" style="text-align:center; width: 100%; max-width:450px; border-left:none; border-top:5px solid var(--success)">
-        <div style="font-size: 50px; margin-bottom: 10px;">✅</div>
-        <h2 style="color:var(--success); margin-top: 0;">Terima Kasih!</h2>
-        <p style="font-size:15px; color:#444">Anda sudah menyelesaikan tes <b>CBT Informatika</b>.</p>
-        <hr style="margin:20px 0; border:0; border-top:1px solid #eee">
-        <p style="font-size:14px; color:#666">
-            Otomatis kembali ke login dalam <span id="timerKeluar" style="font-weight:bold; color:var(--btn-red); font-size:18px">7</span> detik.
-        </p>
-        <button class="btn" style="background:var(--btn-red); color:white; margin-top:15px; width: 100%; padding: 12px;" onclick="keHalamanLogin()">KELUAR SEKARANG</button>
+<div id="halamanTerimaKasih" class="main-layout" style="display:none; justify-content:center; align-items:center; min-height:80vh;">
+    <div class="soal-card" style="text-align:center; width: 100%; max-width:400px; border-left:none; border-top:5px solid var(--success)">
+        <div style="font-size: 50px;">✅</div>
+        <h2 style="color:var(--success);">Berhasil Dikirim!</h2>
+        <p>Nilai Hasil Ujian Anda:</p>
+        <div class="nilai-box" id="displayNilai">0</div>
+        <p style="font-size:14px; color:#666">Otomatis keluar dalam <span id="timerKeluar">10</span> detik.</p>
+        <button class="btn" style="background:var(--btn-red); color:white; width: 100%; padding: 12px;" onclick="keHalamanLogin()">KELUAR SEKARANG</button>
     </div>
 </div>
 
-<footer class="main-footer">
-    Aplikasi CBT Browser by MB<br>
-    <b>© 2026 MB All Rights Reserved</b>
-</footer>
-
 <script>
-    const API_URL_SOAL = "https://script.google.com/macros/s/AKfycbyP6AyagNPxUVcpV59JDCaVgqcD-yloDwicbwrv_wn6upZLqGzVWrpBhng4NkmunWM/exec";
-    const API_URL_LOGIN = "https://script.google.com/macros/s/AKfycbwf_Hza9uzl9mdE-iiYZExPQ1Q7e2NsrVKhy48Bn15YtKzZGw_OLRTM3AYDu0d5mx2X/exec";
+    // GANTI DENGAN URL DEPLOYMENT ANDA
+    const API_URL = "https://script.google.com/macros/s/AKfycbwf_Hza9uzl9mdE-iiYZExPQ1Q7e2NsrVKhy48Bn15YtKzZGw_OLRTM3AYDu0d5mx2X/exec"; 
+    const API_SOAL = "https://script.google.com/macros/s/AKfycbyP6AyagNPxUVcpV59JDCaVgqcD-yloDwicbwrv_wn6upZLqGzVWrpBhng4NkmunWM/exec";
 
     let currentIdx = 0;
     let listSoal = [];
     let jawabanSiswa = {};
-    let userSession = null;
-    let countdownSesi = 60; // TRIGGER LOGOUT DALAM 60 DETIK
+    let userSession = JSON.parse(localStorage.getItem("user"));
 
     window.onload = () => {
-        const savedUser = localStorage.getItem("user");
-        if (!savedUser) { window.location.href = "index.html"; return; }
-        userSession = JSON.parse(savedUser);
+        if (!userSession) { window.location.href = "index.html"; return; }
         document.getElementById('displayNama').innerText = userSession.nama;
-        document.getElementById('displayKelas').innerText = `SMPN 1 Moga | Kelas ${userSession.kelas}`;
+        document.getElementById('displayKelas').innerText = `Kelas ${userSession.kelas}`;
         loadSoal();
-        startCekSesi();
-        startAutoLogoutTimer(); // Jalankan hitung mundur logout
     };
 
-    const loadSoal = async () => {
+    async function loadSoal() {
         try {
-            const res = await fetch(`${API_URL_SOAL}?mode=getSoal`);
+            const res = await fetch(`${API_SOAL}?mode=getSoal`);
             listSoal = await res.json();
-            const saved = localStorage.getItem(`progress_${userSession.idLogin}`);
-            if (saved) jawabanSiswa = JSON.parse(saved);
             renderSoal();
             document.getElementById('loading').style.display = "none";
-            laporMulaiUjian();
-        } catch (err) {
-            console.error("Gagal memuat soal:", err);
-        }
-    };
+        } catch (e) { alert("Gagal memuat soal!"); }
+    }
 
-    const renderGrid = () => {
-        const grid = document.getElementById('gridNomor');
-        grid.innerHTML = listSoal.map((s, i) => {
-            const cls = `${jawabanSiswa[s.no] ? 'sudah' : ''} ${currentIdx === i ? 'aktif' : ''}`;
-            return `<div class="kotak-nomor ${cls}" onclick="lompatSoal(${i})">${i + 1}</div>`;
-        }).join('');
-    };
-
-    const renderSoal = () => {
+    function renderSoal() {
         const soal = listSoal[currentIdx];
         document.getElementById('infoHalaman').innerText = `Soal ${currentIdx + 1} / ${listSoal.length}`;
         
         let html = `
             <div class="soal-card">
-                <div class="pertanyaan">${soal.no}. ${formatContent(soal.pertanyaan)}</div>
-                ${soal.gambar ? `<img src="${soal.gambar}" class="gambar-soal">` : ""}
+                <div class="pertanyaan">${currentIdx + 1}. ${soal.pertanyaan}</div>
                 <div class="opsi-container">
-                    ${['A', 'B', 'C', 'D', 'E'].map(k => {
-                        const val = soal.opsi[k]; if(!val) return "";
-                        return `<div class="opsi ${jawabanSiswa[soal.no] === k ? 'selected' : ''}" onclick="pilihJawaban('${soal.no}','${k}')">
-                            <b>${k}.</b> ${formatContent(val)}
-                        </div>`;
-                    }).join('')}
+                    ${['A', 'B', 'C', 'D'].map(k => `
+                        <div class="opsi ${jawabanSiswa[soal.no] === k ? 'selected' : ''}" onclick="pilihJawaban('${soal.no}','${k}')">
+                            <b>${k}.</b> ${soal.opsi[k]}
+                        </div>
+                    `).join('')}
                 </div>
             </div>`;
-            
         document.getElementById('quizArea').innerHTML = html;
-        document.getElementById('btnPrev').style.visibility = currentIdx === 0 ? "hidden" : "visible";
-        document.getElementById('btnNext').innerText = currentIdx === listSoal.length - 1 ? "Selesai" : "Next ➡️";
         renderGrid();
-    };
+    }
 
-    const formatContent = (t) => (typeof t === 'string' && t.startsWith('http')) ? `<img src="${t}" style="max-width:180px; display:block; margin:10px 0;">` : t;
-
-    const pilihJawaban = (no, o) => {
-        jawabanSiswa[no] = o;
-        localStorage.setItem(`progress_${userSession.idLogin}`, JSON.stringify(jawabanSiswa));
+    function pilihJawaban(no, k) {
+        jawabanSiswa[no] = k;
         renderSoal();
-    };
+    }
 
-    const changeSoal = (d) => {
+    function renderGrid() {
+        const grid = document.getElementById('gridNomor');
+        grid.innerHTML = listSoal.map((s, i) => `
+            <div class="kotak-nomor ${jawabanSiswa[s.no] ? 'sudah' : ''} ${currentIdx === i ? 'aktif' : ''}" onclick="currentIdx=${i};renderSoal();">${i+1}</div>
+        `).join('');
+    }
+
+    function changeSoal(d) {
         if (currentIdx + d >= 0 && currentIdx + d < listSoal.length) {
-            currentIdx += d; renderSoal(); window.scrollTo(0,0);
-        } else if (d === 1) { openModal(); }
-    };
+            currentIdx += d; renderSoal();
+        }
+    }
 
-    const lompatSoal = (i) => { currentIdx = i; renderSoal(); };
-
-    const openModal = () => { 
-        document.getElementById('checkYakin').checked = false;
-        toggleKirimBtn();
-        document.getElementById('modalConfirm').style.display = 'flex'; 
-    };
-    
-    const closeModal = () => document.getElementById('modalConfirm').style.display = 'none';
-
-    const toggleKirimBtn = () => {
-        const isChecked = document.getElementById('checkYakin').checked;
+    function openModal() { document.getElementById('modalConfirm').style.display = 'flex'; }
+    function closeModal() { document.getElementById('modalConfirm').style.display = 'none'; }
+    function toggleKirimBtn() {
         const btn = document.getElementById('btnFinalKirim');
-        btn.disabled = !isChecked;
-        btn.style.opacity = isChecked ? "1" : "0.4";
-    };
+        btn.disabled = !document.getElementById('checkYakin').checked;
+        btn.style.opacity = btn.disabled ? "0.4" : "1";
+    }
 
-    const laporMulaiUjian = () => {
-        fetch(API_URL_SOAL, { method: "POST", body: JSON.stringify({ action: "mulaiUjian", idLogin: userSession.idLogin, nama: userSession.nama }) });
-    };
-
-    // FUNGSI KIRIM JAWABAN & LOGOUT (DIGUNAKAN MANUAL & OTOMATIS)
-    const kirimJawaban = async () => {
+    // LOGIKA HITUNG NILAI DAN KIRIM
+    async function kirimJawaban() {
         closeModal();
         document.getElementById('loading').style.display = "flex";
-        document.getElementById('loadingText').innerText = "Mengirim Jawaban & Menutup Sesi...";
-        
+        document.getElementById('loadingText').innerText = "Menghitung & Mengirim Nilai...";
+
+        // Hitung Skor Sederhana
+        let benar = 0;
+        listSoal.forEach(s => {
+            if (jawabanSiswa[s.no] === s.kunci) benar++;
+        });
+        let skor = Math.round((benar / listSoal.length) * 100);
+
+        const payload = {
+            action: "kirimJawaban",
+            idLogin: userSession.idLogin,
+            nama: userSession.nama,
+            kelas: userSession.kelas,
+            nilai: skor,
+            jawaban: jawabanSiswa
+        };
+
         try {
-            // 1. Kirim Jawaban ke Backend Soal
-            await fetch(API_URL_SOAL, {
-                method: "POST",
-                body: JSON.stringify({
-                    action: "kirimJawaban", idLogin: userSession.idLogin, 
-                    nama: userSession.nama, kelas: userSession.kelas, jawaban: jawabanSiswa
-                })
-            });
-
-            // 2. Kirim Logout ke Backend Login
-            await fetch(`${API_URL_LOGIN}?mode=logout&idLogin=${userSession.idLogin}`, { mode: 'no-cors' });
-
-            tampilkanHalamanTerimaKasih();
-        } catch (err) {
-            console.error("Gagal kirim:", err);
-            alert("Koneksi bermasalah. Jawaban tersimpan lokal.");
-            document.getElementById('loading').style.display = "none";
+            await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+            tampilkanHasil(skor);
+        } catch (e) {
+            alert("Gagal kirim ke server, tapi skor Anda: " + skor);
+            tampilkanHasil(skor);
         }
-    };
+    }
 
-    const tampilkanHalamanTerimaKasih = () => {
+    function tampilkanHasil(skor) {
         document.getElementById('loading').style.display = "none";
         document.getElementById('app-content').classList.add('hidden');
         document.getElementById('halamanTerimaKasih').style.display = 'flex';
-        
-        let detik = 60;
-        const timerTxt = document.getElementById('timerKeluar');
-        const interval = setInterval(() => {
+        document.getElementById('displayNilai').innerText = skor;
+
+        let detik = 10;
+        setInterval(() => {
             detik--;
-            timerTxt.innerText = detik;
-            if(detik <= 0) {
-                clearInterval(interval);
-                keHalamanLogin();
-            }
+            document.getElementById('timerKeluar').innerText = detik;
+            if (detik <= 0) keHalamanLogin();
         }, 1000);
-    };
+    }
 
-    const keHalamanLogin = () => {
+    function keHalamanLogin() {
         localStorage.clear();
-        window.location.href = "index2.html";
-    };
+        window.location.href = "index.html";
+    }
 
-    // TIMER TRIGGER LOGOUT (60 DETIK)
-    const startAutoLogoutTimer = () => {
-        const timerSesi = setInterval(() => {
-            countdownSesi--;
-            if (countdownSesi <= 0) {
-                clearInterval(timerSesi);
-                alert("Waktu habis! Sesi Anda berakhir.");
-                kirimJawaban(); // Otomatis logout dan kirim
-            }
-        }, 1000);
-    };
-
-    const startCekSesi = () => {
-        setInterval(async () => {
-            try {
-                const res = await fetch(`${API_URL_LOGIN}?mode=cek_sesi&idLogin=${userSession.idLogin}`);
-                const d = await res.json();
-                if (d.status === "off") location.reload();
-            } catch (e) {}
-        }, 30000);
-    };
-
-    // Timer Durasi Ujian (Display)
-    let sec = 0;
+    // Timer Durasi
+    let s = 0;
     setInterval(() => {
-        sec++;
-        let h = Math.floor(sec/3600).toString().padStart(2,'0');
-        let m = Math.floor((sec%3600)/60).toString().padStart(2,'0');
-        let s = (sec%60).toString().padStart(2,'0');
-        document.getElementById('timerDisplay').innerText = `${h}:${m}:${s}`;
+        s++;
+        let h = Math.floor(s/3600).toString().padStart(2,'0');
+        let m = Math.floor((s%3600)/60).toString().padStart(2,'0');
+        let sec = (s%60).toString().padStart(2,'0');
+        document.getElementById('timerDisplay').innerText = `${h}:${m}:${sec}`;
     }, 1000);
-
-    window.oncontextmenu = () => false;
 </script>
 </body>
 </html>
