@@ -18,55 +18,33 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             background: var(--light-bg); 
             margin: 0; padding: 0; user-select: none; 
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            display: flex; flex-direction: column; min-height: 100vh;
         }
 
         /* HEADER */
         .header { 
-            background: var(--primary-blue); 
-            color: white; 
-            padding: 10px 15px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            position: sticky; 
-            top: 0; z-index: 100; 
-            border-bottom: 4px solid var(--gold);
+            background: var(--primary-blue); color: white; padding: 10px 15px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            position: sticky; top: 0; z-index: 100; border-bottom: 4px solid var(--gold);
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
         .user-info b { font-size: 14px; color: var(--gold); }
         .timer { 
-            font-size: 16px; font-weight: bold; 
-            background: white; color: var(--primary-blue); 
-            padding: 5px 12px; border-radius: 20px; 
-            border: 2px solid var(--gold);
+            font-size: 16px; font-weight: bold; background: white; color: var(--primary-blue); 
+            padding: 5px 12px; border-radius: 20px; border: 2px solid var(--gold);
         }
 
         /* LAYOUT */
-        .main-layout {
-            display: flex;
-            flex-direction: column;
-            max-width: 1100px;
-            margin: 10px auto;
-            gap: 20px;
-            padding: 0 15px 120px 15px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        @media (min-width: 768px) {
-            .main-layout { flex-direction: row; margin: 20px auto; }
+        .main-layout { display: flex; flex-direction: column; max-width: 1100px; margin: 10px auto; gap: 20px; padding: 0 15px 120px 15px; width: 100%; box-sizing: border-box; }
+        @media (min-width: 768px) { 
+            .main-layout { flex-direction: row; margin: 20px auto; } 
             .user-info b { font-size: 16px; }
         }
 
-        /* SOAL AREA */
         .quiz-container { flex: 3; width: 100%; }
         .soal-card { 
-            background: white; padding: 20px; 
-            border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
+            background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
             border-left: 5px solid var(--primary-blue);
         }
         @media (min-width: 768px) { .soal-card { padding: 30px; } }
@@ -76,10 +54,8 @@
 
         .opsi-container { display: flex; flex-direction: column; gap: 10px; }
         .opsi { 
-            display: flex; align-items: center; padding: 12px; 
-            border: 1px solid #ddd; border-radius: 10px; 
-            cursor: pointer; transition: all 0.2s; background: #fff;
-            font-size: 15px;
+            display: flex; align-items: center; padding: 12px; border: 1px solid #ddd; 
+            border-radius: 10px; cursor: pointer; transition: all 0.2s; background: #fff; font-size: 15px;
         }
         .opsi:hover { border-color: var(--primary-blue); background: #f0f5ff; }
         .opsi.selected { background: #e1ecff; border-color: var(--primary-blue); font-weight: bold; }
@@ -89,55 +65,19 @@
         .sidebar { flex: 1; width: 100%; }
         .nav-card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         .grid-nomor { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 15px; }
-        .kotak-nomor { 
-            aspect-ratio: 1; display: flex; align-items: center; justify-content: center; 
-            background: #e9ecef; border-radius: 6px; cursor: pointer; font-weight: bold; 
-            font-size: 12px; border: 1px solid #ddd;
-        }
-        @media (min-width: 768px) {
-            .sidebar { min-width: 250px; }
-            .nav-card { position: sticky; top: 90px; }
-            .grid-nomor { grid-template-columns: repeat(5, 1fr); gap: 8px; }
-            .kotak-nomor { font-size: 14px; }
-        }
+        .kotak-nomor { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #e9ecef; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; border: 1px solid #ddd; }
+        @media (min-width: 768px) { .sidebar { min-width: 250px; } .nav-card { position: sticky; top: 90px; } .grid-nomor { grid-template-columns: repeat(5, 1fr); gap: 8px; } .kotak-nomor { font-size: 14px; } }
         .kotak-nomor.sudah { background: var(--success) !important; color: white; border-color: var(--success); }
         .kotak-nomor.aktif { border: 2px solid var(--gold); transform: scale(1.05); background: #fff; }
 
-        /* MODAL RESPONSIVE */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); display: none;
-            justify-content: center; align-items: center; z-index: 1000;
-            padding: 15px; /* Spasi agar tidak nempel layar hp */
-            box-sizing: border-box;
-        }
-        .modal-box {
-            background: white; width: 100%; max-width: 400px;
-            border-radius: 20px; text-align: center;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-            padding: 25px; box-sizing: border-box;
-            animation: fadeIn 0.3s ease;
-        }
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 15px; box-sizing: border-box; }
+        .modal-box { background: white; width: 100%; max-width: 400px; border-radius: 20px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.3); padding: 25px; box-sizing: border-box; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* TERIMA KASIH */
         #halamanTerimaKasih { display: none; justify-content: center; align-items: center; min-height: 70vh; }
-
-        /* FOOTER */
-        .main-footer {
-            background: #222; color: #ccc;
-            text-align: center; padding: 20px 10px;
-            font-size: 12px; line-height: 1.6;
-            margin-top: auto;
-        }
-
-        .footer-nav { 
-            background: white; padding: 10px 15px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            position: fixed; bottom: 0; width: 100%; box-sizing: border-box; 
-            box-shadow: 0 -4px 15px rgba(0,0,0,0.1); border-top: 3px solid var(--gold);
-            z-index: 90;
-        }
+        .main-footer { background: #222; color: #ccc; text-align: center; padding: 20px 10px; font-size: 12px; line-height: 1.6; margin-top: auto; }
+        .footer-nav { background: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; position: fixed; bottom: 0; width: 100%; box-sizing: border-box; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); border-top: 3px solid var(--gold); z-index: 90; }
         .btn { padding: 10px 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 13px; }
         .btn-next { background: var(--primary-blue); color: white; }
         .btn-prev { background: #eee; color: #333; }
@@ -158,12 +98,10 @@
     <div class="modal-box">
         <h2 style="margin-top:0; color: #333; font-size: 22px;">Konfirmasi Jawaban</h2>
         <p style="font-size: 16px; color: #555; line-height: 1.4;">Anda yakin sudah selesai mengerjakan tes?</p>
-        
         <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin: 25px 0; background: #f8f9fa; padding: 12px; border-radius: 10px;">
             <input type="checkbox" id="checkYakin" onchange="toggleKirimBtn()" style="width:20px; height:20px; cursor:pointer;">
             <label for="checkYakin" style="font-size: 14px; cursor:pointer; font-weight: 500;">Saya yakin sudah benar</label>
         </div>
-
         <div style="display: flex; gap: 10px;">
             <button class="btn" style="flex:1; background:#eee; color:#333;" onclick="closeModal()">Batal</button>
             <button class="btn" id="btnFinalKirim" style="flex:1; background:var(--btn-red); color:white; opacity:0.4" disabled onclick="kirimJawaban()">Kirim</button>
@@ -184,7 +122,6 @@
         <div class="quiz-container">
             <div id="quizArea"></div>
         </div>
-
         <div class="sidebar">
             <div class="nav-card">
                 <h4 style="margin:0 0 10px 0; color: var(--primary-blue); font-size: 15px;">Nomor Soal</h4>
@@ -227,42 +164,45 @@
     let listSoal = [];
     let jawabanSiswa = {};
     let userSession = null;
+    let countdownSesi = 60; // TRIGGER LOGOUT DALAM 60 DETIK
 
-    window.onload = function() {
+    window.onload = () => {
         const savedUser = localStorage.getItem("user");
         if (!savedUser) { window.location.href = "index.html"; return; }
         userSession = JSON.parse(savedUser);
         document.getElementById('displayNama').innerText = userSession.nama;
-        document.getElementById('displayKelas').innerText = "SMPN 1 Moga | Kelas " + userSession.kelas;
+        document.getElementById('displayKelas').innerText = `SMPN 1 Moga | Kelas ${userSession.kelas}`;
         loadSoal();
         startCekSesi();
+        startAutoLogoutTimer(); // Jalankan hitung mundur logout
     };
 
-    function loadSoal() {
-        fetch(API_URL_SOAL + "?mode=getSoal")
-            .then(res => res.json())
-            .then(data => {
-                listSoal = data;
-                const saved = localStorage.getItem("progress_" + userSession.idLogin);
-                if (saved) jawabanSiswa = JSON.parse(saved);
-                renderSoal();
-                document.getElementById('loading').style.display = "none";
-                laporMulaiUjian();
-            });
-    }
+    const loadSoal = async () => {
+        try {
+            const res = await fetch(`${API_URL_SOAL}?mode=getSoal`);
+            listSoal = await res.json();
+            const saved = localStorage.getItem(`progress_${userSession.idLogin}`);
+            if (saved) jawabanSiswa = JSON.parse(saved);
+            renderSoal();
+            document.getElementById('loading').style.display = "none";
+            laporMulaiUjian();
+        } catch (err) {
+            console.error("Gagal memuat soal:", err);
+        }
+    };
 
-    function renderGrid() {
+    const renderGrid = () => {
         const grid = document.getElementById('gridNomor');
-        grid.innerHTML = "";
-        listSoal.forEach((s, i) => {
-            const cls = (jawabanSiswa[s.no] ? "sudah" : "") + (currentIdx === i ? " aktif" : "");
-            grid.innerHTML += `<div class="kotak-nomor ${cls}" onclick="lompatSoal(${i})">${i + 1}</div>`;
-        });
-    }
+        grid.innerHTML = listSoal.map((s, i) => {
+            const cls = `${jawabanSiswa[s.no] ? 'sudah' : ''} ${currentIdx === i ? 'aktif' : ''}`;
+            return `<div class="kotak-nomor ${cls}" onclick="lompatSoal(${i})">${i + 1}</div>`;
+        }).join('');
+    };
 
-    function renderSoal() {
+    const renderSoal = () => {
         const soal = listSoal[currentIdx];
         document.getElementById('infoHalaman').innerText = `Soal ${currentIdx + 1} / ${listSoal.length}`;
+        
         let html = `
             <div class="soal-card">
                 <div class="pertanyaan">${soal.no}. ${formatContent(soal.pertanyaan)}</div>
@@ -276,80 +216,81 @@
                     }).join('')}
                 </div>
             </div>`;
+            
         document.getElementById('quizArea').innerHTML = html;
         document.getElementById('btnPrev').style.visibility = currentIdx === 0 ? "hidden" : "visible";
         document.getElementById('btnNext').innerText = currentIdx === listSoal.length - 1 ? "Selesai" : "Next ➡️";
         renderGrid();
-    }
+    };
 
-    function formatContent(t) {
-        return (typeof t === 'string' && t.startsWith('http')) ? `<img src="${t}" style="max-width:180px; display:block; margin:10px 0;">` : t;
-    }
+    const formatContent = (t) => (typeof t === 'string' && t.startsWith('http')) ? `<img src="${t}" style="max-width:180px; display:block; margin:10px 0;">` : t;
 
-    function pilihJawaban(no, o) {
+    const pilihJawaban = (no, o) => {
         jawabanSiswa[no] = o;
-        localStorage.setItem("progress_" + userSession.idLogin, JSON.stringify(jawabanSiswa));
+        localStorage.setItem(`progress_${userSession.idLogin}`, JSON.stringify(jawabanSiswa));
         renderSoal();
-    }
+    };
 
-    function changeSoal(d) {
+    const changeSoal = (d) => {
         if (currentIdx + d >= 0 && currentIdx + d < listSoal.length) {
             currentIdx += d; renderSoal(); window.scrollTo(0,0);
         } else if (d === 1) { openModal(); }
-    }
+    };
 
-    function lompatSoal(i) { currentIdx = i; renderSoal(); }
+    const lompatSoal = (i) => { currentIdx = i; renderSoal(); };
 
-    function openModal() { 
+    const openModal = () => { 
         document.getElementById('checkYakin').checked = false;
         toggleKirimBtn();
         document.getElementById('modalConfirm').style.display = 'flex'; 
-    }
+    };
     
-    function closeModal() { document.getElementById('modalConfirm').style.display = 'none'; }
+    const closeModal = () => document.getElementById('modalConfirm').style.display = 'none';
 
-    function toggleKirimBtn() {
+    const toggleKirimBtn = () => {
         const isChecked = document.getElementById('checkYakin').checked;
         const btn = document.getElementById('btnFinalKirim');
         btn.disabled = !isChecked;
         btn.style.opacity = isChecked ? "1" : "0.4";
-    }
+    };
 
-    function laporMulaiUjian() {
+    const laporMulaiUjian = () => {
         fetch(API_URL_SOAL, { method: "POST", body: JSON.stringify({ action: "mulaiUjian", idLogin: userSession.idLogin, nama: userSession.nama }) });
-    }
+    };
 
-    function kirimJawaban() {
+    // FUNGSI KIRIM JAWABAN & LOGOUT (DIGUNAKAN MANUAL & OTOMATIS)
+    const kirimJawaban = async () => {
         closeModal();
         document.getElementById('loading').style.display = "flex";
-        document.getElementById('loadingText').innerText = "Mengirim Jawaban...";
+        document.getElementById('loadingText').innerText = "Mengirim Jawaban & Menutup Sesi...";
         
-        fetch(API_URL_SOAL, {
-            method: "POST",
-            body: JSON.stringify({
-                action: "kirimJawaban", idLogin: userSession.idLogin, 
-                nama: userSession.nama, kelas: userSession.kelas, jawaban: jawabanSiswa
-            })
-        })
-        .then(res => res.json())
-        .then(() => {
-            return fetch(`${API_URL_LOGIN}?mode=logout&idLogin=${userSession.idLogin}`);
-        })
-        .then(() => {
+        try {
+            // 1. Kirim Jawaban ke Backend Soal
+            await fetch(API_URL_SOAL, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "kirimJawaban", idLogin: userSession.idLogin, 
+                    nama: userSession.nama, kelas: userSession.kelas, jawaban: jawabanSiswa
+                })
+            });
+
+            // 2. Kirim Logout ke Backend Login
+            await fetch(`${API_URL_LOGIN}?mode=logout&idLogin=${userSession.idLogin}`, { mode: 'no-cors' });
+
             tampilkanHalamanTerimaKasih();
-        })
-        .catch(err => {
+        } catch (err) {
+            console.error("Gagal kirim:", err);
             alert("Koneksi bermasalah. Jawaban tersimpan lokal.");
             document.getElementById('loading').style.display = "none";
-        });
-    }
+        }
+    };
 
-    function tampilkanHalamanTerimaKasih() {
+    const tampilkanHalamanTerimaKasih = () => {
         document.getElementById('loading').style.display = "none";
         document.getElementById('app-content').classList.add('hidden');
         document.getElementById('halamanTerimaKasih').style.display = 'flex';
         
-        let detik = 60;
+        let detik = 7;
         const timerTxt = document.getElementById('timerKeluar');
         const interval = setInterval(() => {
             detik--;
@@ -359,20 +300,36 @@
                 keHalamanLogin();
             }
         }, 1000);
-    }
+    };
 
-    function keHalamanLogin() {
+    const keHalamanLogin = () => {
         localStorage.clear();
         window.location.href = "index.html";
-    }
+    };
 
-    function startCekSesi() {
-        setInterval(() => {
-            fetch(`${API_URL_LOGIN}?mode=cek_sesi&idLogin=${userSession.idLogin}`)
-                .then(res => res.json()).then(d => { if (d.status === "off") location.reload(); });
+    // TIMER TRIGGER LOGOUT (60 DETIK)
+    const startAutoLogoutTimer = () => {
+        const timerSesi = setInterval(() => {
+            countdownSesi--;
+            if (countdownSesi <= 0) {
+                clearInterval(timerSesi);
+                alert("Waktu habis! Sesi Anda berakhir.");
+                kirimJawaban(); // Otomatis logout dan kirim
+            }
+        }, 1000);
+    };
+
+    const startCekSesi = () => {
+        setInterval(async () => {
+            try {
+                const res = await fetch(`${API_URL_LOGIN}?mode=cek_sesi&idLogin=${userSession.idLogin}`);
+                const d = await res.json();
+                if (d.status === "off") location.reload();
+            } catch (e) {}
         }, 30000);
-    }
+    };
 
+    // Timer Durasi Ujian (Display)
     let sec = 0;
     setInterval(() => {
         sec++;
