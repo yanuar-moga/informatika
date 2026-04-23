@@ -20,10 +20,10 @@
             margin: 0; padding: 0; user-select: none; 
             display: flex;
             flex-direction: column;
-            min-h-screen: 100vh;
+            min-height: 100vh;
         }
 
-        /* HEADER RESPONSIVE */
+        /* HEADER */
         .header { 
             background: var(--primary-blue); 
             color: white; 
@@ -43,13 +43,12 @@
             background: white; color: var(--primary-blue); 
             padding: 5px 12px; border-radius: 20px; 
             border: 2px solid var(--gold);
-            white-space: nowrap;
         }
 
-        /* LAYOUT RESPONSIVE */
+        /* LAYOUT */
         .main-layout {
             display: flex;
-            flex-direction: column; /* Default Mobile */
+            flex-direction: column;
             max-width: 1100px;
             margin: 10px auto;
             gap: 20px;
@@ -63,7 +62,7 @@
             .user-info b { font-size: 16px; }
         }
 
-        /* AREA SOAL */
+        /* SOAL AREA */
         .quiz-container { flex: 3; width: 100%; }
         .soal-card { 
             background: white; padding: 20px; 
@@ -86,75 +85,65 @@
         .opsi.selected { background: #e1ecff; border-color: var(--primary-blue); font-weight: bold; }
         .opsi b { margin-right: 12px; color: var(--primary-blue); }
 
-        /* SIDEBAR NAVIGASI */
+        /* SIDEBAR & GRID */
         .sidebar { flex: 1; width: 100%; }
-        .nav-card { 
-            background: white; padding: 20px; 
-            border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        .nav-card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .grid-nomor { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 15px; }
+        .kotak-nomor { 
+            aspect-ratio: 1; display: flex; align-items: center; justify-content: center; 
+            background: #e9ecef; border-radius: 6px; cursor: pointer; font-weight: bold; 
+            font-size: 12px; border: 1px solid #ddd;
         }
         @media (min-width: 768px) {
             .sidebar { min-width: 250px; }
             .nav-card { position: sticky; top: 90px; }
+            .grid-nomor { grid-template-columns: repeat(5, 1fr); gap: 8px; }
+            .kotak-nomor { font-size: 14px; }
         }
+        .kotak-nomor.sudah { background: var(--success) !important; color: white; border-color: var(--success); }
+        .kotak-nomor.aktif { border: 2px solid var(--gold); transform: scale(1.05); background: #fff; }
 
-        .grid-nomor { 
-            display: grid; 
-            grid-template-columns: repeat(5, 1fr); 
-            gap: 8px; margin-bottom: 20px; 
-        }
-        .kotak-nomor { 
-            aspect-ratio: 1; display: flex; align-items: center; justify-content: center; 
-            background: #e9ecef; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s;
-            font-size: 14px;
-        }
-        .kotak-nomor.sudah { background: var(--success) !important; color: white; }
-        .kotak-nomor.aktif { border: 2px solid var(--gold); transform: scale(1.05); }
-
-        /* MODAL */
+        /* MODAL RESPONSIVE */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); display: none;
+            background: rgba(0,0,0,0.8); display: none;
             justify-content: center; align-items: center; z-index: 1000;
-            padding: 20px;
+            padding: 15px; /* Spasi agar tidak nempel layar hp */
+            box-sizing: border-box;
         }
         .modal-box {
-            background: white; width: 100%; max-width: 450px;
-            border-radius: 15px; text-align: center; overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            padding: 25px; position: relative;
+            background: white; width: 100%; max-width: 400px;
+            border-radius: 20px; text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            padding: 25px; box-sizing: border-box;
+            animation: fadeIn 0.3s ease;
         }
-        
-        /* HALAMAN TERIMA KASIH */
-        #halamanTerimaKasih {
-            display: none; text-align: center; padding: 40px 20px;
-            background: white; border-radius: 15px; margin: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        .success-icon { font-size: 60px; color: var(--success); margin-bottom: 20px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* FOOTER SESUAI PERMINTAAN */
+        /* TERIMA KASIH */
+        #halamanTerimaKasih { display: none; justify-content: center; align-items: center; min-height: 70vh; }
+
+        /* FOOTER */
         .main-footer {
             background: #222; color: #ccc;
             text-align: center; padding: 20px 10px;
-            font-size: 13px; line-height: 1.6;
+            font-size: 12px; line-height: 1.6;
             margin-top: auto;
         }
 
-        /* FOOTER NAV (TOMBOL) */
         .footer-nav { 
-            background: white; padding: 10px 20px; 
+            background: white; padding: 10px 15px; 
             display: flex; justify-content: space-between; align-items: center; 
             position: fixed; bottom: 0; width: 100%; box-sizing: border-box; 
             box-shadow: 0 -4px 15px rgba(0,0,0,0.1); border-top: 3px solid var(--gold);
             z-index: 90;
         }
-        .btn { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 14px; }
+        .btn { padding: 10px 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 13px; }
         .btn-next { background: var(--primary-blue); color: white; }
         .btn-prev { background: #eee; color: #333; }
-        .btn-submit-final { background: var(--success); color: white; width: 100%; margin-top: 10px; }
+        .btn-submit-final { background: var(--success); color: white; width: 100%; margin-top: 5px; font-size: 14px; padding: 12px; }
 
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
-        
         .hidden { display: none !important; }
     </style>
 </head>
@@ -167,15 +156,17 @@
 
 <div class="modal-overlay" id="modalConfirm">
     <div class="modal-box">
-        <h2 style="margin-top:0">Konfirmasi Data</h2>
-        <p>Pastikan data Anda sudah benar</p>
-        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin: 20px 0;">
-            <input type="checkbox" id="checkYakin" onchange="toggleKirimBtn()" style="width:18px; height:18px;">
-            <label for="checkYakin">Saya yakin sudah selesai</label>
+        <h2 style="margin-top:0; color: #333; font-size: 22px;">Konfirmasi Jawaban</h2>
+        <p style="font-size: 16px; color: #555; line-height: 1.4;">Anda yakin sudah selesai mengerjakan tes?</p>
+        
+        <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin: 25px 0; background: #f8f9fa; padding: 12px; border-radius: 10px;">
+            <input type="checkbox" id="checkYakin" onchange="toggleKirimBtn()" style="width:20px; height:20px; cursor:pointer;">
+            <label for="checkYakin" style="font-size: 14px; cursor:pointer; font-weight: 500;">Saya yakin sudah benar</label>
         </div>
+
         <div style="display: flex; gap: 10px;">
-            <button class="btn" style="flex:1; background:#ccc" onclick="closeModal()">Batal</button>
-            <button class="btn" id="btnFinalKirim" style="flex:1; background:var(--btn-red); color:white; opacity:0.5" disabled onclick="kirimJawaban()">Kirim</button>
+            <button class="btn" style="flex:1; background:#eee; color:#333;" onclick="closeModal()">Batal</button>
+            <button class="btn" id="btnFinalKirim" style="flex:1; background:var(--btn-red); color:white; opacity:0.4" disabled onclick="kirimJawaban()">Kirim</button>
         </div>
     </div>
 </div>
@@ -196,30 +187,30 @@
 
         <div class="sidebar">
             <div class="nav-card">
-                <h4 style="margin:0 0 15px 0; color: var(--primary-blue);">Nomor Soal</h4>
+                <h4 style="margin:0 0 10px 0; color: var(--primary-blue); font-size: 15px;">Nomor Soal</h4>
                 <div id="gridNomor" class="grid-nomor"></div>
-                <button class="btn btn-submit-final" onclick="openModal()">Selesai Ujian</button>
+                <button class="btn btn-submit-final" onclick="openModal()">SELESAI UJIAN</button>
             </div>
         </div>
     </div>
 
     <div class="footer-nav">
         <button class="btn btn-prev" id="btnPrev" onclick="changeSoal(-1)">⬅️ Back</button>
-        <div style="font-weight:bold; color:var(--primary-blue); font-size:12px" id="infoHalaman">Soal - / -</div>
+        <div style="font-weight:bold; color:var(--primary-blue); font-size:11px" id="infoHalaman">Soal - / -</div>
         <button class="btn btn-next" id="btnNext" onclick="changeSoal(1)">Next ➡️</button>
     </div>
 </div>
 
-<div id="halamanTerimaKasih" class="main-layout" style="display:none; justify-content:center; align-items:center; min-height:60vh;">
-    <div class="soal-card" style="text-align:center; max-width:500px; border-left:none; border-top:5px solid var(--success)">
-        <div class="success-icon">JOS! 🎓</div>
-        <h2 style="color:var(--success)">Terima Kasih!</h2>
-        <p style="font-size:16px; color:#444">Anda sudah menyelesaikan tes <b>CBT Informatika</b>.</p>
+<div id="halamanTerimaKasih" class="main-layout" style="display:none;">
+    <div class="soal-card" style="text-align:center; width: 100%; max-width:450px; border-left:none; border-top:5px solid var(--success)">
+        <div style="font-size: 50px; margin-bottom: 10px;">✅</div>
+        <h2 style="color:var(--success); margin-top: 0;">Terima Kasih!</h2>
+        <p style="font-size:15px; color:#444">Anda sudah menyelesaikan tes <b>CBT Informatika</b>.</p>
         <hr style="margin:20px 0; border:0; border-top:1px solid #eee">
         <p style="font-size:14px; color:#666">
-            Dalam waktu <span id="timerKeluar" style="font-weight:bold; color:var(--btn-red); font-size:18px">7</span> detik anda akan diarahkan kembali ke halaman login.
+            Otomatis kembali ke login dalam <span id="timerKeluar" style="font-weight:bold; color:var(--btn-red); font-size:18px">7</span> detik.
         </p>
-        <button class="btn" style="background:var(--btn-red); color:white; margin-top:20px; padding:12px 30px" onclick="keHalamanLogin()">KELUAR SEKARANG</button>
+        <button class="btn" style="background:var(--btn-red); color:white; margin-top:15px; width: 100%; padding: 12px;" onclick="keHalamanLogin()">KELUAR SEKARANG</button>
     </div>
 </div>
 
@@ -321,7 +312,7 @@
         const isChecked = document.getElementById('checkYakin').checked;
         const btn = document.getElementById('btnFinalKirim');
         btn.disabled = !isChecked;
-        btn.style.opacity = isChecked ? "1" : "0.5";
+        btn.style.opacity = isChecked ? "1" : "0.4";
     }
 
     function laporMulaiUjian() {
@@ -348,7 +339,7 @@
             tampilkanHalamanTerimaKasih();
         })
         .catch(err => {
-            alert("Koneksi bermasalah, namun jawaban Anda tersimpan di browser.");
+            alert("Koneksi bermasalah. Jawaban tersimpan lokal.");
             document.getElementById('loading').style.display = "none";
         });
     }
