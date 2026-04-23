@@ -12,7 +12,7 @@ body {
   margin: 0;
 }
 
-/* LOGIN */
+/* LOGIN CONTAINER */
 .center {
   display: flex;
   justify-content: center;
@@ -24,9 +24,10 @@ body {
   background: #f2f2f2;
   padding: 30px;
   border-radius: 15px;
-  width: 320px;
+  width: 340px; /* Sedikit diperlebar agar lebih proporsional */
   text-align: center;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  box-sizing: border-box;
 }
 
 .logo {
@@ -36,6 +37,7 @@ body {
 
 h2 {
   color: #1f4e94;
+  margin-bottom: 20px;
 }
 
 label {
@@ -43,30 +45,45 @@ label {
   text-align: left;
   margin-top: 10px;
   font-size: 14px;
+  font-weight: bold;
+  color: #333;
 }
 
+/* PERBAIKAN UTAMA: Box-sizing agar input tidak melar keluar */
 input, select {
   width: 100%;
   padding: 10px;
   margin-top: 5px;
   border-radius: 8px;
   border: 1px solid #ccc;
+  box-sizing: border-box; 
+  font-size: 14px;
 }
 
-/* CHECKBOX */
-.checkbox {
+/* CHECKBOX ALIGNMENT */
+.checkbox-container {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 8px;
-  font-size: 13px;
+  gap: 8px;
+  margin-top: 10px;
+  cursor: pointer;
+  user-select: none;
 }
 
-.checkbox input {
+.checkbox-container input {
   width: auto;
+  margin-top: 0;
+  cursor: pointer;
 }
 
-/* BUTTON */
+.checkbox-container label {
+  margin-top: 0;
+  font-weight: normal;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* BUTTONS */
 button {
   width: 100%;
   margin-top: 15px;
@@ -75,6 +92,7 @@ button {
   border-radius: 10px;
   font-weight: bold;
   cursor: pointer;
+  transition: 0.3s;
 }
 
 .btn-login { background:#1f4e94; color:white; }
@@ -134,9 +152,10 @@ button {
   max-width:700px;
   margin:20px auto;
   text-align:left;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-.box p { margin:4px 0; }
+.box p { margin:6px 0; }
 
 #jamServer {
   font-weight:bold;
@@ -157,7 +176,6 @@ button {
   align-items:center;
 }
 
-/* MODAL BOX */
 .modal-box {
   background:#fff;
   padding:25px;
@@ -194,144 +212,149 @@ button {
 table {
   width:100%;
   border-collapse:collapse;
+  margin-bottom: 15px;
 }
 th, td {
   border:1px solid #ccc;
-  padding:6px;
+  padding:8px;
   text-align:center;
   font-size:13px;
 }
+th { background-color: #f9f9f9; }
 
 /* ANIMASI */
 @keyframes fadeIn {
   from {opacity:0; transform:translateY(-20px);}
   to {opacity:1; transform:translateY(0);}
 }
-  .footer {
-  margin-top: 15px;
-  font-size: 12px;
-  color: #666;
+
+.footer {
+  margin-top: 20px;
+  font-size: 11px;
+  color: #777;
   line-height: 1.5;
+}
+
+#msg {
+  color: #d9534f;
+  font-size: 13px;
+  margin-top: 10px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
 <div id="loginPage" class="center">
-<div class="card">
+  <div class="card">
+    <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" class="logo" alt="Logo">
+    <h2>Aplikasi Login Siswa</h2>
 
-<img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" class="logo">
-<h2>Aplikasi Login Siswa</h2>
+    <label>Kelas</label>
+    <select id="kelas">
+      <option value="">-- Pilih Kelas --</option>
+    </select>
 
-<label>Kelas</label>
-<select id="kelas"><option>-- Pilih Kelas --</option></select>
+    <label>Username</label>
+    <select id="username">
+      <option value="">-- Pilih Siswa --</option>
+    </select>
 
-<label>Username</label>
-<select id="username"><option>-- Pilih Siswa --</option></select>
+    <label>Password</label>
+    <input type="password" id="password" placeholder="Masukkan password">
 
-<label>Password</label>
-<input type="password" id="password">
+    <div class="checkbox-container">
+      <input type="checkbox" id="showPass" onclick="togglePassword()">
+      <label for="showPass">Tampilkan Password</label>
+    </div>
 
-<div class="checkbox">
-<input type="checkbox" onclick="togglePassword()">
-<label>Tampilkan Password</label>
+    <label>Token</label>
+    <input type="text" id="token" placeholder="Masukkan token">
+
+    <button class="btn-login" onclick="login()">Masuk</button>
+    <button class="btn-jadwal" onclick="openModal()">Lihat Jadwal Token</button>
+
+    <p id="msg"></p>
+    
+    <div class="footer">
+      CBT Browser Apps by MB<br>
+      © 2026 MB All Rights Reserved
+    </div>
+  </div>
 </div>
 
-<label>Token</label>
-<input type="text" id="token">
-
-<button class="btn-login" onclick="login()">Masuk</button>
-<button class="btn-jadwal" onclick="openModal()">Lihat Jadwal Token</button>
-
-<p id="msg"></p>
-<div class="footer">
-  CBT Browser Apps by MB<br>
-  © 2026 MB All Rights Reserved
-</div>
-</div>
-</div>
-
-<!-- DASHBOARD -->
 <div id="dashboard">
+  <div class="header">
+    <div class="user-box">
+      <b id="namaHeader"></b><br>
+      <span id="kelasHeader"></span>
+      <button class="logout-btn" onclick="logout()">Keluar</button>
+    </div>
+  </div>
 
-<div class="header">
-<div class="user-box">
-<b id="namaHeader"></b><br>
-<span id="kelasHeader"></span>
-<button class="logout-btn" onclick="logout()">Keluar</button>
-</div>
-</div>
+  <div class="content">
+    <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" class="logo-center" alt="Logo">
+    <div class="title">Asesmen CBT Informatika</div>
+    <p id="tanggal"></p>
+    <p id="jamServer"></p>
 
-<div class="content">
+    <div class="box">
+      <p>Nama : <b id="nama"></b></p>
+      <p>Kelas : <b id="kelasUser"></b></p>
+      <p>Mata Pelajaran : Informatika</p>
+      <p>Semester : Genap</p>
+      <p>Tahun Pelajaran : 2026 - 2027</p>
 
-<img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" class="logo-center">
+      <hr>
 
-<div class="title">Asesmen CBT Informatika</div>
-<p id="tanggal"></p>
-<p id="jamServer"></p>
+      <p><b>Informasi Ujian:</b></p>
+      <ul>
+        <li>Jumlah soal: 40</li>
+        <li>Pilihan ganda: 35</li>
+        <li>Essay: 5</li>
+        <li>Durasi: 90 menit</li>
+      </ul>
 
-<div class="box">
-<p>Nama : <b id="nama"></b></p>
-<p>Kelas : <b id="kelasUser"></b></p>
-  <p>Mate Pelajaran : Informatika </p>
-<p>Semester : Genap </p>
-<p>Tahun Pelajaran : 2026 - 2027 -</p>
+      <p><b>Penting:</b></p>
+      <ul>
+        <li>Dilarang keluar aplikasi</li>
+        <li>Jangan refresh saat ujian</li>
+        <li>Kerjakan dengan jujur</li>
+      </ul>
 
-<hr>
-
-<p><b>Informasi Ujian:</b></p>
-<ul>
-<li>Jumlah soal: 40</li>
-<li>Pilihan ganda: 35</li>
-<li>Essay: 5</li>
-<li>Durasi: 90 menit</li>
-</ul>
-
-<p><b>Penting:</b></p>
-<ul>
-<li>Dilarang keluar aplikasi</li>
-<li>Jangan refresh saat ujian</li>
-<li>Kerjakan dengan jujur</li>
-</ul>
-
-<button class="btn-start" onclick="openConfirm()">Kerjakan Ujian</button>
-
-</div>
-</div>
+      <button class="btn-start" onclick="openConfirm()">Kerjakan Ujian</button>
+    </div>
+  </div>
 </div>
 
-<!-- MODAL KONFIRMASI -->
 <div id="confirmModal" class="modal">
-<div class="modal-box">
-<h3>Konfirmasi Data</h3>
-<p>Pastikan data Anda sudah benar</p>
+  <div class="modal-box">
+    <h3>Konfirmasi Data</h3>
+    <p>Pastikan data Anda sudah benar</p>
+    
+    <div class="checkbox-container" style="justify-content: center; margin-bottom: 15px;">
+      <input type="checkbox" id="checkData">
+      <label for="checkData">Saya yakin data sudah benar</label>
+    </div>
 
-<div class="checkbox">
-<input type="checkbox" id="checkData">
-<label>Saya yakin data sudah benar</label>
+    <div class="btn-group">
+      <button class="btn-cancel" onclick="closeConfirm()">Batal</button>
+      <button class="btn-ok" onclick="lanjutUjian()">Kirim</button>
+    </div>
+  </div>
 </div>
 
-<div class="btn-group">
-<button class="btn-cancel" onclick="closeConfirm()">Batal</button>
-<button class="btn-ok" onclick="lanjutUjian()">Kirim</button>
-</div>
-</div>
-</div>
-
-<!-- MODAL JADWAL -->
 <div id="modalJadwal" class="modal">
-<div class="modal-box">
-<h3>Jadwal Token</h3>
-<table>
-<thead>
-<tr><th>Kelas</th><th>Mulai</th><th>Selesai</th></tr>
-</thead>
-<tbody id="jadwalBody"></tbody>
-</table>
-<button onclick="closeModal()">Tutup</button>
-</div>
+  <div class="modal-box">
+    <h3>Jadwal Token</h3>
+    <table>
+      <thead>
+        <tr><th>Kelas</th><th>Mulai</th><th>Selesai</th></tr>
+      </thead>
+      <tbody id="jadwalBody"></tbody>
+    </table>
+    <button class="btn-cancel" onclick="closeModal()">Tutup</button>
+  </div>
 </div>
 
 <script>
@@ -341,127 +364,157 @@ let siswaData = [];
 let ip = "";
 let userAgent = navigator.userAgent;
 
-/* IP */
+// Ambil IP
 fetch("https://api.ipify.org?format=json")
-.then(res=>res.json())
-.then(data=>ip=data.ip);
+  .then(res => res.json())
+  .then(data => ip = data.ip)
+  .catch(() => ip = "Unknown");
 
-/* DATA SISWA */
+// Load Data Siswa & Dropdown Kelas
 fetch(API_URL)
-.then(res=>res.json())
-.then(data=>{
-  siswaData=data;
-  let set=new Set();
-  data.forEach(s=>set.add(s.kelas));
-  set.forEach(k=>{
-    kelas.innerHTML+=`<option>${k}</option>`;
+  .then(res => res.json())
+  .then(data => {
+    siswaData = data;
+    const kelasSelect = document.getElementById('kelas');
+    let setKelas = new Set();
+    data.forEach(s => setKelas.add(s.kelas));
+    setKelas.forEach(k => {
+      kelasSelect.innerHTML += `<option value="${k}">${k}</option>`;
+    });
   });
-});
 
-/* FILTER */
-kelas.onchange=function(){
-  username.innerHTML='<option>-- Pilih Siswa --</option>';
-  siswaData.filter(s=>s.kelas===this.value)
-  .forEach(s=>{
-    username.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
-  });
+// Filter Username berdasarkan Kelas
+document.getElementById('kelas').onchange = function() {
+  const userSelect = document.getElementById('username');
+  userSelect.innerHTML = '<option value="">-- Pilih Siswa --</option>';
+  siswaData.filter(s => s.kelas === this.value)
+    .forEach(s => {
+      userSelect.innerHTML += `<option value="${s.username}">${s.nama}</option>`;
+    });
 };
 
-/* PASSWORD */
-function togglePassword(){
-  password.type=password.type==="password"?"text":"password";
+// Show/Hide Password
+function togglePassword() {
+  const passInput = document.getElementById('password');
+  passInput.type = passInput.type === "password" ? "text" : "password";
 }
 
-/* LOGIN */
-function login(){
-  fetch(API_URL,{
-    method:"POST",
-    body:JSON.stringify({
-      username:username.value,
-      password:password.value,
-      token:token.value,
-      ip:ip,
-      userAgent:userAgent
+// Login Function
+function login() {
+  const userVal = document.getElementById('username').value;
+  const passVal = document.getElementById('password').value;
+  const tokenVal = document.getElementById('token').value;
+  const msgLabel = document.getElementById('msg');
+
+  if(!userVal || !passVal || !tokenVal) {
+    msgLabel.innerText = "Lengkapi semua data!";
+    return;
+  }
+
+  msgLabel.innerText = "Memproses...";
+
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      username: userVal,
+      password: passVal,
+      token: tokenVal,
+      ip: ip,
+      userAgent: userAgent
     })
   })
-  .then(r=>r.json())
-  .then(res=>{
-    if(res.status==="success"){
-      localStorage.setItem("user",JSON.stringify(res));
+  .then(r => r.json())
+  .then(res => {
+    if(res.status === "success") {
+      localStorage.setItem("user", JSON.stringify(res));
       showDashboard(res);
     } else {
-      msg.innerText=res.msg;
+      msgLabel.innerText = res.msg;
     }
+  })
+  .catch(err => {
+    msgLabel.innerText = "Terjadi kesalahan koneksi.";
   });
 }
 
-/* DASHBOARD */
-function showDashboard(user){
-  loginPage.style.display="none";
-  dashboard.style.display="block";
+// Show Dashboard
+function showDashboard(user) {
+  document.getElementById('loginPage').style.display = "none";
+  document.getElementById('dashboard').style.display = "block";
 
-  nama.innerText=user.nama;
-  kelasUser.innerText=user.kelas;
-  namaHeader.innerText=user.nama;
-  kelasHeader.innerText="Kelas " + user.kelas;
+  document.getElementById('nama').innerText = user.nama;
+  document.getElementById('kelasUser').innerText = user.kelas;
+  document.getElementById('namaHeader').innerText = user.nama;
+  document.getElementById('kelasHeader').innerText = "Kelas " + user.kelas;
 
   setTanggal();
-  setInterval(getLocalTime,1000);
+  setInterval(getLocalTime, 1000);
 }
 
-/* TANGGAL */
-function setTanggal(){
-  const now=new Date();
-  const hari=["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
-  const bulan=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
-  tanggal.innerText=hari[now.getDay()]+", "+now.getDate()+" "+bulan[now.getMonth()]+" "+now.getFullYear();
+// Tampilkan Tanggal
+function setTanggal() {
+  const now = new Date();
+  const hari = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+  const bulan = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+  document.getElementById('tanggal').innerText = hari[now.getDay()] + ", " + now.getDate() + " " + bulan[now.getMonth()] + " " + now.getFullYear();
 }
 
-/* JAM */
-function getLocalTime(){
-  jamServer.innerText="⏰ "+new Date().toLocaleTimeString()+" WIB";
+// Tampilkan Jam
+function getLocalTime() {
+  document.getElementById('jamServer').innerText = "⏰ " + new Date().toLocaleTimeString() + " WIB";
 }
 
-/* LOGOUT */
-function logout(){
+// Logout
+function logout() {
   localStorage.removeItem("user");
   location.reload();
 }
 
-/* KONFIRMASI */
-function openConfirm(){
-  confirmModal.style.display="flex";
+// Modal Konfirmasi
+function openConfirm() {
+  document.getElementById('confirmModal').style.display = "flex";
 }
-function closeConfirm(){
-  confirmModal.style.display="none";
+function closeConfirm() {
+  document.getElementById('confirmModal').style.display = "none";
 }
-function lanjutUjian(){
-  if(!checkData.checked){
+function lanjutUjian() {
+  if(!document.getElementById('checkData').checked) {
     alert("Centang dulu konfirmasi!");
     return;
   }
-  window.location.href="HALAMAN_SOAL_CBT.html";
+  window.location.href = "HALAMAN_SOAL_CBT.html";
 }
 
-/* JADWAL */
-function openModal(){
-  modalJadwal.style.display="flex";
-  fetch(API_URL+"?mode=token")
-  .then(r=>r.json())
-  .then(data=>{
-    jadwalBody.innerHTML="";
-    data.forEach(d=>{
-      jadwalBody.innerHTML+=`<tr>
-      <td>${d.kelas}</td>
-      <td>${d.mulai}</td>
-      <td>${d.selesai}</td>
-      </tr>`;
+// Modal Jadwal Token
+function openModal() {
+  document.getElementById('modalJadwal').style.display = "flex";
+  const body = document.getElementById('jadwalBody');
+  body.innerHTML = "<tr><td colspan='3'>Memuat data...</td></tr>";
+  
+  fetch(API_URL + "?mode=token")
+    .then(r => r.json())
+    .then(data => {
+      body.innerHTML = "";
+      data.forEach(d => {
+        body.innerHTML += `<tr>
+          <td>${d.kelas}</td>
+          <td>${d.mulai}</td>
+          <td>${d.selesai}</td>
+        </tr>`;
+      });
     });
-  });
 }
-function closeModal(){
-  modalJadwal.style.display="none";
+function closeModal() {
+  document.getElementById('modalJadwal').style.display = "none";
 }
+
+// Cek Session jika sudah login
+window.onload = function() {
+  const savedUser = localStorage.getItem("user");
+  if(savedUser) {
+    showDashboard(JSON.parse(savedUser));
+  }
+};
 </script>
 
 </body>
