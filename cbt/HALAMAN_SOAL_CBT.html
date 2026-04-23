@@ -35,6 +35,9 @@
         .main-layout { display: flex; flex-direction: column; max-width: 1100px; margin: 10px auto; gap: 20px; padding: 0 15px 120px 15px; width: 100%; box-sizing: border-box; }
         @media (min-width: 768px) { .main-layout { flex-direction: row; } }
 
+        .quiz-container { flex: 3; }
+        .sidebar { flex: 1; }
+
         .soal-card { 
             background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
             border-left: 5px solid var(--primary-blue);
@@ -51,10 +54,26 @@
         .kotak-nomor.sudah { background: var(--success) !important; color: white; }
         .kotak-nomor.aktif { border: 2px solid var(--gold); background: #fff; }
 
-        .footer-nav { background: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; position: fixed; bottom: 0; width: 100%; border-top: 3px solid var(--gold); z-index: 90; }
-        .btn { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        /* FOOTER NAV REVISI */
+        .footer-nav { 
+            background: white; padding: 12px 20px; display: flex; 
+            justify-content: space-between; align-items: center; 
+            position: fixed; bottom: 0; width: 100%; border-top: 3px solid var(--gold); 
+            z-index: 90; box-sizing: border-box;
+        }
+
+        .btn { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         
-        /* FOOTER DEVELOPER */
+        /* TOMBOL NAVIGASI BIRU */
+        .btn-nav { background: var(--btn-blue); color: white; min-width: 120px; }
+        .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* MODAL BOX DIPERKECIL */
+        .modal-box { 
+            background: white; width: 85%; max-width: 320px; border-radius: 15px; 
+            text-align: center; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
         .main-footer { background: #222; color: #ccc; text-align: center; padding: 15px; font-size: 12px; margin-top: auto; border-top: 2px solid var(--gold); }
 
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
@@ -69,15 +88,15 @@
 </div>
 
 <div class="modal-overlay" id="modalConfirm" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000;">
-    <div class="modal-box" style="background: white; width: 90%; max-width: 400px; border-radius: 20px; text-align: center; padding: 25px;">
-        <h2 style="margin-top:0;">Konfirmasi Jawaban</h2>
-        <p>Anda yakin sudah selesai mengerjakan tes?</p>
-        <div style="margin: 20px 0; background: #f8f9fa; padding: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+    <div class="modal-box">
+        <h3 style="margin-top:0; color: var(--primary-blue);">Selesai Ujian?</h3>
+        <p style="font-size: 14px; color: #555;">Pastikan semua jawaban telah terisi dengan benar.</p>
+        <div style="margin: 15px 0; background: #f8f9fa; padding: 8px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px;">
             <input type="checkbox" id="checkYakin" onchange="toggleKirimBtn()">
-            <label for="checkYakin" style="cursor:pointer">Saya yakin sudah benar</label>
+            <label for="checkYakin" style="cursor:pointer">Saya sudah yakin</label>
         </div>
         <div style="display: flex; gap: 10px;">
-            <button class="btn" style="flex:1; background:var(--btn-blue); color:white;" onclick="closeModal()">Batal</button>
+            <button class="btn" style="flex:1; background:#ccc; color:#333;" onclick="closeModal()">Batal</button>
             <button class="btn" id="btnFinalKirim" style="flex:1; background:var(--btn-red); color:white; opacity:0.4" disabled onclick="kirimJawaban()">Kirim</button>
         </div>
     </div>
@@ -98,7 +117,7 @@
         </div>
         <div class="sidebar">
             <div class="nav-card" style="background:white; padding:15px; border-radius:15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
-                <h4 style="margin:0 0 10px 0;">Nomor Soal</h4>
+                <h4 style="margin:0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px;">Nomor Soal</h4>
                 <div id="gridNomor" class="grid-nomor"></div>
                 <button class="btn" style="background:var(--success); color:white; width:100%; margin-top:15px; padding:12px;" onclick="openModal()">SELESAI UJIAN</button>
             </div>
@@ -106,9 +125,9 @@
     </div>
 
     <div class="footer-nav">
-        <button class="btn" style="background:#eee;" onclick="changeSoal(-1)">⬅️ Back</button>
-        <div id="infoHalaman" style="font-weight:bold; color:var(--primary-blue);">Soal - / -</div>
-        <button class="btn" style="background:var(--primary-blue); color:white;" onclick="changeSoal(1)">Next ➡️</button>
+        <button class="btn btn-nav" id="btnPrev" onclick="changeSoal(-1)">Sebelumnya</button>
+        <div id="infoHalaman" style="font-weight:bold; color:var(--primary-blue); font-size: 14px;">Soal - / -</div>
+        <button class="btn btn-nav" id="btnNext" onclick="changeSoal(1)">Selanjutnya</button>
     </div>
 </div>
 
@@ -129,7 +148,6 @@
 </footer>
 
 <script>
-    // URL API ANDA
     const API_URL = "https://script.google.com/macros/s/AKfycbwf_Hza9uzl9mdE-iiYZExPQ1Q7e2NsrVKhy48Bn15YtKzZGw_OLRTM3AYDu0d5mx2X/exec"; 
     const API_SOAL = "https://script.google.com/macros/s/AKfycbyP6AyagNPxUVcpV59JDCaVgqcD-yloDwicbwrv_wn6upZLqGzVWrpBhng4NkmunWM/exec";
 
@@ -157,6 +175,11 @@
     function renderSoal() {
         const soal = listSoal[currentIdx];
         document.getElementById('infoHalaman').innerText = `Soal ${currentIdx + 1} / ${listSoal.length}`;
+        
+        // Disable tombol jika di ujung soal
+        document.getElementById('btnPrev').disabled = (currentIdx === 0);
+        document.getElementById('btnNext').disabled = (currentIdx === listSoal.length - 1);
+
         document.getElementById('quizArea').innerHTML = `
             <div class="soal-card">
                 <div style="font-weight:bold; margin-bottom:15px; font-size:17px; line-height:1.5;">${currentIdx + 1}. ${soal.pertanyaan}</div>
@@ -171,6 +194,7 @@
     }
 
     function pilihJawaban(no, k) { jawabanSiswa[no] = k; renderSoal(); }
+    
     function renderGrid() {
         document.getElementById('gridNomor').innerHTML = listSoal.map((s, i) => `
             <div class="kotak-nomor ${jawabanSiswa[s.no] ? 'sudah' : ''} ${currentIdx === i ? 'aktif' : ''}" onclick="currentIdx=${i};renderSoal();">${i+1}</div>
@@ -180,6 +204,7 @@
     function changeSoal(d) { if (currentIdx + d >= 0 && currentIdx + d < listSoal.length) { currentIdx += d; renderSoal(); window.scrollTo(0,0); } }
     function openModal() { document.getElementById('modalConfirm').style.display = 'flex'; }
     function closeModal() { document.getElementById('modalConfirm').style.display = 'none'; }
+    
     function toggleKirimBtn() {
         const btn = document.getElementById('btnFinalKirim');
         btn.disabled = !document.getElementById('checkYakin').checked;
@@ -191,13 +216,11 @@
         document.getElementById('loading').style.display = "flex";
         document.getElementById('loadingText').innerText = "Sedang mengirim jawaban...";
 
-        // Kalkulasi skor lokal untuk cadangan
         let benar = 0;
         listSoal.forEach(s => { if (jawabanSiswa[s.no] === s.kunci) benar++; });
         let skor = Math.round((benar / listSoal.length) * 100);
 
         try {
-            // Perbaikan: Menghapus no-cors agar data terbaca oleh GAS
             const response = await fetch(API_URL, {
                 method: "POST",
                 headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -206,7 +229,6 @@
                     idLogin: userSession.idLogin,
                     nama: userSession.nama,
                     kelas: userSession.kelas,
-                    jk: userSession.jk || "-",
                     jawaban: jawabanSiswa
                 })
             });
@@ -221,7 +243,7 @@
             }
         } catch (e) { 
             console.error(e);
-            alert("Koneksi bermasalah, data mungkin gagal terkirim.");
+            alert("Koneksi bermasalah, nilai dihitung secara lokal.");
             tampilkanHasil(skor); 
         }
     }
