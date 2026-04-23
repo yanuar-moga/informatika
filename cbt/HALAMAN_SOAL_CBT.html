@@ -7,7 +7,7 @@
     <style>
         :root {
             --primary-blue: #1f4e94;
-            --btn-blue: #007bff; /* Biru cerah untuk Batal */
+            --btn-blue: #007bff; 
             --btn-red: #ed1c24;
             --gold: #d4af37;
             --light-bg: #f4f7fa;
@@ -21,65 +21,44 @@
             display: flex; flex-direction: column; min-height: 100vh;
         }
 
-        /* HEADER */
         .header { 
             background: var(--primary-blue); color: white; padding: 10px 15px; 
             display: flex; justify-content: space-between; align-items: center; 
             position: sticky; top: 0; z-index: 100; border-bottom: 4px solid var(--gold);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
-        .user-info b { font-size: 14px; color: var(--gold); }
         .timer { 
             font-size: 16px; font-weight: bold; background: white; color: var(--primary-blue); 
             padding: 5px 12px; border-radius: 20px; border: 2px solid var(--gold);
         }
 
-        /* LAYOUT */
         .main-layout { display: flex; flex-direction: column; max-width: 1100px; margin: 10px auto; gap: 20px; padding: 0 15px 120px 15px; width: 100%; box-sizing: border-box; }
-        @media (min-width: 768px) { 
-            .main-layout { flex-direction: row; margin: 20px auto; } 
-            .user-info b { font-size: 16px; }
-        }
+        @media (min-width: 768px) { .main-layout { flex-direction: row; } }
 
-        .quiz-container { flex: 3; width: 100%; }
         .soal-card { 
             background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
             border-left: 5px solid var(--primary-blue);
         }
 
-        .pertanyaan { font-size: 17px; font-weight: 600; margin-bottom: 20px; color: #333; line-height: 1.6; }
-        .opsi-container { display: flex; flex-direction: column; gap: 10px; }
         .opsi { 
             display: flex; align-items: center; padding: 12px; border: 1px solid #ddd; 
-            border-radius: 10px; cursor: pointer; transition: all 0.2s; background: #fff; font-size: 15px;
+            border-radius: 10px; cursor: pointer; margin-bottom: 10px; background: #fff;
         }
-        .opsi:hover { border-color: var(--primary-blue); background: #f0f5ff; }
         .opsi.selected { background: #e1ecff; border-color: var(--primary-blue); font-weight: bold; }
-        .opsi b { margin-right: 12px; color: var(--primary-blue); }
 
-        /* GRID NOMOR */
-        .grid-nomor { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 15px; }
-        .kotak-nomor { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #e9ecef; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; border: 1px solid #ddd; }
-        .kotak-nomor.sudah { background: var(--success) !important; color: white; border-color: var(--success); }
+        .grid-nomor { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .kotak-nomor { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #e9ecef; border-radius: 6px; cursor: pointer; font-weight: bold; border: 1px solid #ddd; }
+        .kotak-nomor.sudah { background: var(--success) !important; color: white; }
         .kotak-nomor.aktif { border: 2px solid var(--gold); background: #fff; }
 
-        /* MODAL */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-box { background: white; width: 90%; max-width: 400px; border-radius: 20px; text-align: center; padding: 25px; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .footer-nav { background: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; position: fixed; bottom: 0; width: 100%; box-sizing: border-box; border-top: 3px solid var(--gold); z-index: 90; }
+        .footer-nav { background: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; position: fixed; bottom: 0; width: 100%; border-top: 3px solid var(--gold); z-index: 90; }
         .btn { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn-next { background: var(--primary-blue); color: white; }
-        .btn-prev { background: #eee; color: #333; }
-        .btn-submit-final { background: var(--success); color: white; width: 100%; margin-top: 5px; padding: 12px; }
+        
+        /* FOOTER DEVELOPER */
+        .main-footer { background: #222; color: #ccc; text-align: center; padding: 15px; font-size: 12px; margin-top: auto; border-top: 2px solid var(--gold); }
 
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
         .hidden { display: none !important; }
-        
-        /* NILAI BADGE */
-        .nilai-box { font-size: 48px; font-weight: bold; color: var(--primary-blue); margin: 15px 0; }
     </style>
 </head>
 <body>
@@ -89,13 +68,13 @@
     <p id="loadingText">Menyiapkan Soal...</p>
 </div>
 
-<div class="modal-overlay" id="modalConfirm">
-    <div class="modal-box">
-        <h2 style="color: #333;">Konfirmasi Jawaban</h2>
+<div class="modal-overlay" id="modalConfirm" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000;">
+    <div class="modal-box" style="background: white; width: 90%; max-width: 400px; border-radius: 20px; text-align: center; padding: 25px;">
+        <h2 style="margin-top:0;">Konfirmasi Jawaban</h2>
         <p>Anda yakin sudah selesai mengerjakan tes?</p>
-        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin: 20px 0; background: #f8f9fa; padding: 10px; border-radius: 10px;">
-            <input type="checkbox" id="checkYakin" onchange="toggleKirimBtn()" style="width:18px; height:18px;">
-            <label for="checkYakin" style="font-size: 14px; cursor:pointer;">Saya yakin sudah benar</label>
+        <div style="margin: 20px 0; background: #f8f9fa; padding: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <input type="checkbox" id="checkYakin" onchange="toggleKirimBtn()">
+            <label for="checkYakin" style="cursor:pointer">Saya yakin sudah benar</label>
         </div>
         <div style="display: flex; gap: 10px;">
             <button class="btn" style="flex:1; background:var(--btn-blue); color:white;" onclick="closeModal()">Batal</button>
@@ -118,35 +97,40 @@
             <div id="quizArea"></div>
         </div>
         <div class="sidebar">
-            <div class="nav-card" style="background:white; padding:15px; border-radius:15px;">
+            <div class="nav-card" style="background:white; padding:15px; border-radius:15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
                 <h4 style="margin:0 0 10px 0;">Nomor Soal</h4>
                 <div id="gridNomor" class="grid-nomor"></div>
-                <button class="btn btn-submit-final" onclick="openModal()">SELESAI UJIAN</button>
+                <button class="btn" style="background:var(--success); color:white; width:100%; margin-top:15px; padding:12px;" onclick="openModal()">SELESAI UJIAN</button>
             </div>
         </div>
     </div>
 
     <div class="footer-nav">
-        <button class="btn btn-prev" id="btnPrev" onclick="changeSoal(-1)">⬅️ Back</button>
-        <div style="font-weight:bold; color:var(--primary-blue);" id="infoHalaman">Soal - / -</div>
-        <button class="btn btn-next" id="btnNext" onclick="changeSoal(1)">Next ➡️</button>
+        <button class="btn" style="background:#eee;" onclick="changeSoal(-1)">⬅️ Back</button>
+        <div id="infoHalaman" style="font-weight:bold; color:var(--primary-blue);">Soal - / -</div>
+        <button class="btn" style="background:var(--primary-blue); color:white;" onclick="changeSoal(1)">Next ➡️</button>
     </div>
 </div>
 
 <div id="halamanTerimaKasih" class="main-layout" style="display:none; justify-content:center; align-items:center; min-height:80vh;">
-    <div class="soal-card" style="text-align:center; width: 100%; max-width:400px; border-left:none; border-top:5px solid var(--success)">
+    <div class="soal-card" style="text-align:center; width: 100%; max-width:400px; border-top:5px solid var(--success); border-left:none;">
         <div style="font-size: 50px;">✅</div>
         <h2 style="color:var(--success);">Berhasil Dikirim!</h2>
         <p>Nilai Hasil Ujian Anda:</p>
-        <div class="nilai-box" id="displayNilai">0</div>
-        <p style="font-size:14px; color:#666">Otomatis keluar dalam <span id="timerKeluar">10</span> detik.</p>
-        <button class="btn" style="background:var(--btn-red); color:white; width: 100%; padding: 12px;" onclick="keHalamanLogin()">KELUAR SEKARANG</button>
+        <div id="displayNilai" style="font-size: 60px; font-weight: bold; color: var(--primary-blue); margin: 15px 0;">0</div>
+        <p style="font-size:14px; color:#666">Otomatis keluar dalam <span id="timerKeluar" style="color:red; font-weight:bold; font-size:18px;">60</span> detik.</p>
+        <button class="btn" style="background:var(--btn-red); color:white; width: 100%; padding: 12px;" onclick="eksekusiLogoutTotal()">KELUAR SEKARANG</button>
     </div>
 </div>
 
+<footer class="main-footer">
+    Aplikasi Asesmen CBT Informatika<br>
+    <b>© 2026 MB All Rights Reserved</b>
+</footer>
+
 <script>
-    // GANTI DENGAN URL DEPLOYMENT ANDA
-    const API_URL = "https://script.google.com/macros/s/AKfycbwf_Hza9uzl9mdE-iiYZExPQ1Q7e2NsrVKhy48Bn15YtKzZGw_OLRTM3AYDu0d5mx2X/exec"; 
+    // URL API ANDA
+    const API_URL = "https://script.google.com/macros/s/AKfycbwf_Hza9uzl9mdE-iiYZExPQ1Q7e2NsrVKhy48Bn15YtKzZGw_OLRTM3AYDu0d5mx2X/exec"; 
     const API_SOAL = "https://script.google.com/macros/s/AKfycbyP6AyagNPxUVcpV59JDCaVgqcD-yloDwicbwrv_wn6upZLqGzVWrpBhng4NkmunWM/exec";
 
     let currentIdx = 0;
@@ -155,7 +139,7 @@
     let userSession = JSON.parse(localStorage.getItem("user"));
 
     window.onload = () => {
-        if (!userSession) { window.location.href = "index.html"; return; }
+        if (!userSession) { eksekusiLogoutTotal(); return; }
         document.getElementById('displayNama').innerText = userSession.nama;
         document.getElementById('displayKelas').innerText = `Kelas ${userSession.kelas}`;
         loadSoal();
@@ -173,40 +157,27 @@
     function renderSoal() {
         const soal = listSoal[currentIdx];
         document.getElementById('infoHalaman').innerText = `Soal ${currentIdx + 1} / ${listSoal.length}`;
-        
-        let html = `
+        document.getElementById('quizArea').innerHTML = `
             <div class="soal-card">
-                <div class="pertanyaan">${currentIdx + 1}. ${soal.pertanyaan}</div>
-                <div class="opsi-container">
-                    ${['A', 'B', 'C', 'D'].map(k => `
-                        <div class="opsi ${jawabanSiswa[soal.no] === k ? 'selected' : ''}" onclick="pilihJawaban('${soal.no}','${k}')">
-                            <b>${k}.</b> ${soal.opsi[k]}
-                        </div>
-                    `).join('')}
-                </div>
+                <div style="font-weight:bold; margin-bottom:15px; font-size:17px; line-height:1.5;">${currentIdx + 1}. ${soal.pertanyaan}</div>
+                ${['A', 'B', 'C', 'D', 'E'].map(k => {
+                    if(!soal.opsi[k]) return '';
+                    return `<div class="opsi ${jawabanSiswa[soal.no] === k ? 'selected' : ''}" onclick="pilihJawaban('${soal.no}','${k}')">
+                        <b style="color:var(--primary-blue); margin-right:10px;">${k}.</b> ${soal.opsi[k]}
+                    </div>`;
+                }).join('')}
             </div>`;
-        document.getElementById('quizArea').innerHTML = html;
         renderGrid();
     }
 
-    function pilihJawaban(no, k) {
-        jawabanSiswa[no] = k;
-        renderSoal();
-    }
-
+    function pilihJawaban(no, k) { jawabanSiswa[no] = k; renderSoal(); }
     function renderGrid() {
-        const grid = document.getElementById('gridNomor');
-        grid.innerHTML = listSoal.map((s, i) => `
+        document.getElementById('gridNomor').innerHTML = listSoal.map((s, i) => `
             <div class="kotak-nomor ${jawabanSiswa[s.no] ? 'sudah' : ''} ${currentIdx === i ? 'aktif' : ''}" onclick="currentIdx=${i};renderSoal();">${i+1}</div>
         `).join('');
     }
 
-    function changeSoal(d) {
-        if (currentIdx + d >= 0 && currentIdx + d < listSoal.length) {
-            currentIdx += d; renderSoal();
-        }
-    }
-
+    function changeSoal(d) { if (currentIdx + d >= 0 && currentIdx + d < listSoal.length) { currentIdx += d; renderSoal(); window.scrollTo(0,0); } }
     function openModal() { document.getElementById('modalConfirm').style.display = 'flex'; }
     function closeModal() { document.getElementById('modalConfirm').style.display = 'none'; }
     function toggleKirimBtn() {
@@ -215,35 +186,30 @@
         btn.style.opacity = btn.disabled ? "0.4" : "1";
     }
 
-    // LOGIKA HITUNG NILAI DAN KIRIM
     async function kirimJawaban() {
         closeModal();
         document.getElementById('loading').style.display = "flex";
-        document.getElementById('loadingText').innerText = "Menghitung & Mengirim Nilai...";
+        document.getElementById('loadingText').innerText = "Sedang menghitung nilai...";
 
-        // Hitung Skor Sederhana
         let benar = 0;
-        listSoal.forEach(s => {
-            if (jawabanSiswa[s.no] === s.kunci) benar++;
-        });
+        listSoal.forEach(s => { if (jawabanSiswa[s.no] === s.kunci) benar++; });
         let skor = Math.round((benar / listSoal.length) * 100);
 
-        const payload = {
-            action: "kirimJawaban",
-            idLogin: userSession.idLogin,
-            nama: userSession.nama,
-            kelas: userSession.kelas,
-            nilai: skor,
-            jawaban: jawabanSiswa
-        };
-
         try {
-            await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+            await fetch(API_URL, {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify({
+                    action: "kirimJawaban",
+                    idLogin: userSession.idLogin,
+                    nama: userSession.nama,
+                    kelas: userSession.kelas,
+                    nilai: skor,
+                    jawaban: jawabanSiswa
+                })
+            });
             tampilkanHasil(skor);
-        } catch (e) {
-            alert("Gagal kirim ke server, tapi skor Anda: " + skor);
-            tampilkanHasil(skor);
-        }
+        } catch (e) { tampilkanHasil(skor); }
     }
 
     function tampilkanHasil(skor) {
@@ -252,20 +218,20 @@
         document.getElementById('halamanTerimaKasih').style.display = 'flex';
         document.getElementById('displayNilai').innerText = skor;
 
-        let detik = 10;
-        setInterval(() => {
+        let detik = 60; // HITUNG MUNDUR 60 DETIK SESUAI PERMINTAAN
+        const intv = setInterval(() => {
             detik--;
             document.getElementById('timerKeluar').innerText = detik;
-            if (detik <= 0) keHalamanLogin();
+            if (detik <= 0) { clearInterval(intv); eksekusiLogoutTotal(); }
         }, 1000);
     }
 
-    function keHalamanLogin() {
+    function eksekusiLogoutTotal() {
         localStorage.clear();
-        window.location.href = "index.html";
+        sessionStorage.clear();
+        window.location.replace("index.html"); // Proteksi tombol BACK
     }
 
-    // Timer Durasi
     let s = 0;
     setInterval(() => {
         s++;
