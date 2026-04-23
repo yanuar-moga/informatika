@@ -1,276 +1,242 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CBT Asesmen Informatika</title>
-
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: linear-gradient(to bottom right, #b3c7d6, #d9e2ec);
-  margin: 0;
-}
-
-.center { display:flex; justify-content:center; align-items:center; height:100vh; }
-
-.card {
-  background:#f2f2f2;
-  padding:30px;
-  border-radius:15px;
-  width:340px;
-  text-align:center;
-}
-
-input, select {
-  width:100%;
-  padding:10px;
-  margin-top:5px;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-
-button {
-  width:100%;
-  margin-top:10px;
-  padding:10px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-.btn-login { background:#1f4e94; color:white; }
-.btn-jadwal { background:#d9534f; color:white; }
-
-#dashboard { display:none; }
-
-.header {
-  background:#1f4e94;
-  color:white;
-  padding:10px;
-  text-align:right;
-}
-
-.box {
-  background:white;
-  padding:20px;
-  margin:20px;
-  border-radius:10px;
-}
-
-#msg { color:red; font-size:13px; }
-</style>
-</head>
-
-<body>
-
-<!-- LOGIN -->
-<div id="loginPage" class="center">
-  <div class="card">
-    <h2>CBT Informatika</h2>
-
-    <label>Kelas</label>
-    <select id="kelas"></select>
-
-    <label>Username</label>
-    <select id="username"></select>
-
-    <label>Password</label>
-    <input type="password" id="password">
-
-    <label>Token</label>
-    <input type="text" id="token">
-
-    <button class="btn-login" id="btnLogin">Masuk</button>
-    <button class="btn-jadwal" id="btnJadwal">Lihat Token</button>
-
-    <p id="msg"></p>
-  </div>
-</div>
-
-<!-- DASHBOARD -->
-<div id="dashboard">
-  <div class="header">
-    <span id="namaHeader"></span>
-    <button onclick="logout()">Logout</button>
-  </div>
-
-  <div class="box">
-    <p>Nama: <b id="nama"></b></p>
-    <p>Kelas: <b id="kelasUser"></b></p>
-    <p id="jam"></p>
-  </div>
-</div>
-
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbyPzHYyvvTG94gsKw3xYF5nj-nEx1vgCj9CEbPTaATUflPNv2iTqBHHd1_xmFQpCxGN/exec";
 
 let siswaData = [];
 let ip = "";
+let userAgent = navigator.userAgent;
 let idleTimer;
 let sessionChecker;
 
-/* =====================
-   🔹 INIT APP
-===================== */
-window.addEventListener("load", initApp);
-
-function initApp() {
-  setupEvents();
-  getIP();
-  loadSiswa();
-  startIdleTimer();
-
-  const saved = localStorage.getItem("user");
-  if(saved) showDashboard(JSON.parse(saved));
+/* =========================
+   🔒 AUTO LOGOUT
+========================= */
+function resetIdleTimer() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+        alert("Sesi berakhir karena tidak ada aktivitas selama 20 menit.");
+        logout();
+    }, 1200000);
 }
 
-/* =====================
-   🔹 EVENT
-===================== */
-function setupEvents() {
-  document.getElementById("btnLogin").addEventListener("click", login);
-  document.getElementById("kelas").addEventListener("change", filterUser);
+/* =========================
+   🔁 CEK SESSION
+========================= */
+function checkSessionStatus() {
+    const savedUser = JSON.parse(localStorage.getItem("user"));
+    if (!savedUser || !savedUser.idLogin) return;
 
-  ["mousemove","click","keypress","touchstart"].forEach(evt=>{
-    window.addEventListener(evt, startIdleTimer);
-  });
+    fetch(`${API_URL}?mode=cek_sesi&idLogin=${savedUser.idLogin}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "off") {
+                alert(data.msg || "Sesi Anda telah dihentikan oleh Admin.");
+                logout();
+            }
+        })
+        .catch(() => console.log("Gagal cek sesi"));
 }
 
-/* =====================
-   🔹 LOAD SISWA
-===================== */
+/* =========================
+   🌐 AMBIL IP
+========================= */
+function getIP() {
+  fetch("https://api.ipify.org?format=json")
+    .then(res => res.json())
+    .then(data => ip = data.ip)
+    .catch(() => ip = "Unknown");
+}
+
+/* =========================
+   📥 LOAD DATA SISWA
+========================= */
 function loadSiswa() {
   fetch(API_URL)
     .then(res => res.json())
     .then(data => {
       siswaData = data;
+      const kelasSelect = document.getElementById('kelas');
 
-      const kelasSet = [...new Set(data.map(s=>s.kelas))];
-      const kelasEl = document.getElementById("kelas");
+      let setKelas = new Set();
+      data.forEach(s => setKelas.add(s.kelas));
 
-      kelasEl.innerHTML = "<option value=''>Pilih Kelas</option>";
-      kelasSet.forEach(k=>{
-        kelasEl.innerHTML += `<option value="${k}">${k}</option>`;
+      kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+
+      setKelas.forEach(k => {
+        kelasSelect.innerHTML += `<option value="${k}">${k}</option>`;
       });
     })
-    .catch(()=>{
-      document.getElementById("msg").innerText = "Gagal load data siswa";
+    .catch(() => {
+      document.getElementById('msg').innerText = "Gagal memuat data siswa";
     });
 }
 
-/* =====================
-   🔹 FILTER USER
-===================== */
-function filterUser() {
-  const kelas = this.value;
-  const userEl = document.getElementById("username");
-
-  userEl.innerHTML = "<option value=''>Pilih Siswa</option>";
+/* =========================
+   🔽 FILTER USER
+========================= */
+document.getElementById('kelas').onchange = function() {
+  const userSelect = document.getElementById('username');
+  userSelect.innerHTML = '<option value="">-- Pilih Siswa --</option>';
 
   siswaData
-    .filter(s=>s.kelas===kelas)
-    .forEach(s=>{
-      userEl.innerHTML += `<option value="${s.username}">${s.nama}</option>`;
+    .filter(s => s.kelas === this.value)
+    .forEach(s => {
+      userSelect.innerHTML += `<option value="${s.username}">${s.nama}</option>`;
     });
+};
+
+/* =========================
+   👁 TOGGLE PASSWORD
+========================= */
+function togglePassword() {
+  const passInput = document.getElementById('password');
+  passInput.type = passInput.type === "password" ? "text" : "password";
 }
 
-/* =====================
+/* =========================
    🔐 LOGIN
-===================== */
+========================= */
 function login() {
-  const username = usernameEl.value;
-  const password = passwordEl.value;
-  const token = tokenEl.value;
+  const userVal = document.getElementById('username').value;
+  const passVal = document.getElementById('password').value;
+  const tokenVal = document.getElementById('token').value;
+  const msgLabel = document.getElementById('msg');
 
-  if(!username || !password || !token){
-    msg.innerText = "Lengkapi semua data";
+  if(!userVal || !passVal || !tokenVal) {
+    msgLabel.innerText = "Lengkapi semua data!";
     return;
   }
 
-  msg.innerText = "Login...";
+  msgLabel.innerText = "Memproses...";
 
   fetch(API_URL, {
-    method:"POST",
-    body: JSON.stringify({ username, password, token, ip })
+    method: "POST",
+    body: JSON.stringify({
+      username: userVal,
+      password: passVal,
+      token: tokenVal,
+      ip: ip,
+      userAgent: userAgent
+    })
   })
-  .then(res=>res.json())
-  .then(res=>{
-    if(res.status==="success"){
+  .then(r => r.json())
+  .then(res => {
+    if(res.status === "success") {
       localStorage.setItem("user", JSON.stringify(res));
       showDashboard(res);
     } else {
-      msg.innerText = res.msg;
+      msgLabel.innerText = res.msg;
     }
   })
-  .catch(()=> msg.innerText="Server error");
+  .catch(() => {
+    msgLabel.innerText = "Terjadi kesalahan koneksi.";
+  });
 }
 
-/* =====================
+/* =========================
    📊 DASHBOARD
-===================== */
-function showDashboard(user){
-  loginPage.style.display="none";
-  dashboard.style.display="block";
+========================= */
+function showDashboard(user) {
+  document.getElementById('loginPage').style.display = "none";
+  document.getElementById('dashboard').style.display = "block";
 
-  nama.innerText = user.nama;
-  kelasUser.innerText = user.kelas;
-  namaHeader.innerText = user.nama;
+  document.getElementById('nama').innerText = user.nama;
+  document.getElementById('kelasUser').innerText = user.kelas;
+  document.getElementById('namaHeader').innerText = user.nama;
+  document.getElementById('kelasHeader').innerText = "Kelas " + user.kelas;
 
-  setInterval(()=>{
-    jam.innerText = new Date().toLocaleTimeString();
-  },1000);
+  setTanggal();
+  setInterval(getLocalTime, 1000);
 
-  sessionChecker = setInterval(checkSession,15000);
+  checkSessionStatus();
+  sessionChecker = setInterval(checkSessionStatus, 15000);
 }
 
-/* =====================
-   🔁 SESSION CHECK
-===================== */
-function checkSession(){
-  const user = JSON.parse(localStorage.getItem("user"));
-  if(!user) return;
+/* =========================
+   📅 TANGGAL
+========================= */
+function setTanggal() {
+  const now = new Date();
+  const hari = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+  const bulan = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 
-  fetch(`${API_URL}?mode=cek_sesi&idLogin=${user.idLogin}`)
-    .then(r=>r.json())
-    .then(d=>{
-      if(d.status==="off"){
-        alert("Sesi dihentikan admin");
-        logout();
-      }
-    });
+  document.getElementById('tanggal').innerText =
+    hari[now.getDay()] + ", " +
+    now.getDate() + " " +
+    bulan[now.getMonth()] + " " +
+    now.getFullYear();
 }
 
-/* =====================
-   🔒 AUTO LOGOUT
-===================== */
-function startIdleTimer(){
-  clearTimeout(idleTimer);
-  idleTimer = setTimeout(()=>{
-    alert("Auto logout");
-    logout();
-  },1200000);
+/* =========================
+   ⏰ JAM
+========================= */
+function getLocalTime() {
+  document.getElementById('jamServer').innerText =
+    "⏰ " + new Date().toLocaleTimeString() + " WIB";
 }
 
-/* =====================
-   🌐 GET IP
-===================== */
-function getIP(){
-  fetch("https://api.ipify.org?format=json")
-    .then(r=>r.json())
-    .then(d=>ip=d.ip)
-    .catch(()=>ip="unknown");
-}
-
-/* =====================
+/* =========================
    🚪 LOGOUT
-===================== */
-function logout(){
+========================= */
+function logout() {
   localStorage.removeItem("user");
   clearInterval(sessionChecker);
   location.reload();
 }
-</script>
 
-</body>
-</html>
+/* =========================
+   📋 MODAL
+========================= */
+function openConfirm() {
+  document.getElementById('confirmModal').style.display = "flex";
+}
+function closeConfirm() {
+  document.getElementById('confirmModal').style.display = "none";
+}
+function lanjutUjian() {
+  if(!document.getElementById('checkData').checked) {
+    alert("Centang dulu konfirmasi!");
+    return;
+  }
+  window.location.href = "HALAMAN_SOAL_CBT.html";
+}
+
+function openModal() {
+  document.getElementById('modalJadwal').style.display = "flex";
+  const body = document.getElementById('jadwalBody');
+
+  body.innerHTML = "<tr><td colspan='3'>Memuat data...</td></tr>";
+
+  fetch(API_URL + "?mode=token")
+    .then(r => r.json())
+    .then(data => {
+      body.innerHTML = "";
+      data.forEach(d => {
+        body.innerHTML += `<tr>
+          <td>${d.kelas}</td>
+          <td>${d.mulai}</td>
+          <td>${d.selesai}</td>
+        </tr>`;
+      });
+    });
+}
+function closeModal() {
+  document.getElementById('modalJadwal').style.display = "none";
+}
+
+/* =========================
+   🚀 INIT (FIX DOUBLE ONLOAD)
+========================= */
+window.addEventListener("load", function () {
+  resetIdleTimer();
+  getIP();
+  loadSiswa();
+
+  const savedUser = localStorage.getItem("user");
+  if(savedUser) {
+    showDashboard(JSON.parse(savedUser));
+  }
+
+  ["mousemove","mousedown","touchstart","click","keypress"]
+    .forEach(evt => window.addEventListener(evt, resetIdleTimer));
+});
+</script>
