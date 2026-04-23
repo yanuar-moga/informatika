@@ -24,7 +24,7 @@ body {
   background: #f2f2f2;
   padding: 30px;
   border-radius: 15px;
-  width: 340px; /* Sedikit diperlebar agar lebih proporsional */
+  width: 340px; 
   text-align: center;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
   box-sizing: border-box;
@@ -49,7 +49,6 @@ label {
   color: #333;
 }
 
-/* PERBAIKAN UTAMA: Box-sizing agar input tidak melar keluar */
 input, select {
   width: 100%;
   padding: 10px;
@@ -363,6 +362,42 @@ const API_URL = "https://script.google.com/macros/s/AKfycbwf_Hza9uzl9mdE-iiYZExP
 let siswaData = [];
 let ip = "";
 let userAgent = navigator.userAgent;
+let idleTimer;
+let sessionChecker;
+
+// --- FUNGSI AUTO LOGOUT INAKTIVITAS (20 MENIT) ---
+function resetIdleTimer() {
+    clearTimeout(idleTimer);
+    // 20 menit = 1200000 ms
+    idleTimer = setTimeout(() => {
+        alert("Sesi berakhir karena tidak ada aktivitas selama 20 menit.");
+        logout();
+    }, 1200000); 
+}
+
+// Pantau aktivitas user
+window.onload = resetIdleTimer;
+window.onmousemove = resetIdleTimer;
+window.onmousedown = resetIdleTimer; 
+window.ontouchstart = resetIdleTimer;
+window.onclick = resetIdleTimer;     
+window.onkeypress = resetIdleTimer;   
+
+// --- FUNGSI CEK STATUS DARI ADMIN (SHEET LOG) ---
+function checkSessionStatus() {
+    const savedUser = JSON.parse(localStorage.getItem("user"));
+    if (!savedUser || !savedUser.idLogin) return;
+
+    fetch(`${API_URL}?mode=cek_sesi&idLogin=${savedUser.idLogin}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "off") {
+                alert(data.msg || "Sesi Anda telah dihentikan oleh Admin.");
+                logout();
+            }
+        })
+        .catch(err => console.log("Gagal sinkronisasi sesi."));
+}
 
 // Ambil IP
 fetch("https://api.ipify.org?format=json")
@@ -393,13 +428,11 @@ document.getElementById('kelas').onchange = function() {
     });
 };
 
-// Show/Hide Password
 function togglePassword() {
   const passInput = document.getElementById('password');
   passInput.type = passInput.type === "password" ? "text" : "password";
 }
 
-// Login Function
 function login() {
   const userVal = document.getElementById('username').value;
   const passVal = document.getElementById('password').value;
@@ -437,7 +470,6 @@ function login() {
   });
 }
 
-// Show Dashboard
 function showDashboard(user) {
   document.getElementById('loginPage').style.display = "none";
   document.getElementById('dashboard').style.display = "block";
@@ -449,9 +481,12 @@ function showDashboard(user) {
 
   setTanggal();
   setInterval(getLocalTime, 1000);
+  
+  // Mulai cek status sesi ke server setiap 15 detik
+  checkSessionStatus();
+  sessionChecker = setInterval(checkSessionStatus, 15000);
 }
 
-// Tampilkan Tanggal
 function setTanggal() {
   const now = new Date();
   const hari = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
@@ -459,18 +494,16 @@ function setTanggal() {
   document.getElementById('tanggal').innerText = hari[now.getDay()] + ", " + now.getDate() + " " + bulan[now.getMonth()] + " " + now.getFullYear();
 }
 
-// Tampilkan Jam
 function getLocalTime() {
   document.getElementById('jamServer').innerText = "⏰ " + new Date().toLocaleTimeString() + " WIB";
 }
 
-// Logout
 function logout() {
   localStorage.removeItem("user");
+  clearInterval(sessionChecker);
   location.reload();
 }
 
-// Modal Konfirmasi
 function openConfirm() {
   document.getElementById('confirmModal').style.display = "flex";
 }
@@ -485,7 +518,6 @@ function lanjutUjian() {
   window.location.href = "HALAMAN_SOAL_CBT.html";
 }
 
-// Modal Jadwal Token
 function openModal() {
   document.getElementById('modalJadwal').style.display = "flex";
   const body = document.getElementById('jadwalBody');
@@ -510,6 +542,7 @@ function closeModal() {
 
 // Cek Session jika sudah login
 window.onload = function() {
+  resetIdleTimer();
   const savedUser = localStorage.getItem("user");
   if(savedUser) {
     showDashboard(JSON.parse(savedUser));
