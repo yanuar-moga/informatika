@@ -7,10 +7,11 @@
     <style>
         :root {
             --primary-blue: #1f4e94;
+            --btn-blue: #4472c4;
+            --btn-red: #ed1c24;
             --gold: #d4af37;
             --light-bg: #f4f7fa;
             --success: #28a745;
-            --danger: #dc3545;
         }
 
         body { 
@@ -84,29 +85,35 @@
         .kotak-nomor.sudah { background: var(--success) !important; color: white; }
         .kotak-nomor.aktif { border: 2px solid var(--gold); transform: scale(1.1); }
 
-        /* MODAL CUSTOM */
+        /* MODAL KONFIRMASI (SESUAI GAMBAR) */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); display: none;
+            background: rgba(0,0,0,0.5); display: none;
             justify-content: center; align-items: center; z-index: 1000;
         }
         .modal-box {
-            background: white; width: 90%; max-width: 400px;
-            border-radius: 20px; text-align: center; overflow: hidden;
-            animation: slideUp 0.3s ease-out; border-top: 5px solid var(--gold);
+            background: white; width: 90%; max-width: 450px;
+            border-radius: 15px; text-align: center; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px; position: relative;
         }
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-box h2 { margin-top: 0; font-size: 22px; color: #000; }
+        .modal-box p { color: #333; font-size: 17px; margin: 15px 0; }
         
-        .modal-header { background: var(--primary-blue); color: white; padding: 20px; }
-        .modal-body { padding: 30px; font-size: 16px; color: #444; }
-        .modal-footer { display: flex; border-top: 1px solid #eee; }
-        .modal-btn { 
-            flex: 1; padding: 15px; border: none; cursor: pointer; 
-            font-weight: bold; font-size: 16px; transition: 0.3s; 
+        .confirm-check { 
+            display: flex; align-items: center; justify-content: center; 
+            gap: 10px; margin: 20px 0; font-size: 15px; color: #444;
         }
-        .btn-cancel { background: #f8f9fa; color: #666; }
-        .btn-confirm { background: var(--success); color: white; }
-        .btn-confirm:hover { background: #218838; }
+        .confirm-check input { width: 18px; height: 18px; cursor: pointer; }
+
+        .modal-actions { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
+        .btn-modal { 
+            flex: 1; padding: 12px; border: none; border-radius: 10px; 
+            font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s;
+        }
+        .btn-batal { background: var(--btn-blue); color: white; }
+        .btn-kirim { background: var(--btn-red); color: white; opacity: 0.5; cursor: not-allowed; }
+        .btn-kirim.active { opacity: 1; cursor: pointer; }
 
         /* FOOTER */
         .footer-nav { 
@@ -127,20 +134,22 @@
 
 <div id="loading">
     <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" width="80">
-    <p>Menyiapkan Soal...</p>
+    <p id="loadingText">Menyiapkan Soal...</p>
 </div>
 
 <div class="modal-overlay" id="modalConfirm">
     <div class="modal-box">
-        <div class="modal-header">
-            <h3 style="margin:0">Konfirmasi Selesai</h3>
+        <h2>Konfirmasi Data</h2>
+        <p>Pastikan data Anda sudah benar</p>
+        
+        <div class="confirm-check">
+            <input type="checkbox" id="checkYakin" onchange="toggleKirimBtn()">
+            <label for="checkYakin">Saya yakin data sudah benar</label>
         </div>
-        <div class="modal-body" id="modalText">
-            Apakah Anda yakin ingin mengirim semua jawaban sekarang?
-        </div>
-        <div class="modal-footer">
-            <button class="modal-btn btn-cancel" onclick="closeModal()">Batal</button>
-            <button class="modal-btn btn-confirm" onclick="kirimJawaban()">Ya, Kirim!</button>
+
+        <div class="modal-actions">
+            <button class="btn-modal btn-batal" onclick="closeModal()">Batal</button>
+            <button class="btn-modal btn-kirim" id="btnFinalKirim" disabled onclick="kirimJawaban()">Kirim</button>
         </div>
     </div>
 </div>
@@ -162,7 +171,7 @@
         <div class="nav-card">
             <h4 style="margin:0 0 15px 0; color: var(--primary-blue);">Nomor Soal</h4>
             <div id="gridNomor" class="grid-nomor"></div>
-            <button class="btn btn-submit-final" id="btnSideSubmit" style="display:none;" onclick="openModal()">Selesai Ujian</button>
+            <button class="btn btn-submit-final" id="btnSideSubmit" onclick="openModal()">Selesai Ujian</button>
         </div>
     </div>
 </div>
@@ -212,7 +221,6 @@
             const cls = (jawabanSiswa[s.no] ? "sudah" : "") + (currentIdx === i ? " aktif" : "");
             grid.innerHTML += `<div class="kotak-nomor ${cls}" onclick="lompatSoal(${i})">${i + 1}</div>`;
         });
-        document.getElementById('btnSideSubmit').style.display = (currentIdx === listSoal.length - 1) ? "block" : "none";
     }
 
     function renderSoal() {
@@ -255,25 +263,35 @@
 
     function lompatSoal(i) { currentIdx = i; renderSoal(); }
 
-    function openModal() {
-        const jml = Object.keys(jawabanSiswa).length;
-        document.getElementById('modalText').innerHTML = `Anda telah menjawab <b>${jml}</b> dari <b>${listSoal.length}</b> soal.<br><br>Yakin ingin mengakhiri ujian?`;
-        document.getElementById('modalConfirm').style.display = 'flex';
+    function openModal() { 
+        document.getElementById('checkYakin').checked = false;
+        toggleKirimBtn();
+        document.getElementById('modalConfirm').style.display = 'flex'; 
     }
     
     function closeModal() { document.getElementById('modalConfirm').style.display = 'none'; }
+
+    function toggleKirimBtn() {
+        const isChecked = document.getElementById('checkYakin').checked;
+        const btn = document.getElementById('btnFinalKirim');
+        if (isChecked) {
+            btn.disabled = false;
+            btn.classList.add('active');
+        } else {
+            btn.disabled = true;
+            btn.classList.remove('active');
+        }
+    }
 
     function laporMulaiUjian() {
         fetch(API_URL_SOAL, { method: "POST", body: JSON.stringify({ action: "mulaiUjian", idLogin: userSession.idLogin, nama: userSession.nama }) });
     }
 
-    // --- PERBAIKAN FUNGSI KIRIM JAWABAN (SINKRONISASI LOGOUT) ---
     function kirimJawaban() {
         closeModal();
         document.getElementById('loading').style.display = "flex";
-        document.getElementById('loading').innerHTML = "<p>Mengirim Jawaban & Menutup Sesi...</p>";
+        document.getElementById('loadingText').innerText = "Mengirim Jawaban & Menutup Sesi...";
         
-        // 1. Kirim Jawaban ke Spreadsheet Soal
         fetch(API_URL_SOAL, {
             method: "POST",
             body: JSON.stringify({
@@ -282,21 +300,17 @@
             })
         })
         .then(res => res.json())
-        .then(data => {
-            // 2. Kirim sinyal Logout ke Spreadsheet Login agar status jadi OFF
+        .then(() => {
             return fetch(`${API_URL_LOGIN}?mode=logout&idLogin=${userSession.idLogin}`);
         })
         .then(() => {
-            // 3. Hapus memori lokal dan pindah halaman
             alert("Ujian Selesai! Sesi Anda telah ditutup.");
             localStorage.clear(); 
             window.location.href = "index.html";
         })
         .catch(err => {
-            console.error(err);
-            alert("Gagal menutup sesi secara otomatis. Jika tidak bisa login kembali, hubungi Admin.");
-            localStorage.clear();
-            window.location.href = "index.html";
+            alert("Terjadi kesalahan. Data tetap tersimpan di lokal.");
+            document.getElementById('loading').style.display = "none";
         });
     }
 
