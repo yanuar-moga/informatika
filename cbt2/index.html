@@ -1,242 +1,319 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBT Asesmen Informatika</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to bottom right, #b3c7d6, #d9e2ec);
+  margin: 0;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.card {
+  background: #f2f2f2;
+  padding: 30px;
+  border-radius: 15px;
+  width: 340px; 
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  box-sizing: border-box;
+}
+
+.logo { width: 70px; margin-bottom: 10px; }
+
+h2 { color: #1f4e94; margin-bottom: 20px; }
+
+label {
+  display: block;
+  text-align: left;
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+button {
+  width: 100%;
+  margin-top: 15px;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-login { background:#1f4e94; color:white; }
+.btn-jadwal { background:#d9534f; color:white; }
+
+#dashboard { display:none; }
+
+.header {
+  background:#1f4e94;
+  color:white;
+  padding:15px;
+  display:flex;
+  justify-content:flex-end;
+}
+
+.content { text-align:center; padding:20px; }
+
+.box {
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  max-width:700px;
+  margin:20px auto;
+}
+
+.modal {
+  display:none;
+  position:fixed;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.4);
+  justify-content:center;
+  align-items:center;
+}
+
+.modal-box {
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+}
+
+#msg { color:red; font-size:13px; }
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginPage" class="center">
+  <div class="card">
+    <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" class="logo">
+    <h2>CBT Asesmen Informatika</h2>
+
+    <label>Kelas</label>
+    <select id="kelas">
+      <option value="">-- Pilih Kelas --</option>
+    </select>
+
+    <label>Username</label>
+    <select id="username">
+      <option value="">-- Pilih Siswa --</option>
+    </select>
+
+    <label>Password</label>
+    <input type="password" id="password">
+
+    <div class="checkbox-container">
+      <input type="checkbox" onclick="togglePassword()"> Tampilkan Password
+    </div>
+
+    <label>Token</label>
+    <input type="text" id="token">
+
+    <button class="btn-login" onclick="login()">Masuk</button>
+    <button class="btn-jadwal" onclick="openModal()">Lihat Jadwal Token</button>
+
+    <p id="msg"></p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="header">
+    <div>
+      <b id="namaHeader"></b><br>
+      <span id="kelasHeader"></span>
+      <button onclick="logout()">Keluar</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <h2>Dashboard CBT</h2>
+    <p id="tanggal"></p>
+    <p id="jamServer"></p>
+
+    <div class="box">
+      <p>Nama : <b id="nama"></b></p>
+      <p>Kelas : <b id="kelasUser"></b></p>
+      <button onclick="openConfirm()">Mulai Ujian</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="confirmModal" class="modal">
+  <div class="modal-box">
+    <h3>Konfirmasi</h3>
+    <input type="checkbox" id="checkData"> Saya yakin<br><br>
+    <button onclick="lanjutUjian()">Mulai</button>
+    <button onclick="closeConfirm()">Batal</button>
+  </div>
+</div>
+
+<div id="modalJadwal" class="modal">
+  <div class="modal-box">
+    <h3>Jadwal Token</h3>
+    <table border="1" width="100%">
+      <thead><tr><th>Kelas</th><th>Mulai</th><th>Selesai</th></tr></thead>
+      <tbody id="jadwalBody"></tbody>
+    </table>
+    <button onclick="closeModal()">Tutup</button>
+  </div>
+</div>
+
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbyPzHYyvvTG94gsKw3xYF5nj-nEx1vgCj9CEbPTaATUflPNv2iTqBHHd1_xmFQpCxGN/exec";
 
 let siswaData = [];
 let ip = "";
-let userAgent = navigator.userAgent;
 let idleTimer;
 let sessionChecker;
 
-/* =========================
-   🔒 AUTO LOGOUT
-========================= */
-function resetIdleTimer() {
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => {
-        alert("Sesi berakhir karena tidak ada aktivitas selama 20 menit.");
-        logout();
-    }, 1200000);
-}
+/* INIT */
+window.onload = function() {
+  resetIdleTimer();
 
-/* =========================
-   🔁 CEK SESSION
-========================= */
-function checkSessionStatus() {
-    const savedUser = JSON.parse(localStorage.getItem("user"));
-    if (!savedUser || !savedUser.idLogin) return;
+  ["mousemove","click","keypress","touchstart"]
+    .forEach(evt => window.addEventListener(evt, resetIdleTimer));
 
-    fetch(`${API_URL}?mode=cek_sesi&idLogin=${savedUser.idLogin}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === "off") {
-                alert(data.msg || "Sesi Anda telah dihentikan oleh Admin.");
-                logout();
-            }
-        })
-        .catch(() => console.log("Gagal cek sesi"));
-}
-
-/* =========================
-   🌐 AMBIL IP
-========================= */
-function getIP() {
   fetch("https://api.ipify.org?format=json")
-    .then(res => res.json())
-    .then(data => ip = data.ip)
-    .catch(() => ip = "Unknown");
-}
+    .then(r=>r.json())
+    .then(d=>ip=d.ip)
+    .catch(()=>ip="unknown");
 
-/* =========================
-   📥 LOAD DATA SISWA
-========================= */
-function loadSiswa() {
-  fetch(API_URL)
-    .then(res => res.json())
-    .then(data => {
-      siswaData = data;
-      const kelasSelect = document.getElementById('kelas');
+  loadSiswa();
 
-      let setKelas = new Set();
-      data.forEach(s => setKelas.add(s.kelas));
-
-      kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
-
-      setKelas.forEach(k => {
-        kelasSelect.innerHTML += `<option value="${k}">${k}</option>`;
-      });
-    })
-    .catch(() => {
-      document.getElementById('msg').innerText = "Gagal memuat data siswa";
-    });
-}
-
-/* =========================
-   🔽 FILTER USER
-========================= */
-document.getElementById('kelas').onchange = function() {
-  const userSelect = document.getElementById('username');
-  userSelect.innerHTML = '<option value="">-- Pilih Siswa --</option>';
-
-  siswaData
-    .filter(s => s.kelas === this.value)
-    .forEach(s => {
-      userSelect.innerHTML += `<option value="${s.username}">${s.nama}</option>`;
-    });
+  const saved = localStorage.getItem("user");
+  if(saved) showDashboard(JSON.parse(saved));
 };
 
-/* =========================
-   👁 TOGGLE PASSWORD
-========================= */
-function togglePassword() {
-  const passInput = document.getElementById('password');
-  passInput.type = passInput.type === "password" ? "text" : "password";
+/* LOAD SISWA */
+function loadSiswa(){
+  fetch(API_URL)
+    .then(r=>r.json())
+    .then(data=>{
+      siswaData=data;
+      let kelasSet=[...new Set(data.map(s=>s.kelas))];
+      let kelasEl=document.getElementById("kelas");
+
+      kelasSet.forEach(k=>{
+        kelasEl.innerHTML+=`<option value="${k}">${k}</option>`;
+      });
+
+      kelasEl.onchange=function(){
+        let userEl=document.getElementById("username");
+        userEl.innerHTML='<option value="">-- Pilih Siswa --</option>';
+        siswaData.filter(s=>s.kelas===this.value)
+          .forEach(s=>{
+            userEl.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
+          });
+      };
+    });
 }
 
-/* =========================
-   🔐 LOGIN
-========================= */
-function login() {
-  const userVal = document.getElementById('username').value;
-  const passVal = document.getElementById('password').value;
-  const tokenVal = document.getElementById('token').value;
-  const msgLabel = document.getElementById('msg');
+/* LOGIN */
+function login(){
+  let u=document.getElementById("username").value;
+  let p=document.getElementById("password").value;
+  let t=document.getElementById("token").value;
 
-  if(!userVal || !passVal || !tokenVal) {
-    msgLabel.innerText = "Lengkapi semua data!";
-    return;
-  }
+  if(!u||!p||!t){ msg.innerText="Lengkapi data"; return; }
 
-  msgLabel.innerText = "Memproses...";
-
-  fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({
-      username: userVal,
-      password: passVal,
-      token: tokenVal,
-      ip: ip,
-      userAgent: userAgent
-    })
+  fetch(API_URL,{
+    method:"POST",
+    body:JSON.stringify({username:u,password:p,token:t,ip:ip})
   })
-  .then(r => r.json())
-  .then(res => {
-    if(res.status === "success") {
-      localStorage.setItem("user", JSON.stringify(res));
+  .then(r=>r.json())
+  .then(res=>{
+    if(res.status==="success"){
+      localStorage.setItem("user",JSON.stringify(res));
       showDashboard(res);
     } else {
-      msgLabel.innerText = res.msg;
+      msg.innerText=res.msg;
     }
-  })
-  .catch(() => {
-    msgLabel.innerText = "Terjadi kesalahan koneksi.";
   });
 }
 
-/* =========================
-   📊 DASHBOARD
-========================= */
-function showDashboard(user) {
-  document.getElementById('loginPage').style.display = "none";
-  document.getElementById('dashboard').style.display = "block";
+/* DASHBOARD */
+function showDashboard(u){
+  loginPage.style.display="none";
+  dashboard.style.display="block";
 
-  document.getElementById('nama').innerText = user.nama;
-  document.getElementById('kelasUser').innerText = user.kelas;
-  document.getElementById('namaHeader').innerText = user.nama;
-  document.getElementById('kelasHeader').innerText = "Kelas " + user.kelas;
+  nama.innerText=u.nama;
+  kelasUser.innerText=u.kelas;
+  namaHeader.innerText=u.nama;
+  kelasHeader.innerText="Kelas "+u.kelas;
 
-  setTanggal();
-  setInterval(getLocalTime, 1000);
-
-  checkSessionStatus();
-  sessionChecker = setInterval(checkSessionStatus, 15000);
+  setInterval(()=>{jamServer.innerText=new Date().toLocaleTimeString();},1000);
 }
 
-/* =========================
-   📅 TANGGAL
-========================= */
-function setTanggal() {
-  const now = new Date();
-  const hari = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
-  const bulan = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
-
-  document.getElementById('tanggal').innerText =
-    hari[now.getDay()] + ", " +
-    now.getDate() + " " +
-    bulan[now.getMonth()] + " " +
-    now.getFullYear();
-}
-
-/* =========================
-   ⏰ JAM
-========================= */
-function getLocalTime() {
-  document.getElementById('jamServer').innerText =
-    "⏰ " + new Date().toLocaleTimeString() + " WIB";
-}
-
-/* =========================
-   🚪 LOGOUT
-========================= */
-function logout() {
+/* LOGOUT */
+function logout(){
   localStorage.removeItem("user");
-  clearInterval(sessionChecker);
   location.reload();
 }
 
-/* =========================
-   📋 MODAL
-========================= */
-function openConfirm() {
-  document.getElementById('confirmModal').style.display = "flex";
-}
-function closeConfirm() {
-  document.getElementById('confirmModal').style.display = "none";
-}
-function lanjutUjian() {
-  if(!document.getElementById('checkData').checked) {
-    alert("Centang dulu konfirmasi!");
-    return;
-  }
-  window.location.href = "HALAMAN_SOAL_CBT.html";
+/* UTIL */
+function resetIdleTimer(){
+  clearTimeout(idleTimer);
+  idleTimer=setTimeout(()=>{alert("Logout otomatis");logout();},1200000);
 }
 
-function openModal() {
-  document.getElementById('modalJadwal').style.display = "flex";
-  const body = document.getElementById('jadwalBody');
+function togglePassword(){
+  let p=document.getElementById("password");
+  p.type=p.type==="password"?"text":"password";
+}
 
-  body.innerHTML = "<tr><td colspan='3'>Memuat data...</td></tr>";
+/* MODAL */
+function openConfirm(){ confirmModal.style.display="flex"; }
+function closeConfirm(){ confirmModal.style.display="none"; }
+function lanjutUjian(){
+  if(!checkData.checked){alert("Centang dulu");return;}
+  window.location.href="HALAMAN_SOAL_CBT.html";
+}
 
-  fetch(API_URL + "?mode=token")
-    .then(r => r.json())
-    .then(data => {
-      body.innerHTML = "";
-      data.forEach(d => {
-        body.innerHTML += `<tr>
-          <td>${d.kelas}</td>
-          <td>${d.mulai}</td>
-          <td>${d.selesai}</td>
-        </tr>`;
+function openModal(){
+  modalJadwal.style.display="flex";
+  fetch(API_URL+"?mode=token")
+    .then(r=>r.json())
+    .then(d=>{
+      jadwalBody.innerHTML="";
+      d.forEach(x=>{
+        jadwalBody.innerHTML+=`<tr><td>${x.kelas}</td><td>${x.mulai}</td><td>${x.selesai}</td></tr>`;
       });
     });
 }
-function closeModal() {
-  document.getElementById('modalJadwal').style.display = "none";
-}
-
-/* =========================
-   🚀 INIT (FIX DOUBLE ONLOAD)
-========================= */
-window.addEventListener("load", function () {
-  resetIdleTimer();
-  getIP();
-  loadSiswa();
-
-  const savedUser = localStorage.getItem("user");
-  if(savedUser) {
-    showDashboard(JSON.parse(savedUser));
-  }
-
-  ["mousemove","mousedown","touchstart","click","keypress"]
-    .forEach(evt => window.addEventListener(evt, resetIdleTimer));
-});
+function closeModal(){ modalJadwal.style.display="none"; }
 </script>
+
+</body>
+</html>
