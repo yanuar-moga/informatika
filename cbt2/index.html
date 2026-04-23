@@ -1,318 +1,258 @@
 <!DOCTYPE html>
-<html lang="id">
+
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CBT Asesmen Informatika</title>
+<title>CBT System</title>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: linear-gradient(to bottom right, #b3c7d6, #d9e2ec);
-  margin: 0;
-}
-
-.center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.card {
-  background: #f2f2f2;
-  padding: 30px;
-  border-radius: 15px;
-  width: 340px; 
-  text-align: center;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  box-sizing: border-box;
-}
-
-.logo { width: 70px; margin-bottom: 10px; }
-
-h2 { color: #1f4e94; margin-bottom: 20px; }
-
-label {
-  display: block;
-  text-align: left;
-  margin-top: 10px;
-  font-size: 14px;
-  font-weight: bold;
-  color: #333;
-}
-
-input, select {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
-}
-
-.checkbox-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-button {
-  width: 100%;
-  margin-top: 15px;
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.btn-login { background:#1f4e94; color:white; }
-.btn-jadwal { background:#d9534f; color:white; }
-
-#dashboard { display:none; }
-
-.header {
-  background:#1f4e94;
+body{
+  font-family:Segoe UI;
+  background:#0f172a;
   color:white;
-  padding:15px;
-  display:flex;
-  justify-content:flex-end;
+  margin:0;
 }
 
-.content { text-align:center; padding:20px; }
-
-.box {
-  background:white;
+.container{
+  max-width:800px;
+  margin:auto;
   padding:20px;
-  border-radius:12px;
-  max-width:700px;
-  margin:20px auto;
 }
 
-.modal {
-  display:none;
-  position:fixed;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.4);
-  justify-content:center;
-  align-items:center;
-}
-
-.modal-box {
-  background:#fff;
+.card{
+  background:#1e293b;
   padding:20px;
   border-radius:10px;
+  margin-top:20px;
 }
 
-#msg { color:red; font-size:13px; }
+button{
+  padding:10px 15px;
+  border:none;
+  background:#22c55e;
+  color:white;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+button:disabled{
+  background:#64748b;
+}
+
+input, select{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border-radius:6px;
+  border:none;
+}
+
+.option{
+  background:#334155;
+  padding:10px;
+  margin-top:10px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.option:hover{
+  background:#475569;
+}
+
+img{
+  max-width:100%;
+  margin-top:10px;
+  border-radius:6px;
+}
 </style>
+
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="loginPage" class="center">
-  <div class="card">
-    <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" class="logo">
-    <h2>CBT Asesmen Informatika</h2>
+<div class="container">
 
-    <label>Kelas</label>
-    <select id="kelas">
-      <option value="">-- Pilih Kelas --</option>
-    </select>
+<div id="login" class="card">
+  <h2>Login CBT</h2>
 
-    <label>Username</label>
-    <select id="username">
-      <option value="">-- Pilih Siswa --</option>
-    </select>
+  <input id="token" placeholder="Masukkan Token">
+  <button id="btnToken" onclick="cekToken()">Lanjut</button>
 
-    <label>Password</label>
-    <input type="password" id="password">
+<select id="user"></select> <input id="password" placeholder="Password">
 
-    <div class="checkbox-container">
-      <input type="checkbox" onclick="togglePassword()"> Tampilkan Password
-    </div>
+<button id="btnLogin" onclick="login()">Login</button>
 
-    <label>Token</label>
-    <input type="text" id="token">
-
-    <button class="btn-login" onclick="login()">Masuk</button>
-    <button class="btn-jadwal" onclick="openModal()">Lihat Jadwal Token</button>
-
-    <p id="msg"></p>
-  </div>
 </div>
 
-<!-- DASHBOARD -->
-<div id="dashboard">
-  <div class="header">
-    <div>
-      <b id="namaHeader"></b><br>
-      <span id="kelasHeader"></span>
-      <button onclick="logout()">Keluar</button>
-    </div>
-  </div>
+<div id="ujian" class="card" style="display:none">
+  <h3 id="info"></h3>
+  <div id="soalBox"></div>
 
-  <div class="content">
-    <h2>Dashboard CBT</h2>
-    <p id="tanggal"></p>
-    <p id="jamServer"></p>
-
-    <div class="box">
-      <p>Nama : <b id="nama"></b></p>
-      <p>Kelas : <b id="kelasUser"></b></p>
-      <button onclick="openConfirm()">Mulai Ujian</button>
-    </div>
-  </div>
+  <br>
+  <button onclick="submitUjian()">Submit Ujian</button>
 </div>
 
-<!-- MODAL -->
-<div id="confirmModal" class="modal">
-  <div class="modal-box">
-    <h3>Konfirmasi</h3>
-    <input type="checkbox" id="checkData"> Saya yakin<br><br>
-    <button onclick="lanjutUjian()">Mulai</button>
-    <button onclick="closeConfirm()">Batal</button>
-  </div>
-</div>
-
-<div id="modalJadwal" class="modal">
-  <div class="modal-box">
-    <h3>Jadwal Token</h3>
-    <table border="1" width="100%">
-      <thead><tr><th>Kelas</th><th>Mulai</th><th>Selesai</th></tr></thead>
-      <tbody id="jadwalBody"></tbody>
-    </table>
-    <button onclick="closeModal()">Tutup</button>
-  </div>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbyPzHYyvvTG94gsKw3xYF5nj-nEx1vgCj9CEbPTaATUflPNv2iTqBHHd1_xmFQpCxGN/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwKKIKuT7ugLEjLzSf5e4cYVi-K3v23z6oNGRF1U73RMRIL3LJSsFPncKdE62qm0l4O/exec";
 
-let siswaData = [];
-let ip = "";
-let idleTimer;
-let sessionChecker;
+let session = "";
+let kelas = "";
+let soalData = [];
+let current = 0;
+let userData = {};
+let loading = false;
 
-/* INIT */
-window.onload = function() {
-  resetIdleTimer();
+// ===== POST =====
+async function post(data){
+  if(loading) return;
+  loading = true;
 
-  ["mousemove","click","keypress","touchstart"]
-    .forEach(evt => window.addEventListener(evt, resetIdleTimer));
+  let res = await fetch(API_URL,{
+    method:"POST",
+    body:new URLSearchParams(data)
+  });
 
-  fetch("https://api.ipify.org?format=json")
-    .then(r=>r.json())
-    .then(d=>ip=d.ip)
-    .catch(()=>ip="unknown");
+  let json = await res.json();
+  loading = false;
 
-  loadSiswa();
-
-  const saved = localStorage.getItem("user");
-  if(saved) showDashboard(JSON.parse(saved));
-};
-
-/* LOAD SISWA */
-function loadSiswa(){
-  fetch(API_URL)
-    .then(r=>r.json())
-    .then(data=>{
-      siswaData=data;
-      let kelasSet=[...new Set(data.map(s=>s.kelas))];
-      let kelasEl=document.getElementById("kelas");
-
-      kelasSet.forEach(k=>{
-        kelasEl.innerHTML+=`<option value="${k}">${k}</option>`;
-      });
-
-      kelasEl.onchange=function(){
-        let userEl=document.getElementById("username");
-        userEl.innerHTML='<option value="">-- Pilih Siswa --</option>';
-        siswaData.filter(s=>s.kelas===this.value)
-          .forEach(s=>{
-            userEl.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
-          });
-      };
-    });
+  return json;
 }
 
-/* LOGIN */
-function login(){
-  let u=document.getElementById("username").value;
-  let p=document.getElementById("password").value;
-  let t=document.getElementById("token").value;
+// ===== CEK TOKEN =====
+async function cekToken(){
+  let btn = document.getElementById("btnToken");
+  btn.disabled = true;
 
-  if(!u||!p||!t){ msg.innerText="Lengkapi data"; return; }
+  let token = document.getElementById("token").value;
 
-  fetch(API_URL,{
-    method:"POST",
-    body:JSON.stringify({username:u,password:p,token:t,ip:ip})
-  })
-  .then(r=>r.json())
-  .then(res=>{
-    if(res.status==="success"){
-      localStorage.setItem("user",JSON.stringify(res));
-      showDashboard(res);
-    } else {
-      msg.innerText=res.msg;
+  let r = await post({action:"cekToken", token});
+
+  if(r.status){
+    kelas = r.kelas;
+
+    let u = await post({action:"getUsers", kelas});
+
+    let sel = document.getElementById("user");
+    sel.innerHTML = "";
+
+    u.users.forEach(x=>{
+      let opt = document.createElement("option");
+      opt.value = x.id;
+      opt.text = x.nama;
+      sel.appendChild(opt);
+    });
+
+  }else{
+    alert(r.message);
+  }
+
+  btn.disabled = false;
+}
+
+// ===== LOGIN =====
+async function login(){
+  let btn = document.getElementById("btnLogin");
+  btn.disabled = true;
+
+  let id = document.getElementById("user").value;
+  let password = document.getElementById("password").value;
+  let token = document.getElementById("token").value;
+
+  let r = await post({
+    action:"login",
+    id, password, token
+  });
+
+  if(r.status){
+    session = r.session_id;
+    userData = r;
+
+    document.getElementById("login").style.display="none";
+    document.getElementById("ujian").style.display="block";
+
+    loadSoal();
+
+  }else{
+    alert(r.message);
+  }
+
+  btn.disabled = false;
+}
+
+// ===== LOAD SOAL =====
+async function loadSoal(){
+  let r = await post({action:"getSoal", kelas});
+  soalData = r.soal;
+
+  tampilSoal();
+}
+
+// ===== TAMPIL SOAL =====
+function tampilSoal(){
+  let s = soalData[current];
+
+  let html = "<h3>Soal "+(current+1)+"</h3>";
+  html += "<p>"+(s[3] || "")+"</p>";
+
+  if(s[4]) html += `<img src="${s[4]}">`;
+
+  ["A","B","C","D","E"].forEach((x,i)=>{
+    let txt = s[5+(i*2)];
+    let img = s[6+(i*2)];
+
+    if(txt || img){
+      html += `<div class="option" onclick="jawab('${x}')">`;
+
+      if(txt) html += `<div>${txt}</div>`;
+      if(img) html += `<img src="${img}">`;
+
+      html += "</div>";
     }
   });
+
+  document.getElementById("soalBox").innerHTML = html;
 }
 
-/* DASHBOARD */
-function showDashboard(u){
-  loginPage.style.display="none";
-  dashboard.style.display="block";
+// ===== SIMPAN JAWABAN =====
+async function jawab(pil){
+  let id = userData.session_id.split("_")[1];
 
-  nama.innerText=u.nama;
-  kelasUser.innerText=u.kelas;
-  namaHeader.innerText=u.nama;
-  kelasHeader.innerText="Kelas "+u.kelas;
+  await post({
+    action:"saveJawaban",
+    id:id,
+    nama:userData.nama,
+    kelas:userData.kelas,
+    no:current+1,
+    jawaban:pil
+  });
 
-  setInterval(()=>{jamServer.innerText=new Date().toLocaleTimeString();},1000);
+  current++;
+
+  if(current < soalData.length){
+    tampilSoal();
+  }else{
+    alert("Semua soal selesai, silakan submit");
+  }
 }
 
-/* LOGOUT */
-function logout(){
-  localStorage.removeItem("user");
-  location.reload();
-}
+// ===== SUBMIT =====
+async function submitUjian(){
+  let id = userData.session_id.split("_")[1];
 
-/* UTIL */
-function resetIdleTimer(){
-  clearTimeout(idleTimer);
-  idleTimer=setTimeout(()=>{alert("Logout otomatis");logout();},1200000);
-}
+  let r = await post({
+    action:"submit",
+    id
+  });
 
-function togglePassword(){
-  let p=document.getElementById("password");
-  p.type=p.type==="password"?"text":"password";
+  if(r.status){
+    alert("Nilai Anda: " + r.nilai);
+  }else{
+    alert(r.message);
+  }
 }
-
-/* MODAL */
-function openConfirm(){ confirmModal.style.display="flex"; }
-function closeConfirm(){ confirmModal.style.display="none"; }
-function lanjutUjian(){
-  if(!checkData.checked){alert("Centang dulu");return;}
-  window.location.href="HALAMAN_SOAL_CBT.html";
-}
-
-function openModal(){
-  modalJadwal.style.display="flex";
-  fetch(API_URL+"?mode=token")
-    .then(r=>r.json())
-    .then(d=>{
-      jadwalBody.innerHTML="";
-      d.forEach(x=>{
-        jadwalBody.innerHTML+=`<tr><td>${x.kelas}</td><td>${x.mulai}</td><td>${x.selesai}</td></tr>`;
-      });
-    });
-}
-function closeModal(){ modalJadwal.style.display="none"; }
 </script>
 
 </body>
