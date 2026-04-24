@@ -157,8 +157,6 @@ th, td { border:1px solid #ccc; padding:8px; text-align:center; font-size:13px; 
 </div>
 
 <script>
-/* KODE JS ASLI (DIINTEGRASIKAN KE UI BARU)
-*/
 const API_URL = "https://script.google.com/macros/s/AKfycbwKKIKuT7ugLEjLzSf5e4cYVi-K3v23z6oNGRF1U73RMRIL3LJSsFPncKdE62qm0l4O/exec";
 
 let session = "";
@@ -198,17 +196,18 @@ async function cekToken(){
   if(!token) return alert("Masukkan Token!");
 
   btn.disabled = true;
-  let r = await post({action:"cekToken", token});
+  let r = await post({action:"cekToken", token: token});
 
-  if(r.status){
+  if(r && r.status){
     kelas = r.kelas;
-    let u = await post({action:"getUsers", kelas});
+    // Ambil daftar user berdasarkan kelas
+    let u = await post({action:"getUsers", kelas: kelas});
 
     let sel = document.getElementById("user");
     sel.innerHTML = '<option value="">-- Pilih Nama --</option>';
-    u.users.forEach(x=>{
+    u.users.forEach(x => {
       let opt = document.createElement("option");
-      opt.value = x.id;
+      opt.value = x.id; // Menyimpan ID siswa
       opt.text = x.nama;
       sel.appendChild(opt);
     });
@@ -217,7 +216,7 @@ async function cekToken(){
     document.getElementById("token").readOnly = true;
     btn.style.display = "none";
   } else {
-    alert(r.message);
+    alert(r ? r.message : "Token salah atau tidak valid.");
   }
   btn.disabled = false;
 }
@@ -232,14 +231,14 @@ async function login(){
   if(!id || !password) return alert("Pilih Nama & Isi Password!");
 
   btn.disabled = true;
-  let r = await post({action:"login", id, password, token});
+  let r = await post({action:"login", id: id, password: password, token: token});
 
-  if(r.status){
+  if(r && r.status){
     session = r.session_id;
-    userData = r;
+    userData = r; // Berisi nama, kelas, dll
     showDashboard();
   } else {
-    alert(r.message);
+    alert(r ? r.message : "Login gagal.");
   }
   btn.disabled = false;
 }
@@ -263,9 +262,11 @@ function mulaiUjian(){
 
 // ===== FUNGSI LOAD SOAL ASLI =====
 async function loadSoal(){
-  let r = await post({action:"getSoal", kelas});
-  soalData = r.soal;
-  tampilSoal();
+  let r = await post({action:"getSoal", kelas: userData.kelas});
+  if(r && r.status){
+    soalData = r.soal;
+    tampilSoal();
+  }
 }
 
 // ===== FUNGSI TAMPIL SOAL ASLI =====
@@ -291,14 +292,16 @@ function tampilSoal(){
 
 // ===== FUNGSI SIMPAN JAWABAN ASLI =====
 async function jawab(pil){
+  // Mengambil ID dari session_id (misal S_123_456 maka ambil 123)
   let id = userData.session_id.split("_")[1];
+  
   await post({
-    action:"saveJawaban",
-    id:id,
-    nama:userData.nama,
-    kelas:userData.kelas,
-    no:current+1,
-    jawaban:pil
+    action: "saveJawaban",
+    id: id,
+    nama: userData.nama,
+    kelas: userData.kelas,
+    no: current + 1,
+    jawaban: pil
   });
 
   current++;
@@ -318,12 +321,12 @@ async function jawab(pil){
 async function submitUjian(){
   if(!confirm("Yakin ingin mengakhiri ujian?")) return;
   let id = userData.session_id.split("_")[1];
-  let r = await post({action:"submit", id});
-  if(r.status){
+  let r = await post({action:"submit", id: id});
+  if(r && r.status){
     alert("Nilai Anda: " + r.nilai);
     location.reload();
   } else {
-    alert(r.message);
+    alert(r ? r.message : "Gagal submit.");
   }
 }
 
