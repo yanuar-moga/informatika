@@ -201,10 +201,14 @@ let userSession = JSON.parse(localStorage.getItem("user"));
 /* ===== TIMER COUNTDOWN ===== */
 const DURASI = 90 * 60 * 1000;
 let endTime = localStorage.getItem("endTime");
+let durasiTersimpan = localStorage.getItem("durasi");
 
-if (!endTime) {
+if (!endTime || durasiTersimpan != DURASI) {
     endTime = new Date().getTime() + DURASI;
     localStorage.setItem("endTime", endTime);
+    localStorage.setItem("durasi", DURASI);
+} else {
+    endTime = parseInt(endTime);
 }
 
 function startTimer() {
