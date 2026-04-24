@@ -109,6 +109,15 @@
             background: #222; color: #ccc;
             text-align: center; padding: 8px 0;
             font-size: 0.85em; border-top: 2px solid var(--gold); z-index: 1000;
+            transition: 0.3s;
+        }
+
+        /* FOOTER SAAT SELESAI */
+        .footer-info.selesai {
+            background: linear-gradient(135deg, #1f4e94, #3a7bd5);
+            color: white;
+            border-top: 3px solid gold;
+            font-weight: 500;
         }
 
         .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
@@ -184,10 +193,10 @@
         <div id="infoHalaman" style="font-weight:bold; color:var(--primary-blue); padding-top:10px;">Soal -/-</div>
         <button class="btn btn-nav" onclick="changeSoal(1)">Berikutnya </button>
     </div>
+</div>
 
-    <div class="footer-info">
-         CBT Asesmen Informatika Ver 1.0 | Dev by MB © 2026 
-    </div>
+<div id="footer" class="footer-info">
+    CBT Asesmen Informatika Ver 1.0 | Dev by MB © 2026 
 </div>
 
 <script>
@@ -198,7 +207,6 @@ let jawabanSiswa = JSON.parse(localStorage.getItem("jawabanSiswa")) || {};
 let currentIdx = 0;
 let userSession = JSON.parse(localStorage.getItem("user"));
 
-/* ===== TIMER COUNTDOWN ===== */
 const DURASI = 90 * 60 * 1000;
 let endTime = localStorage.getItem("endTime");
 let durasiTersimpan = localStorage.getItem("durasi");
@@ -329,6 +337,9 @@ async function kirimJawaban() {
             document.getElementById("app-content").style.display = "none";
             document.getElementById("layarHasil").style.display = "flex";
             document.getElementById("nilaiFinal").innerText = skorLokal;
+
+            document.getElementById("footer").classList.add("selesai");
+
         }, 2000);
 
     } catch (error) {
