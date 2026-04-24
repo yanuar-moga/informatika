@@ -6,9 +6,9 @@
 <title>CBT Asesmen Informatika</title>
 
 <style>
-/* --- STYLE DASHBOARD & LOGIN (SESUAI REQUEST) --- */
+/* --- STYLE DASHBOARD & LOGIN --- */
 body {
-  font-family: Arial, sans-serif;
+  font-family: Segoe UI, Arial, sans-serif;
   background: linear-gradient(to bottom right, #b3c7d6, #d9e2ec);
   margin: 0;
   color: #333;
@@ -22,20 +22,23 @@ body {
 
 .logo { width: 70px; margin-bottom: 10px; }
 h2 { color: #1f4e94; margin-bottom: 20px; }
-label { display: block; text-align: left; margin-top: 10px; font-size: 14px; font-weight: bold; }
+label { display: block; text-align: left; margin-top: 10px; font-size: 14px; font-weight: bold; color: #333; }
 input, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 14px; }
 
-.checkbox-container { display: flex; align-items: center; gap: 8px; margin-top: 10px; cursor: pointer; }
-.checkbox-container input { width: auto; margin-top: 0; }
+.checkbox-container { display: flex; align-items: center; gap: 8px; margin-top: 10px; cursor: pointer; user-select: none; }
+.checkbox-container input { width: auto; margin-top: 0; cursor: pointer; }
+.checkbox-container label { margin-top: 0; font-weight: normal; font-size: 13px; cursor: pointer; }
 
+/* BUTTONS */
 button { width: 100%; margin-top: 15px; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+button:disabled { background: #64748b !important; cursor: not-allowed; }
 .btn-login { background:#1f4e94; color:white; }
-.btn-login:disabled { background:#64748b; }
+.btn-login:hover { background:#163c73; }
 .btn-jadwal { background:#d9534f; color:white; }
 .btn-start { background:#ff5722; color:white; padding:14px; font-size:16px; margin-top:20px; }
 .logout-btn { background:#ff5722; color:white; padding:6px 12px; border-radius:6px; width: auto; margin-top: 5px; }
 
-/* --- STYLE SOAL (INTEGRASI) --- */
+/* --- STYLE SOAL (DARK MODE SESUAI KODE AWAL) --- */
 #halamanSoal { display:none; background:#0f172a; color:white; min-height: 100vh; padding: 20px; }
 .container-soal { max-width: 800px; margin: auto; }
 .soal-card { background:#1e293b; padding:20px; border-radius:10px; margin-top:20px; }
@@ -43,6 +46,7 @@ button { width: 100%; margin-top: 15px; padding: 12px; border: none; border-radi
 .option:hover { background:#475569; border: 1px solid #22c55e; }
 img { max-width:100%; margin-top:10px; border-radius:6px; }
 
+/* DASHBOARD */
 #dashboard { display:none; }
 .header { background:#1f4e94; color:white; padding:15px; display:flex; justify-content:flex-end; }
 .content { text-align:center; padding:20px; }
@@ -50,7 +54,11 @@ img { max-width:100%; margin-top:10px; border-radius:6px; }
 
 /* MODAL */
 .modal { display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.4); justify-content:center; align-items:center; }
-.modal-box { background:#fff; padding:25px; border-radius:12px; width:90%; max-width:350px; text-align:center; }
+.modal-box { background:#fff; padding:25px; border-radius:12px; width:90%; max-width:350px; text-align:center; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
+
+table { width:100%; border-collapse:collapse; margin-bottom: 15px; }
+th, td { border:1px solid #ccc; padding:8px; text-align:center; font-size:13px; color: #333; }
 </style>
 </head>
 
@@ -63,11 +71,11 @@ img { max-width:100%; margin-top:10px; border-radius:6px; }
 
     <label>Token Ujian</label>
     <input type="text" id="token" placeholder="Masukkan token">
-    <button class="btn-login" id="btnCekToken" onclick="cekToken()">Cek Token</button>
+    <button class="btn-login" id="btnToken" onclick="cekToken()">Cek Token</button>
 
-    <div id="formLanjutan" style="display:none">
+    <div id="formLogin" style="display:none; border-top: 1px solid #ccc; margin-top: 15px; padding-top: 10px;">
         <label>Pilih Siswa</label>
-        <select id="userSelect"></select>
+        <select id="user"></select>
 
         <label>Password</label>
         <input type="password" id="password" placeholder="Masukkan password">
@@ -81,10 +89,10 @@ img { max-width:100%; margin-top:10px; border-radius:6px; }
     </div>
 
     <button class="btn-jadwal" onclick="openModal('modalJadwal')">Lihat Jadwal Token</button>
-    <p id="msg" style="color:red; font-size:12px; margin-top:10px;"></p>
     
-    <div class="footer" style="font-size:10px; margin-top:15px; color:#777;">
-      CBT Browser Apps by MB © 2026
+    <div class="footer" style="font-size:11px; margin-top: 20px; color: #777;">
+      CBT Browser Apps by MB<br>
+      © 2026 MB All Rights Reserved
     </div>
   </div>
 </div>
@@ -99,23 +107,29 @@ img { max-width:100%; margin-top:10px; border-radius:6px; }
   </div>
 
   <div class="content">
+    <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" style="width:90px;" alt="Logo">
+    <div style="font-size:24px; color:#1f4e94; font-weight:bold;">Asesmen CBT Informatika</div>
+    
     <div class="box">
-      <h3>Konfirmasi Data Peserta</h3>
       <p>Nama : <b id="namaD"></b></p>
       <p>Kelas : <b id="kelasD"></b></p>
       <p>Mata Pelajaran : <b>Informatika</b></p>
       <hr>
-      <p><b>Instruksi:</b> Pastikan koneksi internet stabil. Klik tombol di bawah untuk mulai.</p>
-      <button class="btn-start" onclick="openModal('confirmModal')">Mulai Ujian</button>
+      <p><b>Informasi Ujian:</b></p>
+      <ul>
+        <li>Dilarang keluar aplikasi atau refresh saat ujian.</li>
+        <li>Kerjakan dengan jujur dan teliti.</li>
+      </ul>
+      <button class="btn-start" onclick="openModal('confirmModal')">Kerjakan Ujian</button>
     </div>
   </div>
 </div>
 
 <div id="halamanSoal">
     <div class="container-soal">
-        <div class="header-soal" style="display:flex; justify-content:space-between; align-items:center;">
-            <h2 style="color:white; margin:0;">CBT Exam</h2>
-            <button class="logout-btn" onclick="submitUjian()" style="background:#22c55e">Selesai Ujian</button>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 id="info">Ruang Ujian</h3>
+            <button class="logout-btn" onclick="submitUjian()" style="background:#22c55e">Submit Ujian</button>
         </div>
         <div id="soalBox" class="soal-card">
             </div>
@@ -124,9 +138,9 @@ img { max-width:100%; margin-top:10px; border-radius:6px; }
 
 <div id="confirmModal" class="modal">
   <div class="modal-box">
-    <h3>Konfirmasi</h3>
-    <p>Yakin ingin memulai ujian sekarang?</p>
-    <button class="btn-login" onclick="mulaiUjian()">Ya, Mulai</button>
+    <h3>Konfirmasi Data</h3>
+    <p>Pastikan data Anda sudah benar sebelum memulai.</p>
+    <button class="btn-login" onclick="mulaiUjian()">Lanjut Ujian</button>
     <button class="btn-jadwal" onclick="closeModal('confirmModal')">Batal</button>
   </div>
 </div>
@@ -134,12 +148,17 @@ img { max-width:100%; margin-top:10px; border-radius:6px; }
 <div id="modalJadwal" class="modal">
   <div class="modal-box">
     <h3>Jadwal Token</h3>
-    <div id="isiJadwal">Memuat data...</div>
+    <table>
+      <thead><tr><th>Kelas</th><th>Mulai</th><th>Selesai</th></tr></thead>
+      <tbody id="jadwalBody"></tbody>
+    </table>
     <button class="btn-login" onclick="closeModal('modalJadwal')">Tutup</button>
   </div>
 </div>
 
 <script>
+/* KODE JS ASLI (DIINTEGRASIKAN KE UI BARU)
+*/
 const API_URL = "https://script.google.com/macros/s/AKfycbwKKIKuT7ugLEjLzSf5e4cYVi-K3v23z6oNGRF1U73RMRIL3LJSsFPncKdE62qm0l4O/exec";
 
 let session = "";
@@ -149,13 +168,22 @@ let current = 0;
 let userData = {};
 let loading = false;
 
-// Helper POST
+// ===== FUNGSI POST ASLI =====
 async function post(data){
-  let res = await fetch(API_URL, {
-    method: "POST",
-    body: new URLSearchParams(data)
-  });
-  return await res.json();
+  if(loading) return;
+  loading = true;
+  try {
+    let res = await fetch(API_URL, {
+      method: "POST",
+      body: new URLSearchParams(data)
+    });
+    let json = await res.json();
+    loading = false;
+    return json;
+  } catch (e) {
+    loading = false;
+    alert("Kesalahan koneksi ke server.");
+  }
 }
 
 function togglePassword() {
@@ -163,46 +191,51 @@ function togglePassword() {
   p.type = p.type === "password" ? "text" : "password";
 }
 
+// ===== FUNGSI CEK TOKEN ASLI =====
 async function cekToken(){
-  const btn = document.getElementById("btnCekToken");
-  const token = document.getElementById("token").value;
-  if(!token) return alert("Isi Token!");
+  let btn = document.getElementById("btnToken");
+  let token = document.getElementById("token").value;
+  if(!token) return alert("Masukkan Token!");
 
   btn.disabled = true;
-  try {
-    let r = await post({action:"cekToken", token});
-    if(r.status){
-      kelas = r.kelas;
-      let u = await post({action:"getUsers", kelas});
-      
-      let sel = document.getElementById("userSelect");
-      sel.innerHTML = '<option value="">-- Pilih Nama --</option>';
-      u.users.forEach(x => {
-        sel.innerHTML += `<option value="${x.id}">${x.nama}</option>`;
-      });
+  let r = await post({action:"cekToken", token});
 
-      document.getElementById("formLanjutan").style.display = "block";
-      document.getElementById("token").readOnly = true;
-      btn.style.display = "none";
-    } else {
-      alert(r.message);
-    }
-  } catch(e) { alert("Gagal koneksi"); }
+  if(r.status){
+    kelas = r.kelas;
+    let u = await post({action:"getUsers", kelas});
+
+    let sel = document.getElementById("user");
+    sel.innerHTML = '<option value="">-- Pilih Nama --</option>';
+    u.users.forEach(x=>{
+      let opt = document.createElement("option");
+      opt.value = x.id;
+      opt.text = x.nama;
+      sel.appendChild(opt);
+    });
+
+    document.getElementById("formLogin").style.display = "block";
+    document.getElementById("token").readOnly = true;
+    btn.style.display = "none";
+  } else {
+    alert(r.message);
+  }
   btn.disabled = false;
 }
 
+// ===== FUNGSI LOGIN ASLI =====
 async function login(){
-  const btn = document.getElementById("btnLogin");
-  const id = document.getElementById("userSelect").value;
-  const password = document.getElementById("password").value;
-  const token = document.getElementById("token").value;
+  let btn = document.getElementById("btnLogin");
+  let id = document.getElementById("user").value;
+  let password = document.getElementById("password").value;
+  let token = document.getElementById("token").value;
 
-  if(!id || !password) return alert("Pilih user & isi password!");
+  if(!id || !password) return alert("Pilih Nama & Isi Password!");
 
   btn.disabled = true;
   let r = await post({action:"login", id, password, token});
 
   if(r.status){
+    session = r.session_id;
     userData = r;
     showDashboard();
   } else {
@@ -228,16 +261,18 @@ function mulaiUjian(){
     loadSoal();
 }
 
+// ===== FUNGSI LOAD SOAL ASLI =====
 async function loadSoal(){
   let r = await post({action:"getSoal", kelas});
   soalData = r.soal;
   tampilSoal();
 }
 
+// ===== FUNGSI TAMPIL SOAL ASLI =====
 function tampilSoal(){
   let s = soalData[current];
-  let html = `<div style="font-size:18px; margin-bottom:15px;"><b>Soal ${current+1} / ${soalData.length}</b></div>`;
-  html += `<p style="font-size:16px; line-height:1.6;">${s[3] || ""}</p>`;
+  let html = "<h3>Soal "+(current+1)+"</h3>";
+  html += "<p>"+(s[3] || "")+"</p>";
 
   if(s[4]) html += `<img src="${s[4]}">`;
 
@@ -246,18 +281,18 @@ function tampilSoal(){
     let img = s[6+(i*2)];
     if(txt || img){
       html += `<div class="option" onclick="jawab('${x}')">`;
-      if(txt) html += `<span><b>${x}.</b> ${txt}</span>`;
-      if(img) html += `<br><img src="${img}">`;
+      if(txt) html += `<div><b>${x}.</b> ${txt}</div>`;
+      if(img) html += `<img src="${img}">`;
       html += "</div>";
     }
   });
   document.getElementById("soalBox").innerHTML = html;
 }
 
+// ===== FUNGSI SIMPAN JAWABAN ASLI =====
 async function jawab(pil){
   let id = userData.session_id.split("_")[1];
-  // Kirim ke server (Async)
-  post({
+  await post({
     action:"saveJawaban",
     id:id,
     nama:userData.nama,
@@ -272,25 +307,45 @@ async function jawab(pil){
   } else {
     document.getElementById("soalBox").innerHTML = `
         <div style="text-align:center; padding:20px;">
-            <h3>Ujian Selesai!</h3>
-            <p>Anda telah menjawab semua soal.</p>
-            <button class="btn-start" onclick="submitUjian()">Kirim Jawaban & Selesai</button>
+            <h3>Selesai!</h3>
+            <p>Semua soal telah terjawab.</p>
+            <button class="btn-start" onclick="submitUjian()">Kirim Sekarang</button>
         </div>`;
   }
 }
 
+// ===== FUNGSI SUBMIT ASLI =====
 async function submitUjian(){
   if(!confirm("Yakin ingin mengakhiri ujian?")) return;
   let id = userData.session_id.split("_")[1];
   let r = await post({action:"submit", id});
-  alert("Ujian Selesai! Nilai Anda: " + r.nilai);
-  location.reload();
+  if(r.status){
+    alert("Nilai Anda: " + r.nilai);
+    location.reload();
+  } else {
+    alert(r.message);
+  }
 }
 
 function logout(){ location.reload(); }
-
-function openModal(id){ document.getElementById(id).style.display = "flex"; }
+function openModal(id){ 
+  document.getElementById(id).style.display = "flex"; 
+  if(id === 'modalJadwal') loadJadwal();
+}
 function closeModal(id){ document.getElementById(id).style.display = "none"; }
+
+function loadJadwal() {
+  const body = document.getElementById('jadwalBody');
+  body.innerHTML = "<tr><td colspan='3'>Memuat...</td></tr>";
+  fetch(API_URL + "?mode=token")
+    .then(r => r.json())
+    .then(data => {
+      body.innerHTML = "";
+      data.forEach(d => {
+        body.innerHTML += `<tr><td>${d.kelas}</td><td>${d.mulai}</td><td>${d.selesai}</td></tr>`;
+      });
+    }).catch(() => body.innerHTML = "<tr><td colspan='3'>Gagal memuat.</td></tr>");
+}
 </script>
 
 </body>
