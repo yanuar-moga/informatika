@@ -94,8 +94,9 @@
             cursor: pointer;
             font-weight: bold;
             transition: 0.2s;
+            border: 1px solid #ccc;
         }
-        .kotak-nomor.sudah { background: var(--success); color: white; }
+        .kotak-nomor.sudah { background: var(--success); color: white; border-color: var(--success); }
         .kotak-nomor.aktif { border: 3px solid var(--gold); transform: scale(1.1); }
 
         /* FOOTER & NAV */
@@ -131,6 +132,7 @@
             background: white; display: flex; flex-direction: column;
             justify-content: center; align-items: center; z-index: 9999;
         }
+        img { max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px; }
     </style>
 </head>
 
@@ -188,7 +190,7 @@
         <button class="btn btn-nav" onclick="changeSoal(1)">Berikutnya </button>
     </div>
 
-    <div class="footer-info">
+    <div class="footer-info" id="footerPengembang">
         <strong>Sistem CBT SMPN 1 Moga</strong> | Dikembangkan oleh: <strong>Yanuar</strong> | v2.6.4
     </div>
 </div>
@@ -199,99 +201,156 @@ const API_URL = "https://script.google.com/macros/s/AKfycbzTacoBkA6md69TmVNi-uCw
 let listSoal = [];
 let jawabanSiswa = {};
 let currentIdx = 0;
+// Mengambil session dari login sebelumnya
 let userSession = JSON.parse(localStorage.getItem("user"));
 
 window.onload = async () => {
-    if (!userSession) { window.location.href = "index.html"; return; }
+    // Validasi Session
+    if (!userSession) { 
+        alert("Sesi berakhir, silakan login kembali.");
+        window.location.href = "index.html"; 
+        return; 
+    }
+    
     document.getElementById("displayNama").innerText = userSession.nama;
     document.getElementById("displayKelas").innerText = "Kelas " + userSession.kelas;
     
-    await laporMulaiUjian();
     await loadSoal();
 };
 
-async function laporMulaiUjian() {
+// Fungsi umum untuk komunikasi ke GAS
+async function postToGAS(data) {
     try {
-        await fetch(API_URL, {
-            method: "POST", mode: "no-cors",
-            body: JSON.stringify({ action: "mulaiUjian", idLogin: userSession.idLogin, nama: userSession.nama })
+        const response = await fetch(API_URL, {
+            method: "POST",
+            body: new URLSearchParams(data)
         });
-    } catch (e) {}
-}
-
-async function loadSoal() {
-    try {
-        const response = await fetch(API_URL + "?mode=getSoal");
-        listSoal = await response.json();
-        renderSoal();
-        document.getElementById("loading").style.display = "none";
-    } catch (error) { alert("Gagal memuat soal."); }
-}
-
-function renderSoal() {
-    if (listSoal.length === 0) return;
-    const s = listSoal[currentIdx];
-    document.getElementById("infoHalaman").innerText = `Soal ${currentIdx + 1} dari ${listSoal.length}`;
-    document.getElementById("quizArea").innerHTML = `
-        <div class="soal-card">
-            <div style="font-size:1.2em; margin-bottom:20px; line-height:1.5;"><b>${currentIdx + 1}.</b> ${s.pertanyaan}</div>
-            <div class="daftar-opsi">
-                ${['A', 'B', 'C', 'D', 'E'].map(k => {
-                    if (!s.opsi[k]) return '';
-                    const isSelected = jawabanSiswa[s.no] === k ? 'selected' : '';
-                    return `<div class="opsi ${isSelected}" onclick="pilih('${s.no}', '${k}')"><strong>${k}.</strong> ${s.opsi[k]}</div>`;
-                }).join('')}
-            </div>
-        </div>`;
-    renderGrid();
-}
-
-function pilih(noSoal, kodeOpsi) { jawabanSiswa[noSoal] = kodeOpsi; renderSoal(); }
-
-function renderGrid() {
-    const gridNomor = document.getElementById("gridNomor");
-    gridNomor.innerHTML = listSoal.map((s, i) => `
-        <div class="kotak-nomor ${jawabanSiswa[s.no] ? 'sudah' : ''} ${currentIdx === i ? 'aktif' : ''}" onclick="currentIdx=${i};renderSoal()">${i + 1}</div>
-    `).join('');
-}
-
-function changeSoal(arah) {
-    if (currentIdx + arah >= 0 && currentIdx + arah < listSoal.length) {
-        currentIdx += arah; renderSoal();
+        return await response.json();
+    } catch (e) {
+        console.error("Kesalahan koneksi server:", e);
     }
 }
 
-async function kirimJawaban() {
-    const jumlahDijawab = Object.keys(jawabanSiswa).length;
-    if (!confirm(`Anda menjawab ${jumlahDijawab}/${listSoal.length} soal. Selesaikan ujian?`)) return;
+// Mengambil data soal
+async function loadSoal() {
+    try {
+        const response = await fetch(API_URL + "?action=getSoal&kelas=" + userSession.kelas);
+        const resJson = await response.json();
+        
+        if(resJson.status) {
+            listSoal = resJson.soal;
+            renderSoal();
+            document.getElementById("loading").style.display = "none";
+        } else {
+            alert("Soal tidak ditemukan untuk kelas ini.");
+        }
+    } catch (error) { 
+        alert("Gagal memuat soal. Periksa koneksi internet."); 
+    }
+}
 
-    document.getElementById("loading").style.display = "flex";
-    document.getElementById("loadingText").innerText = "Menyimpan & Menghitung Skor...";
+// Menampilkan butir soal
+function renderSoal() {
+    if (listSoal.length === 0) return;
+    const s = listSoal[currentIdx]; // s adalah baris dari Spreadsheet Soal
+    
+    document.getElementById("infoHalaman").innerText = `Soal ${currentIdx + 1} dari ${listSoal.length}`;
+    
+    // s[3] = Pertanyaan, s[4] = Gambar Soal
+    let html = `
+        <div class="soal-card">
+            <div style="font-size:1.15em; margin-bottom:20px; line-height:1.6;">
+                <b>${currentIdx + 1}.</b> ${s[3]}
+            </div>`;
+    
+    if (s[4]) {
+        html += `<div style="text-align:center; margin-bottom:15px;"><img src="${s[4]}"></div>`;
+    }
 
-    const payload = {
-        action: "kirimJawaban",
-        idLogin: userSession.idLogin,
+    html += `<div class="daftar-opsi">`;
+    
+    // Mapping Opsi A (Kolom 5) sampai E (Kolom 13)
+    ['A', 'B', 'C', 'D', 'E'].forEach((label, i) => {
+        const teksOpsi = s[5 + (i * 2)];
+        const imgOpsi = s[6 + (i * 2)];
+        
+        if (teksOpsi || imgOpsi) {
+            const isSelected = jawabanSiswa[currentIdx + 1] === label ? 'selected' : '';
+            html += `
+                <div class="opsi ${isSelected}" onclick="simpanKeServer('${currentIdx + 1}', '${label}')">
+                    <strong>${label}.</strong> ${teksOpsi || ''}
+                    ${imgOpsi ? `<br><img src="${imgOpsi}" style="max-height:150px;">` : ''}
+                </div>`;
+        }
+    });
+
+    html += `</div></div>`;
+    document.getElementById("quizArea").innerHTML = html;
+    renderGrid();
+}
+
+// Kirim jawaban per nomor secara realtime (Silent Save)
+async function simpanKeServer(noSoal, kodeOpsi) {
+    jawabanSiswa[noSoal] = kodeOpsi;
+    renderSoal();
+    
+    // Kirim ke GAS (saveJawaban)
+    let idMurni = userSession.session_id.split("_")[1];
+    postToGAS({
+        action: "saveJawaban",
+        id: idMurni,
         nama: userSession.nama,
         kelas: userSession.kelas,
-        jawaban: jawabanSiswa
-    };
+        no: noSoal,
+        jawaban: kodeOpsi
+    });
+}
 
+// Menampilkan grid nomor soal di sidebar
+function renderGrid() {
+    const gridNomor = document.getElementById("gridNomor");
+    gridNomor.innerHTML = listSoal.map((s, i) => {
+        const sudahDijawab = jawabanSiswa[i + 1] ? 'sudah' : '';
+        const sedangAktif = currentIdx === i ? 'aktif' : '';
+        return `<div class="kotak-nomor ${sudahDijawab} ${sedangAktif}" onclick="currentIdx=${i};renderSoal()">${i + 1}</div>`;
+    }).join('');
+}
+
+// Navigasi tombol bawah
+function changeSoal(arah) {
+    if (currentIdx + arah >= 0 && currentIdx + arah < listSoal.length) {
+        currentIdx += arah; 
+        renderSoal();
+    }
+}
+
+// Submit Final
+async function kirimJawaban() {
+    const jumlahDijawab = Object.keys(jawabanSiswa).length;
+    if (!confirm(`Anda menjawab ${jumlahDijawab} dari ${listSoal.length} soal. Selesaikan ujian?`)) return;
+
+    document.getElementById("loading").style.display = "flex";
+    document.getElementById("loadingText").innerText = "Mengunci Jawaban & Menghitung Skor...";
+
+    let idMurni = userSession.session_id.split("_")[1];
+    
     try {
-        await fetch(API_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+        const res = await postToGAS({ action: "submit", id: idMurni });
         
-        // Kalkulasi Skor Lokal untuk tampilan cepat
-        let skorLokal = 0;
-        listSoal.forEach(s => { if(jawabanSiswa[s.no] === s.kunci) skorLokal += Number(s.skor); });
-
-        setTimeout(() => {
+        if (res && res.status) {
+            setTimeout(() => {
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("app-content").style.display = "none"; // Ini juga menyembunyikan footer pengembang
+                document.getElementById("layarHasil").style.display = "flex";
+                document.getElementById("nilaiFinal").innerText = res.nilai;
+            }, 1500);
+        } else {
+            alert(res.message || "Gagal mengakhiri ujian.");
             document.getElementById("loading").style.display = "none";
-            document.getElementById("app-content").style.display = "none";
-            document.getElementById("layarHasil").style.display = "flex";
-            document.getElementById("nilaiFinal").innerText = skorLokal;
-        }, 2000);
-
+        }
     } catch (error) {
-        document.getElementById("layarHasil").style.display = "flex";
+        alert("Terjadi gangguan koneksi.");
+        document.getElementById("loading").style.display = "none";
     }
 }
 
