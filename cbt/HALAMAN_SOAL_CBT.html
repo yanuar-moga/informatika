@@ -6,7 +6,6 @@
     <title>CBT Asesmen Informatika</title>
 
     <style>
-        /* === STYLE TETAP KONSISTEN === */
         :root {
             --primary-blue: #1f4e94;
             --btn-blue: #007bff; 
@@ -50,7 +49,7 @@
             max-width: 1100px; 
             margin: 20px auto; 
             gap: 20px; 
-            padding: 0 15px 160px; /* Ruang untuk footer info */
+            padding: 0 15px 160px;
         }
 
         @media(min-width: 768px) { .main-layout { flex-direction: row; } }
@@ -98,7 +97,6 @@
         .kotak-nomor.sudah { background: var(--success); color: white; }
         .kotak-nomor.aktif { border: 3px solid var(--gold); transform: scale(1.1); }
 
-        /* FOOTER & NAV */
         .nav-bottom {
             position: fixed; bottom: 40px; width: 100%;
             display: flex; justify-content: space-between;
@@ -116,7 +114,6 @@
         .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-nav { background: var(--btn-blue); color: white; }
 
-        /* LAYAR HASIL AKHIR */
         #layarHasil {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: white; display: none;
@@ -197,15 +194,49 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbzTacoBkA6md69TmVNi-uCwtXoUzu15_YlBfwmYqzpHGha_ad-nKnMAPD0c7VkG42Q/exec";
 
 let listSoal = [];
-let jawabanSiswa = {};
+let jawabanSiswa = JSON.parse(localStorage.getItem("jawabanSiswa")) || {};
 let currentIdx = 0;
 let userSession = JSON.parse(localStorage.getItem("user"));
 
+/* ===== TIMER COUNTDOWN ===== */
+const DURASI = 60 * 60 * 1000;
+let endTime = localStorage.getItem("endTime");
+
+if (!endTime) {
+    endTime = new Date().getTime() + DURASI;
+    localStorage.setItem("endTime", endTime);
+}
+
+function startTimer() {
+    setInterval(() => {
+        const now = new Date().getTime();
+        let sisa = endTime - now;
+
+        if (sisa <= 0) {
+            document.getElementById("timerDisplay").innerText = "00:00:00";
+            kirimJawaban();
+            return;
+        }
+
+        const jam = Math.floor(sisa / (1000*60*60));
+        const menit = Math.floor((sisa / (1000*60)) % 60);
+        const detik = Math.floor((sisa/1000)%60);
+
+        document.getElementById("timerDisplay").innerText =
+            `${String(jam).padStart(2,'0')}:`+
+            `${String(menit).padStart(2,'0')}:`+
+            `${String(detik).padStart(2,'0')}`;
+    },1000);
+}
+
 window.onload = async () => {
     if (!userSession) { window.location.href = "index.html"; return; }
+
     document.getElementById("displayNama").innerText = userSession.nama;
     document.getElementById("displayKelas").innerText = "Kelas " + userSession.kelas;
-    
+
+    startTimer();
+
     await laporMulaiUjian();
     await loadSoal();
 };
@@ -246,7 +277,11 @@ function renderSoal() {
     renderGrid();
 }
 
-function pilih(noSoal, kodeOpsi) { jawabanSiswa[noSoal] = kodeOpsi; renderSoal(); }
+function pilih(noSoal, kodeOpsi) {
+    jawabanSiswa[noSoal] = kodeOpsi;
+    localStorage.setItem("jawabanSiswa", JSON.stringify(jawabanSiswa));
+    renderSoal();
+}
 
 function renderGrid() {
     const gridNomor = document.getElementById("gridNomor");
@@ -279,9 +314,11 @@ async function kirimJawaban() {
     try {
         await fetch(API_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
         
-        // Kalkulasi Skor Lokal untuk tampilan cepat
         let skorLokal = 0;
         listSoal.forEach(s => { if(jawabanSiswa[s.no] === s.kunci) skorLokal += Number(s.skor); });
+
+        localStorage.removeItem("endTime");
+        localStorage.removeItem("jawabanSiswa");
 
         setTimeout(() => {
             document.getElementById("loading").style.display = "none";
@@ -296,7 +333,7 @@ async function kirimJawaban() {
 }
 
 function logOutSiswa() {
-    localStorage.removeItem("user");
+    localStorage.clear();
     window.location.href = "index.html"; 
 }
 </script>
