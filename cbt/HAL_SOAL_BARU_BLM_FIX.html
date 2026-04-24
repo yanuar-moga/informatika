@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBT Asesmen Informatika</title>
+
+    <style>
+        :root {
+            --primary-blue: #1f4e94;
+            --btn-blue: #007bff; 
+            --btn-red: #ed1c24;
+            --gold: #d4af37;
+            --light-bg: #f4f7fa;
+            --success: #28a745;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--light-bg); 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh;
+        }
+
+        .header { 
+            background: var(--primary-blue); 
+            color: white; 
+            padding: 10px 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-bottom: 4px solid var(--gold);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .timer { 
+            background: white; 
+            color: var(--primary-blue); 
+            padding: 5px 15px; 
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .main-layout { 
+            display: flex; 
+            flex-direction: column; 
+            max-width: 1100px; 
+            margin: 20px auto; 
+            gap: 20px; 
+            padding: 0 15px 160px;
+        }
+
+        @media(min-width: 768px) { .main-layout { flex-direction: row; } }
+
+        .quiz-container { flex: 3; }
+        .sidebar { flex: 1; }
+
+        .soal-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid var(--primary-blue);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .opsi {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .opsi:hover { background: #f0f4f8; }
+        .opsi.selected {
+            background: #e1ecff;
+            border-color: var(--btn-blue);
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        .grid-nomor { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 15px; }
+        .kotak-nomor {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .kotak-nomor.sudah { background: var(--success); color: white; }
+        .kotak-nomor.aktif { border: 3px solid var(--gold); transform: scale(1.1); }
+
+        .nav-bottom {
+            position: fixed; bottom: 40px; width: 100%;
+            display: flex; justify-content: space-between;
+            background: white; padding: 10px 20px;
+            border-top: 1px solid #eee; box-sizing: border-box; z-index: 900;
+        }
+
+        .footer-info {
+            position: fixed; bottom: 0; width: 100%;
+            background: #1a1a1a;
+            color: #ccc;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 0.8em;
+            z-index: 20000;
+            transition: 0.3s;
+        }
+
+        .footer-info.selesai {
+            background: linear-gradient(135deg, #1f4e94, #3a7bd5);
+            color: white;
+        }
+
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-nav { background: var(--btn-blue); color: white; }
+
+        /* === HASIL ANBK STYLE === */
+        #layarHasil {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #eef3f9, #dbe7f5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10001;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .hasil-container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px 30px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .logo-hasil {
+            width: 90px;
+            margin-bottom: 15px;
+        }
+
+        .judul-hasil {
+            color: var(--primary-blue);
+            margin: 10px 0;
+        }
+
+        .sub-hasil {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .box-nilai {
+            margin: 25px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, #f0f7ff, #e3efff);
+            border-radius: 20px;
+        }
+
+        .label-nilai {
+            font-size: 0.85em;
+            color: #777;
+        }
+
+        .nilai-besar {
+            font-size: 4em;
+            font-weight: 900;
+            color: var(--primary-blue);
+        }
+
+        .btn-keluar {
+            margin-top: 20px;
+            background: var(--btn-red);
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        #loading {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 9999;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="loading">
+    <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" width="80">
+    <p id="loadingText">Menghubungkan ke Server...</p>
+</div>
+
+<div id="layarHasil">
+    <div class="hasil-container">
+        <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" class="logo-hasil">
+        <h2 class="judul-hasil">Terima Kasih!</h2>
+        <p class="sub-hasil">Anda telah menyelesaikan asesmen</p>
+
+        <div class="box-nilai">
+            <div class="label-nilai">NILAI HASIL TES</div>
+            <div class="nilai-besar" id="nilaiFinal">0</div>
+        </div>
+
+        <p class="sub-hasil">Klik tombol di bawah untuk keluar</p>
+
+        <button class="btn-keluar" onclick="logOutSiswa()">Keluar</button>
+    </div>
+</div>
+
+<div id="app-content">
+    <div class="header">
+        <div>
+            <b id="displayNama">-</b><br>
+            <small id="displayKelas">-</small>
+        </div>
+        <div class="timer" id="timerDisplay">00:00:00</div>
+    </div>
+
+    <div class="main-layout">
+        <div class="quiz-container">
+            <div id="quizArea"></div>
+        </div>
+
+        <div class="sidebar">
+            <div style="background:white; padding:20px; border-radius:15px;">
+                <h4>Navigasi Soal</h4>
+                <div id="gridNomor" class="grid-nomor"></div>
+                <hr>
+                <button class="btn" onclick="kirimJawaban()">SELESAI</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-bottom">
+        <button class="btn btn-nav" onclick="changeSoal(-1)">Sebelumnya</button>
+        <div id="infoHalaman">Soal -/-</div>
+        <button class="btn btn-nav" onclick="changeSoal(1)">Berikutnya</button>
+    </div>
+</div>
+
+<div id="footer" class="footer-info">
+    CBT Asesmen Informatika Ver 1.0 | Dev by MB © 2026
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzTacoBkA6md69TmVNi-uCwtXoUzu15_YlBfwmYqzpHGha_ad-nKnMAPD0c7VkG42Q/exec";
+
+let listSoal = [];
+let jawabanSiswa = JSON.parse(localStorage.getItem("jawabanSiswa")) || {};
+let currentIdx = 0;
+let userSession = JSON.parse(localStorage.getItem("user"));
+
+const DURASI = 90 * 60 * 1000;
+let endTime = localStorage.getItem("endTime");
+let durasiTersimpan = localStorage.getItem("durasi");
+
+if (!endTime || durasiTersimpan != DURASI) {
+    endTime = new Date().getTime() + DURASI;
+    localStorage.setItem("endTime", endTime);
+    localStorage.setItem("durasi", DURASI);
+} else {
+    endTime = parseInt(endTime);
+}
+
+function startTimer() {
+    setInterval(() => {
+        const now = new Date().getTime();
+        let sisa = endTime - now;
+
+        if (sisa <= 0) {
+            document.getElementById("timerDisplay").innerText = "00:00:00";
+            kirimJawaban();
+            return;
+        }
+
+        const jam = Math.floor(sisa / (1000*60*60));
+        const menit = Math.floor((sisa / (1000*60)) % 60);
+        const detik = Math.floor((sisa/1000)%60);
+
+        document.getElementById("timerDisplay").innerText =
+            `${String(jam).padStart(2,'0')}:${String(menit).padStart(2,'0')}:${String(detik).padStart(2,'0')}`;
+    },1000);
+}
+
+window.onload = async () => {
+    if (!userSession) { window.location.href = "index.html"; return; }
+
+    document.getElementById("displayNama").innerText = userSession.nama;
+    document.getElementById("displayKelas").innerText = "Kelas " + userSession.kelas;
+
+    startTimer();
+    await laporMulaiUjian();
+    await loadSoal();
+};
+
+async function laporMulaiUjian() {
+    try {
+        await fetch(API_URL, {
+            method: "POST", mode: "no-cors",
+            body: JSON.stringify({ action: "mulaiUjian", idLogin: userSession.idLogin, nama: userSession.nama })
+        });
+    } catch (e) {}
+}
+
+async function loadSoal() {
+    try {
+        const response = await fetch(API_URL + "?mode=getSoal");
+        listSoal = await response.json();
+        renderSoal();
+        document.getElementById("loading").style.display = "none";
+    } catch (error) { alert("Gagal memuat soal."); }
+}
+
+function renderSoal() {
+    if (listSoal.length === 0) return;
+    const s = listSoal[currentIdx];
+    document.getElementById("infoHalaman").innerText = `Soal ${currentIdx + 1} dari ${listSoal.length}`;
+    document.getElementById("quizArea").innerHTML = `
+        <div class="soal-card">
+            <div><b>${currentIdx + 1}.</b> ${s.pertanyaan}</div>
+            ${['A','B','C','D','E'].map(k=>{
+                if(!s.opsi[k]) return '';
+                const sel = jawabanSiswa[s.no]===k?'selected':'';
+                return `<div class="opsi ${sel}" onclick="pilih('${s.no}','${k}')">${k}. ${s.opsi[k]}</div>`;
+            }).join('')}
+        </div>`;
+    renderGrid();
+}
+
+function pilih(no,kode){
+    jawabanSiswa[no]=kode;
+    localStorage.setItem("jawabanSiswa", JSON.stringify(jawabanSiswa));
+    renderSoal();
+}
+
+function renderGrid(){
+    document.getElementById("gridNomor").innerHTML=listSoal.map((s,i)=>
+        `<div class="kotak-nomor ${jawabanSiswa[s.no]?'sudah':''} ${currentIdx===i?'aktif':''}" onclick="currentIdx=${i};renderSoal()">${i+1}</div>`
+    ).join('');
+}
+
+function changeSoal(a){
+    if(currentIdx+a>=0 && currentIdx+a<listSoal.length){
+        currentIdx+=a;renderSoal();
+    }
+}
+
+async function kirimJawaban(){
+    if(!confirm("Selesaikan ujian?")) return;
+
+    document.getElementById("loading").style.display="flex";
+
+    try{
+        await fetch(API_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({jawaban:jawabanSiswa})});
+
+        let skor=0;
+        listSoal.forEach(s=>{if(jawabanSiswa[s.no]===s.kunci) skor+=Number(s.skor);});
+
+        localStorage.clear();
+
+        setTimeout(()=>{
+            document.getElementById("loading").style.display="none";
+            document.getElementById("app-content").style.display="none";
+            document.getElementById("layarHasil").style.display="flex";
+            document.getElementById("nilaiFinal").innerText=skor;
+
+            document.getElementById("footer").classList.add("selesai");
+            document.getElementById("footer").innerText="UJIAN SELESAI • CBT Asesmen Informatika Ver 1.0 | Dev by MB © 2026";
+
+        },1500);
+
+    }catch(e){}
+}
+
+function logOutSiswa(){
+    localStorage.clear();
+    window.location.href="index.html";
+}
+</script>
+</body>
+</html>
