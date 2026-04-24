@@ -6,7 +6,7 @@
     <title>Asesmen CBT - SMP Negeri 1 Moga</title>
 
     <style>
-        /* === TAMPILAN LENGKAP === */
+        /* === STYLE SISTEM CBT === */
         :root {
             --primary-blue: #1f4e94;
             --btn-blue: #007bff; 
@@ -146,15 +146,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255,255,255,0.9);
+            background: white;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 9999;
         }
-
-        .hidden { display: none !important; }
     </style>
 </head>
 
@@ -162,7 +160,7 @@
 
 <div id="loading">
     <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" width="80">
-    <p id="loadingText" style="margin-top:15px; font-weight:bold; color:var(--primary-blue);">Menyiapkan Soal...</p>
+    <p id="loadingText" style="margin-top:15px; font-weight:bold; color:var(--primary-blue);">Menghubungkan ke Server...</p>
 </div>
 
 <div id="app-content">
@@ -197,7 +195,7 @@
 </div>
 
 <script>
-// KONFIGURASI API (PASTIKAN URL SUDAH SESUAI DENGAN DEPLOY TERBARU)
+// KONFIGURASI API (WAJIB SESUAI DENGAN URL DEPLOY TERBARU)
 const API_URL = "https://script.google.com/macros/s/AKfycbzTacoBkA6md69TmVNi-uCwtXoUzu15_YlBfwmYqzpHGha_ad-nKnMAPD0c7VkG42Q/exec";
 
 let listSoal = [];
@@ -205,22 +203,25 @@ let jawabanSiswa = {};
 let currentIdx = 0;
 let userSession = JSON.parse(localStorage.getItem("user"));
 
-// Inisialisasi saat halaman dimuat
+// --- INISIALISASI ---
 window.onload = async () => {
     if (!userSession) {
         alert("Sesi tidak ditemukan. Silakan login kembali.");
         window.location.href = "index.html"; 
         return;
     }
+    
     document.getElementById("displayNama").innerText = userSession.nama;
     document.getElementById("displayKelas").innerText = "Kelas " + userSession.kelas;
     
-    // PERBAIKAN: Lapor mulai ujian dulu agar baris di SESSION tercipta
+    // LANGKAH 1: Lapor buka soal ke Sheet SESSION
     await laporMulaiUjian();
+    
+    // LANGKAH 2: Ambil Soal
     await loadSoal();
 };
 
-// Fungsi Baru: Mencatat waktu mulai di sheet SESSION
+// --- FUNGSI LAPOR SESI (KE SHEET SESSION) ---
 async function laporMulaiUjian() {
     try {
         await fetch(API_URL, {
@@ -232,27 +233,25 @@ async function laporMulaiUjian() {
                 nama: userSession.nama
             })
         });
-        console.log("Sesi mulai berhasil dikirim.");
+        console.log("Status: Waktu mulai ujian telah dicatat di SESSION.");
     } catch (e) {
-        console.error("Gagal mencatat sesi mulai:", e);
+        console.error("Gagal mencatat waktu mulai:", e);
     }
 }
 
-// Mengambil soal dari GAS
+// --- FUNGSI AMBIL SOAL ---
 async function loadSoal() {
     try {
         const response = await fetch(API_URL + "?mode=getSoal");
-        const data = await response.json();
-        listSoal = data;
+        listSoal = await response.json();
         renderSoal();
         document.getElementById("loading").style.display = "none";
     } catch (error) {
-        console.error("Error loading soal:", error);
-        alert("Gagal memuat soal. Pastikan koneksi internet stabil.");
+        alert("Gagal memuat soal. Periksa koneksi internet Anda.");
     }
 }
 
-// Menampilkan soal berdasarkan index aktif
+// --- TAMPILKAN SOAL ---
 function renderSoal() {
     if (listSoal.length === 0) return;
     
@@ -314,7 +313,7 @@ function lompatKeSoal(index) {
     renderSoal();
 }
 
-// FUNGSI KIRIM JAWABAN (FIXED CORS & SESSION)
+// --- FUNGSI KIRIM JAWABAN (UPDATE HASIL & SESSION) ---
 async function kirimJawaban() {
     const jumlahDijawab = Object.keys(jawabanSiswa).length;
     const pesan = jumlahDijawab < listSoal.length 
@@ -327,7 +326,7 @@ async function kirimJawaban() {
     const loadingText = document.getElementById("loadingText");
     
     loading.style.display = "flex";
-    loadingText.innerText = "Mengirim jawaban ke server...";
+    loadingText.innerText = "Menyimpan jawaban & mengakhiri sesi...";
 
     const payload = {
         action: "kirimJawaban",
@@ -344,18 +343,17 @@ async function kirimJawaban() {
             body: JSON.stringify(payload)
         });
 
-        // Delay 2 detik untuk memastikan server memproses data
+        // Beri waktu GAS untuk proses appendRow dan update SESSION
         setTimeout(() => {
             loading.style.display = "none";
-            alert("✅ Berhasil! Jawaban Anda telah tersimpan.");
+            alert("✅ Berhasil! Jawaban dan Sesi Anda telah tersimpan.");
             localStorage.removeItem("user");
             window.location.reload();
-        }, 2000);
+        }, 2500);
 
     } catch (error) {
-        console.error("Error submitting:", error);
         loading.style.display = "none";
-        alert("Terjadi kesalahan saat mengirim. Silakan coba lagi.");
+        alert("Gagal mengirim data. Coba lagi.");
     }
 }
 </script>
