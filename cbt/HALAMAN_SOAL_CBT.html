@@ -1,363 +1,355 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asesmen CBT - SMP Negeri 1 Moga</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBT Asesmen Informatika</title>
 
-    <style>
-        /* === STYLE TETAP KONSISTEN === */
-        :root {
-            --primary-blue: #1f4e94;
-            --btn-blue: #007bff; 
-            --btn-red: #ed1c24;
-            --gold: #d4af37;
-            --light-bg: #f4f7fa;
-            --success: #28a745;
-        }
+<style>
+/* --- STYLE DASHBOARD & LOGIN --- */
+body {
+  font-family: Segoe UI, Arial, sans-serif;
+  background: linear-gradient(to bottom right, #b3c7d6, #d9e2ec);
+  margin: 0;
+  color: #333;
+}
 
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: var(--light-bg); 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column; 
-            min-height: 100vh;
-        }
+.center { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+.card {
+  background: #f2f2f2; padding: 30px; border-radius: 15px;
+  width: 340px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); box-sizing: border-box;
+}
 
-        .header { 
-            background: var(--primary-blue); 
-            color: white; 
-            padding: 10px 20px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            border-bottom: 4px solid var(--gold);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
+.logo { width: 70px; margin-bottom: 10px; }
+h2 { color: #1f4e94; margin-bottom: 20px; }
+label { display: block; text-align: left; margin-top: 10px; font-size: 14px; font-weight: bold; color: #333; }
+input, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 14px; }
 
-        .timer { 
-            background: white; 
-            color: var(--primary-blue); 
-            padding: 5px 15px; 
-            border-radius: 20px;
-            font-weight: bold;
-        }
+.checkbox-container { display: flex; align-items: center; gap: 8px; margin-top: 10px; cursor: pointer; user-select: none; }
+.checkbox-container input { width: auto; margin-top: 0; cursor: pointer; }
+.checkbox-container label { margin-top: 0; font-weight: normal; font-size: 13px; cursor: pointer; }
 
-        .main-layout { 
-            display: flex; 
-            flex-direction: column; 
-            max-width: 1100px; 
-            margin: 20px auto; 
-            gap: 20px; 
-            padding: 0 15px 160px; /* Ruang untuk footer info */
-        }
+/* BUTTONS */
+button { width: 100%; margin-top: 15px; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+button:disabled { background: #64748b !important; cursor: not-allowed; }
+.btn-login { background:#1f4e94; color:white; }
+.btn-login:hover { background:#163c73; }
+.btn-jadwal { background:#d9534f; color:white; }
+.btn-start { background:#ff5722; color:white; padding:14px; font-size:16px; margin-top:20px; }
+.logout-btn { background:#ff5722; color:white; padding:6px 12px; border-radius:6px; width: auto; margin-top: 5px; }
 
-        @media(min-width: 768px) { .main-layout { flex-direction: row; } }
+/* --- STYLE SOAL (DARK MODE SESUAI KODE AWAL) --- */
+#halamanSoal { display:none; background:#0f172a; color:white; min-height: 100vh; padding: 20px; }
+.container-soal { max-width: 800px; margin: auto; }
+.soal-card { background:#1e293b; padding:20px; border-radius:10px; margin-top:20px; }
+.option { background:#334155; padding:12px; margin-top:10px; border-radius:6px; cursor:pointer; transition: 0.2s; border: 1px solid transparent; }
+.option:hover { background:#475569; border: 1px solid #22c55e; }
+img { max-width:100%; margin-top:10px; border-radius:6px; }
 
-        .quiz-container { flex: 3; }
-        .sidebar { flex: 1; }
+/* DASHBOARD */
+#dashboard { display:none; }
+.header { background:#1f4e94; color:white; padding:15px; display:flex; justify-content:flex-end; }
+.content { text-align:center; padding:20px; }
+.box { background:white; padding:20px; border-radius:12px; max-width:700px; margin:20px auto; text-align:left; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
 
-        .soal-card {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            border-left: 5px solid var(--primary-blue);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
+/* MODAL */
+.modal { display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.4); justify-content:center; align-items:center; }
+.modal-box { background:#fff; padding:25px; border-radius:12px; width:90%; max-width:350px; text-align:center; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
 
-        .opsi {
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            margin-top: 10px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .opsi:hover { background: #f0f4f8; }
-        .opsi.selected {
-            background: #e1ecff;
-            border-color: var(--btn-blue);
-            font-weight: bold;
-            color: var(--primary-blue);
-        }
-
-        .grid-nomor { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 15px; }
-        .kotak-nomor {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #e9ecef;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
-            border: 1px solid #ccc;
-        }
-        .kotak-nomor.sudah { background: var(--success); color: white; border-color: var(--success); }
-        .kotak-nomor.aktif { border: 3px solid var(--gold); transform: scale(1.1); }
-
-        /* FOOTER & NAV */
-        .nav-bottom {
-            position: fixed; bottom: 40px; width: 100%;
-            display: flex; justify-content: space-between;
-            background: white; padding: 10px 20px;
-            border-top: 1px solid #eee; box-sizing: border-box; z-index: 900;
-        }
-
-        .footer-info {
-            position: fixed; bottom: 0; width: 100%;
-            background: #222; color: #ccc;
-            text-align: center; padding: 8px 0;
-            font-size: 0.85em; border-top: 2px solid var(--gold); z-index: 1000;
-        }
-
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn-nav { background: var(--btn-blue); color: white; }
-
-        /* LAYAR HASIL AKHIR */
-        #layarHasil {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; display: none;
-            flex-direction: column; justify-content: center;
-            align-items: center; z-index: 10001; text-align: center; padding: 20px;
-        }
-
-        .skor-box { font-size: 4em; color: var(--primary-blue); font-weight: 900; margin: 15px 0; }
-
-        #loading {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 9999;
-        }
-        img { max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px; }
-    </style>
+table { width:100%; border-collapse:collapse; margin-bottom: 15px; }
+th, td { border:1px solid #ccc; padding:8px; text-align:center; font-size:13px; color: #333; }
+</style>
 </head>
 
 <body>
 
-<div id="loading">
-    <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" width="80">
-    <p id="loadingText" style="margin-top:15px; font-weight:bold; color:var(--primary-blue);">Menghubungkan ke Server...</p>
-</div>
+<div id="loginPage" class="center">
+  <div class="card">
+    <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" class="logo" alt="Logo">
+    <h2>CBT Asesmen Informatika</h2>
 
-<div id="layarHasil">
-    <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" width="100">
-    <h2 style="color:var(--primary-blue); margin-top:20px;">Terima Kasih!</h2>
-    <p style="font-size:1.1em; color:#555;">Anda telah berhasil melaksanakan asesmen.</p>
-    
-    <div style="margin: 25px 0; padding:20px; background:#f0f7ff; border-radius:20px; width:100%; max-width:280px;">
-        <span style="font-weight:bold; color:#777; font-size:0.9em;">NILAI HASIL TES</span>
-        <div class="skor-box" id="nilaiFinal">0</div>
-    </div>
+    <label>Token Ujian</label>
+    <input type="text" id="token" placeholder="Masukkan token">
+    <button class="btn-login" id="btnToken" onclick="cekToken()">Cek Token</button>
 
-    <p style="color: #888; font-size: 0.9em; margin-bottom: 20px;">Klik tombol di bawah untuk keluar dengan aman.</p>
-    
-    <button class="btn" style="background:var(--btn-red); color:white; padding:15px 50px; font-size:1em;" onclick="logOutSiswa()">
-        LOG OUT
-    </button>
-</div>
+    <div id="formLogin" style="display:none; border-top: 1px solid #ccc; margin-top: 15px; padding-top: 10px;">
+        <label>Pilih Siswa</label>
+        <select id="user"></select>
 
-<div id="app-content">
-    <div class="header">
-        <div>
-            <b id="displayNama" style="font-size:1.1em;">-</b><br>
-            <small id="displayKelas">-</small>
-        </div>
-        <div class="timer" id="timerDisplay">00:00:00</div>
-    </div>
-
-    <div class="main-layout">
-        <div class="quiz-container">
-            <div id="quizArea"></div>
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Masukkan password">
+        
+        <div class="checkbox-container">
+          <input type="checkbox" id="showPass" onclick="togglePassword()">
+          <label for="showPass">Tampilkan Password</label>
         </div>
 
-        <div class="sidebar">
-            <div style="background:white; padding:20px; border-radius:15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <h4 style="margin-top:0; border-bottom:1px solid #eee; padding-bottom:10px;">Navigasi Soal</h4>
-                <div id="gridNomor" class="grid-nomor"></div>
-                <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
-                <button class="btn" style="background:var(--success); color:white; width:100%; font-size:1.1em;" onclick="kirimJawaban()">SELESAI</button>
+        <button class="btn-login" id="btnLogin" onclick="login()">Masuk</button>
+    </div>
+
+    <button class="btn-jadwal" onclick="openModal('modalJadwal')">Lihat Jadwal Token</button>
+    
+    <div class="footer" style="font-size:11px; margin-top: 20px; color: #777;">
+      CBT Browser Apps by MB<br>
+      © 2026 MB All Rights Reserved
+    </div>
+  </div>
+</div>
+
+<div id="dashboard">
+  <div class="header">
+    <div style="text-align:right">
+      <b id="namaHeader"></b><br>
+      <span id="kelasHeader"></span><br>
+      <button class="logout-btn" onclick="logout()">Keluar</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" style="width:90px;" alt="Logo">
+    <div style="font-size:24px; color:#1f4e94; font-weight:bold;">Asesmen CBT Informatika</div>
+    
+    <div class="box">
+      <p>Nama : <b id="namaD"></b></p>
+      <p>Kelas : <b id="kelasD"></b></p>
+      <p>Mata Pelajaran : <b>Informatika</b></p>
+      <hr>
+      <p><b>Informasi Ujian:</b></p>
+      <ul>
+        <li>Dilarang keluar aplikasi atau refresh saat ujian.</li>
+        <li>Kerjakan dengan jujur dan teliti.</li>
+      </ul>
+      <button class="btn-start" onclick="openModal('confirmModal')">Kerjakan Ujian</button>
+    </div>
+  </div>
+</div>
+
+<div id="halamanSoal">
+    <div class="container-soal">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 id="info">Ruang Ujian</h3>
+            <button class="logout-btn" onclick="submitUjian()" style="background:#22c55e">Submit Ujian</button>
+        </div>
+        <div id="soalBox" class="soal-card">
             </div>
-        </div>
     </div>
+</div>
 
-    <div class="nav-bottom">
-        <button class="btn btn-nav" onclick="changeSoal(-1)"> Sebelumnya</button>
-        <div id="infoHalaman" style="font-weight:bold; color:var(--primary-blue); padding-top:10px;">Soal -/-</div>
-        <button class="btn btn-nav" onclick="changeSoal(1)">Berikutnya </button>
-    </div>
+<div id="confirmModal" class="modal">
+  <div class="modal-box">
+    <h3>Konfirmasi Data</h3>
+    <p>Pastikan data Anda sudah benar sebelum memulai.</p>
+    <button class="btn-login" onclick="mulaiUjian()">Lanjut Ujian</button>
+    <button class="btn-jadwal" onclick="closeModal('confirmModal')">Batal</button>
+  </div>
+</div>
 
-    <div class="footer-info" id="footerPengembang">
-        <strong>Sistem CBT SMPN 1 Moga</strong> | Dikembangkan oleh: <strong>Yanuar</strong> | v2.6.4
-    </div>
+<div id="modalJadwal" class="modal">
+  <div class="modal-box">
+    <h3>Jadwal Token</h3>
+    <table>
+      <thead><tr><th>Kelas</th><th>Mulai</th><th>Selesai</th></tr></thead>
+      <tbody id="jadwalBody"></tbody>
+    </table>
+    <button class="btn-login" onclick="closeModal('modalJadwal')">Tutup</button>
+  </div>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzTacoBkA6md69TmVNi-uCwtXoUzu15_YlBfwmYqzpHGha_ad-nKnMAPD0c7VkG42Q/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwKKIKuT7ugLEjLzSf5e4cYVi-K3v23z6oNGRF1U73RMRIL3LJSsFPncKdE62qm0l4O/exec";
 
-let listSoal = [];
-let jawabanSiswa = {};
-let currentIdx = 0;
-// Mengambil session dari login sebelumnya
-let userSession = JSON.parse(localStorage.getItem("user"));
+let session = "";
+let kelas = "";
+let soalData = [];
+let current = 0;
+let userData = {};
+let loading = false;
 
-window.onload = async () => {
-    // Validasi Session
-    if (!userSession) { 
-        alert("Sesi berakhir, silakan login kembali.");
-        window.location.href = "index.html"; 
-        return; 
-    }
-    
-    document.getElementById("displayNama").innerText = userSession.nama;
-    document.getElementById("displayKelas").innerText = "Kelas " + userSession.kelas;
-    
-    await loadSoal();
-};
-
-// Fungsi umum untuk komunikasi ke GAS
-async function postToGAS(data) {
-    try {
-        const response = await fetch(API_URL, {
-            method: "POST",
-            body: new URLSearchParams(data)
-        });
-        return await response.json();
-    } catch (e) {
-        console.error("Kesalahan koneksi server:", e);
-    }
+// ===== FUNGSI POST ASLI =====
+async function post(data){
+  if(loading) return;
+  loading = true;
+  try {
+    let res = await fetch(API_URL, {
+      method: "POST",
+      body: new URLSearchParams(data)
+    });
+    let json = await res.json();
+    loading = false;
+    return json;
+  } catch (e) {
+    loading = false;
+    alert("Kesalahan koneksi ke server.");
+  }
 }
 
-// Mengambil data soal
-async function loadSoal() {
-    try {
-        const response = await fetch(API_URL + "?action=getSoal&kelas=" + userSession.kelas);
-        const resJson = await response.json();
-        
-        if(resJson.status) {
-            listSoal = resJson.soal;
-            renderSoal();
-            document.getElementById("loading").style.display = "none";
-        } else {
-            alert("Soal tidak ditemukan untuk kelas ini.");
-        }
-    } catch (error) { 
-        alert("Gagal memuat soal. Periksa koneksi internet."); 
-    }
+function togglePassword() {
+  const p = document.getElementById('password');
+  p.type = p.type === "password" ? "text" : "password";
 }
 
-// Menampilkan butir soal
-function renderSoal() {
-    if (listSoal.length === 0) return;
-    const s = listSoal[currentIdx]; // s adalah baris dari Spreadsheet Soal
-    
-    document.getElementById("infoHalaman").innerText = `Soal ${currentIdx + 1} dari ${listSoal.length}`;
-    
-    // s[3] = Pertanyaan, s[4] = Gambar Soal
-    let html = `
-        <div class="soal-card">
-            <div style="font-size:1.15em; margin-bottom:20px; line-height:1.6;">
-                <b>${currentIdx + 1}.</b> ${s[3]}
-            </div>`;
-    
-    if (s[4]) {
-        html += `<div style="text-align:center; margin-bottom:15px;"><img src="${s[4]}"></div>`;
-    }
+// ===== FUNGSI CEK TOKEN ASLI =====
+async function cekToken(){
+  let btn = document.getElementById("btnToken");
+  let token = document.getElementById("token").value;
+  if(!token) return alert("Masukkan Token!");
 
-    html += `<div class="daftar-opsi">`;
-    
-    // Mapping Opsi A (Kolom 5) sampai E (Kolom 13)
-    ['A', 'B', 'C', 'D', 'E'].forEach((label, i) => {
-        const teksOpsi = s[5 + (i * 2)];
-        const imgOpsi = s[6 + (i * 2)];
-        
-        if (teksOpsi || imgOpsi) {
-            const isSelected = jawabanSiswa[currentIdx + 1] === label ? 'selected' : '';
-            html += `
-                <div class="opsi ${isSelected}" onclick="simpanKeServer('${currentIdx + 1}', '${label}')">
-                    <strong>${label}.</strong> ${teksOpsi || ''}
-                    ${imgOpsi ? `<br><img src="${imgOpsi}" style="max-height:150px;">` : ''}
-                </div>`;
-        }
+  btn.disabled = true;
+  let r = await post({action:"cekToken", token: token});
+
+  if(r && r.status){
+    kelas = r.kelas;
+    // Ambil daftar user berdasarkan kelas
+    let u = await post({action:"getUsers", kelas: kelas});
+
+    let sel = document.getElementById("user");
+    sel.innerHTML = '<option value="">-- Pilih Nama --</option>';
+    u.users.forEach(x => {
+      let opt = document.createElement("option");
+      opt.value = x.id; // Menyimpan ID siswa
+      opt.text = x.nama;
+      sel.appendChild(opt);
     });
 
-    html += `</div></div>`;
-    document.getElementById("quizArea").innerHTML = html;
-    renderGrid();
+    document.getElementById("formLogin").style.display = "block";
+    document.getElementById("token").readOnly = true;
+    btn.style.display = "none";
+  } else {
+    alert(r ? r.message : "Token salah atau tidak valid.");
+  }
+  btn.disabled = false;
 }
 
-// Kirim jawaban per nomor secara realtime (Silent Save)
-async function simpanKeServer(noSoal, kodeOpsi) {
-    jawabanSiswa[noSoal] = kodeOpsi;
-    renderSoal();
+// ===== FUNGSI LOGIN ASLI =====
+async function login(){
+  let btn = document.getElementById("btnLogin");
+  let id = document.getElementById("user").value;
+  let password = document.getElementById("password").value;
+  let token = document.getElementById("token").value;
+
+  if(!id || !password) return alert("Pilih Nama & Isi Password!");
+
+  btn.disabled = true;
+  let r = await post({action:"login", id: id, password: password, token: token});
+
+  if(r && r.status){
+    session = r.session_id;
+    userData = r; // Berisi nama, kelas, dll
+    showDashboard();
+  } else {
+    alert(r ? r.message : "Login gagal.");
+  }
+  btn.disabled = false;
+}
+
+function showDashboard(){
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
     
-    // Kirim ke GAS (saveJawaban)
-    let idMurni = userSession.session_id.split("_")[1];
-    postToGAS({
-        action: "saveJawaban",
-        id: idMurni,
-        nama: userSession.nama,
-        kelas: userSession.kelas,
-        no: noSoal,
-        jawaban: kodeOpsi
-    });
+    document.getElementById("namaHeader").innerText = userData.nama;
+    document.getElementById("kelasHeader").innerText = "Kelas " + userData.kelas;
+    document.getElementById("namaD").innerText = userData.nama;
+    document.getElementById("kelasD").innerText = userData.kelas;
 }
 
-// Menampilkan grid nomor soal di sidebar
-function renderGrid() {
-    const gridNomor = document.getElementById("gridNomor");
-    gridNomor.innerHTML = listSoal.map((s, i) => {
-        const sudahDijawab = jawabanSiswa[i + 1] ? 'sudah' : '';
-        const sedangAktif = currentIdx === i ? 'aktif' : '';
-        return `<div class="kotak-nomor ${sudahDijawab} ${sedangAktif}" onclick="currentIdx=${i};renderSoal()">${i + 1}</div>`;
-    }).join('');
+function mulaiUjian(){
+    closeModal('confirmModal');
+    document.getElementById("dashboard").style.display = "none";
+    document.getElementById("halamanSoal").style.display = "block";
+    loadSoal();
 }
 
-// Navigasi tombol bawah
-function changeSoal(arah) {
-    if (currentIdx + arah >= 0 && currentIdx + arah < listSoal.length) {
-        currentIdx += arah; 
-        renderSoal();
+// ===== FUNGSI LOAD SOAL ASLI =====
+async function loadSoal(){
+  let r = await post({action:"getSoal", kelas: userData.kelas});
+  if(r && r.status){
+    soalData = r.soal;
+    tampilSoal();
+  }
+}
+
+// ===== FUNGSI TAMPIL SOAL ASLI =====
+function tampilSoal(){
+  let s = soalData[current];
+  let html = "<h3>Soal "+(current+1)+"</h3>";
+  html += "<p>"+(s[3] || "")+"</p>";
+
+  if(s[4]) html += `<img src="${s[4]}">`;
+
+  ["A","B","C","D","E"].forEach((x,i)=>{
+    let txt = s[5+(i*2)];
+    let img = s[6+(i*2)];
+    if(txt || img){
+      html += `<div class="option" onclick="jawab('${x}')">`;
+      if(txt) html += `<div><b>${x}.</b> ${txt}</div>`;
+      if(img) html += `<img src="${img}">`;
+      html += "</div>";
     }
+  });
+  document.getElementById("soalBox").innerHTML = html;
 }
 
-// Submit Final
-async function kirimJawaban() {
-    const jumlahDijawab = Object.keys(jawabanSiswa).length;
-    if (!confirm(`Anda menjawab ${jumlahDijawab} dari ${listSoal.length} soal. Selesaikan ujian?`)) return;
+// ===== FUNGSI SIMPAN JAWABAN ASLI =====
+async function jawab(pil){
+  // Mengambil ID dari session_id (misal S_123_456 maka ambil 123)
+  let id = userData.session_id.split("_")[1];
+  
+  await post({
+    action: "saveJawaban",
+    id: id,
+    nama: userData.nama,
+    kelas: userData.kelas,
+    no: current + 1,
+    jawaban: pil
+  });
 
-    document.getElementById("loading").style.display = "flex";
-    document.getElementById("loadingText").innerText = "Mengunci Jawaban & Menghitung Skor...";
-
-    let idMurni = userSession.session_id.split("_")[1];
-    
-    try {
-        const res = await postToGAS({ action: "submit", id: idMurni });
-        
-        if (res && res.status) {
-            setTimeout(() => {
-                document.getElementById("loading").style.display = "none";
-                document.getElementById("app-content").style.display = "none"; // Ini juga menyembunyikan footer pengembang
-                document.getElementById("layarHasil").style.display = "flex";
-                document.getElementById("nilaiFinal").innerText = res.nilai;
-            }, 1500);
-        } else {
-            alert(res.message || "Gagal mengakhiri ujian.");
-            document.getElementById("loading").style.display = "none";
-        }
-    } catch (error) {
-        alert("Terjadi gangguan koneksi.");
-        document.getElementById("loading").style.display = "none";
-    }
+  current++;
+  if(current < soalData.length){
+    tampilSoal();
+  } else {
+    document.getElementById("soalBox").innerHTML = `
+        <div style="text-align:center; padding:20px;">
+            <h3>Selesai!</h3>
+            <p>Semua soal telah terjawab.</p>
+            <button class="btn-start" onclick="submitUjian()">Kirim Sekarang</button>
+        </div>`;
+  }
 }
 
-function logOutSiswa() {
-    localStorage.removeItem("user");
-    window.location.href = "index.html"; 
+// ===== FUNGSI SUBMIT ASLI =====
+async function submitUjian(){
+  if(!confirm("Yakin ingin mengakhiri ujian?")) return;
+  let id = userData.session_id.split("_")[1];
+  let r = await post({action:"submit", id: id});
+  if(r && r.status){
+    alert("Nilai Anda: " + r.nilai);
+    location.reload();
+  } else {
+    alert(r ? r.message : "Gagal submit.");
+  }
+}
+
+function logout(){ location.reload(); }
+function openModal(id){ 
+  document.getElementById(id).style.display = "flex"; 
+  if(id === 'modalJadwal') loadJadwal();
+}
+function closeModal(id){ document.getElementById(id).style.display = "none"; }
+
+function loadJadwal() {
+  const body = document.getElementById('jadwalBody');
+  body.innerHTML = "<tr><td colspan='3'>Memuat...</td></tr>";
+  fetch(API_URL + "?mode=token")
+    .then(r => r.json())
+    .then(data => {
+      body.innerHTML = "";
+      data.forEach(d => {
+        body.innerHTML += `<tr><td>${d.kelas}</td><td>${d.mulai}</td><td>${d.selesai}</td></tr>`;
+      });
+    }).catch(() => body.innerHTML = "<tr><td colspan='3'>Gagal memuat.</td></tr>");
 }
 </script>
+
 </body>
 </html>
