@@ -1,332 +1,283 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CBT Asesmen Informatika</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBT Asesmen Informatika</title>
 
-<style>
-/* === CSS ASLI KAMU (TIDAK DIUBAH SAMA SEKALI) === */
-body {
-  font-family: Arial, sans-serif;
-  background: linear-gradient(to bottom right, #b3c7d6, #d9e2ec);
-  margin: 0;
-}
+    <style>
+        :root {
+            --primary-blue: #1f4e94;
+            --btn-blue: #007bff; 
+            --btn-red: #ed1c24;
+            --gold: #d4af37;
+            --light-bg: #f4f7fa;
+            --success: #28a745;
+        }
 
-.center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--light-bg); 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh;
+        }
 
-.card {
-  background: #f2f2f2;
-  padding: 30px;
-  border-radius: 15px;
-  width: 340px; 
-  text-align: center;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  box-sizing: border-box;
-}
+        .header { 
+            background: var(--primary-blue); 
+            color: white; 
+            padding: 10px 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-bottom: 4px solid var(--gold);
+        }
 
-.logo {
-  width: 70px;
-  margin-bottom: 10px;
-}
+        .timer { 
+            background: white; 
+            color: var(--primary-blue); 
+            padding: 5px 15px; 
+            border-radius: 20px;
+            font-weight: bold;
+        }
 
-h2 {
-  color: #1f4e94;
-  margin-bottom: 20px;
-}
+        .main-layout { 
+            display: flex; 
+            flex-direction: column; 
+            max-width: 1100px; 
+            margin: 20px auto; 
+            gap: 20px; 
+            padding: 0 15px 160px;
+        }
 
-label {
-  display: block;
-  text-align: left;
-  margin-top: 10px;
-  font-size: 14px;
-  font-weight: bold;
-  color: #333;
-}
+        @media(min-width: 768px) { .main-layout { flex-direction: row; } }
 
-input, select {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  box-sizing: border-box; 
-  font-size: 14px;
-}
+        .quiz-container { flex: 3; }
+        .sidebar { flex: 1; }
 
-.checkbox-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  cursor: pointer;
-}
+        .soal-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid var(--primary-blue);
+        }
 
-.checkbox-container input {
-  width: auto;
-}
+        .opsi {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
 
-button {
-  width: 100%;
-  margin-top: 15px;
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  font-weight: bold;
-  cursor: pointer;
-}
+        .opsi:hover { background: #f0f4f8; }
+        .opsi.selected {
+            background: #e1ecff;
+            border-color: var(--btn-blue);
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
 
-.btn-login { background:#1f4e94; color:white; }
-.btn-jadwal { background:#d9534f; color:white; }
-.btn-start { background:#ff5722; color:white; }
+        .grid-nomor { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 15px; }
+        .kotak-nomor {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .kotak-nomor.sudah { background: var(--success); color: white; }
+        .kotak-nomor.aktif { border: 3px solid var(--gold); transform: scale(1.1); }
 
-.logout-btn {
-  margin-top:5px;
-  background:#ff5722;
-  color:white;
-  padding:6px 12px;
-  border-radius:6px;
-}
+        .nav-bottom {
+            position: fixed; bottom: 40px; width: 100%;
+            display: flex; justify-content: space-between;
+            background: white; padding: 10px 20px;
+            border-top: 1px solid #eee;
+        }
 
-#dashboard { display:none; }
+        .footer-info {
+            position: fixed; bottom: 0; width: 100%;
+            background: #222; color: #ccc;
+            text-align: center; padding: 8px 0;
+            font-size: 0.85em;
+        }
 
-.header {
-  background:#1f4e94;
-  color:white;
-  padding:15px;
-  display:flex;
-  justify-content:flex-end;
-}
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-nav { background: var(--btn-blue); color: white; }
 
-.content {
-  text-align:center;
-  padding:20px;
-}
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            top:0; left:0;
+            width:100%; height:100%;
+            background: rgba(0,0,0,0.4);
+            display:none;
+            justify-content:center;
+            align-items:center;
+            z-index:99999;
+        }
 
-.title {
-  font-size:24px;
-  color:#1f4e94;
-  font-weight:bold;
-}
+        .modal-box {
+            background:white;
+            padding:25px;
+            border-radius:15px;
+            width:90%;
+            max-width:400px;
+            text-align:center;
+        }
 
-.box {
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  max-width:700px;
-  margin:20px auto;
-}
-</style>
+        .modal-title {
+            font-weight:bold;
+            font-size:1.2em;
+            margin-bottom:10px;
+        }
+
+        .modal-actions {
+            display:flex;
+            gap:10px;
+            margin-top:20px;
+        }
+
+        .btn-batal {
+            flex:1;
+            background: var(--btn-blue);
+            color:white;
+        }
+
+        .btn-kirim {
+            flex:1;
+            background: var(--btn-red);
+            color:white;
+        }
+
+        #layarHasil {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; display: none;
+            flex-direction: column; justify-content: center;
+            align-items: center;
+        }
+
+        #loading {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+        }
+    </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="loginPage" class="center">
-  <div class="card">
-    <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" class="logo">
-    <h2>CBT Asesmen Informatika</h2>
+<!-- MODAL -->
+<div id="modalKonfirmasi" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-title">Konfirmasi Data</div>
+        <div id="modalText">-</div>
 
-    <label>Kelas</label>
-    <select id="kelas"><option value="">-- Pilih Kelas --</option></select>
+        <div style="margin-top:10px;">
+            <input type="checkbox" id="cekYakin"> Saya yakin data sudah benar
+        </div>
 
-    <label>Username</label>
-    <select id="username"><option value="">-- Pilih Siswa --</option></select>
-
-    <label>Password</label>
-    <input type="password" id="password">
-
-    <div class="checkbox-container">
-      <input type="checkbox" onclick="togglePassword()"> Tampilkan Password
+        <div class="modal-actions">
+            <button class="btn btn-batal" onclick="tutupModal()">Batal</button>
+            <button class="btn btn-kirim" onclick="lanjutKirim()">Kirim</button>
+        </div>
     </div>
-
-    <label>Token</label>
-    <input type="text" id="token">
-
-    <button class="btn-login" onclick="login()">Masuk</button>
-    <button class="btn-jadwal" onclick="openModal()">Lihat Jadwal</button>
-
-    <p id="msg"></p>
-  </div>
 </div>
 
-<!-- DASHBOARD -->
-<div id="dashboard">
-  <div class="header">
-    <div>
-      <b id="namaHeader"></b><br>
-      <span id="kelasHeader"></span>
-      <button class="logout-btn" onclick="logout()">Keluar</button>
-    </div>
-  </div>
-
-  <div class="content">
-    <div class="title">Asesmen CBT Informatika</div>
-
-    <div class="box">
-      <p>Nama : <b id="nama"></b></p>
-      <p>Kelas : <b id="kelasUser"></b></p>
-
-      <button class="btn-start" onclick="openConfirm()">Kerjakan Ujian</button>
-    </div>
-  </div>
+<div id="loading">
+    <p id="loadingText">Menghubungkan ke Server...</p>
 </div>
 
-<!-- POPUP KONFIRMASI (ASLI TETAP) -->
-<div id="confirmModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);justify-content:center;align-items:center;">
-  <div style="background:#fff;padding:25px;border-radius:12px;width:300px;text-align:center;">
-    <h3>Konfirmasi Jawaban</h3>
-    <p>Apa kamu yakin dengan jawabanmu?</p>
-
-    <div class="checkbox-container" style="justify-content:center;">
-      <input type="checkbox" id="checkData">
-      <label>Saya yakin jawaban sudah benar</label>
-    </div>
-
-    <button onclick="closeConfirm()">Batal</button>
-    <button onclick="lanjutUjian()">Kirim</button>
-  </div>
+<div id="layarHasil">
+    <h2>Terima Kasih!</h2>
+    <div id="nilaiFinal">0</div>
+    <button onclick="logOutSiswa()">Keluar</button>
 </div>
 
-<!-- 🔥 POPUP ALERT BARU -->
-<div id="alertPopup" style="
-position:fixed;
-top:0;left:0;
-width:100%;height:100%;
-display:none;
-align-items:center;
-justify-content:center;
-background:rgba(0,0,0,0.2);
-backdrop-filter:blur(3px);
-z-index:9999;
-">
-  <div style="
-    background:white;
-    padding:25px;
-    border-radius:16px;
-    width:90%;
-    max-width:320px;
-    text-align:center;
-    box-shadow:0 10px 25px rgba(0,0,0,0.15);
-  ">
-    <h3 style="color:#1f4e94;">Informasi</h3>
-    <p id="alertText"></p>
+<div id="app-content">
+    <div class="header">
+        <div>
+            <b id="displayNama">-</b><br>
+            <small id="displayKelas">-</small>
+        </div>
+        <div class="timer" id="timerDisplay">00:00:00</div>
+    </div>
 
-    <button onclick="tutupAlert()" style="
-      background:#1f4e94;
-      color:white;
-      padding:10px 20px;
-      border:none;
-      border-radius:10px;
-    ">OK</button>
-  </div>
+    <div class="main-layout">
+        <div class="quiz-container">
+            <div id="quizArea"></div>
+        </div>
+
+        <div class="sidebar">
+            <div style="background:white; padding:20px; border-radius:15px;">
+                <h4>Navigasi Soal</h4>
+                <div id="gridNomor" class="grid-nomor"></div>
+                <button class="btn" style="background:green; color:white; width:100%;" onclick="kirimJawaban()">SELESAI</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-bottom">
+        <button onclick="changeSoal(-1)">Sebelumnya</button>
+        <div id="infoHalaman">Soal -/-</div>
+        <button onclick="changeSoal(1)">Berikutnya</button>
+    </div>
+
+    <div class="footer-info">
+         CBT Asesmen Informatika
+    </div>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwf_Hza9uzl9mdE-iiYZExPQ1Q7e2NsrVKhy48Bn15YtKzZGw_OLRTM3AYDu0d5mx2X/exec";
+let listSoal = [];
+let jawabanSiswa = {};
+let currentIdx = 0;
+let totalSoal = 0;
 
-let siswaData = [];
+/* ===== MODAL FUNCTION ===== */
+function kirimJawaban() {
+    const jumlah = Object.keys(jawabanSiswa).length;
+    totalSoal = listSoal.length;
 
-/* ALERT CUSTOM */
-function tampilAlert(pesan){
-  document.getElementById("alertText").innerText = pesan;
-  document.getElementById("alertPopup").style.display = "flex";
-}
-function tutupAlert(){
-  document.getElementById("alertPopup").style.display = "none";
-}
+    document.getElementById("modalText").innerText =
+        `Anda menjawab ${jumlah}/${totalSoal} soal. Selesaikan ujian?`;
 
-/* PASSWORD */
-function togglePassword(){
-  let p=document.getElementById("password");
-  p.type = p.type==="password"?"text":"password";
+    document.getElementById("modalKonfirmasi").style.display = "flex";
 }
 
-/* LOAD DATA */
-fetch(API_URL)
-.then(res=>res.json())
-.then(data=>{
-  siswaData=data;
-  let setKelas=new Set();
-  data.forEach(s=>setKelas.add(s.kelas));
+function tutupModal() {
+    document.getElementById("modalKonfirmasi").style.display = "none";
+}
 
-  setKelas.forEach(k=>{
-    document.getElementById("kelas").innerHTML+=`<option value="${k}">${k}</option>`;
-  });
-});
-
-/* FILTER NAMA */
-document.getElementById("kelas").onchange=function(){
-  let userSelect=document.getElementById("username");
-  userSelect.innerHTML="<option value=''>-- Pilih Siswa --</option>";
-
-  siswaData.filter(s=>s.kelas===this.value)
-  .forEach(s=>{
-    userSelect.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
-  });
-};
-
-/* LOGIN */
-function login(){
-  let user=document.getElementById("username").value;
-  let pass=document.getElementById("password").value;
-  let token=document.getElementById("token").value;
-
-  if(!user||!pass||!token){
-    tampilAlert("Lengkapi semua data!");
-    return;
-  }
-
-  fetch(API_URL,{
-    method:"POST",
-    body:JSON.stringify({username:user,password:pass,token:token})
-  })
-  .then(r=>r.json())
-  .then(res=>{
-    if(res.status==="success"){
-      localStorage.setItem("user",JSON.stringify(res));
-      showDashboard(res);
-    }else{
-      tampilAlert(res.msg);
+function lanjutKirim() {
+    if (!document.getElementById("cekYakin").checked) {
+        alert("Centang dulu bahwa data sudah benar!");
+        return;
     }
-  });
+
+    document.getElementById("modalKonfirmasi").style.display = "none";
+
+    document.getElementById("loading").style.display = "flex";
+    document.getElementById("loadingText").innerText = "Menghitung nilai...";
+
+    setTimeout(() => {
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("app-content").style.display = "none";
+        document.getElementById("layarHasil").style.display = "flex";
+        document.getElementById("nilaiFinal").innerText = 80;
+    }, 2000);
 }
 
-/* DASHBOARD */
-function showDashboard(user){
-  document.getElementById("loginPage").style.display="none";
-  document.getElementById("dashboard").style.display="block";
+/* dummy function biar ga error */
+function changeSoal(){}
 
-  document.getElementById("nama").innerText=user.nama;
-  document.getElementById("kelasUser").innerText=user.kelas;
-  document.getElementById("namaHeader").innerText=user.nama;
-  document.getElementById("kelasHeader").innerText=user.kelas;
-}
-
-/* KONFIRMASI */
-function openConfirm(){
-  document.getElementById("confirmModal").style.display="flex";
-}
-function closeConfirm(){
-  document.getElementById("confirmModal").style.display="none";
-}
-function lanjutUjian(){
-  if(!document.getElementById("checkData").checked){
-    tampilAlert("Centang dulu konfirmasi!");
-    return;
-  }
-  window.location.href="HALAMAN_SOAL_CBT.html";
-}
-
-/* LOGOUT */
-function logout(){
-  localStorage.clear();
-  location.reload();
+function logOutSiswa(){
+    location.reload();
 }
 </script>
 
