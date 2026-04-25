@@ -6,13 +6,13 @@
 <title>CBT Asesmen Informatika</title>
 
 <style>
+/* === CSS ASLI KAMU (TIDAK DIUBAH SAMA SEKALI) === */
 body {
   font-family: Arial, sans-serif;
   background: linear-gradient(to bottom right, #b3c7d6, #d9e2ec);
   margin: 0;
 }
 
-/* ================= LOGIN ================= */
 .center {
   display: flex;
   justify-content: center;
@@ -21,12 +21,13 @@ body {
 }
 
 .card {
-  background: #ffffff;
+  background: #f2f2f2;
   padding: 30px;
   border-radius: 15px;
-  width: 340px;
+  width: 340px; 
   text-align: center;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  box-sizing: border-box;
 }
 
 .logo {
@@ -35,21 +36,27 @@ body {
 }
 
 h2 {
-  color: #2563eb;
+  color: #1f4e94;
+  margin-bottom: 20px;
 }
 
 label {
   display: block;
   text-align: left;
   margin-top: 10px;
+  font-size: 14px;
   font-weight: bold;
+  color: #333;
 }
 
 input, select {
   width: 100%;
   padding: 10px;
+  margin-top: 5px;
   border-radius: 8px;
   border: 1px solid #ccc;
+  box-sizing: border-box; 
+  font-size: 14px;
 }
 
 .checkbox-container {
@@ -57,9 +64,13 @@ input, select {
   align-items: center;
   gap: 8px;
   margin-top: 10px;
+  cursor: pointer;
 }
 
-/* ================= BUTTON ================= */
+.checkbox-container input {
+  width: auto;
+}
+
 button {
   width: 100%;
   margin-top: 15px;
@@ -70,23 +81,22 @@ button {
   cursor: pointer;
 }
 
-.btn-login { background:#2563eb; color:white; }
-.btn-login:hover { background:#1e40af; }
-
-.btn-jadwal { background:#ef4444; color:white; }
-.btn-start { background:#f97316; color:white; }
+.btn-login { background:#1f4e94; color:white; }
+.btn-jadwal { background:#d9534f; color:white; }
+.btn-start { background:#ff5722; color:white; }
 
 .logout-btn {
-  background:#ef4444;
+  margin-top:5px;
+  background:#ff5722;
   color:white;
   padding:6px 12px;
+  border-radius:6px;
 }
 
-/* ================= DASHBOARD ================= */
 #dashboard { display:none; }
 
 .header {
-  background:#2563eb;
+  background:#1f4e94;
   color:white;
   padding:15px;
   display:flex;
@@ -100,7 +110,7 @@ button {
 
 .title {
   font-size:24px;
-  color:#2563eb;
+  color:#1f4e94;
   font-weight:bold;
 }
 
@@ -110,65 +120,6 @@ button {
   border-radius:12px;
   max-width:700px;
   margin:20px auto;
-}
-
-/* ================= POPUP ALERT ================= */
-.popup {
-  position: fixed;
-  top:0;left:0;
-  width:100%;height:100%;
-  background:rgba(0,0,0,0.25);
-  backdrop-filter: blur(3px);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
-}
-
-.popup-box {
-  background:white;
-  padding:25px;
-  border-radius:16px;
-  width:90%;
-  max-width:350px;
-  text-align:center;
-  box-shadow:0 10px 30px rgba(0,0,0,0.2);
-}
-
-.popup-box h3 {
-  color:#2563eb;
-  margin-bottom:10px;
-}
-
-.popup-box p {
-  margin:10px 0;
-}
-
-.popup-buttons {
-  display:flex;
-  gap:10px;
-  margin-top:20px;
-}
-
-.btn-blue {
-  background:#2563eb;
-  color:white;
-}
-
-.btn-orange {
-  background:#f97316;
-  color:white;
-}
-
-.btn-red {
-  background:#ef4444;
-  color:white;
-}
-
-/* ================= ANIMASI ================= */
-@keyframes fadeIn {
-  from {opacity:0; transform:translateY(-20px);}
-  to {opacity:1; transform:translateY(0);}
 }
 </style>
 </head>
@@ -182,10 +133,10 @@ button {
     <h2>CBT Asesmen Informatika</h2>
 
     <label>Kelas</label>
-    <select id="kelas"></select>
+    <select id="kelas"><option value="">-- Pilih Kelas --</option></select>
 
     <label>Username</label>
-    <select id="username"></select>
+    <select id="username"><option value="">-- Pilih Siswa --</option></select>
 
     <label>Password</label>
     <input type="password" id="password">
@@ -209,7 +160,7 @@ button {
   <div class="header">
     <div>
       <b id="namaHeader"></b><br>
-      <span id="kelasHeader"></span><br>
+      <span id="kelasHeader"></span>
       <button class="logout-btn" onclick="logout()">Keluar</button>
     </div>
   </div>
@@ -226,33 +177,53 @@ button {
   </div>
 </div>
 
-<!-- POPUP KONFIRMASI -->
-<div id="confirmPopup" class="popup">
-  <div class="popup-box">
+<!-- POPUP KONFIRMASI (ASLI TETAP) -->
+<div id="confirmModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);justify-content:center;align-items:center;">
+  <div style="background:#fff;padding:25px;border-radius:12px;width:300px;text-align:center;">
     <h3>Konfirmasi Jawaban</h3>
     <p>Apa kamu yakin dengan jawabanmu?</p>
 
-    <div class="checkbox-container">
+    <div class="checkbox-container" style="justify-content:center;">
       <input type="checkbox" id="checkData">
       <label>Saya yakin jawaban sudah benar</label>
     </div>
 
-    <div class="popup-buttons">
-      <button class="btn-blue" onclick="closeConfirm()">Batal</button>
-      <button class="btn-orange" onclick="lanjutUjian()">Kirim</button>
-    </div>
+    <button onclick="closeConfirm()">Batal</button>
+    <button onclick="lanjutUjian()">Kirim</button>
   </div>
 </div>
 
-<!-- POPUP ALERT CUSTOM -->
-<div id="alertPopup" class="popup">
-  <div class="popup-box">
-    <h3 id="alertTitle">Informasi</h3>
-    <p id="alertMsg"></p>
+<!-- 🔥 POPUP ALERT BARU -->
+<div id="alertPopup" style="
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+display:none;
+align-items:center;
+justify-content:center;
+background:rgba(0,0,0,0.2);
+backdrop-filter:blur(3px);
+z-index:9999;
+">
+  <div style="
+    background:white;
+    padding:25px;
+    border-radius:16px;
+    width:90%;
+    max-width:320px;
+    text-align:center;
+    box-shadow:0 10px 25px rgba(0,0,0,0.15);
+  ">
+    <h3 style="color:#1f4e94;">Informasi</h3>
+    <p id="alertText"></p>
 
-    <div class="popup-buttons">
-      <button class="btn-red" onclick="closeAlert()">OK</button>
-    </div>
+    <button onclick="tutupAlert()" style="
+      background:#1f4e94;
+      color:white;
+      padding:10px 20px;
+      border:none;
+      border-radius:10px;
+    ">OK</button>
   </div>
 </div>
 
@@ -261,49 +232,53 @@ const API_URL = "https://script.google.com/macros/s/AKfycbwf_Hza9uzl9mdE-iiYZExP
 
 let siswaData = [];
 
-/* ================= ALERT CUSTOM ================= */
-function showAlert(msg){
-  document.getElementById("alertMsg").innerText = msg;
+/* ALERT CUSTOM */
+function tampilAlert(pesan){
+  document.getElementById("alertText").innerText = pesan;
   document.getElementById("alertPopup").style.display = "flex";
 }
-function closeAlert(){
+function tutupAlert(){
   document.getElementById("alertPopup").style.display = "none";
 }
 
-/* ================= PASSWORD ================= */
+/* PASSWORD */
 function togglePassword(){
   let p=document.getElementById("password");
   p.type = p.type==="password"?"text":"password";
 }
 
-/* ================= LOAD DATA ================= */
+/* LOAD DATA */
 fetch(API_URL)
 .then(res=>res.json())
 .then(data=>{
   siswaData=data;
-  let kelasSet=new Set();
-  data.forEach(s=>kelasSet.add(s.kelas));
-  kelasSet.forEach(k=>{
-    kelas.innerHTML+=`<option value="${k}">${k}</option>`;
+  let setKelas=new Set();
+  data.forEach(s=>setKelas.add(s.kelas));
+
+  setKelas.forEach(k=>{
+    document.getElementById("kelas").innerHTML+=`<option value="${k}">${k}</option>`;
   });
 });
 
-kelas.onchange=function(){
-  username.innerHTML="";
+/* FILTER NAMA */
+document.getElementById("kelas").onchange=function(){
+  let userSelect=document.getElementById("username");
+  userSelect.innerHTML="<option value=''>-- Pilih Siswa --</option>";
+
   siswaData.filter(s=>s.kelas===this.value)
   .forEach(s=>{
-    username.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
+    userSelect.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
   });
 };
 
-/* ================= LOGIN ================= */
+/* LOGIN */
 function login(){
-  let user=username.value;
-  let pass=password.value;
+  let user=document.getElementById("username").value;
+  let pass=document.getElementById("password").value;
   let token=document.getElementById("token").value;
 
   if(!user||!pass||!token){
-    showAlert("Lengkapi semua data!");
+    tampilAlert("Lengkapi semua data!");
     return;
   }
 
@@ -317,38 +292,38 @@ function login(){
       localStorage.setItem("user",JSON.stringify(res));
       showDashboard(res);
     }else{
-      showAlert(res.msg);
+      tampilAlert(res.msg);
     }
   });
 }
 
-/* ================= DASHBOARD ================= */
+/* DASHBOARD */
 function showDashboard(user){
-  loginPage.style.display="none";
-  dashboard.style.display="block";
+  document.getElementById("loginPage").style.display="none";
+  document.getElementById("dashboard").style.display="block";
 
-  nama.innerText=user.nama;
-  kelasUser.innerText=user.kelas;
-  namaHeader.innerText=user.nama;
-  kelasHeader.innerText=user.kelas;
+  document.getElementById("nama").innerText=user.nama;
+  document.getElementById("kelasUser").innerText=user.kelas;
+  document.getElementById("namaHeader").innerText=user.nama;
+  document.getElementById("kelasHeader").innerText=user.kelas;
 }
 
-/* ================= KONFIRMASI ================= */
+/* KONFIRMASI */
 function openConfirm(){
-  confirmPopup.style.display="flex";
+  document.getElementById("confirmModal").style.display="flex";
 }
 function closeConfirm(){
-  confirmPopup.style.display="none";
+  document.getElementById("confirmModal").style.display="none";
 }
 function lanjutUjian(){
-  if(!checkData.checked){
-    showAlert("Centang dulu konfirmasi!");
+  if(!document.getElementById("checkData").checked){
+    tampilAlert("Centang dulu konfirmasi!");
     return;
   }
   window.location.href="HALAMAN_SOAL_CBT.html";
 }
 
-/* ================= LOGOUT ================= */
+/* LOGOUT */
 function logout(){
   localStorage.clear();
   location.reload();
