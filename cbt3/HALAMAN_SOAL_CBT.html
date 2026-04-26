@@ -129,7 +129,7 @@
             justify-content: center; align-items: center; z-index: 9999;
         }
 
-        /* ===== CUSTOM ALERT ===== */
+        /* ALERT */
         .custom-alert-overlay{
             position:fixed;
             top:0;left:0;width:100%;height:100%;
@@ -146,155 +146,86 @@
             border-radius:15px;
             width:320px;
             text-align:center;
-            box-shadow:0 10px 25px rgba(0,0,0,0.2);
-        }
-
-        .alert-title{
-            font-weight:bold;
-            font-size:18px;
-            margin-bottom:10px;
-        }
-
-        .alert-text{
-            font-size:14px;
-            color:#555;
-            margin-bottom:20px;
         }
 
         .alert-actions{
             display:flex;
-            justify-content:space-between;
             gap:10px;
         }
 
-        .btn-blue{
-            background:#3b6fd8;
-            color:white;
-            flex:1;
-        }
-
-        .btn-red{
-            background:#e53935;
-            color:white;
-            flex:1;
-        }
+        .btn-blue{background:#3b6fd8;color:white;flex:1;}
+        .btn-red{background:#e53935;color:white;flex:1;}
     </style>
 </head>
 
 <body>
 
-<!-- CUSTOM ALERT -->
 <div id="customAlert" class="custom-alert-overlay">
     <div class="custom-alert-box">
-        <div class="alert-title" id="alertTitle">Konfirmasi</div>
-        <div class="alert-text" id="alertText"></div>
-        <div class="alert-actions" id="alertActions"></div>
+        <div id="alertText"></div>
+        <div id="alertActions" class="alert-actions"></div>
     </div>
 </div>
 
 <div id="loading">
     <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" width="80">
-    <p id="loadingText" style="margin-top:15px; font-weight:bold; color:var(--primary-blue);">Menghubungkan ke Server...</p>
+    <p id="loadingText">Menghubungkan ke Server...</p>
 </div>
 
-<div id="layarHasil">
-    <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" width="100">
-    <h2 style="color:var(--primary-blue); margin-top:20px;">Terima Kasih!</h2>
-    <p style="font-size:1.1em; color:#555;">Anda telah berhasil melaksanakan asesmen.</p>
-    
-    <div style="margin: 25px 0; padding:20px; background:#f0f7ff; border-radius:20px; width:100%; max-width:280px;">
-        <span style="font-weight:bold; color:#777; font-size:0.9em;">NILAI HASIL TES</span>
-        <div class="skor-box" id="nilaiFinal">0</div>
-    </div>
-
-    <p style="color: #888; font-size: 0.9em; margin-bottom: 20px;">Klik tombol di bawah untuk keluar dengan aman.</p>
-    
-    <button class="btn" style="background:var(--btn-red); color:white; padding:15px 50px; font-size:1em;" onclick="logOutSiswa()">
-        Keluar
-    </button>
-</div>
+<div id="layarHasil">...</div>
 
 <div id="app-content">
-    <!-- (SEMUA KODE TETAP SAMA, TIDAK DIUBAH) -->
+    <div class="header">
+        <div>
+            <b id="displayNama">-</b><br>
+            <small id="displayKelas">-</small>
+        </div>
+        <div class="timer" id="timerDisplay">00:00:00</div>
+    </div>
+
+    <div class="main-layout">
+        <div class="quiz-container">
+            <div id="quizArea"></div>
+        </div>
+
+        <div class="sidebar">
+            <div style="background:white; padding:20px;">
+                <h4>Navigasi Soal</h4>
+                <div id="gridNomor" class="grid-nomor"></div>
+                <button class="btn" style="background:var(--success); color:white; width:100%;" onclick="kirimJawaban()">SELESAI</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-bottom">
+        <button class="btn btn-nav" onclick="changeSoal(-1)">Sebelumnya</button>
+        <div id="infoHalaman">Soal</div>
+        <button class="btn btn-nav" onclick="changeSoal(1)">Berikutnya</button>
+    </div>
+
+    <div class="footer-info">CBT Asesmen Informatika</div>
 </div>
 
 <script>
-/* ===== CUSTOM ALERT FUNCTION ===== */
-function showAlert(pesan){
-    document.getElementById("alertTitle").innerText="Pemberitahuan";
-    document.getElementById("alertText").innerText=pesan;
+function showAlert(msg){
+    document.getElementById("alertText").innerText=msg;
     document.getElementById("alertActions").innerHTML=
-        `<button class="btn btn-blue" onclick="closeAlert()">Oke</button>`;
+    `<button class="btn btn-blue" onclick="closeAlert()">OK</button>`;
     document.getElementById("customAlert").style.display="flex";
 }
 
-function showConfirm(pesan,callback){
-    document.getElementById("alertTitle").innerText="Konfirmasi Data";
-    document.getElementById("alertText").innerText=pesan;
+function showConfirm(msg,cb){
+    document.getElementById("alertText").innerText=msg;
     document.getElementById("alertActions").innerHTML=
-        `<button class="btn btn-blue" onclick="closeAlert()">Batal</button>
-         <button class="btn btn-red" onclick="confirmYes()">Kirim</button>`;
+    `<button class="btn btn-blue" onclick="closeAlert()">Batal</button>
+     <button class="btn btn-red" onclick="yes()">Kirim</button>`;
+    window._cb=cb;
     document.getElementById("customAlert").style.display="flex";
-    window._confirmCallback=callback;
 }
 
-function confirmYes(){
-    closeAlert();
-    if(window._confirmCallback) window._confirmCallback();
-}
-
-function closeAlert(){
-    document.getElementById("customAlert").style.display="none";
-}
-
-/* ===== PERUBAHAN ALERT ===== */
-async function loadSoal() {
-    try {
-        const response = await fetch(API_URL + "?mode=getSoal");
-        listSoal = await response.json();
-        renderSoal();
-        document.getElementById("loading").style.display = "none";
-    } catch (error) { showAlert("Gagal memuat soal."); }
-}
-
-async function kirimJawaban() {
-    const jumlahDijawab = Object.keys(jawabanSiswa).length;
-
-    showConfirm(`Anda menjawab ${jumlahDijawab}/${listSoal.length} soal. Selesaikan ujian?`, async () => {
-
-        document.getElementById("loading").style.display = "flex";
-        document.getElementById("loadingText").innerText = "Menyimpan & Menghitung Skor...";
-
-        const payload = {
-            action: "kirimJawaban",
-            idLogin: userSession.idLogin,
-            nama: userSession.nama,
-            kelas: userSession.kelas,
-            jawaban: jawabanSiswa
-        };
-
-        try {
-            await fetch(API_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
-            
-            let skorLokal = 0;
-            listSoal.forEach(s => { if(jawabanSiswa[s.no] === s.kunci) skorLokal += Number(s.skor); });
-
-            localStorage.removeItem("endTime");
-            localStorage.removeItem("jawabanSiswa");
-
-            setTimeout(() => {
-                document.getElementById("loading").style.display = "none";
-                document.getElementById("app-content").style.display = "none";
-                document.getElementById("layarHasil").style.display = "flex";
-                document.getElementById("nilaiFinal").innerText = skorLokal;
-            }, 2000);
-
-        } catch (error) {
-            document.getElementById("layarHasil").style.display = "flex";
-        }
-
-    });
-}
+function yes(){closeAlert();window._cb();}
+function closeAlert(){document.getElementById("customAlert").style.display="none";}
 </script>
+
 </body>
 </html>
