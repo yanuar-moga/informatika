@@ -128,6 +128,71 @@
             background: white; display: flex; flex-direction: column;
             justify-content: center; align-items: center; z-index: 9999;
         }
+/* ===== CUSTOM ALERT ===== */
+.custom-alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10002;
+}
+
+.custom-alert h3 {
+    margin: 0 0 10px;
+    color: var(--primary-blue);
+}
+
+.custom-alert p {
+    margin: 0 0 15px;
+    font-size: 14px;
+}
+
+.alert-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.alert-btn {
+    flex: 1;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-batal {
+    background: var(--btn-blue);
+    color: white;
+}
+
+.btn-kirim {
+    background: var(--btn-red);
+    color: white;
+}
+
+/* ANIMASI ALERT */
+.custom-alert {
+    background: #fff;
+    width: 340px;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+
+    animation: zoomIn 0.2s ease;
+}
+
+@keyframes zoomIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
     </style>
 </head>
 
@@ -194,6 +259,7 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbzTacoBkA6md69TmVNi-uCwtXoUzu15_YlBfwmYqzpHGha_ad-nKnMAPD0c7VkG42Q/exec";
 
 let listSoal = [];
+let sudahKirim = false;
 let jawabanSiswa = JSON.parse(localStorage.getItem("jawabanSiswa")) || {};
 let currentIdx = 0;
 let userSession = JSON.parse(localStorage.getItem("user"));
@@ -216,11 +282,12 @@ function startTimer() {
         const now = new Date().getTime();
         let sisa = endTime - now;
 
-        if (sisa <= 0) {
-            document.getElementById("timerDisplay").innerText = "00:00:00";
-            kirimJawaban();
-            return;
-        }
+if (sisa <= 0 && !sudahKirim) {
+    sudahKirim = true;
+    document.getElementById("timerDisplay").innerText = "00:00:00";
+    kirimJawaban();
+    return;
+}
 
         const jam = Math.floor(sisa / (1000*60*60));
         const menit = Math.floor((sisa / (1000*60)) % 60);
@@ -301,8 +368,37 @@ function changeSoal(arah) {
 }
 
 async function kirimJawaban() {
+if (sudahKirim) return;
+sudahKirim = true;
     const jumlahDijawab = Object.keys(jawabanSiswa).length;
-    if (!confirm(`Anda menjawab ${jumlahDijawab}/${listSoal.length} soal. Selesaikan ujian?`)) return;
+    tampilAlert(
+    `Anda menjawab ${jumlahDijawab}/${listSoal.length} soal. Selesaikan ujian?`,
+    prosesKirimJawaban
+);
+}
+function logOutSiswa() {
+    localStorage.clear();
+    window.location.href = "index.html"; 
+}
+
+let aksiSetelahKonfirmasi = null;
+
+function tampilAlert(pesan, aksi) {
+    document.getElementById("alertText").innerText = pesan;
+    document.getElementById("alertBox").style.display = "flex";
+    aksiSetelahKonfirmasi = aksi;
+}
+
+function tutupAlert() {
+    document.getElementById("alertBox").style.display = "none";
+}
+
+function lanjutKirim() {
+    tutupAlert();
+    if (aksiSetelahKonfirmasi) aksiSetelahKonfirmasi();
+}
+
+async function prosesKirimJawaban() {
 
     document.getElementById("loading").style.display = "flex";
     document.getElementById("loadingText").innerText = "Menyimpan & Menghitung Skor...";
@@ -319,7 +415,9 @@ async function kirimJawaban() {
         await fetch(API_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
         
         let skorLokal = 0;
-        listSoal.forEach(s => { if(jawabanSiswa[s.no] === s.kunci) skorLokal += Number(s.skor); });
+        listSoal.forEach(s => { 
+            if(jawabanSiswa[s.no] === s.kunci) skorLokal += Number(s.skor); 
+        });
 
         localStorage.removeItem("endTime");
         localStorage.removeItem("jawabanSiswa");
@@ -335,11 +433,18 @@ async function kirimJawaban() {
         document.getElementById("layarHasil").style.display = "flex";
     }
 }
-
-function logOutSiswa() {
-    localStorage.clear();
-    window.location.href = "index.html"; 
-}
 </script>
+<!-- CUSTOM ALERT -->
+<div class="custom-alert-overlay" id="alertBox">
+    <div class="custom-alert">
+        <h3>Konfirmasi Ujian</h3>
+        <p id="alertText">-</p>
+
+        <div class="alert-buttons">
+            <button class="alert-btn btn-batal" onclick="tutupAlert()">Batal</button>
+            <button class="alert-btn btn-kirim" onclick="lanjutKirim()">Kirim</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
