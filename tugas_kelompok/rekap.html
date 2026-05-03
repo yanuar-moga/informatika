@@ -19,7 +19,6 @@ h2{ margin-bottom:15px; }
   gap:10px;
   flex-wrap:wrap;
   margin-bottom:15px;
-  align-items:center;
 }
 
 select,button{
@@ -34,13 +33,6 @@ button{
   cursor:pointer;
 }
 
-button:hover{ background:#083d82; }
-
-.stat{
-  margin:10px 0;
-  font-weight:bold;
-}
-
 .container{
   display:flex;
   gap:20px;
@@ -53,33 +45,23 @@ button:hover{ background:#083d82; }
   background:white;
   padding:15px;
   border-radius:10px;
-  box-shadow:0 5px 15px rgba(0,0,0,.1);
 }
 
 table{
   width:100%;
   border-collapse:collapse;
-  font-size:14px;
+  font-size:13px;
 }
 
 th,td{
   border:1px solid #ddd;
   padding:6px;
-  text-align:left;
-}
-
-th{
-  background:#f0f0f0;
 }
 
 .sudah{ color:green; }
 .belum{ color:red; }
 
 canvas{
-  background:white;
-  padding:15px;
-  border-radius:10px;
-  box-shadow:0 5px 15px rgba(0,0,0,.1);
   margin-top:20px;
 }
 </style>
@@ -94,41 +76,40 @@ canvas{
     <option value="ALL">Semua Kelas</option>
   </select>
 
-  <button onclick="renderData()">Tampilkan</button>
-
   <select id="filterJudul">
-    <option value="ALL">Semua Judul Tugas</option>
+    <option value="ALL">Semua Judul</option>
   </select>
 
-  <button onclick="renderPerJudul()">📄 Tampilkan per Judul</button>
+  <button onclick="renderData()">Tampilkan</button>
 </div>
 
-<div class="stat" id="statistik">Memuat data...</div>
+<div id="statistik">Memuat data...</div>
 
 <div class="container">
-  <div class="box">
-    <h3 class="sudah">🟢 Sudah Mengirim</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>No</th>
-          <th>Nama Siswa</th>
-          <th>Link</th>
-        </tr>
-      </thead>
-      <tbody id="sudahList"></tbody>
-    </table>
-  </div>
 
-  <div class="box">
-    <h3 class="belum">🔴 Belum Mengirim</h3>
-    <ul id="belumList"></ul>
-  </div>
+<div class="box">
+<h3 class="sudah">🟢 Sudah Mengirim</h3>
+<table>
+<thead>
+<tr>
+<th>No</th>
+<th>Kelompok</th>
+<th>Nama Anggota</th>
+<th>Link</th>
+</tr>
+</thead>
+<tbody id="sudahList"></tbody>
+</table>
 </div>
 
-<div id="rekapJudul" style="margin-top:30px;"></div>
+<div class="box">
+<h3 class="belum">🔴 Belum Mengirim</h3>
+<ul id="belumList"></ul>
+</div>
 
-<canvas id="chartBar" height="120"></canvas>
+</div>
+
+<canvas id="chartBar"></canvas>
 
 <script>
 
@@ -147,97 +128,95 @@ Promise.all([
   semuaSiswa=siswa || [];
   semuaTugas=tugas || [];
   initFilter();
-})
-.catch(()=>{
-  document.getElementById("statistik").innerHTML="Gagal mengambil data";
 });
 
-
+/* INIT FILTER */
 function initFilter(){
 
-  const kelasSelect=document.getElementById("filterKelas");
-  const judulSelect=document.getElementById("filterJudul");
+  const kelasSet=[...new Set(semuaSiswa.map(s=>s.rombel))];
+  const judulSet=[...new Set(semuaTugas.map(t=>t.judul))];
 
-  [...new Set(semuaSiswa.map(s=>s.rombel))]
-  .filter(Boolean)
-  .sort()
-  .forEach(r=>{
-    kelasSelect.innerHTML+=`<option value="${r}">${r}</option>`;
+  kelasSet.forEach(k=>{
+    document.getElementById("filterKelas")
+      .innerHTML+=`<option>${k}</option>`;
   });
 
-  [...new Set(semuaTugas.map(t=>t.judul))]
-  .filter(Boolean)
-  .sort()
-  .forEach(j=>{
-    judulSelect.innerHTML+=`<option value="${j}">${j}</option>`;
+  judulSet.forEach(j=>{
+    document.getElementById("filterJudul")
+      .innerHTML+=`<option>${j}</option>`;
   });
 }
 
 
-/* FILTER & TAMPILKAN DATA */
-function renderPerJudul(){
+/* RENDER */
+function renderData(){
 
   const kelas=document.getElementById("filterKelas").value;
   const judul=document.getElementById("filterJudul").value;
 
-  if(kelas==="ALL"){
-    alert("Silakan pilih kelas terlebih dahulu!");
-    return;
+  let siswaKelas=semuaSiswa;
+  if(kelas!=="ALL"){
+    siswaKelas=siswaKelas.filter(s=>s.rombel===kelas);
   }
 
-  if(judul==="ALL"){
-    alert("Pilih salah satu judul tugas terlebih dahulu!");
-    return;
+  let tugas=semuaTugas;
+  if(kelas!=="ALL"){
+    tugas=tugas.filter(t=>t.kelas===kelas);
+  }
+  if(judul!=="ALL"){
+    tugas=tugas.filter(t=>t.judul===judul);
   }
 
-  // Ambil daftar siswa sesuai kelas
-  const siswaKelas=semuaSiswa.filter(s=>s.rombel===kelas);
+  /* =====================
+     AMBIL SEMUA NAMA YANG SUDAH (FLATTEN)
+  ===================== */
+  let sudahSet=new Set();
 
-  // Ambil data tugas berdasarkan kolom kelas & judul
-  const tugasFilter=semuaTugas.filter(t=>
-    t.kelas===kelas && t.judul===judul
-  );
+  tugas.forEach(t=>{
+    if(t.nama){
+      t.nama.split(",").forEach(n=>{
+        sudahSet.add(n.trim());
+      });
+    }
+  });
 
   const total=siswaKelas.length;
-  const sudah=tugasFilter.length;
-  const sudahNama=tugasFilter.map(t=>t.nama);
 
-  const belum=siswaKelas.filter(s=>!sudahNama.includes(s.nama));
+  const belum=siswaKelas.filter(s=>!sudahSet.has(s.nama));
 
-  const persen=total?Math.round((sudah/total)*100):0;
-
-  // =====================
-  // TABEL SUDAH MENGIRIM
-  // =====================
+  /* =====================
+     TABEL SUDAH
+  ===================== */
   document.getElementById("sudahList").innerHTML=
-    tugasFilter.map((t,i)=>`
+    tugas.map((t,i)=>`
       <tr>
         <td>${i+1}</td>
+        <td>${t.kelompok}</td>
         <td>${t.nama}</td>
         <td><a href="${t.link}" target="_blank">Buka</a></td>
       </tr>
     `).join("");
 
-  // =====================
-  // LIST BELUM MENGIRIM
-  // =====================
+  /* =====================
+     BELUM
+  ===================== */
   document.getElementById("belumList").innerHTML=
     belum.map(s=>`<li>${s.nama}</li>`).join("");
 
-  // =====================
-  // STATISTIK
-  // =====================
+  /* =====================
+     STATISTIK
+  ===================== */
   document.getElementById("statistik").innerHTML=
-    `Kelas: ${kelas} | Judul: ${judul} | Total: ${total} | Sudah: ${sudah} | Belum: ${belum.length}`;
+    `Total: ${total} | Sudah: ${sudahSet.size} | Belum: ${belum.length}`;
 
-  renderChart(sudah,belum.length);
+  renderChart(sudahSet.size,belum.length);
 }
 
 
 /* CHART */
-function renderChart(jumlahSudah,jumlahBelum){
+function renderChart(sudah,belum){
 
-  const ctx=document.getElementById("chartBar").getContext("2d");
+  const ctx=document.getElementById("chartBar");
 
   if(chart) chart.destroy();
 
@@ -246,14 +225,12 @@ function renderChart(jumlahSudah,jumlahBelum){
     data:{
       labels:["Sudah","Belum"],
       datasets:[{
-        label:"Jumlah Siswa",
-        data:[jumlahSudah,jumlahBelum],
+        data:[sudah,belum],
         backgroundColor:["green","red"]
       }]
     },
     options:{
-      responsive:true,
-      plugins:{ legend:{ display:false } }
+      plugins:{legend:{display:false}}
     }
   });
 }
