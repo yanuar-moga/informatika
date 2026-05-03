@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>CBT SMPN 1 MOGA</title>
+
+<style>
+:root{
+  --blue:#1976d2;
+  --red:#d32f2f;
+}
+
+body{
+  margin:0;
+  font-family:Arial;
+  background:#b0bec5;
+}
+
+/* HEADER */
+.header{
+  background:#1976d2;
+  color:#fff;
+  padding:12px;
+  display:none;
+  justify-content:space-between;
+}
+
+/* LAYOUT */
+.wrap{display:flex;height:calc(100vh - 50px);}
+.sidebar{width:120px;background:#fff;padding:10px;}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+
+.num{padding:8px;background:#ddd;text-align:center;border-radius:6px;cursor:pointer;}
+.num.active{background:var(--blue);color:#fff}
+.num.done{background:#4caf50;color:#fff}
+
+.content{flex:1;padding:12px;}
+.card{background:#fff;padding:15px;border-radius:12px;}
+
+/* BUTTON */
+.btn{
+  padding:10px;
+  border:none;
+  border-radius:6px;
+  margin-top:10px;
+  width:100%;
+  cursor:pointer;
+}
+.blue{background:var(--blue);color:#fff}
+.red{background:var(--red);color:#fff}
+
+/* LOGIN */
+.login-container{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.login-box{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  width:100%;
+  max-width:400px;
+}
+
+.form-group{margin-bottom:10px;}
+
+/* MODAL */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+
+.modal-box{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  width:90%;
+  max-width:350px;
+  text-align:center;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<div>CBT SMPN 1 MOGA</div>
+<div id="timer"></div>
+</div>
+
+<div id="app"></div>
+
+<!-- MODAL KONFIRMASI -->
+<div id="modal" class="modal">
+  <div class="modal-box">
+    <h3>Konfirmasi Data</h3>
+    <p>Pastikan data Anda sudah benar</p>
+
+    <div id="dataUser"></div>
+
+    <br>
+    <label>
+      <input type="checkbox" id="cek">
+      Saya yakin data sudah benar
+    </label>
+
+    <br><br>
+
+    <button class="btn blue" onclick="closeModal()">Batal</button>
+    <button class="btn red" onclick="mulaiUjian()">Kirim</button>
+  </div>
+</div>
+
+<script>
+const API="https://script.google.com/macros/s/AKfycbyFKeH-bb47KADy6577hEQU3zJy4WmkBAAxzIHuRqmqY6dNnPCDaXrl-UP-v78lj72c/exec";
+
+let dataSiswa=[],dataToken=[];
+let state={soal:[],index:0,jawaban:[]};
+let currentUser=null;
+
+
+// ================= LOGIN VIEW =================
+function viewLogin(){
+document.querySelector(".header").style.display="none";
+
+document.getElementById("app").innerHTML=`
+<div class="login-container">
+<div class="login-box">
+
+<h2 style="text-align:center">CBT Informatika</h2>
+
+<div class="form-group">
+<select id="kelas"></select>
+</div>
+
+<div class="form-group">
+<select id="username"></select>
+</div>
+
+<div class="form-group">
+<input type="password" id="password" placeholder="Password">
+</div>
+
+<div class="form-group">
+<input id="token" placeholder="Token">
+</div>
+
+<button class="btn blue" onclick="login()">Masuk</button>
+<button class="btn red" onclick="jadwal()">Jadwal</button>
+
+</div>
+</div>
+`;
+
+loadData();
+}
+
+
+// ================= LOAD DATA =================
+function loadData(){
+fetch(API)
+.then(r=>r.json())
+.then(d=>{
+dataSiswa=d;
+
+let kelas=[...new Set(d.map(x=>x.kelas))];
+let el=document.getElementById("kelas");
+
+el.innerHTML='<option>Pilih Kelas</option>';
+kelas.forEach(k=>el.innerHTML+=`<option>${k}</option>`);
+
+el.onchange=loadUser;
+});
+
+fetch(API+"?mode=token")
+.then(r=>r.json())
+.then(d=>dataToken=d);
+}
+
+function loadUser(){
+let k=document.getElementById("kelas").value;
+let el=document.getElementById("username");
+
+el.innerHTML="";
+dataSiswa.filter(x=>x.kelas==k)
+.forEach(s=>{
+el.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
+});
+}
+
+
+// ================= LOGIN =================
+function login(){
+let username=document.getElementById("username").value;
+let password=document.getElementById("password").value;
+let token=document.getElementById("token").value;
+
+fetch(API,{
+method:"POST",
+body:JSON.stringify({mode:"login",username,password,token})
+})
+.then(r=>r.json())
+.then(res=>{
+if(res.status=="success"){
+currentUser=res;
+showKonfirmasi();
+}else{
+alert(res.msg);
+}
+});
+}
+
+
+// ================= POPUP KONFIRMASI =================
+function showKonfirmasi(){
+
+document.getElementById("dataUser").innerHTML=`
+<p><b>Nama:</b> ${currentUser.nama}</p>
+<p><b>Kelas:</b> ${currentUser.kelas}</p>
+`;
+
+document.getElementById("modal").style.display="flex";
+}
+
+function closeModal(){
+document.getElementById("modal").style.display="none";
+}
+
+
+// ================= MULAI UJIAN =================
+function mulaiUjian(){
+
+if(!document.getElementById("cek").checked){
+alert("Centang konfirmasi dulu!");
+return;
+}
+
+closeModal();
+startExam();
+}
+
+
+// ================= SOAL VIEW =================
+function viewSoal(){
+
+document.querySelector(".header").style.display="flex";
+
+let side='<div class="sidebar"><div class="grid">';
+state.soal.forEach((s,i)=>{
+let c="num";
+if(i==state.index)c+=" active";
+if(state.jawaban[i])c+=" done";
+side+=`<div class="${c}" onclick="goto(${i})">${i+1}</div>`;
+});
+side+='</div></div>';
+
+let s=state.soal[state.index];
+
+let main=`
+<div class="content">
+<div class="card">
+<h3>Soal ${state.index+1}</h3>
+<p>${s.soal}</p>
+`;
+
+["A","B","C","D"].forEach(o=>{
+main+=`
+<div>
+<input type="radio" ${state.jawaban[state.index]==o?"checked":""}
+onclick="jawab('${o}')"> ${o}. ${s.pilihan[o]}
+</div>`;
+});
+
+main+=`
+<button class="btn" onclick="prev()">Prev</button>
+<button class="btn blue" onclick="next()">Next</button>
+<button class="btn red" onclick="submit()">Kirim</button>
+</div></div>
+`;
+
+document.getElementById("app").innerHTML=`<div class="wrap">${side}${main}</div>`;
+}
+
+
+// ================= NAV =================
+function jawab(v){state.jawaban[state.index]=v;viewSoal();}
+function next(){if(state.index<state.soal.length-1){state.index++;viewSoal();}}
+function prev(){if(state.index>0){state.index--;viewSoal();}}
+function goto(i){state.index=i;viewSoal();}
+
+
+// ================= START =================
+function startExam(){
+fetch(API+"?mode=soal")
+.then(r=>r.json())
+.then(d=>{
+state.soal=d;
+state.jawaban=new Array(d.length).fill("");
+viewSoal();
+startTimer(1800);
+});
+}
+
+
+// ================= TIMER =================
+function startTimer(s){
+setInterval(()=>{
+s--;
+document.getElementById("timer").innerText=
+Math.floor(s/60)+":"+("0"+s%60).slice(-2);
+if(s<=0)submit();
+},1000);
+}
+
+
+// ================= HASIL =================
+function submit(){
+viewHasil();
+}
+
+function viewHasil(){
+document.querySelector(".header").style.display="none";
+
+document.getElementById("app").innerHTML=`
+<div class="login-container">
+<div class="login-box">
+
+<h2>Ujian Selesai</h2>
+<p>Jawaban berhasil dikirim</p>
+
+<button class="btn blue" onclick="location.reload()">Kembali</button>
+
+</div>
+</div>
+`;
+}
+
+
+// ================= JADWAL =================
+function jadwal(){
+let html="Jadwal:<br><br>";
+dataToken.forEach(x=>{
+html+=`${x.kelas} : ${x.mulai} - ${x.selesai}<br>`;
+});
+alert(html);
+}
+
+
+// ================= INIT =================
+viewLogin();
+
+</script>
+</body>
+</html>
