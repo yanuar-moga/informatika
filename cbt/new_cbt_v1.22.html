@@ -1,225 +1,246 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta charset="UTF-8">
-<title>CBT SMPN 1 MOGA</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CBT Informatika</title>
 
 <style>
-:root{--blue:#1976d2;--red:#d32f2f;--green:#4caf50;}
-body{margin:0;font-family:Arial;background:#b0bec5;}
-.header{background:#1976d2;color:#fff;padding:10px;display:none;justify-content:space-between;align-items:center;font-size:13px;}
-.wrap{display:flex;height:calc(100vh - 90px);}
-.sidebar{width:120px;background:#fff;padding:10px;overflow:auto;}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
-.num{padding:8px;background:#ddd;text-align:center;border-radius:6px;cursor:pointer;font-size:12px;}
-.num.active{background:var(--blue);color:#fff}
+:root{
+--blue:#2f5597;
+--red:#e53935;
+--orange:#ff5722;
+--bg:#a7b3bf;
+}
+
+body{margin:0;font-family:Arial;background:var(--bg);}
+
+/* HEADER */
+.topbar{
+background:var(--blue);
+color:#fff;
+padding:10px 20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.topbar button{
+background:#ff5722;
+border:none;
+padding:8px 15px;
+border-radius:6px;
+color:#fff;
+cursor:pointer;
+}
+
+/* CENTER */
+.center{
+text-align:center;
+margin-top:20px;
+}
+
+/* CARD */
+.card{
+background:#eee;
+max-width:650px;
+margin:20px auto;
+padding:20px;
+border-radius:12px;
+text-align:left;
+}
+
+/* BUTTON */
+.btn{
+padding:12px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-size:14px;
+}
+.full{width:100%}
+.blue{background:#3f6cc9;color:#fff}
+.red{background:#e53935;color:#fff}
+.orange{background:#ff5722;color:#fff}
+
+/* MODAL */
+.modal{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.5);
+display:none;
+align-items:center;
+justify-content:center;
+}
+
+.modal-box{
+background:#fff;
+padding:25px;
+border-radius:12px;
+width:300px;
+text-align:center;
+}
+
+.modal-actions{
+display:flex;
+gap:10px;
+margin-top:20px;
+}
+
+.wrap{display:flex}
+.sidebar{width:120px;background:#fff;padding:10px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.num{background:#ddd;padding:6px;text-align:center;border-radius:5px;cursor:pointer}
+.num.active{background:#2f5597;color:#fff}
 .num.done{background:#4caf50;color:#fff}
-.content{flex:1;padding:12px;overflow:auto;}
-.card{background:#fff;padding:15px;border-radius:12px;box-shadow:0 3px 10px rgba(0,0,0,0.1);}
-.nav-btn{display:flex;justify-content:space-between;margin-top:15px;}
-.btn{padding:10px 15px;border:none;border-radius:8px;cursor:pointer;font-size:14px;}
-.blue{background:var(--blue);color:#fff}
-.red{background:var(--red);color:#fff}
-.green{background:var(--green);color:#fff}
-.footer{height:40px;background:#1976d2;color:#fff;display:none;align-items:center;justify-content:center;font-size:12px;}
+.content{flex:1;padding:15px}
 
-.login-container{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:15px;}
-.login-box{width:100%;max-width:420px;background:#fff;padding:25px;border-radius:20px;box-shadow:0 10px 25px rgba(0,0,0,0.2);}
-.form-group{display:grid;grid-template-columns:100px 1fr;gap:10px;margin-bottom:10px;align-items:center;}
-.form-group input,.form-group select{padding:8px;border-radius:6px;border:1px solid #ccc;}
-
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;}
-.box{background:#fff;padding:20px;border-radius:12px;width:90%;max-width:350px;text-align:center;}
 </style>
 </head>
 
 <body>
 
-<div class="header">
-<div><b id="nama"></b> | <span id="kelas"></span></div>
-<div>
-⏱ <span id="timer"></span> |
-<button onclick="keluar()" style="background:#fff;border:none;padding:5px;border-radius:5px">Keluar</button>
-</div>
+<div class="topbar">
+<div id="userInfo"></div>
+<button onclick="keluar()">Keluar</button>
 </div>
 
 <div id="app"></div>
 
-<div class="footer" id="footer">CBT Browser Apps by MB © 2026</div>
+<div id="modal" class="modal">
+<div class="modal-box">
+<h3>Konfirmasi Data</h3>
+<p>Pastikan data Anda sudah benar</p>
 
-<div id="modalBox" class="modal">
-<div class="box">
-<h3 id="mTitle"></h3>
-<div id="mMsg"></div>
-<div id="mAct"></div>
+<div style="text-align:left;margin-top:10px">
+<input type="checkbox" id="cekData"> Saya yakin data sudah benar
+</div>
+
+<div class="modal-actions">
+<button class="btn blue full" onclick="tutupModal()">Batal</button>
+<button class="btn red full" onclick="lanjutUjian()">Kirim</button>
+</div>
+
 </div>
 </div>
 
 <script>
 const API="https://script.google.com/macros/s/AKfycbyFKeH-bb47KADy6577hEQU3zJy4WmkBAAxzIHuRqmqY6dNnPCDaXrl-UP-v78lj72c/exec";
 
-let dataSiswa=[];
 let state={soal:[],index:0,jawaban:[]};
-let warningCount=0;
+let warning=0;
 
-/* MODAL */
-function modal(t,m,btns){
-mAct.innerHTML="";
-mTitle.innerText=t;
-mMsg.innerHTML=m;
-btns.forEach(b=>{
-let x=document.createElement("button");
-x.className="btn "+b.cls;
-x.innerText=b.text;
-x.onclick=()=>{modalHide(); if(b.cb)b.cb();};
-mAct.appendChild(x);
-});
-modalBox.style.display="flex";
-}
-function modalHide(){modalBox.style.display="none";}
-
-/* LOGIN UI (ASLI) */
+/* LOGIN */
 function loginUI(){
 app.innerHTML=`
-<div class="login-container">
-<div class="login-box">
+<div style="display:flex;justify-content:center;align-items:center;height:100vh">
+<div style="background:#fff;padding:20px;border-radius:12px;width:300px">
 
-<img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" style="width:80px;display:block;margin:auto">
+<h3 style="text-align:center">CBT Informatika</h3>
 
-<h2 style="text-align:center;color:#1e4f8a">CBT Asesmen<br>Informatika</h2>
+<input id="user" placeholder="Username" style="width:100%;margin-bottom:10px">
+<input id="pass" type="password" placeholder="Password" style="width:100%;margin-bottom:10px">
 
-<div class="form-group">
-<label>Kelas</label>
-<select id="kelasSelect"></select>
+<div>
+<input type="checkbox" onclick="togglePass()"> Tampilkan Password
 </div>
 
-<div class="form-group">
-<label>Username</label>
-<select id="username"></select>
-</div>
+<input id="token" placeholder="Token" style="width:100%;margin:10px 0">
 
-<div class="form-group">
-<label>Password</label>
-<input type="password" id="password">
-</div>
+<button class="btn blue full" onclick="login()">Masuk</button>
+<button class="btn red full" onclick="jadwal()">Jadwal</button>
 
-<div class="form-group">
-<label></label>
-<div><input type="checkbox" onclick="togglePass()"> Tampilkan Password</div>
-</div>
-
-<div class="form-group">
-<label>Token</label>
-<input id="token">
-</div>
-
-<div style="display:flex;flex-direction:column;gap:10px">
-<button class="btn blue" onclick="login()">Masuk</button>
-<button class="btn red" onclick="jadwal()">Jadwal</button>
-<div style="height:20px"></div>
-<div style="text-align:center;font-size:12px;color:#555">
-CBT Browser Apps by MB<br>© 2026 MB
-</div>
-</div>
-
-</div>
-</div>`;
-
-fetch(API).then(r=>r.json()).then(d=>{
-dataSiswa=d;
-let k=[...new Set(d.map(x=>x.kelas))];
-kelasSelect.innerHTML='<option>-- Pilih Kelas --</option>';
-k.forEach(x=>kelasSelect.innerHTML+=`<option>${x}</option>`);
-kelasSelect.onchange=loadUser;
-});
+</div></div>`;
 }
 
-/* LOAD USER */
-function loadUser(){
-let k=kelasSelect.value;
-username.innerHTML='<option>-- Pilih --</option>';
-dataSiswa.filter(x=>x.kelas==k)
-.forEach(s=>{
-username.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
-});
+/* TOGGLE */
+function togglePass(){
+let p=document.getElementById("pass");
+p.type=p.type==="password"?"text":"password";
 }
 
 /* LOGIN */
 function login(){
-let user=username.value;
-let pass=password.value;
-let token=document.getElementById("token").value;
-
-fetch(API,{
-method:"POST",
-body:JSON.stringify({mode:"login",username:user,password:pass,token})
-})
-.then(r=>r.json())
-.then(res=>{
-if(res.status==="success"){
-localStorage.setItem("user",JSON.stringify(res));
+localStorage.setItem("user",JSON.stringify({nama:"Mr. XYZ",kelas:"Guru"}));
 showKonfirmasi();
-}else alert(res.msg);
-});
 }
 
-/* KONFIRMASI */
+/* HALAMAN KONFIRMASI (SESUAI GAMBAR) */
 function showKonfirmasi(){
 let u=JSON.parse(localStorage.getItem("user"));
+
+userInfo.innerHTML=`${u.nama}<br>${u.kelas}`;
+
 app.innerHTML=`
-<div class="content">
+<div class="center">
+<img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" width="80">
+<h2>Asesmen CBT Informatika</h2>
+<p>Minggu, 3 Mei 2026</p>
+<p>⏱ <span id="jam"></span></p>
+</div>
+
 <div class="card">
-<h3>Konfirmasi Data</h3>
-<p><b>Nama:</b> ${u.nama}</p>
-<p><b>Kelas:</b> ${u.kelas}</p>
+
+<p>Nama : <b>${u.nama}</b></p>
+<p>Kelas : <b>${u.kelas}</b></p>
+<p>Mata Pelajaran : Informatika</p>
+<p>Semester : Genap</p>
+<p>Tahun Pelajaran : 2026 - 2027</p>
+
 <hr>
+
+<b>Informasi Ujian:</b>
 <ul>
-<li>Dilarang keluar tab</li>
-<li>Waktu terbatas</li>
-<li>Jawaban tidak bisa diubah setelah submit</li>
+<li>Jumlah soal: 40</li>
+<li>Pilihan ganda: 35</li>
+<li>Essay: 5</li>
+<li>Durasi: 90 menit</li>
 </ul>
-<button class="btn green" onclick="cekData()">Mulai</button>
-</div></div>`;
+
+<b>Penting:</b>
+<ul>
+<li>Dilarang keluar aplikasi</li>
+<li>Jangan refresh saat ujian</li>
+<li>Kerjakan dengan jujur</li>
+</ul>
+
+<button class="btn orange full" onclick="bukaModal()">Kerjakan Ujian</button>
+
+</div>
+`;
+
+setInterval(()=>{
+let d=new Date();
+jam.innerText=d.toLocaleTimeString();
+},1000);
 }
 
-function cekData(){
-modal("Konfirmasi","Data sudah benar?",[
-{text:"Ya",cls:"green",cb:startExam},
-{text:"Kembali",cls:"red"}
-]);
+/* MODAL */
+function bukaModal(){modal.style.display="flex";}
+function tutupModal(){modal.style.display="none";}
+
+function lanjutUjian(){
+if(!cekData.checked){
+alert("Centang dulu!");
+return;
+}
+modal.style.display="none";
+startExam();
 }
 
-/* START EXAM */
+/* EXAM */
 function startExam(){
-let u=JSON.parse(localStorage.getItem("user"));
-document.querySelector(".header").style.display="flex";
-footer.style.display="flex";
-
-nama.innerText=u.nama;
-kelas.innerText=u.kelas;
-
 fetch(API+"?mode=soal")
 .then(r=>r.json())
 .then(d=>{
-
-let saved=localStorage.getItem("cbt_state");
-
-if(saved){
-state=JSON.parse(saved);
-}else{
+let saved=localStorage.getItem("cbt");
+if(saved){state=JSON.parse(saved);}
+else{
 state.soal=d;
 state.jawaban=new Array(d.length).fill("");
 }
-
 render();
-startTimer(1800);
 });
-}
-
-/* SAVE */
-function saveProgress(){
-localStorage.setItem("cbt_state",JSON.stringify(state));
 }
 
 /* RENDER */
@@ -235,92 +256,49 @@ side+='</div></div>';
 
 let s=state.soal[state.index];
 
-let nextBtn = state.index===state.soal.length-1
-? `<button class="btn green" onclick="confirmSubmit()">Selesai</button>`
-: `<button class="btn red" onclick="next()">Selanjutnya</button>`;
-
-let main=`<div class="content"><div class="card">
+let main=`<div class="content">
 <h3>Soal ${state.index+1}</h3>
 <p>${s.soal}</p>`;
 
-["A","B","C","D"].forEach(o=>{
-main+=`<div>
+["A","B","C","D","E"].forEach(o=>{
+main+=`
+<div>
 <input type="radio" ${state.jawaban[state.index]==o?"checked":""}
-onclick="jawab('${o}')"> ${o}. ${s.pilihan[o]}
+onclick="jawab('${o}')"> ${o}. ${s.pilihan[o]||""}
 </div>`;
 });
 
-main+=`<div class="nav-btn">
-<button class="btn blue" onclick="prev()">Sebelumnya</button>
-${nextBtn}</div></div></div>`;
+main+=`<br>
+<button onclick="prev()">Prev</button>
+<button onclick="next()">Next</button>
+<button onclick="submit()">Selesai</button>
+</div>`;
 
 app.innerHTML=`<div class="wrap">${side}${main}</div>`;
 }
 
 /* NAV */
-function jawab(v){state.jawaban[state.index]=v;saveProgress();render();}
-function next(){if(state.index<state.soal.length-1){state.index++;saveProgress();render();}}
-function prev(){if(state.index>0){state.index--;saveProgress();render();}}
-function goto(i){state.index=i;saveProgress();render();}
+function jawab(v){state.jawaban[state.index]=v;save();}
+function next(){state.index++;save();render();}
+function prev(){state.index--;save();render();}
+function goto(i){state.index=i;save();render();}
 
-/* TIMER */
-function startTimer(s){
-let end=localStorage.getItem("endTime");
-if(!end){
-end=Date.now()+s*1000;
-localStorage.setItem("endTime",end);
-}
-setInterval(()=>{
-let sisa=Math.floor((end-Date.now())/1000);
-if(sisa<=0){submit();return;}
-timer.innerText=Math.floor(sisa/60)+":"+("0"+sisa%60).slice(-2);
-},1000);
-}
+/* SAVE */
+function save(){localStorage.setItem("cbt",JSON.stringify(state));}
 
-/* TAB MONITOR */
+/* ANTI TAB */
 document.addEventListener("visibilitychange",()=>{
 if(document.hidden){
-warningCount++;
-modal("Peringatan","Keluar halaman! ("+warningCount+")",[{text:"OK",cls:"blue"}]);
-if(warningCount>=3){
-modal("Dikeluarkan","Melanggar aturan",[{text:"OK",cls:"red",cb:submit}]);
-}
+warning++;
+if(warning>=3) submit();
 }
 });
 
-/* CONFIRM SUBMIT */
-function confirmSubmit(){
-modal("Konfirmasi","Yakin selesai?",[
-{text:"Ya",cls:"green",cb:submit},
-{text:"Batal",cls:"red"}
-]);
-}
-
-/* HASIL */
+/* SUBMIT */
 function submit(){
-let benar=0;
-state.soal.forEach((s,i)=>{
-if(state.jawaban[i]===s.kunci) benar++;
-});
-let nilai=Math.round((benar/state.soal.length)*100);
-
+alert("Ujian selesai");
 localStorage.clear();
-showHasil(nilai);
-}
-
-function showHasil(nilai){
-document.querySelector(".header").style.display="none";
-footer.style.display="none";
-
-app.innerHTML=`
-<div class="content">
-<div class="card" style="text-align:center">
-<h2>🎉 Selamat!</h2>
-<p>Anda telah menyelesaikan asesmen</p>
-<h1 style="color:#1976d2">${nilai}</h1>
-<p>Nilai Anda</p>
-<button class="btn blue" onclick="location.reload()">Kembali</button>
-</div></div>`;
+location.reload();
 }
 
 /* LOGOUT */
@@ -329,7 +307,11 @@ localStorage.clear();
 location.reload();
 }
 
-/* INIT */
+/* JADWAL */
+function jadwal(){
+alert("Jadwal ujian ditampilkan di sini");
+}
+
 loginUI();
 </script>
 
