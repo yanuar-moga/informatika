@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Dashboard Rekap Tugas</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+  font-family:Arial;
+  background:#f4f6f9;
+  padding:20px;
+}
+
+h2{ margin-bottom:15px; }
+
+.topbar{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:15px;
+  align-items:center;
+}
+
+select,button{
+  padding:8px;
+}
+
+button{
+  background:#0A4FA3;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+button:hover{ background:#083d82; }
+
+.stat{
+  margin:10px 0;
+  font-weight:bold;
+}
+
+.container{
+  display:flex;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+.box{
+  flex:1;
+  min-width:300px;
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  box-shadow:0 5px 15px rgba(0,0,0,.1);
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+}
+
+th,td{
+  border:1px solid #ddd;
+  padding:6px;
+  text-align:left;
+}
+
+th{
+  background:#f0f0f0;
+}
+
+.sudah{ color:green; }
+.belum{ color:red; }
+
+canvas{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  box-shadow:0 5px 15px rgba(0,0,0,.1);
+  margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>📊 Dashboard Rekap Pengumpulan Tugas</h2>
+
+<div class="topbar">
+  <select id="filterKelas">
+    <option value="ALL">Semua Kelas</option>
+  </select>
+
+  <button onclick="renderData()">Tampilkan</button>
+
+  <select id="filterJudul">
+    <option value="ALL">Semua Judul Tugas</option>
+  </select>
+
+  <button onclick="renderPerJudul()">📄 Tampilkan per Judul</button>
+</div>
+
+<div class="stat" id="statistik">Memuat data...</div>
+
+<div class="container">
+  <div class="box">
+    <h3 class="sudah">🟢 Sudah Mengirim</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama Siswa</th>
+          <th>Link</th>
+        </tr>
+      </thead>
+      <tbody id="sudahList"></tbody>
+    </table>
+  </div>
+
+  <div class="box">
+    <h3 class="belum">🔴 Belum Mengirim</h3>
+    <ul id="belumList"></ul>
+  </div>
+</div>
+
+<div id="rekapJudul" style="margin-top:30px;"></div>
+
+<canvas id="chartBar" height="120"></canvas>
+
+<script>
+
+const url="https://script.google.com/macros/s/AKfycbxFwHKhNImDiPSNA9OJ4Op6yV7cym8z-iR9I28d60_58EtgIPy8ZqW6K6rQAfpfcufY/exec";
+
+let semuaSiswa=[];
+let semuaTugas=[];
+let chart;
+
+/* LOAD DATA */
+Promise.all([
+  fetch(url+"?action=getDataSiswa").then(r=>r.json()),
+  fetch(url+"?action=getDataTugas").then(r=>r.json())
+])
+.then(([siswa,tugas])=>{
+  semuaSiswa=siswa || [];
+  semuaTugas=tugas || [];
+  initFilter();
+})
+.catch(()=>{
+  document.getElementById("statistik").innerHTML="Gagal mengambil data";
+});
+
+
+function initFilter(){
+
+  const kelasSelect=document.getElementById("filterKelas");
+  const judulSelect=document.getElementById("filterJudul");
+
+  [...new Set(semuaSiswa.map(s=>s.rombel))]
+  .filter(Boolean)
+  .sort()
+  .forEach(r=>{
+    kelasSelect.innerHTML+=`<option value="${r}">${r}</option>`;
+  });
+
+  [...new Set(semuaTugas.map(t=>t.judul))]
+  .filter(Boolean)
+  .sort()
+  .forEach(j=>{
+    judulSelect.innerHTML+=`<option value="${j}">${j}</option>`;
+  });
+}
+
+
+/* FILTER & TAMPILKAN DATA */
+function renderPerJudul(){
+
+  const kelas=document.getElementById("filterKelas").value;
+  const judul=document.getElementById("filterJudul").value;
+
+  if(kelas==="ALL"){
+    alert("Silakan pilih kelas terlebih dahulu!");
+    return;
+  }
+
+  if(judul==="ALL"){
+    alert("Pilih salah satu judul tugas terlebih dahulu!");
+    return;
+  }
+
+  // Ambil daftar siswa sesuai kelas
+  const siswaKelas=semuaSiswa.filter(s=>s.rombel===kelas);
+
+  // Ambil data tugas berdasarkan kolom kelas & judul
+  const tugasFilter=semuaTugas.filter(t=>
+    t.kelas===kelas && t.judul===judul
+  );
+
+  const total=siswaKelas.length;
+  const sudah=tugasFilter.length;
+  const sudahNama=tugasFilter.map(t=>t.nama);
+
+  const belum=siswaKelas.filter(s=>!sudahNama.includes(s.nama));
+
+  const persen=total?Math.round((sudah/total)*100):0;
+
+  // =====================
+  // TABEL SUDAH MENGIRIM
+  // =====================
+  document.getElementById("sudahList").innerHTML=
+    tugasFilter.map((t,i)=>`
+      <tr>
+        <td>${i+1}</td>
+        <td>${t.nama}</td>
+        <td><a href="${t.link}" target="_blank">Buka</a></td>
+      </tr>
+    `).join("");
+
+  // =====================
+  // LIST BELUM MENGIRIM
+  // =====================
+  document.getElementById("belumList").innerHTML=
+    belum.map(s=>`<li>${s.nama}</li>`).join("");
+
+  // =====================
+  // STATISTIK
+  // =====================
+  document.getElementById("statistik").innerHTML=
+    `Kelas: ${kelas} | Judul: ${judul} | Total: ${total} | Sudah: ${sudah} | Belum: ${belum.length}`;
+
+  renderChart(sudah,belum.length);
+}
+
+
+/* CHART */
+function renderChart(jumlahSudah,jumlahBelum){
+
+  const ctx=document.getElementById("chartBar").getContext("2d");
+
+  if(chart) chart.destroy();
+
+  chart=new Chart(ctx,{
+    type:"bar",
+    data:{
+      labels:["Sudah","Belum"],
+      datasets:[{
+        label:"Jumlah Siswa",
+        data:[jumlahSudah,jumlahBelum],
+        backgroundColor:["green","red"]
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{ legend:{ display:false } }
+    }
+  });
+}
+
+</script>
+
+</body>
+</html>
