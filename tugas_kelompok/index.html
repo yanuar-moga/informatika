@@ -28,11 +28,6 @@ body{
   text-align:center;
 }
 
-.logo{
-  width:80px;
-  margin-bottom:10px;
-}
-
 .title{
   margin:6px 0 18px;
   color:#0A4FA3;
@@ -86,28 +81,17 @@ textarea{
 .btn-primary:hover{
   background:#083d82;
 }
-
-.btn-primary:disabled{
-  background:#7a9bc7;
-  cursor:not-allowed;
-}
-
-.footer{
-  margin-top:18px;
-  font-size:12px;
-  color:#777;
-}
 </style>
 </head>
 
 <body>
 
 <div class="card">
-  <img src="assets/logo.png" class="logo" alt="Logo">
   <h1 class="title">Form Pengumpulan Tugas</h1>
 
   <form id="formTugas" class="form">
 
+    <!-- KELAS -->
     <div class="field">
       <span class="label-text">Kelas</span>
       <select id="kelas" required>
@@ -124,27 +108,27 @@ textarea{
       </select>
     </div>
 
+    <!-- NAMA KELOMPOK -->
     <div class="field">
-      <span class="label-text">Nama Lengkap</span>
-      <select id="nama" required disabled>
-        <option value="">Memuat data...</option>
+      <span class="label-text">Nama (Kelompok)</span>
+      <input type="text" id="nama" class="input-field" placeholder="Contoh: Kelompok 1 / Nama Anggota" required>
+    </div>
+
+    <!-- JUDUL -->
+    <div class="field">
+      <span class="label-text">Judul Tugas</span>
+      <select id="judul" required>
+        <option value="Tugas Kolaborasi Video SPMB">Tugas Kolaborasi Video SPMB</option>
       </select>
     </div>
 
-<div class="field">
-  <span class="label-text">Judul Tugas</span>
-  <select id="judul" class="input-field" required>
-    <option value="" disabled selected>-- Pilih Judul Tugas --</option>
-    <option value="GAME JUMPING SCRATCH">GAME JUMPING SCRATCH</option>
-    <option value="MEMBUAT GAME MANDIRI">MEMBUAT GAME MANDIRI</option>
-  </select>
-</div>
-
+    <!-- LINK -->
     <div class="field">
       <span class="label-text">Link Tugas</span>
       <input id="link" type="url" class="input-field" required>
     </div>
 
+    <!-- CATATAN -->
     <div class="field">
       <span class="label-text">Catatan</span>
       <textarea id="catatan"></textarea>
@@ -155,83 +139,24 @@ textarea{
     </button>
 
   </form>
-
-  <div class="footer">© 2026 Informatika</div>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function(){
-
 const url="https://script.google.com/macros/s/AKfycbw7UWmQGgF-yBoN6wWnZmlGkSB1qfUZGF_BtD9bnRINz766P846T1MOiXd83FKGZsYQ/exec";
 
-let semuaSiswa=[];
-
-const kelasSelect=document.getElementById("kelas");
-const namaSelect=document.getElementById("nama");
 const formTugas=document.getElementById("formTugas");
 const btn=document.getElementById("btnKirim");
-const judul=document.getElementById("judul");
-const link=document.getElementById("link");
-const catatan=document.getElementById("catatan");
 
-/* Disable sampai data siap */
-kelasSelect.disabled=true;
-namaSelect.disabled=true;
-namaSelect.innerHTML='<option value="">Memuat data...</option>';
-
-/* Load data siswa */
-fetch(url+"?action=getDataSiswa")
-.then(res=>res.json())
-.then(data=>{
-  semuaSiswa=data || [];
-  kelasSelect.disabled=false;
-  namaSelect.innerHTML='<option value="">Pilih Kelas Dulu</option>';
-})
-.catch(()=>{
-  namaSelect.innerHTML='<option value="">Gagal memuat data</option>';
-});
-
-/* FILTER SESUAI DATA JSON (KELAS FULL CAPS) */
-kelasSelect.addEventListener("change",function(){
-
-  const kelasDipilih=this.value;
-
-  if(!kelasDipilih){
-    namaSelect.innerHTML='<option value="">Pilih Kelas Dulu</option>';
-    namaSelect.disabled=true;
-    return;
-  }
-
-  const kelasFix=kelasDipilih.trim().toUpperCase();
-
-  const siswaFilter=semuaSiswa.filter(s=>
-    s.rombel && s.rombel.trim().toUpperCase()===kelasFix
-  );
-
-  if(siswaFilter.length===0){
-    namaSelect.innerHTML='<option value="">Tidak ada data</option>';
-    namaSelect.disabled=true;
-    return;
-  }
-
-  namaSelect.innerHTML='<option value="">Pilih Nama</option>';
-  namaSelect.disabled=false;
-
-  siswaFilter.forEach(s=>{
-    const opt=document.createElement("option");
-    opt.value=s.nama;
-    opt.textContent=s.nama;
-    namaSelect.appendChild(opt);
-  });
-
-});
-
-/* SUBMIT */
 formTugas.addEventListener("submit",function(e){
-
   e.preventDefault();
 
-  if(!kelasSelect.value || !namaSelect.value || !judul.value || !link.value){
+  const kelas=document.getElementById("kelas").value;
+  const nama=document.getElementById("nama").value;
+  const judul=document.getElementById("judul").value;
+  const link=document.getElementById("link").value;
+  const catatan=document.getElementById("catatan").value;
+
+  if(!kelas || !nama || !judul || !link){
     alert("Semua field wajib diisi!");
     return;
   }
@@ -241,11 +166,11 @@ formTugas.addEventListener("submit",function(e){
 
   const fd=new URLSearchParams();
   fd.append("action","submitTugas");
-  fd.append("kelas",kelasSelect.value);
-  fd.append("nama",namaSelect.value);
-  fd.append("judul",judul.value);
-  fd.append("link",link.value);
-  fd.append("catatan",catatan.value);
+  fd.append("kelas",kelas);
+  fd.append("nama",nama);
+  fd.append("judul",judul);
+  fd.append("link",link);
+  fd.append("catatan",catatan);
 
   fetch(url,{
     method:"POST",
@@ -256,8 +181,6 @@ formTugas.addEventListener("submit",function(e){
     if(res.status==="success"){
       alert("Tugas berhasil dikirim!");
       formTugas.reset();
-      namaSelect.innerHTML='<option value="">Pilih Kelas Dulu</option>';
-      namaSelect.disabled=true;
     }else{
       alert("Gagal mengirim");
     }
@@ -270,8 +193,6 @@ formTugas.addEventListener("submit",function(e){
     btn.disabled=false;
     btn.innerText="Kirim Tugas";
   });
-
-});
 
 });
 </script>
