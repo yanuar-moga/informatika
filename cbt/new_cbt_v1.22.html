@@ -17,7 +17,6 @@ body{
   margin:0;
   font-family:Arial;
   background:#b0bec5;
-
   display:flex;
   flex-direction:column;
   min-height:100vh;
@@ -33,35 +32,21 @@ body{
 .wrap{display:flex;height:calc(100vh - 90px);}
 
 .sidebar{
-  width:120px;
-  background:#fff;
-  padding:10px;
-  overflow:auto;
+  width:120px;background:#fff;padding:10px;overflow:auto;
 }
 
 .grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:6px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:6px;
 }
 
 .num{
-  padding:8px;
-  background:#ddd;
-  text-align:center;
-  border-radius:6px;
-  cursor:pointer;
-  font-size:12px;
+  padding:8px;background:#ddd;text-align:center;border-radius:6px;cursor:pointer;font-size:12px;
 }
 
 .num.active{background:var(--blue);color:#fff}
 .num.done{background:#4caf50;color:#fff}
 
-.content{
-  flex:1;
-  padding:12px;
-  overflow:auto;
-}
+.content{flex:1;padding:12px;overflow:auto;}
 
 .card{
   background:#e0e0e0;
@@ -71,128 +56,52 @@ body{
   margin:20px auto;
 }
 
-.card p{margin:4px 0;}
-.card ul{margin:5px 0 10px 18px;}
+.nav-btn{display:flex;justify-content:space-between;margin-top:15px;}
 
-.nav-btn{
-  display:flex;
-  justify-content:space-between;
-  margin-top:15px;
-}
-
-.btn{
-  padding:10px 15px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-  font-size:14px;
-}
-
+.btn{padding:10px 15px;border:none;border-radius:8px;cursor:pointer;font-size:14px;}
 .blue{background:var(--blue);color:#fff}
 .red{background:var(--red);color:#fff}
 .green{background:var(--green);color:#fff}
 .orange{background:var(--orange);color:#fff}
 
 .footer{
-  height:40px;
-  background:#1976d2;
-  color:#fff;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  font-size:12px;
+  height:40px;background:#1976d2;color:#fff;
+  display:none;align-items:center;justify-content:center;font-size:12px;
 }
 
-/* LOGIN ASLI */
+/* LOGIN */
 .login-container{
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:15px;
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:15px;
 }
-
 .login-box{
-  width:100%;
-  max-width:420px;
-  background:#fff;
-  padding:25px;
-  border-radius:20px;
+  width:100%;max-width:420px;background:#fff;padding:25px;border-radius:20px;
   box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
-
 .form-group{
-  display:grid;
-  grid-template-columns:100px 1fr;
-  gap:10px;
-  margin-bottom:10px;
-  align-items:center;
+  display:grid;grid-template-columns:100px 1fr;gap:10px;margin-bottom:10px;align-items:center;
 }
-
 .form-group input,.form-group select{
-  padding:8px;
-  border-radius:6px;
-  border:1px solid #ccc;
+  padding:8px;border-radius:6px;border:1px solid #ccc;
 }
 
 /* MODAL */
 .modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.5);
-  display:none;
-  align-items:center;
-  justify-content:center;
+  position:fixed;inset:0;background:rgba(0,0,0,.5);
+  display:none;align-items:center;justify-content:center;
 }
-
 .box{
-  background:#fff;
-  padding:20px;
-  border-radius:12px;
-  width:90%;
-  max-width:350px;
-  text-align:center;
+  background:#fff;padding:20px;border-radius:12px;width:90%;max-width:350px;text-align:center;
 }
 
-/* 🔥 RESPONSIVE MOBILE */
+/* 🔥 RESPONSIVE */
 @media(max-width:768px){
-
-  .wrap{
-    flex-direction:column;
-    height:auto;
-  }
-
-  .sidebar{
-    width:100%;
-    padding:8px;
-  }
-
-  .grid{
-    grid-template-columns:repeat(5,1fr);
-  }
-
-  .num{
-    padding:10px;
-    font-size:13px;
-  }
-
-  .content{
-    padding:8px;
-  }
-
-  .card{
-    margin:10px 5px;
-    padding:12px;
-  }
-
-  .nav-btn{
-    flex-direction:column;
-    gap:8px;
-  }
-
-  .btn{
-    width:100%;
-  }
+  .wrap{flex-direction:column;height:auto;}
+  .sidebar{width:100%;}
+  .grid{grid-template-columns:repeat(5,1fr);}
+  .num{padding:10px;font-size:13px;}
+  .nav-btn{flex-direction:column;gap:8px;}
+  .btn{width:100%;}
+  .card{margin:10px 5px;}
 }
 </style>
 </head>
@@ -241,49 +150,98 @@ modalBox.style.display="flex";
 }
 function modalHide(){modalBox.style.display="none";}
 
-/* TOGGLE PASSWORD */
-function togglePass(){
-let p=document.getElementById("password");
-p.type=(p.type==="password")?"text":"password";
-}
+/* LOGIN UI */
+function loginUI(){
+app.innerHTML=`<div class="login-container"><div class="login-box">
+<h2 style="text-align:center">CBT Informatika</h2>
+<div class="form-group"><label>Kelas</label><select id="kelasSelect"></select></div>
+<div class="form-group"><label>Username</label><select id="username"></select></div>
+<div class="form-group"><label>Password</label><input type="password" id="password"></div>
+<div class="form-group"><label>Token</label><input id="token"></div>
+<button class="btn blue" onclick="login()">Masuk</button>
+</div></div>`;
 
-/* LOGIN, INIT, dll TIDAK DIUBAH */
-
-/* START EXAM */
-function startExam(){
-localStorage.setItem("layer","soal");
-
-fetch(API+"?mode=soal")
-.then(r=>r.json())
-.then(d=>{
-let saved=localStorage.getItem("cbt_state");
-if(saved){state=JSON.parse(saved);}
-else{
-state.soal=d;
-state.jawaban=new Array(d.length).fill("");
-}
-render();
-startTimer(1800);
-
-/* 🔥 TAMBAHAN FOOTER */
-document.getElementById("footer").style.display="flex";
-
+fetch(API).then(r=>r.json()).then(d=>{
+dataSiswa=d;
+let k=[...new Set(d.map(x=>x.kelas))];
+kelasSelect.innerHTML='<option>-- Pilih Kelas --</option>';
+k.forEach(x=>kelasSelect.innerHTML+=`<option>${x}</option>`);
+kelasSelect.onchange=loadUser;
 });
 }
 
-/* 🔥 RENDER (SUDAH RESPONSIVE) */
+function loadUser(){
+let k=kelasSelect.value;
+username.innerHTML='<option>-- Pilih --</option>';
+dataSiswa.filter(x=>x.kelas==k)
+.forEach(s=>{
+username.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
+});
+}
+
+function login(){
+let user=username.value;
+let pass=password.value;
+let token=document.getElementById("token").value;
+
+fetch(API,{
+method:"POST",
+body:JSON.stringify({mode:"login",username:user,password:pass,token})
+})
+.then(r=>r.json())
+.then(res=>{
+if(res.status==="success"){
+localStorage.setItem("user",JSON.stringify(res));
+localStorage.setItem("layer","konfirmasi");
+showKonfirmasi();
+}else alert(res.msg);
+});
+}
+
+/* INIT */
+function init(){
+let user=localStorage.getItem("user");
+if(!user){loginUI();return;}
+document.querySelector(".header").style.display="flex";
+footer.style.display="flex";
+startExam();
+}
+
+/* START EXAM */
+function startExam(){
+fetch(API+"?mode=soal")
+.then(r=>r.json())
+.then(d=>{
+state.soal=d;
+state.jawaban=new Array(d.length).fill("");
+render();
+startTimer(1800);
+footer.style.display="flex";
+});
+}
+
+/* TIMER */
+function startTimer(duration){
+let end=Date.now()+duration*1000;
+function update(){
+let sisa=Math.floor((end-Date.now())/1000);
+if(sisa<=0){submit();return;}
+timer.innerText=Math.floor(sisa/60)+":"+("0"+sisa%60).slice(-2);
+requestAnimationFrame(update);
+}
+update();
+}
+
+/* 🔥 RENDER RESPONSIVE */
 function render(){
-
-let side=`<div class="sidebar"><div class="grid">`;
-
+let side='<div class="sidebar"><div class="grid">';
 state.soal.forEach((s,i)=>{
 let c="num";
 if(i===state.index)c+=" active";
 if(state.jawaban[i])c+=" done";
 side+=`<div class="${c}" onclick="goto(${i})">${i+1}</div>`;
 });
-
-side+=`</div></div>`;
+side+='</div></div>';
 
 let s=state.soal[state.index];
 
@@ -298,22 +256,40 @@ main+=`
 ${state.jawaban[state.index]==o?"checked":""}
 onclick="jawab('${o}')">
 ${o}. ${s.pilihan[o]||""}
-</label>
-`;
+</label>`;
 });
 
-main+=`
-<div class="nav-btn">
+main+=`<div class="nav-btn">
 <button class="btn blue" onclick="prev()">Sebelumnya</button>
 <button class="btn red" onclick="next()">Selanjutnya</button>
-<button class="btn green" onclick="popupSubmit()">Selesai</button>
-</div>
-</div></div>`;
+<button class="btn green" onclick="submit()">Selesai</button>
+</div></div></div>`;
 
 app.innerHTML=`<div class="wrap">${side}${main}</div>`;
 }
 
-/* SISANYA TETAP */
+/* NAV */
+function jawab(v){state.jawaban[state.index]=v;}
+function next(){if(state.index<state.soal.length-1){state.index++;render();}}
+function prev(){if(state.index>0){state.index--;render();}}
+function goto(i){state.index=i;render();}
+
+/* SUBMIT */
+function submit(){
+app.innerHTML=`<div class="card" style="text-align:center">
+<h2>Selesai</h2>
+<h1>Skor Anda: 85</h1>
+<button class="btn red" onclick="keluar()">Keluar</button>
+</div>`;
+}
+
+/* LOGOUT */
+function keluar(){
+localStorage.clear();
+location.reload();
+}
+
+init();
 </script>
 
 </body>
