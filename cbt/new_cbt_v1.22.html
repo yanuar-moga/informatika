@@ -1,103 +1,236 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta charset="UTF-8">
-<title>CBT SMPN 1 MOGA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>CBT SMPN 1 MOGA - Profesional</title>
 
-<style>
-:root{
-  --blue:#1976d2;
-  --red:#d32f2f;
-  --green:#4caf50;
-  --orange:#ff5722;
-}
+    <style>
+        :root {
+            --primary: #2f5597;
+            --accent: #ffc107;
+            --success: #28a745;
+            --danger: #dc3545;
+            --bg: #f4f7f9;
+            --text: #333;
+        }
 
-body{margin:0;font-family:Arial;background:#b0bec5;}
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+        }
 
-.header{
-  background:#2f5597;color:#fff;padding:10px;
-  display:none;justify-content:space-between;align-items:center;font-size:13px;
-}
+        /* HEADER */
+        .header {
+            background: var(--primary);
+            color: #fff;
+            padding: 0 20px;
+            height: 60px;
+            display: none; /* Akan diubah ke flex via JS */
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
+            position: relative;
+        }
 
-.wrap{display:flex;height:calc(100vh - 90px);}
-.sidebar{width:120px;background:#fff;padding:10px;overflow:auto;}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+        .timer-box {
+            background: rgba(0,0,0,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 1.2rem;
+        }
 
-.num{padding:8px;background:#ddd;text-align:center;border-radius:6px;cursor:pointer;font-size:12px;}
-.num.active{background:var(--blue);color:#fff}
-.num.done{background:#4caf50;color:#fff}
+        /* LAYOUT UTAMA */
+        .wrap {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
 
-.content{flex:1;padding:12px;overflow:auto;}
+        /* KONTEN SOAL */
+        .content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-.card{
-  background:#e0e0e0;
-  padding:15px;
-  border-radius:12px;
-  max-width:650px;
-  margin:20px auto;
-}
-.card p{margin:4px 0;}
-.card ul{margin:5px 0 10px 18px;}
+        .card-soal {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
 
-.nav-btn{display:flex;justify-content:space-between;margin-top:15px;}
+        .nomor-soal {
+            font-weight: bold;
+            font-size: 1.1rem;
+            border-bottom: 2px solid var(--bg);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
 
-.btn{padding:10px 15px;border:none;border-radius:8px;cursor:pointer;font-size:14px;}
-.blue{background:var(--blue);color:#fff}
-.red{background:var(--red);color:#fff}
-.green{background:var(--green);color:#fff}
-.orange{background:var(--orange);color:#fff}
+        .teks-soal {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
 
-.footer{
-  height:40px;background:#1976d2;color:#fff;
-  display:none;align-items:center;justify-content:center;font-size:12px;
-}
+        /* PILIHAN JAWABAN */
+        .opsi-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
 
-/* LOGIN ASLI (TIDAK DIUBAH) */
-.login-container{
-  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:15px;
-}
-.login-box{
-  width:100%;max-width:420px;background:#fff;padding:25px;border-radius:20px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.2);
-}
-.form-group{
-  display:grid;grid-template-columns:100px 1fr;gap:10px;margin-bottom:10px;align-items:center;
-}
-.form-group input,.form-group select{
-  padding:8px;border-radius:6px;border:1px solid #ccc;
-}
+        .opsi-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
 
-/* MODAL */
-.modal{
-  position:fixed;inset:0;background:rgba(0,0,0,.5);
-  display:none;align-items:center;justify-content:center;
-}
-.box{
-  background:#fff;padding:20px;border-radius:12px;width:90%;max-width:350px;text-align:center;
-}
-</style>
+        .opsi-item:hover {
+            background: #f0f4ff;
+            border-color: var(--primary);
+        }
+
+        .opsi-item input {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        .opsi-item.selected {
+            background: #e8f0fe;
+            border-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .huruf-opsi {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        /* SIDEBAR NAVIGASI */
+        .sidebar {
+            width: 300px;
+            background: #fff;
+            border-left: 1px solid #ddd;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .grid-nomor {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            overflow-y: auto;
+        }
+
+        .num {
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .num.active { border: 2px solid var(--primary); color: var(--primary); }
+        .num.done { background: var(--success); color: #fff; border-color: var(--success); }
+
+        /* TOMBOL NAVIGASI */
+        .nav-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: opacity 0.2s;
+        }
+
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .blue { background: var(--primary); color: #fff; }
+        .yellow { background: var(--accent); color: #000; }
+        .green { background: var(--success); color: #fff; }
+        .red { background: var(--danger); color: #fff; }
+
+        /* MODAL & LOGIN (Tetap Fungsional) */
+        .modal { position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:100; }
+        .box { background:#fff; padding:25px; border-radius:8px; width:90%; max-width:400px; text-align:center; }
+        
+        .login-container { min-height:100vh; display:flex; align-items:center; justify-content:center; background: linear-gradient(135deg, #2f5597 0%, #1976d2 100%); }
+        .login-box { width:100%; max-width:400px; background:#fff; padding:40px; border-radius:12px; box-shadow:0 15px 35px rgba(0,0,0,0.3); }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.85rem; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+
+        @media (max-width: 768px) {
+            .wrap { flex-direction: column; overflow-y: auto; }
+            .sidebar { width: 100%; order: 2; height: auto; border-left: none; border-top: 1px solid #ddd; }
+            .content { order: 1; padding: 15px; }
+            .header { font-size: 12px; }
+        }
+    </style>
 </head>
 
 <body>
 
 <div class="header">
-<div><b id="nama"></b> | <span id="kelas"></span></div>
-<div>⏱ <span id="timer"></span> |
-<button onclick="keluar()" style="background:#fff;border:none;padding:5px;border-radius:5px">Keluar</button>
-</div>
+    <div id="info-siswa">
+        <strong id="nama"></strong><br>
+        <span id="kelas" style="opacity: 0.8; font-size: 0.8rem;"></span>
+    </div>
+    <div class="timer-box" id="timer">00:00</div>
+    <button onclick="keluar()" class="btn red" style="padding: 5px 10px; font-size: 0.7rem;">KELUAR</button>
 </div>
 
 <div id="app"></div>
 
-<div class="footer" id="footer">CBT Browser Apps by MB © 2026</div>
-
 <div id="modalBox" class="modal">
-<div class="box">
-<h3 id="mTitle"></h3>
-<div id="mMsg"></div>
-<div id="mAct"></div>
-</div>
+    <div class="box">
+        <h3 id="mTitle"></h3>
+        <div id="mMsg" style="margin: 15px 0;"></div>
+        <div id="mAct" style="display:flex; justify-content: center; gap: 10px;"></div>
+    </div>
 </div>
 
 <script>
@@ -107,330 +240,270 @@ let dataSiswa=[];
 let state={soal:[],index:0,jawaban:[]};
 let warning=0;
 
-/* MODAL */
+/* MODAL CONTROL */
 function modal(t,m,btns){
-mAct.innerHTML="";
-mTitle.innerText=t;
-mMsg.innerHTML=m;
-btns.forEach(b=>{
-let x=document.createElement("button");
-x.className="btn "+b.cls;
-x.innerText=b.text;
-x.onclick=()=>{modalHide(); if(b.cb)b.cb();};
-mAct.appendChild(x);
-});
-modalBox.style.display="flex";
+    mAct.innerHTML="";
+    mTitle.innerText=t;
+    mMsg.innerHTML=m;
+    btns.forEach(b=>{
+        let x=document.createElement("button");
+        x.className="btn "+b.cls;
+        x.innerText=b.text;
+        x.onclick=()=>{modalHide(); if(b.cb)b.cb();};
+        mAct.appendChild(x);
+    });
+    modalBox.style.display="flex";
 }
 function modalHide(){modalBox.style.display="none";}
 
-/* TOGGLE PASSWORD */
-function togglePass(){
-let p=document.getElementById("password");
-p.type=(p.type==="password")?"text":"password";
-}
-
-/* JADWAL */
-function jadwal(){
-modal("Jadwal & Token",`
-<table style="width:100%;font-size:13px">
-<tr><th>Hari</th><th>Mapel</th><th>Jam</th><th>Token</th></tr>
-<tr><td>Senin</td><td>Informatika</td><td>08.00</td><td><b>ABC123</b></td></tr>
-</table>
-`,[{text:"Tutup",cls:"blue"}]);
-}
-
-/* LOGIN UI (ASLI 100%) */
+/* UI LOGIN */
 function loginUI(){
-app.innerHTML=`
-<div class="login-container">
-<div class="login-box">
+    app.innerHTML=`
+    <div class="login-container">
+        <div class="login-box">
+            <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" style="width:70px;display:block;margin:0 auto 20px">
+            <h2 style="text-align:center; color:var(--primary); margin-bottom:30px">CBT ASESMEN</h2>
+            <div class="form-group">
+                <label>PILIH KELAS</label>
+                <select id="kelasSelect"><option>Memuat kelas...</option></select>
+            </div>
+            <div class="form-group">
+                <label>NAMA SISWA</label>
+                <select id="username"><option>-- Pilih Nama --</option></select>
+            </div>
+            <div class="form-group">
+                <label>PASSWORD</label>
+                <input type="password" id="password" placeholder="Masukkan Password">
+            </div>
+            <div class="form-group">
+                <label>TOKEN</label>
+                <input id="token" style="text-transform: uppercase; font-weight:bold; letter-spacing:2px">
+            </div>
+            <button class="btn blue" style="width:100%; margin-top:10px" onclick="login()">MASUK UJIAN</button>
+            <p style="text-align:center; font-size:11px; color:#999; margin-top:20px">© 2026 SMPN 1 MOGA. All Rights Reserved.</p>
+        </div>
+    </div>`;
 
-<img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" 
-style="width:80px;display:block;margin:auto">
-
-<h2 style="text-align:center;color:#1e4f8a">
-CBT Asesmen<br>Informatika
-</h2>
-
-<div class="form-group">
-<label>Kelas</label>
-<select id="kelasSelect"></select>
-</div>
-
-<div class="form-group">
-<label>Username</label>
-<select id="username"></select>
-</div>
-
-<div class="form-group">
-<label>Password</label>
-<input type="password" id="password">
-</div>
-
-<div class="form-group">
-<label></label>
-<div>
-<input type="checkbox" onclick="togglePass()"> Tampilkan Password
-</div>
-</div>
-
-<div class="form-group">
-<label>Token</label>
-<input id="token">
-</div>
-
-<div style="display:flex;flex-direction:column;gap:10px">
-<button class="btn blue" onclick="login()">Masuk</button>
-<button class="btn red" onclick="jadwal()">Jadwal</button>
-
-<div style="height:20px"></div>
-
-<div style="text-align:center;font-size:12px;color:#555">
-CBT Browser Apps by MB<br>
-© 2026 MB All Rights Reserved
-</div>
-
-</div>
-</div>
-</div>`;
-
-fetch(API).then(r=>r.json()).then(d=>{
-dataSiswa=d;
-let k=[...new Set(d.map(x=>x.kelas))];
-kelasSelect.innerHTML='<option>-- Pilih Kelas --</option>';
-k.forEach(x=>kelasSelect.innerHTML+=`<option>${x}</option>`);
-kelasSelect.onchange=loadUser;
-});
+    fetch(API).then(r=>r.json()).then(d=>{
+        dataSiswa=d;
+        let k=[...new Set(d.map(x=>x.kelas))];
+        let sel = document.getElementById('kelasSelect');
+        sel.innerHTML='<option>-- Pilih Kelas --</option>';
+        k.forEach(x=>sel.innerHTML+=`<option>${x}</option>`);
+        sel.onchange=loadUser;
+    });
 }
 
-/* LOAD USER */
 function loadUser(){
-let k=kelasSelect.value;
-username.innerHTML='<option>-- Pilih --</option>';
-dataSiswa.filter(x=>x.kelas==k)
-.forEach(s=>{
-username.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
-});
+    let k=document.getElementById('kelasSelect').value;
+    let un = document.getElementById('username');
+    un.innerHTML='<option>-- Pilih Nama --</option>';
+    dataSiswa.filter(x=>x.kelas==k).forEach(s=>{
+        un.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
+    });
 }
 
-/* LOGIN */
 function login(){
-let user=username.value;
-let pass=password.value;
-let token=document.getElementById("token").value;
+    let user=document.getElementById('username').value;
+    let pass=document.getElementById('password').value;
+    let token=document.getElementById('token').value;
 
-fetch(API,{
-method:"POST",
-body:JSON.stringify({mode:"login",username:user,password:pass,token})
-})
-.then(r=>r.json())
-.then(res=>{
-if(res.status==="success"){
-localStorage.setItem("user",JSON.stringify(res));
-localStorage.setItem("layer","konfirmasi");
-showKonfirmasi();
-}else alert(res.msg);
-});
+    if(!user || !pass || !token) return alert("Lengkapi data!");
+
+    fetch(API,{
+        method:"POST",
+        body:JSON.stringify({mode:"login",username:user,password:pass,token})
+    })
+    .then(r=>r.json())
+    .then(res=>{
+        if(res.status==="success"){
+            localStorage.setItem("user",JSON.stringify(res));
+            localStorage.setItem("layer","konfirmasi");
+            init();
+        }else alert(res.msg);
+    });
 }
 
-/* INIT */
-function init(){
-let user=localStorage.getItem("user");
-let layer=localStorage.getItem("layer");
-
-if(!user){loginUI();return;}
-
-let u=JSON.parse(user);
-document.querySelector(".header").style.display="flex";
-footer.style.display="flex";
-nama.innerText=u.nama;
-kelas.innerText=u.kelas;
-
-if(layer==="soal") startExam();
-else if(layer==="hasil") showHasil();
-else showKonfirmasi();
-}
-
-/* KONFIRMASI */
+/* DASHBOARD / KONFIRMASI */
 function showKonfirmasi(){
-let u=JSON.parse(localStorage.getItem("user"));
-
-app.innerHTML=`
-<div style="text-align:center;margin-top:20px">
-<img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" width="80">
-<h2>Asesmen CBT Informatika</h2>
-<p>⏱ <span id="jam"></span></p>
-</div>
-
-<div class="card">
-<p>Nama : <b>${u.nama}</b></p>
-<p>Kelas : <b>${u.kelas}</b></p>
-<p>Mata Pelajaran : Informatika</p>
-<p>Semester : Genap</p>
-<p>Tahun Pelajaran : 2026 - 2027</p>
-
-<hr>
-
-<b>Informasi Ujian:</b>
-<ul>
-<li>Jumlah soal: 40</li>
-<li>Pilihan ganda: 35</li>
-<li>Essay: 5</li>
-<li>Durasi: 90 menit</li>
-</ul>
-
-<b>Penting:</b>
-<ul>
-<li>Dilarang keluar aplikasi</li>
-<li>Jangan refresh saat ujian</li>
-<li>Kerjakan dengan jujur</li>
-</ul>
-
-<button class="btn orange" style="width:100%" onclick="popupData()">Kerjakan Ujian</button>
-</div>
-`;
-
-setInterval(()=>{jam.innerText=new Date().toLocaleTimeString();},1000);
+    let u=JSON.parse(localStorage.getItem("user"));
+    app.innerHTML=`
+    <div style="max-width:600px; margin:40px auto; background:#fff; padding:30px; border-radius:8px; box-shadow:0 5px 15px rgba(0,0,0,0.1)">
+        <h3 style="border-bottom:2px solid #eee; padding-bottom:10px">Konfirmasi Peserta</h3>
+        <table style="width:100%; line-height:2.5">
+            <tr><td>Nama Peserta</td><td>: <strong>${u.nama}</strong></td></tr>
+            <tr><td>Kelas</td><td>: ${u.kelas}</td></tr>
+            <tr><td>Mata Pelajaran</td><td>: Informatika</td></tr>
+            <tr><td>Durasi</td><td>: 90 Menit</td></tr>
+        </table>
+        <div style="background:#fff3cd; padding:15px; border-radius:5px; margin-top:20px; font-size:0.9rem">
+            Pastikan koneksi internet stabil. Dilarang menutup jendela ujian sebelum selesai.
+        </div>
+        <button class="btn green" style="width:100%; margin-top:20px; font-size:1.1rem" onclick="startExam()">MULAI KERJAKAN</button>
+    </div>`;
 }
 
-/* POPUP KONFIRMASI */
-function popupData(){
-modal("Konfirmasi Data",`
-<p>Pastikan data benar</p>
-<div style="text-align:left">
-<input type="checkbox" id="cek"> Saya yakin data sudah benar
-</div>
-`,[
-{text:"Batal",cls:"blue"},
-{text:"Kirim",cls:"red",cb:cekStart}
-]);
-}
-
-function cekStart(){
-if(!document.getElementById("cek").checked){
-alert("Centang dulu!");
-return;
-}
-startExam();
-}
-
-/* START EXAM */
+/* CORE EXAM LOGIC */
 function startExam(){
-localStorage.setItem("layer","soal");
+    localStorage.setItem("layer","soal");
+    document.querySelector(".header").style.display="flex";
 
-fetch(API+"?mode=soal")
-.then(r=>r.json())
-.then(d=>{
-let saved=localStorage.getItem("cbt_state");
-if(saved){state=JSON.parse(saved);}
-else{
-state.soal=d;
-state.jawaban=new Array(d.length).fill("");
-}
-render();
-startTimer(1800);
-});
+    fetch(API+"?mode=soal")
+    .then(r=>r.json())
+    .then(d=>{
+        let saved=localStorage.getItem("cbt_state");
+        if(saved){
+            state=JSON.parse(saved);
+        } else {
+            state.soal=d;
+            state.jawaban=new Array(d.length).fill("");
+            state.index=0;
+        }
+        render();
+        startTimer(5400); // 90 Menit
+    });
 }
 
-/* TIMER PRESISI */
 function startTimer(duration){
-let end=localStorage.getItem("endTime");
-if(!end){
-end=Date.now()+duration*1000;
-localStorage.setItem("endTime",end);
-}else end=parseInt(end);
+    let end=localStorage.getItem("endTime");
+    if(!end){
+        end=Date.now()+duration*1000;
+        localStorage.setItem("endTime",end);
+    }else end=parseInt(end);
 
-function update(){
-let sisa=Math.floor((end-Date.now())/1000);
-if(sisa<=0){submit();return;}
-timer.innerText=Math.floor(sisa/60)+":"+("0"+sisa%60).slice(-2);
-requestAnimationFrame(update);
-}
-update();
+    function update(){
+        let sisa=Math.floor((end-Date.now())/1000);
+        if(sisa<=0){ submit(); return; }
+        let m = Math.floor(sisa/60);
+        let s = sisa%60;
+        document.getElementById('timer').innerText = `${m}:${s<10?'0'+s:s}`;
+        if(sisa < 300) document.getElementById('timer').style.color = "red";
+        requestAnimationFrame(update);
+    }
+    update();
 }
 
-/* RENDER */
 function render(){
-let side='<div class="sidebar"><div class="grid">';
-state.soal.forEach((s,i)=>{
-let c="num";
-if(i===state.index)c+=" active";
-if(state.jawaban[i])c+=" done";
-side+=`<div class="${c}" onclick="goto(${i})">${i+1}</div>`;
-});
-side+='</div></div>';
+    let s = state.soal[state.index];
+    
+    // Render Sidebar
+    let sideGrid = '';
+    state.soal.forEach((soal, i) => {
+        let cls = "num";
+        if(i === state.index) cls += " active";
+        if(state.jawaban[i]) cls += " done";
+        sideGrid += `<div class="${cls}" onclick="goto(${i})">${i+1}</div>`;
+    });
 
-let s=state.soal[state.index];
+    // Render Main Card
+    let optionsHtml = '';
+    ["A","B","C","D","E"].forEach(o => {
+        if(s.pilihan[o]){
+            let isSel = state.jawaban[state.index] === o ? 'selected' : '';
+            optionsHtml += `
+            <div class="opsi-item ${isSel}" onclick="jawab('${o}')">
+                <input type="radio" name="q" ${isSel?'checked':''}>
+                <span class="huruf-opsi">${o}.</span> ${s.pilihan[o]}
+            </div>`;
+        }
+    });
 
-let main=`<div class="content"><div class="card">
-<h3>Soal ${state.index+1}</h3>
-<p>${s.soal}</p>`;
-
-["A","B","C","D","E"].forEach(o=>{
-main+=`<div>
-<input type="radio" ${state.jawaban[state.index]==o?"checked":""}
-onclick="jawab('${o}')"> ${o}. ${s.pilihan[o]||""}
-</div>`;
-});
-
-main+=`<div class="nav-btn">
-<button class="btn blue" onclick="prev()">Sebelumnya</button>
-<button class="btn red" onclick="next()">Selanjutnya</button>
-<button class="btn green" onclick="popupSubmit()">Selesai</button>
-</div></div></div>`;
-
-app.innerHTML=`<div class="wrap">${side}${main}</div>`;
+    app.innerHTML = `
+    <div class="wrap">
+        <div class="content">
+            <div class="card-soal">
+                <div class="nomor-soal">SOAL NOMOR ${state.index+1}</div>
+                <div class="teks-soal">${s.soal}</div>
+                <div class="opsi-container">${optionsHtml}</div>
+                
+                <div class="nav-footer">
+                    <button class="btn blue" onclick="prev()" ${state.index==0?'disabled':''}>SEBELUMNYA</button>
+                    <button class="btn yellow" onclick="jawab('')">RAGU-RAGU</button>
+                    ${state.index == state.soal.length-1 
+                        ? `<button class="btn green" onclick="popupSubmit()">SELESAI</button>` 
+                        : `<button class="btn blue" onclick="next()">SELANJUTNYA</button>`
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="sidebar">
+            <div class="sidebar-title">NAVIGASI SOAL</div>
+            <div class="grid-nomor">${sideGrid}</div>
+        </div>
+    </div>`;
 }
 
-/* NAV */
-function jawab(v){state.jawaban[state.index]=v;save();}
-function next(){if(state.index<state.soal.length-1){state.index++;save();render();}}
-function prev(){if(state.index>0){state.index--;save();render();}}
-function goto(i){state.index=i;save();render();}
-function save(){localStorage.setItem("cbt_state",JSON.stringify(state));}
+function jawab(v){
+    state.jawaban[state.index]=v;
+    save();
+    render();
+}
 
-/* POPUP SUBMIT */
+function next(){ if(state.index < state.soal.length-1){ state.index++; save(); render(); } }
+function prev(){ if(state.index > 0){ state.index--; save(); render(); } }
+function goto(i){ state.index=i; save(); render(); }
+function save(){ localStorage.setItem("cbt_state", JSON.stringify(state)); }
+
 function popupSubmit(){
-modal("Konfirmasi Submit","Yakin selesai?",[
-{text:"Batal",cls:"blue"},
-{text:"Ya",cls:"red",cb:submit}
-]);
+    modal("Konfirmasi Selesai", "Apakah Anda yakin ingin mengakhiri ujian? Jawaban tidak dapat diubah lagi.", [
+        {text:"BATAL", cls:"blue"},
+        {text:"YA, SELESAI", cls:"red", cb:submit}
+    ]);
 }
 
-/* SUBMIT */
 function submit(){
-localStorage.setItem("layer","hasil");
-showHasil();
+    localStorage.setItem("layer","hasil");
+    app.innerHTML=`<div class="content"><h2>Mengirim Jawaban...</h2></div>`;
+    // Simulasi pengiriman data
+    setTimeout(showHasil, 1500);
 }
 
-/* HASIL */
 function showHasil(){
-app.innerHTML=`
-<div class="card" style="text-align:center">
-<h2>Selamat!</h2>
-<p>Anda telah menyelesaikan asesmen</p>
-<h1>Skor Anda: 85</h1>
-<button class="btn red" onclick="keluar()">Keluar</button>
-</div>`;
+    document.querySelector(".header").style.display="none";
+    app.innerHTML=`
+    <div class="login-container">
+        <div class="login-box" style="text-align:center">
+            <h2 style="color:var(--success)">UJIAN SELESAI</h2>
+            <p>Terima kasih telah mengikuti asesmen dengan jujur.</p>
+            <div style="font-size:3rem; margin:20px 0; font-weight:bold">✓</div>
+            <button class="btn blue" onclick="keluar()">KEMBALI KE LOGIN</button>
+        </div>
+    </div>`;
 }
 
-/* ANTI TAB */
-document.addEventListener("visibilitychange",()=>{
-if(document.hidden){
-warning++;
-if(warning>=3) submit();
+function init(){
+    let user=localStorage.getItem("user");
+    let layer=localStorage.getItem("layer");
+    if(!user){ loginUI(); return; }
+    
+    let u=JSON.parse(user);
+    document.getElementById("nama").innerText=u.nama;
+    document.getElementById("kelas").innerText="Kelas: " + u.kelas;
+
+    if(layer==="soal") startExam();
+    else if(layer==="hasil") showHasil();
+    else showKonfirmasi();
 }
+
+function keluar(){
+    localStorage.clear();
+    location.reload();
+}
+
+/* ANTI CHEAT */
+document.addEventListener("visibilitychange",()=>{
+    if(document.hidden && localStorage.getItem("layer") === "soal"){
+        warning++;
+        if(warning >= 3){
+            alert("Anda keluar dari tab ujian terlalu sering. Ujian otomatis dihentikan.");
+            submit();
+        } else {
+            alert("Peringatan " + warning + "/3: Dilarang membuka tab lain!");
+        }
+    }
 });
 
-/* LOGOUT */
-function keluar(){
-localStorage.clear();
-location.reload();
-}
-
-/* INIT */
 init();
 </script>
-
 </body>
 </html>
