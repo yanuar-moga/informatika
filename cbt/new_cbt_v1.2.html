@@ -42,7 +42,7 @@ body{
   overflow:auto;
 }
 
-/* GRID NOMOR */
+/* GRID */
 .grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -110,7 +110,7 @@ body{
   text-align:center;
 }
 
-/* LOGIN FULLSCREEN STYLE */
+/* LOGIN */
 .login-container{
   min-height:100vh;
   display:flex;
@@ -144,34 +144,14 @@ body{
   border:1px solid #ccc;
 }
 
-/* MOBILE FIX (16:9 FEEL) */
+/* MOBILE */
 @media(max-width:768px){
-
-.login-container{
-  align-items:flex-start;
-  padding-top:40px;
-}
-
-.form-group{
-  grid-template-columns:1fr;
-}
-
-.header{
-  font-size:12px;
-}
-
-.sidebar{
-  width:100%;
-}
-
-.grid{
-  grid-template-columns:repeat(6,1fr);
-}
-
-.wrap{
-  flex-direction:column;
-}
-
+.login-container{align-items:flex-start;padding-top:40px;}
+.form-group{grid-template-columns:1fr;}
+.header{font-size:12px;}
+.sidebar{width:100%;}
+.grid{grid-template-columns:repeat(6,1fr);}
+.wrap{flex-direction:column;}
 }
 </style>
 </head>
@@ -264,7 +244,6 @@ CBT Asesmen<br>Informatika
 </div>
 
 <div style="display:flex;flex-direction:column;gap:10px">
-
 <button class="btn blue" onclick="login()">Masuk</button>
 <button class="btn red" onclick="jadwal()">Jadwal</button>
 
@@ -282,8 +261,11 @@ CBT Browser Apps by MB<br>
 `;
 
 /* LOAD DATA */
-fetch(API).then(r=>r.json()).then(d=>{
+fetch(API)
+.then(r=>r.json())
+.then(d=>{
 dataSiswa=d||[];
+
 let k=[...new Set(dataSiswa.map(x=>x.kelas))];
 let el=document.getElementById("kelas");
 
@@ -358,8 +340,8 @@ document.querySelector(".header").style.display="flex";
 fetch(API+"?mode=soal")
 .then(r=>r.json())
 .then(d=>{
-state.soal=d;
-state.jawaban=new Array(d.length).fill("");
+state.soal=d||[];
+state.jawaban=new Array(state.soal.length).fill("");
 render();
 startTimer(1800);
 });
@@ -376,18 +358,18 @@ side+=`<div class="${c}" onclick="goto(${i})">${i+1}</div>`;
 });
 side+='</div></div>';
 
-let s=state.soal[state.index];
+let s=state.soal[state.index]||{};
 
 let main=`<div class="content"><div class="card">
 <h4>Soal ${state.index+1}</h4>
-<p>${s.soal}</p>`;
+<p>${s.soal||"-"}</p>`;
 
 ["A","B","C","D"].forEach(o=>{
 main+=`
 <div>
 <input type="radio" name="o"
 ${state.jawaban[state.index]==o?"checked":""}
-onchange="jawab('${o}')"> ${o}. ${s.pilihan[o]}
+onchange="jawab('${o}')"> ${o}. ${(s.pilihan||{})[o]||""}
 </div>`;
 });
 
@@ -425,7 +407,7 @@ cb:()=>location.reload()
 }]);
 }
 
-/* JADWAL TABLE */
+/* JADWAL TABLE FIX */
 function jadwal(){
 let html=`
 <table style="width:100%;border-collapse:collapse;font-size:13px">
@@ -437,6 +419,9 @@ let html=`
 </tr>
 `;
 
+if(!dataToken.length){
+html+=`<tr><td colspan="4">Tidak ada data</td></tr>`;
+}else{
 dataToken.forEach(x=>{
 html+=`
 <tr>
@@ -446,6 +431,7 @@ html+=`
 <td style="border:1px solid #ccc;padding:6px">${x.token||"-"}</td>
 </tr>`;
 });
+}
 
 html+=`</table>`;
 modal("Jadwal Ujian",html,[{text:"OK",cls:"blue"}]);
