@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>CBT SMPN 1 MOGA</title>
+
+<style>
+:root{
+  --blue:#1976d2; --red:#d32f2f; --bg:#f5f7fb; --card:#ffffff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial;background:var(--bg)}
+
+/* HEADER */
+.header{
+  background:linear-gradient(90deg,#1976d2,#2196f3);
+  color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;
+}
+.header .title{font-weight:bold}
+.header .timer{font-weight:bold}
+
+/* LAYOUT */
+.wrap{display:flex;height:calc(100vh - 56px)}
+.sidebar{
+  width:120px;background:#fff;padding:10px;overflow:auto;border-right:1px solid #eee;
+}
+.grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:6px;
+}
+.num{
+  padding:8px;border-radius:6px;text-align:center;cursor:pointer;background:#e0e0e0;
+  font-size:12px;
+}
+.num.active{background:var(--blue);color:#fff}
+.num.done{background:#4caf50;color:#fff}
+
+/* CONTENT */
+.content{flex:1;padding:15px;overflow:auto}
+.card{
+  background:var(--card);padding:16px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+.option{margin:6px 0;padding:6px;border-radius:6px}
+.option:hover{background:#f0f0f0}
+
+/* BUTTON */
+.btn{padding:10px 14px;border:none;border-radius:8px;cursor:pointer}
+.blue{background:var(--blue);color:#fff}
+.red{background:var(--red);color:#fff}
+.gray{background:#ddd}
+
+/* MODAL */
+.modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.4);
+  display:none;align-items:center;justify-content:center;z-index:999;
+}
+.box{
+  background:#fff;padding:20px;border-radius:12px;width:300px;text-align:center;
+}
+.actions button{margin:5px}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="title">CBT SMPN 1 MOGA</div>
+  <div id="timer" class="timer">--:--</div>
+</div>
+
+<div id="app"></div>
+
+<!-- MODAL -->
+<div id="modal" class="modal">
+  <div class="box">
+    <h3 id="mTitle"></h3>
+    <p id="mMsg"></p>
+    <div class="actions" id="mAct"></div>
+  </div>
+</div>
+
+<script>
+const API = "PASTE_URL_GAS_DISINI";
+
+let state = {
+  soal: [],
+  index: 0,
+  jawaban: [],
+  done: false
+};
+
+/* ================= MODAL ================= */
+function modal(title,msg,buttons){
+  mTitle.innerText=title;
+  mMsg.innerText=msg;
+  mAct.innerHTML="";
+  buttons.forEach(b=>{
+    let btn=document.createElement("button");
+    btn.className="btn "+b.cls;
+    btn.innerText=b.text;
+    btn.onclick=()=>{
+      modalHide();
+      if(b.cb) b.cb();
+    };
+    mAct.appendChild(btn);
+  });
+  modalShow();
+}
+function modalShow(){modal.style.display="flex"}
+function modalHide(){modal.style.display="none"}
+
+/* ================= LOGIN ================= */
+function loginUI(){
+app.innerHTML=`
+<div class="content">
+<div class="card">
+<h3>Login CBT</h3>
+<input id=u placeholder="Username"><br><br>
+<input id=p type=password placeholder="Password"><br><br>
+<input id=t placeholder="Token"><br><br>
+<button class="btn blue" onclick="login()">Login</button>
+</div>
+</div>`;
+}
+
+function login(){
+modal("Proses","Sedang login...",[]);
+fetch(API,{
+method:"POST",
+body:JSON.stringify({
+mode:"login",
+username:u.value,
+password:p.value,
+token:t.value
+})
+})
+.then(r=>r.json())
+.then(res=>{
+modalHide();
+if(res.status=="success"){
+localStorage.user=JSON.stringify(res);
+loadSoal();
+}else{
+modal("Error",res.msg,[{text:"OK",cls:"red"}]);
+}
+});
+}
+
+/* ================= LOAD SOAL ================= */
+function loadSoal(){
+fetch(API+"?mode=soal")
+.then(r=>r.json())
+.then(data=>{
+state.soal=data;
+state.jawaban=new Array(data.length).fill("");
+renderUI();
+startTimer(1800);
+});
+}
+
+/* ================= RENDER ================= */
+function renderUI(){
+let side=`<div class="sidebar"><div class="grid">`;
+
+state.soal.forEach((s,i)=>{
+let cls="num";
+if(state.index==i) cls+=" active";
+if(state.jawaban[i]) cls+=" done";
+side+=`<div class="${cls}" onclick="goto(${i})">${i+1}</div>`;
+});
+
+side+=`</div></div>`;
+
+let s=state.soal[state.index];
+
+let main=`
+<div class="content">
+<div class="card">
+<h4>Soal ${state.index+1}</h4>
+<p>${s.soal}</p>
+${s.gambar?`<img src="${s.gambar}" width="100%">`:""}
+`;
+
+["A","B","C","D"].forEach(o=>{
+main+=`
+<div class="option">
+<input type="radio" name="o"
+${state.jawaban[state.index]==o?"checked":""}
+onchange="jawab('${o}')">
+${o}. ${s.pilihan[o]}
+</div>`;
+});
+
+main+=`
+<br>
+<button class="btn gray" onclick="prev()">Prev</button>
+<button class="btn blue" onclick="next()">Next</button>
+</div>
+
+<br>
+<button class="btn red" onclick="confirmSubmit()">Kirim Jawaban</button>
+</div>`;
+
+app.innerHTML=`<div class="wrap">${side}${main}</div>`;
+}
+
+function jawab(v){
+state.jawaban[state.index]=v;
+renderUI();
+}
+function next(){if(state.index<state.soal.length-1){state.index++;renderUI();}}
+function prev(){if(state.index>0){state.index--;renderUI();}}
+function goto(i){state.index=i;renderUI();}
+
+/* ================= TIMER ================= */
+function startTimer(sec){
+let t=sec;
+setInterval(()=>{
+t--;
+let m=Math.floor(t/60);
+let s=t%60;
+timer.innerText=`${m}:${s<10?"0":""}${s}`;
+if(t<=0) submit();
+},1000);
+}
+
+/* ================= SUBMIT ================= */
+function confirmSubmit(){
+modal("Konfirmasi","Yakin kirim jawaban?",[
+{text:"Batal",cls:"gray"},
+{text:"Kirim",cls:"red",cb:submit}
+]);
+}
+
+function submit(){
+if(state.done) return;
+state.done=true;
+
+modal("Mengirim","Mohon tunggu...",[]);
+
+let u=JSON.parse(localStorage.user);
+
+fetch(API,{
+method:"POST",
+body:JSON.stringify({
+mode:"submit",
+idLogin:u.idLogin,
+nama:u.nama,
+jk:u.jk,
+kelas:u.kelas,
+jawaban:state.jawaban
+})
+})
+.then(r=>r.json())
+.then(res=>{
+modal("Selesai","Nilai: "+res.nilai,[
+{text:"OK",cls:"blue",cb:()=>location.reload()}
+]);
+});
+}
+
+/* INIT */
+loginUI();
+</script>
+
+</body>
+</html>
