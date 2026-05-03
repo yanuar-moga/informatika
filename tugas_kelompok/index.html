@@ -36,33 +36,27 @@ body{
 .title{
   margin:6px 0 18px;
   color:#0A4FA3;
-  font-size:20px;
 }
 
 .form{text-align:left}
 
 .field{
-  display:flex;
-  flex-direction:column;
   margin-bottom:14px;
 }
 
 .label-text{
   font-size:13px;
-  margin-bottom:5px;
+  margin-bottom:6px;
+  display:block;
   color:#444;
 }
 
 .input-field,select,textarea{
-  padding:10px 12px;
+  width:100%;
+  padding:10px;
   border-radius:8px;
   border:1px solid #ccc;
   font-size:14px;
-  outline:none;
-}
-
-select[multiple]{
-  height:120px;
 }
 
 textarea{
@@ -70,8 +64,23 @@ textarea{
   resize:none;
 }
 
-.input-field:focus,select:focus,textarea:focus{
-  border-color:#0A4FA3;
+.checkbox-list{
+  max-height:140px;
+  overflow-y:auto;
+  border:1px solid #ccc;
+  border-radius:8px;
+  padding:8px;
+}
+
+.checkbox-item{
+  display:flex;
+  align-items:center;
+  margin-bottom:5px;
+  font-size:13px;
+}
+
+.checkbox-item input{
+  margin-right:6px;
 }
 
 .btn-primary{
@@ -81,13 +90,8 @@ textarea{
   border:none;
   border-radius:10px;
   color:#fff;
-  font-size:15px;
   font-weight:bold;
   cursor:pointer;
-}
-
-.btn-primary:hover{
-  background:#083d82;
 }
 
 .btn-secondary{
@@ -98,10 +102,9 @@ textarea{
   background:#4CAF50;
   border-radius:10px;
   color:#fff;
-  font-size:14px;
-  font-weight:bold;
   text-align:center;
   text-decoration:none;
+  font-weight:bold;
 }
 
 .footer{
@@ -116,18 +119,16 @@ textarea{
 
 <div class="card">
 
-<img src="assets/logo.png" class="logo" alt="Logo">
+<img src="assets/logo.png" class="logo">
 <h1 class="title">Form Pengumpulan Tugas</h1>
 
 <form id="formTugas" class="form">
 
-<!-- NAMA KELOMPOK -->
 <div class="field">
   <span class="label-text">Nama Kelompok</span>
   <input type="text" id="kelompok" class="input-field" required>
 </div>
 
-<!-- KELAS -->
 <div class="field">
   <span class="label-text">Kelas</span>
   <select id="kelas" required>
@@ -144,15 +145,13 @@ textarea{
   </select>
 </div>
 
-<!-- NAMA ANAK MULTI -->
 <div class="field">
   <span class="label-text">Nama Anak (maksimal 6)</span>
-  <select id="namaAnak" multiple required>
-    <option>Memuat data...</option>
-  </select>
+  <div id="listNama" class="checkbox-list">
+    Memuat data...
+  </div>
 </div>
 
-<!-- JUDUL -->
 <div class="field">
   <span class="label-text">Judul Tugas</span>
   <select id="judul">
@@ -160,13 +159,11 @@ textarea{
   </select>
 </div>
 
-<!-- LINK -->
 <div class="field">
   <span class="label-text">Link Tugas</span>
   <input id="link" type="url" class="input-field" required>
 </div>
 
-<!-- CATATAN -->
 <div class="field">
   <span class="label-text">Catatan</span>
   <textarea id="catatan"></textarea>
@@ -192,17 +189,17 @@ const url="https://script.google.com/macros/s/AKfycbw7UWmQGgF-yBoN6wWnZmlGkSB1qf
 let semuaSiswa=[];
 
 const kelas=document.getElementById("kelas");
-const namaSelect=document.getElementById("namaAnak");
+const listNama=document.getElementById("listNama");
 
 /* LOAD DATA */
 fetch(url+"?action=getDataSiswa")
 .then(res=>res.json())
 .then(data=>{
   semuaSiswa=data || [];
-  namaSelect.innerHTML='<option>Pilih kelas dulu</option>';
+  listNama.innerHTML="Pilih kelas dulu";
 });
 
-/* FILTER NAMA BERDASARKAN KELAS */
+/* FILTER */
 kelas.addEventListener("change",function(){
   const k=this.value.toUpperCase().trim();
 
@@ -210,22 +207,28 @@ kelas.addEventListener("change",function(){
     s.rombel && s.rombel.toUpperCase().trim()===k
   );
 
-  namaSelect.innerHTML='';
+  listNama.innerHTML="";
 
   filter.forEach(s=>{
-    const opt=document.createElement("option");
-    opt.value=s.nama;
-    opt.textContent=s.nama;
-    namaSelect.appendChild(opt);
+    const div=document.createElement("div");
+    div.className="checkbox-item";
+
+    div.innerHTML = `
+      <input type="checkbox" value="${s.nama}">
+      <label>${s.nama}</label>
+    `;
+
+    listNama.appendChild(div);
   });
 });
 
-/* BATASI MAX 6 */
-namaSelect.addEventListener("change",function(){
-  const selected=[...this.selectedOptions];
-  if(selected.length>6){
+/* BATASI 6 */
+listNama.addEventListener("change",function(){
+  const checked = listNama.querySelectorAll("input:checked");
+
+  if(checked.length > 6){
     alert("Maksimal 6 anak!");
-    selected[selected.length-1].selected=false;
+    event.target.checked = false;
   }
 });
 
@@ -235,8 +238,10 @@ document.getElementById("formTugas").addEventListener("submit",function(e){
 
   const kelompok=document.getElementById("kelompok").value;
   const kelasVal=kelas.value;
-  const nama=[...namaSelect.selectedOptions].map(o=>o.value).join(", ");
-  const judul=document.getElementById("judul").value;
+
+  const nama = [...listNama.querySelectorAll("input:checked")]
+    .map(i=>i.value).join(", ");
+
   const link=document.getElementById("link").value;
   const catatan=document.getElementById("catatan").value;
 
@@ -254,7 +259,7 @@ document.getElementById("formTugas").addEventListener("submit",function(e){
   fd.append("kelompok",kelompok);
   fd.append("kelas",kelasVal);
   fd.append("nama",nama);
-  fd.append("judul",judul);
+  fd.append("judul","Tugas Kolaborasi Video SPMB");
   fd.append("link",link);
   fd.append("catatan",catatan);
 
