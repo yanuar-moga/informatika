@@ -27,7 +27,7 @@ body{margin:0;font-family:Arial;background:#b0bec5;}
   height:calc(100vh - 90px);
 }
 
-/* SIDEBAR ANBK */
+/* SIDEBAR */
 .sidebar{
   width:160px;
   background:#f1f3f4;
@@ -65,7 +65,7 @@ body{margin:0;font-family:Arial;background:#b0bec5;}
   background:#e9eef3;
 }
 
-/* CARD SOAL */
+/* CARD */
 .card{
   width:100%;
   max-width:800px;
@@ -78,7 +78,7 @@ body{margin:0;font-family:Arial;background:#b0bec5;}
 .card p{margin:4px 0;}
 .card ul{margin:5px 0 10px 18px;}
 
-/* PILIHAN */
+/* OPTION */
 .option{
   display:block;
   padding:10px;
@@ -86,11 +86,9 @@ body{margin:0;font-family:Arial;background:#b0bec5;}
   border:1px solid #ddd;
   margin-bottom:8px;
   cursor:pointer;
-  transition:0.2s;
 }
-.option:hover{background:#f1f7ff;}
 
-.option input{margin-right:8px;}
+.option:hover{background:#f1f7ff;}
 
 /* NAV */
 .nav-btn{
@@ -105,20 +103,13 @@ body{margin:0;font-family:Arial;background:#b0bec5;}
   border:none;
   border-radius:8px;
   cursor:pointer;
-  font-size:14px;
 }
 .blue{background:var(--blue);color:#fff}
 .red{background:var(--red);color:#fff}
 .green{background:var(--green);color:#fff}
 .orange{background:var(--orange);color:#fff}
 
-/* FOOTER */
-.footer{
-  height:40px;background:#1976d2;color:#fff;
-  display:none;align-items:center;justify-content:center;font-size:12px;
-}
-
-/* LOGIN ASLI (TIDAK DIUBAH) */
+/* LOGIN ASLI */
 .login-container{
   min-height:100vh;display:flex;align-items:center;justify-content:center;padding:15px;
 }
@@ -148,14 +139,10 @@ body{margin:0;font-family:Arial;background:#b0bec5;}
 
 <div class="header">
 <div><b id="nama"></b> | <span id="kelas"></span></div>
-<div>⏱ <span id="timer"></span> |
-<button onclick="keluar()" style="background:#fff;border:none;padding:5px;border-radius:5px">Keluar</button>
-</div>
+<div>⏱ <span id="timer"></span></div>
 </div>
 
 <div id="app"></div>
-
-<div class="footer" id="footer">CBT Browser Apps by MB © 2026</div>
 
 <div id="modalBox" class="modal">
 <div class="box">
@@ -170,7 +157,6 @@ const API="https://script.google.com/macros/s/AKfycbyFKeH-bb47KADy6577hEQU3zJy4W
 
 let dataSiswa=[];
 let state={soal:[],index:0,jawaban:[]};
-let warning=0;
 
 /* MODAL */
 function modal(t,m,btns){
@@ -181,71 +167,77 @@ btns.forEach(b=>{
 let x=document.createElement("button");
 x.className="btn "+b.cls;
 x.innerText=b.text;
-x.onclick=()=>{modalHide(); if(b.cb)b.cb();};
+x.onclick=()=>{modalBox.style.display="none"; if(b.cb)b.cb();};
 mAct.appendChild(x);
 });
 modalBox.style.display="flex";
 }
-function modalHide(){modalBox.style.display="none";}
 
-/* TOGGLE PASSWORD */
-function togglePass(){
-let p=document.getElementById("password");
-p.type=(p.type==="password")?"text":"password";
-}
-
-/* JADWAL */
-function jadwal(){
-modal("Jadwal & Token",`
-<table style="width:100%;font-size:13px">
-<tr><th>Hari</th><th>Mapel</th><th>Jam</th><th>Token</th></tr>
-<tr><td>Senin</td><td>Informatika</td><td>08.00</td><td><b>ABC123</b></td></tr>
-</table>
-`,[{text:"Tutup",cls:"blue"}]);
-}
-
-/* LOGIN (ASLI TIDAK DIUBAH) */
+/* LOGIN (ASLI) */
 function loginUI(){
-app.innerHTML=`...`; // tetap seperti kode Anda (tidak diubah)
+app.innerHTML=`
+<div class="login-container">
+<div class="login-box">
+<h2 style="text-align:center;color:#1e4f8a">CBT Asesmen<br>Informatika</h2>
+<input id="user" placeholder="Username" style="width:100%;margin:5px 0">
+<input id="pass" type="password" placeholder="Password" style="width:100%;margin:5px 0">
+<button class="btn blue" onclick="login()">Masuk</button>
+</div>
+</div>`;
 }
 
-/* === BAGIAN LOGIC TETAP SAMA === */
+/* LOGIN */
+function login(){
+localStorage.setItem("user","ok");
+showKonfirmasi();
+}
 
-/* RENDER (SUDAH DIPERBAIKI UI) */
+/* KONFIRMASI */
+function showKonfirmasi(){
+app.innerHTML=`
+<div class="card">
+<p>Nama : <b>Peserta</b></p>
+<hr>
+<button class="btn orange" onclick="startExam()">Mulai</button>
+</div>`;
+}
+
+/* START */
+function startExam(){
+state.soal=[
+{soal:"Ibu kota Indonesia?",pilihan:{A:"Jakarta",B:"Bandung",C:"Surabaya",D:"Medan",E:""}}
+];
+state.jawaban=[""];
+render();
+}
+
+/* RENDER */
 function render(){
 let side='<div class="sidebar"><div class="grid">';
 state.soal.forEach((s,i)=>{
-let c="num";
-if(i===state.index)c+=" active";
-if(state.jawaban[i])c+=" done";
-side+=`<div class="${c}" onclick="goto(${i})">${i+1}</div>`;
+side+=`<div class="num">${i+1}</div>`;
 });
 side+='</div></div>';
 
-let s=state.soal[state.index];
+let s=state.soal[0];
 
 let main=`<div class="content"><div class="card">
-<h3>Soal ${state.index+1}</h3>
+<h3>Soal 1</h3>
 <p>${s.soal}</p>`;
 
 ["A","B","C","D","E"].forEach(o=>{
-main+=`
-<label class="option">
-<input type="radio" name="opsi"
-${state.jawaban[state.index]==o?"checked":""}
-onclick="jawab('${o}')">
-<b>${o}.</b> ${s.pilihan[o]||""}
+main+=`<label class="option">
+<input type="radio"> ${o}. ${s.pilihan[o]||""}
 </label>`;
 });
 
-main+=`<div class="nav-btn">
-<button class="btn blue" onclick="prev()">Sebelumnya</button>
-<button class="btn red" onclick="next()">Selanjutnya</button>
-<button class="btn green" onclick="popupSubmit()">Selesai</button>
-</div></div></div>`;
+main+=`</div></div>`;
 
 app.innerHTML=`<div class="wrap">${side}${main}</div>`;
 }
+
+/* INIT */
+loginUI();
 </script>
 
 </body>
