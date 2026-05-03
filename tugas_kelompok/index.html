@@ -112,6 +112,53 @@ textarea{
   font-size:12px;
   color:#777;
 }
+
+/* ================= ALERT ================= */
+
+.alert-overlay{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.4);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+}
+
+.alert-box{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  width:280px;
+  text-align:center;
+}
+
+.alert-box h3{
+  margin:0 0 10px;
+}
+
+.alert-box p{
+  font-size:14px;
+  margin-bottom:15px;
+}
+
+.alert-box button{
+  padding:8px 16px;
+  border:none;
+  border-radius:6px;
+  color:#fff;
+  cursor:pointer;
+}
+
+.alert-success h3{ color:#0A4FA3; }
+.alert-success button{ background:#0A4FA3; }
+
+.alert-error h3{ color:#e53935; }
+.alert-error button{ background:#e53935; }
+
 </style>
 </head>
 
@@ -183,6 +230,15 @@ textarea{
 
 </div>
 
+<!-- CUSTOM ALERT -->
+<div id="customAlert" class="alert-overlay">
+  <div class="alert-box">
+    <h3 id="alertTitle"></h3>
+    <p id="alertMessage"></p>
+    <button onclick="closeAlert()">OK</button>
+  </div>
+</div>
+
 <script>
 const url="https://script.google.com/macros/s/AKfycbw7UWmQGgF-yBoN6wWnZmlGkSB1qfUZGF_BtD9bnRINz766P846T1MOiXd83FKGZsYQ/exec";
 
@@ -190,6 +246,25 @@ let semuaSiswa=[];
 
 const kelas=document.getElementById("kelas");
 const listNama=document.getElementById("listNama");
+
+/* ALERT */
+function showAlert(type,message){
+  const overlay=document.getElementById("customAlert");
+  const box=overlay.querySelector(".alert-box");
+
+  document.getElementById("alertTitle").innerText =
+    type==="success" ? "Berhasil" : "Gagal";
+
+  document.getElementById("alertMessage").innerText=message;
+
+  box.className="alert-box " + (type==="success" ? "alert-success" : "alert-error");
+
+  overlay.style.display="flex";
+}
+
+function closeAlert(){
+  document.getElementById("customAlert").style.display="none";
+}
 
 /* LOAD DATA */
 fetch(url+"?action=getDataSiswa")
@@ -213,7 +288,7 @@ kelas.addEventListener("change",function(){
     const div=document.createElement("div");
     div.className="checkbox-item";
 
-    div.innerHTML = `
+    div.innerHTML=`
       <input type="checkbox" value="${s.nama}">
       <label>${s.nama}</label>
     `;
@@ -223,12 +298,12 @@ kelas.addEventListener("change",function(){
 });
 
 /* BATASI 6 */
-listNama.addEventListener("change",function(){
-  const checked = listNama.querySelectorAll("input:checked");
+listNama.addEventListener("change",function(e){
+  const checked=listNama.querySelectorAll("input:checked");
 
-  if(checked.length > 6){
-    alert("Maksimal 6 anak!");
-    event.target.checked = false;
+  if(checked.length>6){
+    showAlert("error","Maksimal 6 anak!");
+    e.target.checked=false;
   }
 });
 
@@ -239,14 +314,14 @@ document.getElementById("formTugas").addEventListener("submit",function(e){
   const kelompok=document.getElementById("kelompok").value;
   const kelasVal=kelas.value;
 
-  const nama = [...listNama.querySelectorAll("input:checked")]
+  const nama=[...listNama.querySelectorAll("input:checked")]
     .map(i=>i.value).join(", ");
 
   const link=document.getElementById("link").value;
   const catatan=document.getElementById("catatan").value;
 
   if(!kelompok || !kelasVal || !nama || !link){
-    alert("Lengkapi data!");
+    showAlert("error","Lengkapi semua data!");
     return;
   }
 
@@ -266,12 +341,19 @@ document.getElementById("formTugas").addEventListener("submit",function(e){
   fetch(url,{method:"POST",body:fd})
   .then(res=>res.json())
   .then(res=>{
-    alert(res.status==="success" ? "Berhasil!" : "Gagal!");
+    if(res.status==="success"){
+      showAlert("success","Tugas berhasil dikirim!");
+      document.getElementById("formTugas").reset();
+      listNama.innerHTML="Pilih kelas dulu";
+    }else{
+      showAlert("error","Gagal mengirim tugas");
+    }
+
     btn.disabled=false;
     btn.innerText="Kirim Tugas";
   })
   .catch(()=>{
-    alert("Error koneksi");
+    showAlert("error","Terjadi kesalahan koneksi");
     btn.disabled=false;
     btn.innerText="Kirim Tugas";
   });
