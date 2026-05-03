@@ -1,185 +1,317 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CBT Informatika</title>
+<meta charset="UTF-8">
+<title>CBT SMPN 1 MOGA</title>
 
 <style>
 :root{
---blue:#2f5597;
---red:#e53935;
---orange:#ff5722;
---bg:#a7b3bf;
+  --blue:#1976d2;
+  --red:#d32f2f;
+  --green:#4caf50;
+  --orange:#ff5722;
 }
 
-body{margin:0;font-family:Arial;background:var(--bg);}
-
-/* HEADER */
-.topbar{
-background:var(--blue);
-color:#fff;
-padding:10px 20px;
-display:flex;
-justify-content:space-between;
-align-items:center;
+body{
+  margin:0;
+  font-family:Arial;
+  background:#b0bec5;
 }
 
-.topbar button{
-background:#ff5722;
-border:none;
-padding:8px 15px;
-border-radius:6px;
-color:#fff;
-cursor:pointer;
+.header{
+  background:#2f5597;
+  color:#fff;
+  padding:10px;
+  display:none;
+  justify-content:space-between;
+  align-items:center;
+  font-size:13px;
 }
 
-/* CENTER */
-.center{
-text-align:center;
-margin-top:20px;
-}
+.wrap{display:flex;height:calc(100vh - 90px);}
+.sidebar{width:120px;background:#fff;padding:10px;overflow:auto;}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
 
-/* CARD */
+.num{
+  padding:8px;
+  background:#ddd;
+  text-align:center;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:12px;
+}
+.num.active{background:var(--blue);color:#fff}
+.num.done{background:#4caf50;color:#fff}
+
+.content{flex:1;padding:12px;overflow:auto;}
+
 .card{
-background:#eee;
-max-width:650px;
-margin:20px auto;
-padding:20px;
-border-radius:12px;
-text-align:left;
+  background:#fff;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.1);
 }
 
-/* BUTTON */
-.btn{
-padding:12px;
-border:none;
-border-radius:8px;
-cursor:pointer;
-font-size:14px;
+.nav-btn{
+  display:flex;
+  justify-content:space-between;
+  margin-top:15px;
 }
-.full{width:100%}
-.blue{background:#3f6cc9;color:#fff}
-.red{background:#e53935;color:#fff}
-.orange{background:#ff5722;color:#fff}
+
+.btn{
+  padding:10px 15px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:14px;
+}
+
+.blue{background:var(--blue);color:#fff}
+.red{background:var(--red);color:#fff}
+.green{background:var(--green);color:#fff}
+.orange{background:var(--orange);color:#fff}
+
+.footer{
+  height:40px;
+  background:#1976d2;
+  color:#fff;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+}
+
+/* LOGIN (ASLI TIDAK DIUBAH) */
+.login-container{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+}
+
+.login-box{
+  width:100%;
+  max-width:420px;
+  background:#fff;
+  padding:25px;
+  border-radius:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+.form-group{
+  display:grid;
+  grid-template-columns:100px 1fr;
+  gap:10px;
+  margin-bottom:10px;
+  align-items:center;
+}
+
+.form-group input,
+.form-group select{
+  padding:8px;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
 
 /* MODAL */
 .modal{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.5);
-display:none;
-align-items:center;
-justify-content:center;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
 }
 
-.modal-box{
-background:#fff;
-padding:25px;
-border-radius:12px;
-width:300px;
-text-align:center;
+.box{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  width:90%;
+  max-width:350px;
+  text-align:center;
 }
-
-.modal-actions{
-display:flex;
-gap:10px;
-margin-top:20px;
-}
-
-.wrap{display:flex}
-.sidebar{width:120px;background:#fff;padding:10px}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
-.num{background:#ddd;padding:6px;text-align:center;border-radius:5px;cursor:pointer}
-.num.active{background:#2f5597;color:#fff}
-.num.done{background:#4caf50;color:#fff}
-.content{flex:1;padding:15px}
-
 </style>
 </head>
 
 <body>
 
-<div class="topbar">
-<div id="userInfo"></div>
-<button onclick="keluar()">Keluar</button>
+<div class="header">
+<div>
+<b id="nama"></b> | <span id="kelas"></span>
+</div>
+<div>
+⏱ <span id="timer"></span> |
+<button onclick="keluar()" style="background:#fff;border:none;padding:5px;border-radius:5px">Keluar</button>
+</div>
 </div>
 
 <div id="app"></div>
 
-<div id="modal" class="modal">
-<div class="modal-box">
-<h3>Konfirmasi Data</h3>
-<p>Pastikan data Anda sudah benar</p>
-
-<div style="text-align:left;margin-top:10px">
-<input type="checkbox" id="cekData"> Saya yakin data sudah benar
+<div class="footer" id="footer">
+CBT Browser Apps by MB © 2026
 </div>
 
-<div class="modal-actions">
-<button class="btn blue full" onclick="tutupModal()">Batal</button>
-<button class="btn red full" onclick="lanjutUjian()">Kirim</button>
-</div>
-
+<div id="modalBox" class="modal">
+<div class="box">
+<h3 id="mTitle"></h3>
+<div id="mMsg"></div>
+<div id="mAct"></div>
 </div>
 </div>
 
 <script>
 const API="https://script.google.com/macros/s/AKfycbyFKeH-bb47KADy6577hEQU3zJy4WmkBAAxzIHuRqmqY6dNnPCDaXrl-UP-v78lj72c/exec";
 
+let dataSiswa=[];
 let state={soal:[],index:0,jawaban:[]};
 let warning=0;
 
-/* LOGIN */
+/* MODAL */
+function modal(t,m,btns){
+mAct.innerHTML="";
+mTitle.innerText=t;
+mMsg.innerHTML=m;
+btns.forEach(b=>{
+let x=document.createElement("button");
+x.className="btn "+b.cls;
+x.innerText=b.text;
+x.onclick=()=>{modalHide(); if(b.cb)b.cb();};
+mAct.appendChild(x);
+});
+modalBox.style.display="flex";
+}
+function modalHide(){modalBox.style.display="none";}
+
+/* TOGGLE PASSWORD */
+function togglePass(){
+let p=document.getElementById("password");
+p.type=(p.type==="password")?"text":"password";
+}
+
+/* JADWAL */
+function jadwal(){
+modal("Jadwal & Token",`
+<table style="width:100%;border-collapse:collapse;font-size:13px">
+<tr><th>Hari</th><th>Mapel</th><th>Jam</th><th>Token</th></tr>
+<tr><td>Senin</td><td>Informatika</td><td>08.00</td><td><b>ABC123</b></td></tr>
+</table>
+`,[{text:"Tutup",cls:"blue"}]);
+}
+
+/* LOGIN UI (ASLI) */
 function loginUI(){
-app.innerHTML=`
-<div style="display:flex;justify-content:center;align-items:center;height:100vh">
-<div style="background:#fff;padding:20px;border-radius:12px;width:300px">
+app.innerHTML=`<div class="login-container">
+<div class="login-box">
 
-<h3 style="text-align:center">CBT Informatika</h3>
+<img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" 
+style="width:80px;display:block;margin:auto">
 
-<input id="user" placeholder="Username" style="width:100%;margin-bottom:10px">
-<input id="pass" type="password" placeholder="Password" style="width:100%;margin-bottom:10px">
+<h2 style="text-align:center;color:#1e4f8a">
+CBT Asesmen<br>Informatika
+</h2>
 
+<div class="form-group">
+<label>Kelas</label>
+<select id="kelasSelect"></select>
+</div>
+
+<div class="form-group">
+<label>Username</label>
+<select id="username"></select>
+</div>
+
+<div class="form-group">
+<label>Password</label>
+<input type="password" id="password">
+</div>
+
+<div class="form-group">
+<label></label>
 <div>
 <input type="checkbox" onclick="togglePass()"> Tampilkan Password
 </div>
+</div>
 
-<input id="token" placeholder="Token" style="width:100%;margin:10px 0">
+<div class="form-group">
+<label>Token</label>
+<input id="token">
+</div>
 
-<button class="btn blue full" onclick="login()">Masuk</button>
-<button class="btn red full" onclick="jadwal()">Jadwal</button>
+<div style="display:flex;flex-direction:column;gap:10px">
+<button class="btn blue" onclick="login()">Masuk</button>
+<button class="btn red" onclick="jadwal()">Jadwal</button>
 
-</div></div>`;
+<div style="height:20px"></div>
+
+<div style="text-align:center;font-size:12px;color:#555">
+CBT Browser Apps by MB<br>
+© 2026 MB All Rights Reserved
+</div>
+
+</div>
+</div>
+</div>`;
+
+fetch(API).then(r=>r.json()).then(d=>{
+dataSiswa=d;
+let k=[...new Set(d.map(x=>x.kelas))];
+kelasSelect.innerHTML='<option>-- Pilih Kelas --</option>';
+k.forEach(x=>kelasSelect.innerHTML+=`<option>${x}</option>`);
+kelasSelect.onchange=loadUser;
+});
 }
 
-/* TOGGLE */
-function togglePass(){
-let p=document.getElementById("pass");
-p.type=p.type==="password"?"text":"password";
+/* LOAD USER */
+function loadUser(){
+let k=kelasSelect.value;
+username.innerHTML='<option>-- Pilih --</option>';
+dataSiswa.filter(x=>x.kelas==k)
+.forEach(s=>{
+username.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
+});
 }
 
 /* LOGIN */
 function login(){
-localStorage.setItem("user",JSON.stringify({nama:"Mr. XYZ",kelas:"Guru"}));
+let user=username.value;
+let pass=password.value;
+let token=document.getElementById("token").value;
+
+fetch(API,{
+method:"POST",
+body:JSON.stringify({mode:"login",username:user,password:pass,token})
+})
+.then(r=>r.json())
+.then(res=>{
+if(res.status==="success"){
+localStorage.setItem("user",JSON.stringify(res));
 showKonfirmasi();
+}else alert(res.msg);
+});
 }
 
-/* HALAMAN KONFIRMASI (SESUAI GAMBAR) */
+/* KONFIRMASI SESUAI GAMBAR */
 function showKonfirmasi(){
 let u=JSON.parse(localStorage.getItem("user"));
 
-userInfo.innerHTML=`${u.nama}<br>${u.kelas}`;
+document.querySelector(".header").style.display="flex";
+footer.style.display="flex";
+
+nama.innerText=u.nama;
+kelas.innerText=u.kelas;
 
 app.innerHTML=`
-<div class="center">
+<div style="text-align:center;margin-top:20px">
 <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" width="80">
 <h2>Asesmen CBT Informatika</h2>
 <p>Minggu, 3 Mei 2026</p>
 <p>⏱ <span id="jam"></span></p>
 </div>
 
-<div class="card">
+<div class="card" style="max-width:650px;margin:20px auto;background:#e0e0e0">
 
 <p>Nama : <b>${u.nama}</b></p>
 <p>Kelas : <b>${u.kelas}</b></p>
@@ -204,7 +336,7 @@ app.innerHTML=`
 <li>Kerjakan dengan jujur</li>
 </ul>
 
-<button class="btn orange full" onclick="bukaModal()">Kerjakan Ujian</button>
+<button class="btn orange" style="width:100%" onclick="popupData()">Kerjakan Ujian</button>
 
 </div>
 `;
@@ -215,31 +347,43 @@ jam.innerText=d.toLocaleTimeString();
 },1000);
 }
 
-/* MODAL */
-function bukaModal(){modal.style.display="flex";}
-function tutupModal(){modal.style.display="none";}
+/* POPUP CHECKBOX */
+function popupData(){
+modal("Konfirmasi Data",
+`
+<p>Pastikan data Anda sudah benar</p>
+<div style="text-align:left">
+<input type="checkbox" id="cek"> Saya yakin data sudah benar
+</div>
+`,
+[
+{text:"Batal",cls:"blue"},
+{text:"Kirim",cls:"red",cb:cekStart}
+]
+);
+}
 
-function lanjutUjian(){
-if(!cekData.checked){
+function cekStart(){
+if(!document.getElementById("cek").checked){
 alert("Centang dulu!");
 return;
 }
-modal.style.display="none";
 startExam();
 }
 
-/* EXAM */
+/* START EXAM */
 function startExam(){
 fetch(API+"?mode=soal")
 .then(r=>r.json())
 .then(d=>{
-let saved=localStorage.getItem("cbt");
+let saved=localStorage.getItem("cbt_state");
 if(saved){state=JSON.parse(saved);}
 else{
 state.soal=d;
 state.jawaban=new Array(d.length).fill("");
 }
 render();
+startTimer(1800);
 });
 }
 
@@ -256,23 +400,22 @@ side+='</div></div>';
 
 let s=state.soal[state.index];
 
-let main=`<div class="content">
+let main=`<div class="content"><div class="card">
 <h3>Soal ${state.index+1}</h3>
 <p>${s.soal}</p>`;
 
 ["A","B","C","D","E"].forEach(o=>{
-main+=`
-<div>
+main+=`<div>
 <input type="radio" ${state.jawaban[state.index]==o?"checked":""}
 onclick="jawab('${o}')"> ${o}. ${s.pilihan[o]||""}
 </div>`;
 });
 
-main+=`<br>
-<button onclick="prev()">Prev</button>
-<button onclick="next()">Next</button>
-<button onclick="submit()">Selesai</button>
-</div>`;
+main+=`<div class="nav-btn">
+<button class="btn blue" onclick="prev()">Sebelumnya</button>
+<button class="btn red" onclick="next()">Selanjutnya</button>
+<button class="btn green" onclick="submit()">Selesai</button>
+</div></div></div>`;
 
 app.innerHTML=`<div class="wrap">${side}${main}</div>`;
 }
@@ -282,9 +425,21 @@ function jawab(v){state.jawaban[state.index]=v;save();}
 function next(){state.index++;save();render();}
 function prev(){state.index--;save();render();}
 function goto(i){state.index=i;save();render();}
+function save(){localStorage.setItem("cbt_state",JSON.stringify(state));}
 
-/* SAVE */
-function save(){localStorage.setItem("cbt",JSON.stringify(state));}
+/* TIMER */
+function startTimer(s){
+let end=localStorage.getItem("endTime");
+if(!end){
+end=Date.now()+s*1000;
+localStorage.setItem("endTime",end);
+}
+setInterval(()=>{
+let sisa=Math.floor((end-Date.now())/1000);
+if(sisa<=0){submit();return;}
+timer.innerText=Math.floor(sisa/60)+":"+("0"+sisa%60).slice(-2);
+},1000);
+}
 
 /* ANTI TAB */
 document.addEventListener("visibilitychange",()=>{
@@ -307,11 +462,7 @@ localStorage.clear();
 location.reload();
 }
 
-/* JADWAL */
-function jadwal(){
-alert("Jadwal ujian ditampilkan di sini");
-}
-
+/* INIT */
 loginUI();
 </script>
 
