@@ -26,19 +26,16 @@ body{
   display:none;
   justify-content:space-between;
   align-items:center;
+  font-size:14px;
 }
 
-.header-right{
-  text-align:right;
-  font-size:13px;
-}
-
-/* LAYOUT */
+/* WRAP */
 .wrap{
   display:flex;
-  height:calc(100vh - 100px);
+  height:calc(100vh - 50px);
 }
 
+/* SIDEBAR */
 .sidebar{
   width:120px;
   background:#fff;
@@ -46,6 +43,7 @@ body{
   overflow:auto;
 }
 
+/* GRID */
 .grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -68,34 +66,42 @@ body{
 .content{
   flex:1;
   padding:15px;
-  display:flex;
-  flex-direction:column;
+  overflow:auto;
 }
 
 .card{
   background:#fff;
   padding:20px;
   border-radius:12px;
-  flex:1;
+  box-shadow:0 3px 10px rgba(0,0,0,0.1);
 }
 
-/* NAV */
-.nav{
+/* NAV BUTTON */
+.nav-btn{
   display:flex;
   justify-content:space-between;
-  margin-top:10px;
+  margin-top:20px;
 }
 
-.btn{
+.btn-small{
   padding:10px 16px;
   border:none;
-  border-radius:8px;
+  border-radius:6px;
   cursor:pointer;
+  font-size:14px;
 }
 
 .blue{background:var(--blue);color:#fff}
 .red{background:var(--red);color:#fff}
 .green{background:var(--green);color:#fff}
+
+/* FOOTER */
+.footer{
+  text-align:center;
+  font-size:12px;
+  padding:10px;
+  color:#444;
+}
 
 /* LOGIN */
 .login-container{
@@ -112,6 +118,7 @@ body{
   background:#fff;
   padding:25px;
   border-radius:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
 .form-group{
@@ -119,14 +126,20 @@ body{
   grid-template-columns:100px 1fr;
   gap:10px;
   margin-bottom:10px;
+  align-items:center;
 }
 
-/* FOOTER */
-.footer{
-  background:#fff;
-  text-align:center;
+.form-group input,
+.form-group select{
   padding:8px;
-  font-size:12px;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+
+@media(max-width:768px){
+.sidebar{width:100%;}
+.grid{grid-template-columns:repeat(6,1fr);}
+.wrap{flex-direction:column;}
 }
 </style>
 </head>
@@ -134,23 +147,23 @@ body{
 <body>
 
 <div class="header">
-  <div>CBT SMPN 1 MOGA</div>
-  <div class="header-right" id="infoUser"></div>
+<div>CBT SMPN 1 MOGA</div>
+<div id="infoUser"></div>
+<div>
+<span id="timer"></span>
+<button onclick="logout()" style="margin-left:10px;padding:5px 10px">Keluar</button>
+</div>
 </div>
 
 <div id="app"></div>
 
-<div class="footer">
-CBT Apps • Developer MB
-</div>
-
 <script>
 const API="https://script.google.com/macros/s/AKfycbyFKeH-bb47KADy6577hEQU3zJy4WmkBAAxzIHuRqmqY6dNnPCDaXrl-UP-v78lj72c/exec";
 
-let dataSiswa=[];
+let dataSiswa=[],dataToken=[];
 let state={soal:[],index:0,jawaban:[]};
 
-/* ================= LOGIN ================= */
+/* LOGIN UI */
 function loginUI(){
 document.querySelector(".header").style.display="none";
 
@@ -166,7 +179,7 @@ document.getElementById("app").innerHTML=`
 </div>
 
 <div class="form-group">
-<label>User</label>
+<label>Username</label>
 <select id="username"></select>
 </div>
 
@@ -180,7 +193,7 @@ document.getElementById("app").innerHTML=`
 <input id="token">
 </div>
 
-<button class="btn blue" onclick="login()">Masuk</button>
+<button onclick="login()">Masuk</button>
 
 </div>
 </div>
@@ -188,12 +201,11 @@ document.getElementById("app").innerHTML=`
 
 fetch(API).then(r=>r.json()).then(d=>{
 dataSiswa=d;
+
 let k=[...new Set(d.map(x=>x.kelas))];
 let el=document.getElementById("kelas");
-
 el.innerHTML='<option>Pilih</option>';
 k.forEach(x=>el.innerHTML+=`<option>${x}</option>`);
-
 el.onchange=loadUser;
 });
 }
@@ -201,18 +213,15 @@ el.onchange=loadUser;
 function loadUser(){
 let k=document.getElementById("kelas").value;
 let el=document.getElementById("username");
-
 el.innerHTML="";
 dataSiswa.filter(x=>x.kelas==k)
-.forEach(s=>{
-el.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
-});
+.forEach(s=>el.innerHTML+=`<option value="${s.username}">${s.nama}</option>`);
 }
 
-/* ================= LOGIN ACTION ================= */
+/* LOGIN */
 function login(){
 let username=document.getElementById("username").value;
-let password=document.getElementById("password").value.trim();
+let password=document.getElementById("password").value;
 let token=document.getElementById("token").value;
 
 fetch(API,{
@@ -230,84 +239,87 @@ alert(res.msg);
 });
 }
 
-/* ================= START ================= */
+/* START */
 function startExam(){
-
 let user=JSON.parse(localStorage.getItem("user"));
-
 document.querySelector(".header").style.display="flex";
-document.getElementById("infoUser").innerHTML=`
-${user.nama}<br>${user.kelas}
-<br><button onclick="logout()">Keluar</button>
-`;
 
-let sisa = localStorage.getItem("timer") || 1800;
-
-startTimer(parseInt(sisa));
+document.getElementById("infoUser").innerHTML=
+`${user.nama} | ${user.kelas}`;
 
 fetch(API+"?mode=soal")
 .then(r=>r.json())
 .then(d=>{
 state.soal=d;
 state.jawaban=new Array(d.length).fill("");
-render();
+
+viewSoal();
+
+/* TIMER PERSIST */
+let t=localStorage.getItem("timer") || 1800;
+startTimer(parseInt(t));
 });
 }
 
-/* ================= RENDER ================= */
-function render(){
+/* SOAL VIEW */
+function viewSoal(){
 
 let side='<div class="sidebar"><div class="grid">';
 state.soal.forEach((s,i)=>{
 let c="num";
-if(i===state.index)c+=" active";
+if(i==state.index)c+=" active";
 if(state.jawaban[i])c+=" done";
 side+=`<div class="${c}" onclick="goto(${i})">${i+1}</div>`;
 });
 side+='</div></div>';
 
-let s=state.soal[state.index]||{};
-
-let nextBtn = (state.index === state.soal.length-1)
-? `<button class="btn green" onclick="submit()">Selesai</button>`
-: `<button class="btn red" onclick="next()">Selanjutnya</button>`;
+let s=state.soal[state.index];
 
 let main=`
 <div class="content">
 <div class="card">
 <h3>Soal ${state.index+1}</h3>
-<p>${s.soal||""}</p>
+<p>${s.soal}</p>
 `;
 
 ["A","B","C","D"].forEach(o=>{
 main+=`
 <div>
 <input type="radio" ${state.jawaban[state.index]==o?"checked":""}
-onclick="jawab('${o}')"> ${o}. ${(s.pilihan||{})[o]||""}
+onclick="jawab('${o}')"> ${o}. ${s.pilihan[o]}
 </div>`;
 });
 
-main+=`
-</div>
+/* NAVIGATION */
+main+=`<div class="nav-btn">`;
 
-<div class="nav">
-<button class="btn blue" onclick="prev()">Sebelumnya</button>
-${nextBtn}
-</div>
+if(state.index>0){
+main+=`<button class="btn-small blue" onclick="prev()">Sebelumnya</button>`;
+}else{
+main+=`<div></div>`;
+}
 
-</div>
-`;
+if(state.index < state.soal.length-1){
+main+=`<button class="btn-small red" onclick="next()">Selanjutnya</button>`;
+}else{
+main+=`<button class="btn-small green" onclick="submit()">Selesai</button>`;
+}
+
+main+=`</div></div></div>
+<div class="footer">
+CBT Browser Apps by MB | © 2026
+</div>`;
 
 document.getElementById("app").innerHTML=`<div class="wrap">${side}${main}</div>`;
 }
 
-/* ================= NAV ================= */
-function jawab(v){state.jawaban[state.index]=v;render();}
-function next(){if(state.index<state.soal.length-1){state.index++;render();}}
-function prev(){if(state.index>0){state.index--;render();}}
-function goto(i){state.index=i;render();}
+/* NAV */
+function jawab(v){state.jawaban[state.index]=v;viewSoal();}
+function next(){state.index++;viewSoal();}
+function prev(){state.index--;viewSoal();}
+function goto(i){state.index=i;viewSoal();}
 
-/* ================= TIMER ================= */
+/* TIMER */
 function startTimer(s){
 setInterval(()=>{
 s--;
@@ -320,22 +332,14 @@ if(s<=0)submit();
 },1000);
 }
 
-/* ================= SUBMIT ================= */
+/* SUBMIT */
 function submit(){
-localStorage.removeItem("timer");
-
-document.getElementById("app").innerHTML=`
-<div class="login-container">
-<div class="login-box">
-<h2>Ujian Selesai</h2>
-<p>Jawaban berhasil dikirim</p>
-<button class="btn blue" onclick="location.reload()">Kembali</button>
-</div>
-</div>
-`;
+alert("Jawaban terkirim");
+localStorage.clear();
+location.reload();
 }
 
-/* ================= LOGOUT ================= */
+/* LOGOUT */
 function logout(){
 localStorage.clear();
 location.reload();
