@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>CBT SMPN 1 MOGA</title>
+
+<style>
+:root{
+  --blue:#1976d2;
+  --red:#d32f2f;
+  --green:#2e7d32;
+}
+
+body{
+  margin:0;
+  font-family:Arial;
+  background:#b0bec5;
+}
+
+/* HEADER */
+.header{
+  background:#1976d2;
+  color:#fff;
+  padding:10px 15px;
+  display:none;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.header-right{
+  text-align:right;
+  font-size:13px;
+}
+
+/* LAYOUT */
+.wrap{
+  display:flex;
+  height:calc(100vh - 100px);
+}
+
+.sidebar{
+  width:120px;
+  background:#fff;
+  padding:10px;
+  overflow:auto;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+}
+
+.num{
+  padding:8px;
+  background:#ddd;
+  text-align:center;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:12px;
+}
+
+.num.active{background:var(--blue);color:#fff}
+.num.done{background:#4caf50;color:#fff}
+
+/* CONTENT */
+.content{
+  flex:1;
+  padding:15px;
+  display:flex;
+  flex-direction:column;
+}
+
+.card{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  flex:1;
+}
+
+/* NAV */
+.nav{
+  display:flex;
+  justify-content:space-between;
+  margin-top:10px;
+}
+
+.btn{
+  padding:10px 16px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.blue{background:var(--blue);color:#fff}
+.red{background:var(--red);color:#fff}
+.green{background:var(--green);color:#fff}
+
+/* LOGIN */
+.login-container{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+}
+
+.login-box{
+  width:100%;
+  max-width:420px;
+  background:#fff;
+  padding:25px;
+  border-radius:20px;
+}
+
+.form-group{
+  display:grid;
+  grid-template-columns:100px 1fr;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+/* FOOTER */
+.footer{
+  background:#fff;
+  text-align:center;
+  padding:8px;
+  font-size:12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>CBT SMPN 1 MOGA</div>
+  <div class="header-right" id="infoUser"></div>
+</div>
+
+<div id="app"></div>
+
+<div class="footer">
+CBT Apps • Developer MB
+</div>
+
+<script>
+const API="https://script.google.com/macros/s/AKfycbyFKeH-bb47KADy6577hEQU3zJy4WmkBAAxzIHuRqmqY6dNnPCDaXrl-UP-v78lj72c/exec";
+
+let dataSiswa=[];
+let state={soal:[],index:0,jawaban:[]};
+
+/* ================= LOGIN ================= */
+function loginUI(){
+document.querySelector(".header").style.display="none";
+
+document.getElementById("app").innerHTML=`
+<div class="login-container">
+<div class="login-box">
+
+<h2 style="text-align:center">CBT Informatika</h2>
+
+<div class="form-group">
+<label>Kelas</label>
+<select id="kelas"></select>
+</div>
+
+<div class="form-group">
+<label>User</label>
+<select id="username"></select>
+</div>
+
+<div class="form-group">
+<label>Password</label>
+<input type="password" id="password">
+</div>
+
+<div class="form-group">
+<label>Token</label>
+<input id="token">
+</div>
+
+<button class="btn blue" onclick="login()">Masuk</button>
+
+</div>
+</div>
+`;
+
+fetch(API).then(r=>r.json()).then(d=>{
+dataSiswa=d;
+let k=[...new Set(d.map(x=>x.kelas))];
+let el=document.getElementById("kelas");
+
+el.innerHTML='<option>Pilih</option>';
+k.forEach(x=>el.innerHTML+=`<option>${x}</option>`);
+
+el.onchange=loadUser;
+});
+}
+
+function loadUser(){
+let k=document.getElementById("kelas").value;
+let el=document.getElementById("username");
+
+el.innerHTML="";
+dataSiswa.filter(x=>x.kelas==k)
+.forEach(s=>{
+el.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
+});
+}
+
+/* ================= LOGIN ACTION ================= */
+function login(){
+let username=document.getElementById("username").value;
+let password=document.getElementById("password").value.trim();
+let token=document.getElementById("token").value;
+
+fetch(API,{
+method:"POST",
+body:JSON.stringify({mode:"login",username,password,token})
+})
+.then(r=>r.json())
+.then(res=>{
+if(res.status=="success"){
+localStorage.setItem("user",JSON.stringify(res));
+startExam();
+}else{
+alert(res.msg);
+}
+});
+}
+
+/* ================= START ================= */
+function startExam(){
+
+let user=JSON.parse(localStorage.getItem("user"));
+
+document.querySelector(".header").style.display="flex";
+document.getElementById("infoUser").innerHTML=`
+${user.nama}<br>${user.kelas}
+<br><button onclick="logout()">Keluar</button>
+`;
+
+let sisa = localStorage.getItem("timer") || 1800;
+
+startTimer(parseInt(sisa));
+
+fetch(API+"?mode=soal")
+.then(r=>r.json())
+.then(d=>{
+state.soal=d;
+state.jawaban=new Array(d.length).fill("");
+render();
+});
+}
+
+/* ================= RENDER ================= */
+function render(){
+
+let side='<div class="sidebar"><div class="grid">';
+state.soal.forEach((s,i)=>{
+let c="num";
+if(i===state.index)c+=" active";
+if(state.jawaban[i])c+=" done";
+side+=`<div class="${c}" onclick="goto(${i})">${i+1}</div>`;
+});
+side+='</div></div>';
+
+let s=state.soal[state.index]||{};
+
+let nextBtn = (state.index === state.soal.length-1)
+? `<button class="btn green" onclick="submit()">Selesai</button>`
+: `<button class="btn red" onclick="next()">Selanjutnya</button>`;
+
+let main=`
+<div class="content">
+<div class="card">
+<h3>Soal ${state.index+1}</h3>
+<p>${s.soal||""}</p>
+`;
+
+["A","B","C","D"].forEach(o=>{
+main+=`
+<div>
+<input type="radio" ${state.jawaban[state.index]==o?"checked":""}
+onclick="jawab('${o}')"> ${o}. ${(s.pilihan||{})[o]||""}
+</div>`;
+});
+
+main+=`
+</div>
+
+<div class="nav">
+<button class="btn blue" onclick="prev()">Sebelumnya</button>
+${nextBtn}
+</div>
+
+</div>
+`;
+
+document.getElementById("app").innerHTML=`<div class="wrap">${side}${main}</div>`;
+}
+
+/* ================= NAV ================= */
+function jawab(v){state.jawaban[state.index]=v;render();}
+function next(){if(state.index<state.soal.length-1){state.index++;render();}}
+function prev(){if(state.index>0){state.index--;render();}}
+function goto(i){state.index=i;render();}
+
+/* ================= TIMER ================= */
+function startTimer(s){
+setInterval(()=>{
+s--;
+localStorage.setItem("timer",s);
+
+document.getElementById("timer").innerText=
+Math.floor(s/60)+":"+("0"+s%60).slice(-2);
+
+if(s<=0)submit();
+},1000);
+}
+
+/* ================= SUBMIT ================= */
+function submit(){
+localStorage.removeItem("timer");
+
+document.getElementById("app").innerHTML=`
+<div class="login-container">
+<div class="login-box">
+<h2>Ujian Selesai</h2>
+<p>Jawaban berhasil dikirim</p>
+<button class="btn blue" onclick="location.reload()">Kembali</button>
+</div>
+</div>
+`;
+}
+
+/* ================= LOGOUT ================= */
+function logout(){
+localStorage.clear();
+location.reload();
+}
+
+/* INIT */
+loginUI();
+</script>
+
+</body>
+</html>
