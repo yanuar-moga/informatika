@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Dashboard Rekap Tugas</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body{
@@ -33,6 +32,10 @@ button{
   cursor:pointer;
 }
 
+button:hover{
+  background:#083d82;
+}
+
 .container{
   display:flex;
   gap:20px;
@@ -45,6 +48,7 @@ button{
   background:white;
   padding:15px;
   border-radius:10px;
+  box-shadow:0 5px 15px rgba(0,0,0,.1);
 }
 
 table{
@@ -58,11 +62,16 @@ th,td{
   padding:6px;
 }
 
+th{
+  background:#f0f0f0;
+}
+
 .sudah{ color:green; }
 .belum{ color:red; }
 
-canvas{
-  margin-top:20px;
+#statistik{
+  margin-bottom:10px;
+  font-weight:bold;
 }
 </style>
 </head>
@@ -109,15 +118,12 @@ canvas{
 
 </div>
 
-<canvas id="chartBar"></canvas>
-
 <script>
 
 const url="https://script.google.com/macros/s/AKfycbw7UWmQGgF-yBoN6wWnZmlGkSB1qfUZGF_BtD9bnRINz766P846T1MOiXd83FKGZsYQ/exec";
 
 let semuaSiswa=[];
 let semuaTugas=[];
-let chart;
 
 /* LOAD DATA */
 Promise.all([
@@ -128,7 +134,11 @@ Promise.all([
   semuaSiswa=siswa || [];
   semuaTugas=tugas || [];
   initFilter();
+})
+.catch(()=>{
+  document.getElementById("statistik").innerHTML="Gagal mengambil data";
 });
+
 
 /* INIT FILTER */
 function initFilter(){
@@ -148,7 +158,7 @@ function initFilter(){
 }
 
 
-/* RENDER */
+/* RENDER DATA */
 function renderData(){
 
   const kelas=document.getElementById("filterKelas").value;
@@ -168,7 +178,7 @@ function renderData(){
   }
 
   /* =====================
-     AMBIL SEMUA NAMA YANG SUDAH (FLATTEN)
+     AMBIL SEMUA NAMA SUDAH (FLATTEN)
   ===================== */
   let sudahSet=new Set();
 
@@ -181,7 +191,6 @@ function renderData(){
   });
 
   const total=siswaKelas.length;
-
   const belum=siswaKelas.filter(s=>!sudahSet.has(s.nama));
 
   /* =====================
@@ -208,31 +217,6 @@ function renderData(){
   ===================== */
   document.getElementById("statistik").innerHTML=
     `Total: ${total} | Sudah: ${sudahSet.size} | Belum: ${belum.length}`;
-
-  renderChart(sudahSet.size,belum.length);
-}
-
-
-/* CHART */
-function renderChart(sudah,belum){
-
-  const ctx=document.getElementById("chartBar");
-
-  if(chart) chart.destroy();
-
-  chart=new Chart(ctx,{
-    type:"bar",
-    data:{
-      labels:["Sudah","Belum"],
-      datasets:[{
-        data:[sudah,belum],
-        backgroundColor:["green","red"]
-      }]
-    },
-    options:{
-      plugins:{legend:{display:false}}
-    }
-  });
 }
 
 </script>
