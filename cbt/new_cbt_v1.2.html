@@ -6,22 +6,159 @@
 <title>CBT SMPN 1 MOGA</title>
 
 <style>
-:root{--blue:#1976d2;--red:#d32f2f}
-body{margin:0;font-family:Arial;background:#b0bec5}
-.header{background:#1976d2;color:#fff;padding:12px;display:none;justify-content:space-between}
-.wrap{display:flex;height:calc(100vh - 50px)}
-.sidebar{width:120px;background:#fff;padding:10px}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
-.num{padding:6px;background:#ddd;text-align:center;border-radius:5px;cursor:pointer}
-.num.active{background:#1976d2;color:#fff}
+:root{
+  --blue:#1976d2;
+  --red:#d32f2f;
+}
+
+/* GLOBAL */
+body{
+  margin:0;
+  font-family:Arial;
+  background:#b0bec5;
+}
+
+/* HEADER */
+.header{
+  background:#1976d2;
+  color:#fff;
+  padding:12px;
+  display:none;
+  justify-content:space-between;
+  align-items:center;
+  font-size:14px;
+}
+
+/* LAYOUT */
+.wrap{
+  display:flex;
+  height:calc(100vh - 50px);
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:120px;
+  background:#fff;
+  padding:10px;
+  overflow:auto;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+}
+.num{
+  padding:8px;
+  background:#ddd;
+  text-align:center;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:12px;
+}
+.num.active{background:var(--blue);color:#fff}
 .num.done{background:#4caf50;color:#fff}
-.content{flex:1;padding:10px}
-.card{background:#fff;padding:15px;border-radius:10px}
-.btn{padding:10px;border:none;border-radius:6px;margin-top:10px;cursor:pointer}
-.blue{background:#1976d2;color:#fff}
-.red{background:#d32f2f;color:#fff}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center}
-.box{background:#fff;padding:20px;border-radius:10px;width:300px;text-align:center}
+
+/* CONTENT */
+.content{
+  flex:1;
+  padding:12px;
+  overflow:auto;
+}
+.card{
+  background:#fff;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
+
+/* BUTTON */
+.btn{
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  margin-top:10px;
+  cursor:pointer;
+  font-size:14px;
+}
+.blue{background:var(--blue);color:#fff}
+.red{background:var(--red);color:#fff}
+
+/* MODAL */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+.box{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  width:300px;
+  text-align:center;
+}
+
+/* LOGIN FORM */
+.login-box{
+  max-width:420px;
+  margin:40px auto;
+  background:#fff;
+  padding:25px;
+  border-radius:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+.form-group{
+  display:grid;
+  grid-template-columns:100px 1fr;
+  gap:10px;
+  margin-bottom:10px;
+  align-items:center;
+}
+.form-group input,
+.form-group select{
+  padding:8px;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+.row{
+  display:flex;
+  gap:10px;
+}
+.row .btn{
+  flex:1;
+}
+
+/* MOBILE */
+@media(max-width:768px){
+
+.wrap{
+  flex-direction:column;
+}
+
+.sidebar{
+  width:100%;
+  order:2;
+}
+
+.grid{
+  grid-template-columns:repeat(6,1fr);
+}
+
+.content{
+  order:1;
+}
+
+.form-group{
+  grid-template-columns:1fr;
+}
+
+.header{
+  font-size:12px;
+}
+
+}
 </style>
 </head>
 
@@ -68,26 +205,48 @@ function modalHide(){modal.style.display="none"}
 /* ===== LOGIN ===== */
 function loginUI(){
 app.innerHTML=`
-<div style="max-width:380px;margin:40px auto;background:#fff;padding:25px;border-radius:20px">
-<img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" style="width:80px;display:block;margin:auto">
-<h2 style="text-align:center;color:#1e4f8a">CBT Asesmen<br>Informatika</h2>
+<div class="login-box">
 
+<img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" 
+style="width:80px;display:block;margin:auto">
+
+<h2 style="text-align:center;color:#1e4f8a">
+CBT Asesmen<br>Informatika
+</h2>
+
+<div class="form-group">
 <label>Kelas</label>
-<select id=kelas onchange="loadSiswa()"></select>
+<select id="kelas" onchange="loadSiswa()"></select>
+</div>
 
+<div class="form-group">
 <label>Username</label>
-<select id=username></select>
+<select id="username"></select>
+</div>
 
+<div class="form-group">
 <label>Password</label>
-<input type=password id=password>
+<input type="password" id="password">
+</div>
 
-<label><input type=checkbox onclick="password.type=password.type=='password'?'text':'password'"> Tampilkan</label>
+<div class="form-group">
+<label></label>
+<div>
+<input type="checkbox" onclick="password.type=password.type=='password'?'text':'password'">
+Tampilkan Password
+</div>
+</div>
 
+<div class="form-group">
 <label>Token</label>
-<input id=token>
+<input id="token">
+</div>
 
+<div class="row">
 <button class="btn blue" onclick="login()">Masuk</button>
 <button class="btn red" onclick="jadwal()">Jadwal</button>
+</div>
+
 </div>`;
 
 fetch(API).then(r=>r.json()).then(d=>{
@@ -100,12 +259,14 @@ k.forEach(x=>kelas.innerHTML+=`<option>${x}</option>`);
 fetch(API+"?mode=token").then(r=>r.json()).then(d=>dataToken=d);
 }
 
+/* ===== SISWA ===== */
 function loadSiswa(){
 username.innerHTML='<option>-- Pilih --</option>';
 dataSiswa.filter(x=>x.kelas==kelas.value)
 .forEach(s=>username.innerHTML+=`<option value="${s.username}">${s.nama}</option>`);
 }
 
+/* ===== LOGIN ACTION ===== */
 function login(){
 modal("Login","Memproses...",[]);
 fetch(API,{
@@ -137,7 +298,6 @@ fetch(API+"?mode=soal")
 .then(d=>{
 state.soal=d;
 
-// 🔥 LOAD JAWABAN DARI LOCAL
 let saved = localStorage.getItem("jawaban");
 state.jawaban = saved ? JSON.parse(saved) : new Array(d.length).fill("");
 
@@ -146,6 +306,7 @@ timer(1800);
 });
 }
 
+/* ===== RENDER ===== */
 function render(){
 let side='<div class=sidebar><div class=grid>';
 state.soal.forEach((s,i)=>{
@@ -157,36 +318,35 @@ side+=`<div class="${c}" onclick="goto(${i})">${i+1}</div>`;
 side+='</div></div>';
 
 let s=state.soal[state.index];
+
 let main=`<div class=content><div class=card>
 <h4>Soal ${state.index+1}</h4>
 <p>${s.soal}</p>
-${s.gambar?`<img src="${s.gambar}" width=100%>`:""}`;
+${s.gambar?`<img src="${s.gambar}" style="width:100%">`:""}`;
 
 ["A","B","C","D"].forEach(o=>{
-main+=`<div>
+main+=`<div style="margin:8px 0">
 <input type=radio name=o
 ${state.jawaban[state.index]==o?"checked":""}
 onchange="jawab('${o}')"> ${o}. ${s.pilihan[o]}
 </div>`;
 });
 
-main+=`<button onclick=prev()>Prev</button>
-<button onclick=next()>Next</button>
+main+=`
+<button class="btn" onclick=prev()>Prev</button>
+<button class="btn blue" onclick=next()>Next</button>
 <button class="btn red" onclick=submit()>Kirim</button>
 </div></div>`;
 
 app.innerHTML=`<div class=wrap>${side}${main}</div>`;
 }
 
+/* ===== LOGIC ===== */
 function jawab(v){
 state.jawaban[state.index]=v;
-
-// 🔥 SIMPAN LOCAL
 localStorage.setItem("jawaban",JSON.stringify(state.jawaban));
-
 render();
 }
-
 function next(){if(state.index<state.soal.length-1){state.index++;render()}}
 function prev(){if(state.index>0){state.index--;render()}}
 function goto(i){state.index=i;render()}
@@ -220,10 +380,7 @@ jawaban:state.jawaban
 })
 .then(r=>r.json())
 .then(res=>{
-
-// 🔥 HAPUS LOCAL STORAGE
 localStorage.removeItem("jawaban");
-
 modal("Selesai","Nilai: "+res.nilai,[{
 text:"OK",
 cls:"blue",
