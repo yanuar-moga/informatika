@@ -6,239 +6,206 @@
 <title>CBT SMPN 1 MOGA</title>
 
 <style>
-:root{
-  --blue:#1976d2; --red:#d32f2f; --bg:#f5f7fb; --card:#ffffff;
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial;background:var(--bg)}
-
-/* HEADER */
-.header{
-  background:linear-gradient(90deg,#1976d2,#2196f3);
-  color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;
-}
-.header .title{font-weight:bold}
-.header .timer{font-weight:bold}
-
-/* LAYOUT */
-.wrap{display:flex;height:calc(100vh - 56px)}
-.sidebar{
-  width:120px;background:#fff;padding:10px;overflow:auto;border-right:1px solid #eee;
-}
-.grid{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:6px;
-}
-.num{
-  padding:8px;border-radius:6px;text-align:center;cursor:pointer;background:#e0e0e0;
-  font-size:12px;
-}
-.num.active{background:var(--blue);color:#fff}
+:root{--blue:#1976d2;--red:#d32f2f}
+body{margin:0;font-family:Arial;background:#b0bec5}
+.header{background:#1976d2;color:#fff;padding:12px;display:none;justify-content:space-between}
+.wrap{display:flex;height:calc(100vh - 50px)}
+.sidebar{width:120px;background:#fff;padding:10px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.num{padding:6px;background:#ddd;text-align:center;border-radius:5px;cursor:pointer}
+.num.active{background:#1976d2;color:#fff}
 .num.done{background:#4caf50;color:#fff}
-
-/* CONTENT */
-.content{flex:1;padding:15px;overflow:auto}
-.card{
-  background:var(--card);padding:16px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1);
-}
-.option{margin:6px 0;padding:6px;border-radius:6px}
-.option:hover{background:#f0f0f0}
-
-/* BUTTON */
-.btn{padding:10px 14px;border:none;border-radius:8px;cursor:pointer}
-.blue{background:var(--blue);color:#fff}
-.red{background:var(--red);color:#fff}
-.gray{background:#ddd}
-
-/* MODAL */
-.modal{
-  position:fixed;inset:0;background:rgba(0,0,0,.4);
-  display:none;align-items:center;justify-content:center;z-index:999;
-}
-.box{
-  background:#fff;padding:20px;border-radius:12px;width:300px;text-align:center;
-}
-.actions button{margin:5px}
+.content{flex:1;padding:10px}
+.card{background:#fff;padding:15px;border-radius:10px}
+.btn{padding:10px;border:none;border-radius:6px;margin-top:10px;cursor:pointer}
+.blue{background:#1976d2;color:#fff}
+.red{background:#d32f2f;color:#fff}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center}
+.box{background:#fff;padding:20px;border-radius:10px;width:300px;text-align:center}
 </style>
 </head>
 
-<body>
+<body oncontextmenu="return false">
 
 <div class="header">
-  <div class="title">CBT SMPN 1 MOGA</div>
-  <div id="timer" class="timer">--:--</div>
+<div>CBT SMPN 1 MOGA</div>
+<div id="timer"></div>
 </div>
 
 <div id="app"></div>
 
-<!-- MODAL -->
 <div id="modal" class="modal">
-  <div class="box">
-    <h3 id="mTitle"></h3>
-    <p id="mMsg"></p>
-    <div class="actions" id="mAct"></div>
-  </div>
+<div class="box">
+<h3 id="mTitle"></h3>
+<p id="mMsg"></p>
+<div id="mAct"></div>
+</div>
 </div>
 
 <script>
-const API = "PASTE_URL_GAS_DISINI";
+const API="https://script.google.com/macros/s/AKfycbyFKeH-bb47KADy6577hEQU3zJy4WmkBAAxzIHuRqmqY6dNnPCDaXrl-UP-v78lj72c/exec";
 
-let state = {
-  soal: [],
-  index: 0,
-  jawaban: [],
-  done: false
-};
+let dataSiswa=[],dataToken=[];
+let state={soal:[],index:0,jawaban:[],done:false};
+let warning=0;
 
-/* ================= MODAL ================= */
-function modal(title,msg,buttons){
-  mTitle.innerText=title;
-  mMsg.innerText=msg;
-  mAct.innerHTML="";
-  buttons.forEach(b=>{
-    let btn=document.createElement("button");
-    btn.className="btn "+b.cls;
-    btn.innerText=b.text;
-    btn.onclick=()=>{
-      modalHide();
-      if(b.cb) b.cb();
-    };
-    mAct.appendChild(btn);
-  });
-  modalShow();
+/* ===== MODAL ===== */
+function modal(t,m,btns){
+mTitle.innerText=t;
+mMsg.innerText=m;
+mAct.innerHTML="";
+btns.forEach(b=>{
+let x=document.createElement("button");
+x.className="btn "+b.cls;
+x.innerText=b.text;
+x.onclick=()=>{modalHide();if(b.cb)b.cb()};
+mAct.appendChild(x);
+});
+modal.style.display="flex";
 }
-function modalShow(){modal.style.display="flex"}
 function modalHide(){modal.style.display="none"}
 
-/* ================= LOGIN ================= */
+/* ===== LOGIN ===== */
 function loginUI(){
 app.innerHTML=`
-<div class="content">
-<div class="card">
-<h3>Login CBT</h3>
-<input id=u placeholder="Username"><br><br>
-<input id=p type=password placeholder="Password"><br><br>
-<input id=t placeholder="Token"><br><br>
-<button class="btn blue" onclick="login()">Login</button>
-</div>
+<div style="max-width:380px;margin:40px auto;background:#fff;padding:25px;border-radius:20px">
+<img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" style="width:80px;display:block;margin:auto">
+<h2 style="text-align:center;color:#1e4f8a">CBT Asesmen<br>Informatika</h2>
+
+<label>Kelas</label>
+<select id=kelas onchange="loadSiswa()"></select>
+
+<label>Username</label>
+<select id=username></select>
+
+<label>Password</label>
+<input type=password id=password>
+
+<label><input type=checkbox onclick="password.type=password.type=='password'?'text':'password'"> Tampilkan</label>
+
+<label>Token</label>
+<input id=token>
+
+<button class="btn blue" onclick="login()">Masuk</button>
+<button class="btn red" onclick="jadwal()">Jadwal</button>
 </div>`;
+
+fetch(API).then(r=>r.json()).then(d=>{
+dataSiswa=d;
+let k=[...new Set(d.map(x=>x.kelas))];
+kelas.innerHTML='<option>-- Pilih Kelas --</option>';
+k.forEach(x=>kelas.innerHTML+=`<option>${x}</option>`);
+});
+
+fetch(API+"?mode=token").then(r=>r.json()).then(d=>dataToken=d);
+}
+
+function loadSiswa(){
+username.innerHTML='<option>-- Pilih --</option>';
+dataSiswa.filter(x=>x.kelas==kelas.value)
+.forEach(s=>username.innerHTML+=`<option value="${s.username}">${s.nama}</option>`);
 }
 
 function login(){
-modal("Proses","Sedang login...",[]);
+modal("Login","Memproses...",[]);
 fetch(API,{
 method:"POST",
 body:JSON.stringify({
 mode:"login",
-username:u.value,
-password:p.value,
-token:t.value
+username:username.value,
+password:password.value||"",
+token:token.value
 })
 })
 .then(r=>r.json())
 .then(res=>{
 modalHide();
 if(res.status=="success"){
-localStorage.user=JSON.stringify(res);
-loadSoal();
-}else{
-modal("Error",res.msg,[{text:"OK",cls:"red"}]);
-}
+localStorage.setItem("user",JSON.stringify(res));
+startExam();
+}else modal("Error",res.msg,[{text:"OK",cls:"red"}]);
 });
 }
 
-/* ================= LOAD SOAL ================= */
-function loadSoal(){
+/* ===== CBT ===== */
+function startExam(){
+document.querySelector(".header").style.display="flex";
+enterFullscreen();
+
 fetch(API+"?mode=soal")
 .then(r=>r.json())
-.then(data=>{
-state.soal=data;
-state.jawaban=new Array(data.length).fill("");
-renderUI();
-startTimer(1800);
+.then(d=>{
+state.soal=d;
+
+// 🔥 LOAD JAWABAN DARI LOCAL
+let saved = localStorage.getItem("jawaban");
+state.jawaban = saved ? JSON.parse(saved) : new Array(d.length).fill("");
+
+render();
+timer(1800);
 });
 }
 
-/* ================= RENDER ================= */
-function renderUI(){
-let side=`<div class="sidebar"><div class="grid">`;
-
+function render(){
+let side='<div class=sidebar><div class=grid>';
 state.soal.forEach((s,i)=>{
-let cls="num";
-if(state.index==i) cls+=" active";
-if(state.jawaban[i]) cls+=" done";
-side+=`<div class="${cls}" onclick="goto(${i})">${i+1}</div>`;
+let c="num";
+if(i==state.index)c+=" active";
+if(state.jawaban[i])c+=" done";
+side+=`<div class="${c}" onclick="goto(${i})">${i+1}</div>`;
 });
-
-side+=`</div></div>`;
+side+='</div></div>';
 
 let s=state.soal[state.index];
-
-let main=`
-<div class="content">
-<div class="card">
+let main=`<div class=content><div class=card>
 <h4>Soal ${state.index+1}</h4>
 <p>${s.soal}</p>
-${s.gambar?`<img src="${s.gambar}" width="100%">`:""}
-`;
+${s.gambar?`<img src="${s.gambar}" width=100%>`:""}`;
 
 ["A","B","C","D"].forEach(o=>{
-main+=`
-<div class="option">
-<input type="radio" name="o"
+main+=`<div>
+<input type=radio name=o
 ${state.jawaban[state.index]==o?"checked":""}
-onchange="jawab('${o}')">
-${o}. ${s.pilihan[o]}
+onchange="jawab('${o}')"> ${o}. ${s.pilihan[o]}
 </div>`;
 });
 
-main+=`
-<br>
-<button class="btn gray" onclick="prev()">Prev</button>
-<button class="btn blue" onclick="next()">Next</button>
-</div>
+main+=`<button onclick=prev()>Prev</button>
+<button onclick=next()>Next</button>
+<button class="btn red" onclick=submit()>Kirim</button>
+</div></div>`;
 
-<br>
-<button class="btn red" onclick="confirmSubmit()">Kirim Jawaban</button>
-</div>`;
-
-app.innerHTML=`<div class="wrap">${side}${main}</div>`;
+app.innerHTML=`<div class=wrap>${side}${main}</div>`;
 }
 
 function jawab(v){
 state.jawaban[state.index]=v;
-renderUI();
-}
-function next(){if(state.index<state.soal.length-1){state.index++;renderUI();}}
-function prev(){if(state.index>0){state.index--;renderUI();}}
-function goto(i){state.index=i;renderUI();}
 
-/* ================= TIMER ================= */
-function startTimer(sec){
-let t=sec;
+// 🔥 SIMPAN LOCAL
+localStorage.setItem("jawaban",JSON.stringify(state.jawaban));
+
+render();
+}
+
+function next(){if(state.index<state.soal.length-1){state.index++;render()}}
+function prev(){if(state.index>0){state.index--;render()}}
+function goto(i){state.index=i;render()}
+
+/* ===== TIMER ===== */
+function timer(s){
 setInterval(()=>{
-t--;
-let m=Math.floor(t/60);
-let s=t%60;
-timer.innerText=`${m}:${s<10?"0":""}${s}`;
-if(t<=0) submit();
+s--;
+timer.innerText=Math.floor(s/60)+":"+("0"+s%60).slice(-2);
+if(s<=0)submit();
 },1000);
 }
 
-/* ================= SUBMIT ================= */
-function confirmSubmit(){
-modal("Konfirmasi","Yakin kirim jawaban?",[
-{text:"Batal",cls:"gray"},
-{text:"Kirim",cls:"red",cb:submit}
-]);
-}
-
+/* ===== SUBMIT ===== */
 function submit(){
-if(state.done) return;
+if(state.done)return;
 state.done=true;
 
-modal("Mengirim","Mohon tunggu...",[]);
-
-let u=JSON.parse(localStorage.user);
+let u=JSON.parse(localStorage.getItem("user"));
 
 fetch(API,{
 method:"POST",
@@ -253,10 +220,46 @@ jawaban:state.jawaban
 })
 .then(r=>r.json())
 .then(res=>{
-modal("Selesai","Nilai: "+res.nilai,[
-{text:"OK",cls:"blue",cb:()=>location.reload()}
-]);
+
+// 🔥 HAPUS LOCAL STORAGE
+localStorage.removeItem("jawaban");
+
+modal("Selesai","Nilai: "+res.nilai,[{
+text:"OK",
+cls:"blue",
+cb:()=>location.reload()
+}]);
 });
+}
+
+/* ===== ANTI NYONTEK ===== */
+document.addEventListener("visibilitychange",()=>{
+if(document.hidden){
+warning++;
+if(warning>=3){
+modal("Dikeluarkan","Anda keluar ujian!",[{text:"OK",cls:"red",cb:submit}]);
+}else{
+modal("Peringatan","Jangan pindah tab!",[{text:"OK",cls:"blue"}]);
+}
+}
+});
+
+/* ===== FULLSCREEN ===== */
+function enterFullscreen(){
+let el=document.documentElement;
+if(el.requestFullscreen)el.requestFullscreen();
+}
+
+/* ===== BLOK INSPECT ===== */
+document.onkeydown=function(e){
+if(e.key==="F12"||e.ctrlKey&&e.key==="u") return false;
+}
+
+/* ===== JADWAL ===== */
+function jadwal(){
+let t="";
+dataToken.forEach(x=>t+=x.kelas+" "+x.mulai+"-"+x.selesai+"\n");
+modal("Jadwal",t,[{text:"OK",cls:"blue"}]);
 }
 
 /* INIT */
