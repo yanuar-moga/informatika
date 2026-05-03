@@ -12,6 +12,7 @@
   --green:#4caf50;
   --orange:#ff5722;
 }
+
 body{margin:0;font-family:Arial;background:#b0bec5;}
 
 .header{
@@ -36,14 +37,12 @@ body{margin:0;font-family:Arial;background:#b0bec5;}
   max-width:650px;
   margin:20px auto;
 }
-
-/* RAPATKAN */
 .card p{margin:4px 0;}
 .card ul{margin:5px 0 10px 18px;}
 
-.btn{
-  padding:10px 15px;border:none;border-radius:8px;cursor:pointer;font-size:14px;
-}
+.nav-btn{display:flex;justify-content:space-between;margin-top:15px;}
+
+.btn{padding:10px 15px;border:none;border-radius:8px;cursor:pointer;font-size:14px;}
 .blue{background:var(--blue);color:#fff}
 .red{background:var(--red);color:#fff}
 .green{background:var(--green);color:#fff}
@@ -54,7 +53,7 @@ body{margin:0;font-family:Arial;background:#b0bec5;}
   display:none;align-items:center;justify-content:center;font-size:12px;
 }
 
-/* LOGIN ASLI */
+/* LOGIN ASLI (TIDAK DIUBAH) */
 .login-container{
   min-height:100vh;display:flex;align-items:center;justify-content:center;padding:15px;
 }
@@ -140,7 +139,7 @@ modal("Jadwal & Token",`
 `,[{text:"Tutup",cls:"blue"}]);
 }
 
-/* LOGIN UI ASLI */
+/* LOGIN UI (ASLI 100%) */
 function loginUI(){
 app.innerHTML=`
 <div class="login-container">
@@ -234,15 +233,12 @@ showKonfirmasi();
 });
 }
 
-/* INIT FIX */
+/* INIT */
 function init(){
 let user=localStorage.getItem("user");
 let layer=localStorage.getItem("layer");
 
-if(!user){
-loginUI();
-return;
-}
+if(!user){loginUI();return;}
 
 let u=JSON.parse(user);
 document.querySelector(".header").style.display="flex";
@@ -250,8 +246,90 @@ footer.style.display="flex";
 nama.innerText=u.nama;
 kelas.innerText=u.kelas;
 
-if(layer==="soal"){startExam();}
-else{showKonfirmasi();}
+if(layer==="soal") startExam();
+else if(layer==="hasil") showHasil();
+else showKonfirmasi();
+}
+
+/* KONFIRMASI */
+function showKonfirmasi(){
+let u=JSON.parse(localStorage.getItem("user"));
+
+app.innerHTML=`
+<div style="text-align:center;margin-top:20px">
+<img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" width="80">
+<h2>Asesmen CBT Informatika</h2>
+<p>⏱ <span id="jam"></span></p>
+</div>
+
+<div class="card">
+<p>Nama : <b>${u.nama}</b></p>
+<p>Kelas : <b>${u.kelas}</b></p>
+<p>Mata Pelajaran : Informatika</p>
+<p>Semester : Genap</p>
+<p>Tahun Pelajaran : 2026 - 2027</p>
+
+<hr>
+
+<b>Informasi Ujian:</b>
+<ul>
+<li>Jumlah soal: 40</li>
+<li>Pilihan ganda: 35</li>
+<li>Essay: 5</li>
+<li>Durasi: 90 menit</li>
+</ul>
+
+<b>Penting:</b>
+<ul>
+<li>Dilarang keluar aplikasi</li>
+<li>Jangan refresh saat ujian</li>
+<li>Kerjakan dengan jujur</li>
+</ul>
+
+<button class="btn orange" style="width:100%" onclick="popupData()">Kerjakan Ujian</button>
+</div>
+`;
+
+setInterval(()=>{jam.innerText=new Date().toLocaleTimeString();},1000);
+}
+
+/* POPUP KONFIRMASI */
+function popupData(){
+modal("Konfirmasi Data",`
+<p>Pastikan data benar</p>
+<div style="text-align:left">
+<input type="checkbox" id="cek"> Saya yakin data sudah benar
+</div>
+`,[
+{text:"Batal",cls:"blue"},
+{text:"Kirim",cls:"red",cb:cekStart}
+]);
+}
+
+function cekStart(){
+if(!document.getElementById("cek").checked){
+alert("Centang dulu!");
+return;
+}
+startExam();
+}
+
+/* START EXAM */
+function startExam(){
+localStorage.setItem("layer","soal");
+
+fetch(API+"?mode=soal")
+.then(r=>r.json())
+.then(d=>{
+let saved=localStorage.getItem("cbt_state");
+if(saved){state=JSON.parse(saved);}
+else{
+state.soal=d;
+state.jawaban=new Array(d.length).fill("");
+}
+render();
+startTimer(1800);
+});
 }
 
 /* TIMER PRESISI */
@@ -271,10 +349,84 @@ requestAnimationFrame(update);
 update();
 }
 
-/* VISIBILITY FIX */
-document.addEventListener("visibilitychange",()=>{
-if(!document.hidden) startTimer(0);
+/* RENDER */
+function render(){
+let side='<div class="sidebar"><div class="grid">';
+state.soal.forEach((s,i)=>{
+let c="num";
+if(i===state.index)c+=" active";
+if(state.jawaban[i])c+=" done";
+side+=`<div class="${c}" onclick="goto(${i})">${i+1}</div>`;
 });
+side+='</div></div>';
+
+let s=state.soal[state.index];
+
+let main=`<div class="content"><div class="card">
+<h3>Soal ${state.index+1}</h3>
+<p>${s.soal}</p>`;
+
+["A","B","C","D","E"].forEach(o=>{
+main+=`<div>
+<input type="radio" ${state.jawaban[state.index]==o?"checked":""}
+onclick="jawab('${o}')"> ${o}. ${s.pilihan[o]||""}
+</div>`;
+});
+
+main+=`<div class="nav-btn">
+<button class="btn blue" onclick="prev()">Sebelumnya</button>
+<button class="btn red" onclick="next()">Selanjutnya</button>
+<button class="btn green" onclick="popupSubmit()">Selesai</button>
+</div></div></div>`;
+
+app.innerHTML=`<div class="wrap">${side}${main}</div>`;
+}
+
+/* NAV */
+function jawab(v){state.jawaban[state.index]=v;save();}
+function next(){if(state.index<state.soal.length-1){state.index++;save();render();}}
+function prev(){if(state.index>0){state.index--;save();render();}}
+function goto(i){state.index=i;save();render();}
+function save(){localStorage.setItem("cbt_state",JSON.stringify(state));}
+
+/* POPUP SUBMIT */
+function popupSubmit(){
+modal("Konfirmasi Submit","Yakin selesai?",[
+{text:"Batal",cls:"blue"},
+{text:"Ya",cls:"red",cb:submit}
+]);
+}
+
+/* SUBMIT */
+function submit(){
+localStorage.setItem("layer","hasil");
+showHasil();
+}
+
+/* HASIL */
+function showHasil(){
+app.innerHTML=`
+<div class="card" style="text-align:center">
+<h2>Selamat!</h2>
+<p>Anda telah menyelesaikan asesmen</p>
+<h1>Skor Anda: 85</h1>
+<button class="btn red" onclick="keluar()">Keluar</button>
+</div>`;
+}
+
+/* ANTI TAB */
+document.addEventListener("visibilitychange",()=>{
+if(document.hidden){
+warning++;
+if(warning>=3) submit();
+}
+});
+
+/* LOGOUT */
+function keluar(){
+localStorage.clear();
+location.reload();
+}
 
 /* INIT */
 init();
