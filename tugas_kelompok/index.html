@@ -20,12 +20,17 @@ body{
 }
 
 .card{
-  width:380px;
+  width:400px;
   background:#fff;
   border-radius:18px;
   padding:28px 26px 22px;
   box-shadow:0 12px 30px rgba(0,0,0,.15);
   text-align:center;
+}
+
+.logo{
+  width:80px;
+  margin-bottom:10px;
 }
 
 .title{
@@ -53,8 +58,11 @@ body{
   border-radius:8px;
   border:1px solid #ccc;
   font-size:14px;
-  height:42px;
   outline:none;
+}
+
+select[multiple]{
+  height:120px;
 }
 
 textarea{
@@ -96,10 +104,6 @@ textarea{
   text-decoration:none;
 }
 
-.btn-secondary:hover{
-  background:#3e8e41;
-}
-
 .footer{
   margin-top:18px;
   font-size:12px;
@@ -111,120 +115,158 @@ textarea{
 <body>
 
 <div class="card">
-  <h1 class="title">Form Pengumpulan Tugas</h1>
 
-  <form id="formTugas" class="form">
+<img src="assets/logo.png" class="logo" alt="Logo">
+<h1 class="title">Form Pengumpulan Tugas</h1>
 
-    <!-- KELAS -->
-    <div class="field">
-      <span class="label-text">Kelas</span>
-      <select id="kelas" required>
-        <option value="">Pilih Kelas</option>
-        <option>Kelas 7A</option>
-        <option>Kelas 7B</option>
-        <option>Kelas 7C</option>
-        <option>Kelas 7D</option>
-        <option>Kelas 7E</option>
-        <option>Kelas 7F</option>
-        <option>Kelas 7G</option>
-        <option>Kelas 7H</option>
-        <option>Kelas 7I</option>
-      </select>
-    </div>
+<form id="formTugas" class="form">
 
-    <!-- NAMA KELOMPOK -->
-    <div class="field">
-      <span class="label-text">Nama (Kelompok)</span>
-      <input type="text" id="nama" class="input-field" placeholder="Contoh: Kelompok 1 / Nama Anggota" required>
-    </div>
+<!-- NAMA KELOMPOK -->
+<div class="field">
+  <span class="label-text">Nama Kelompok</span>
+  <input type="text" id="kelompok" class="input-field" required>
+</div>
 
-    <!-- JUDUL -->
-    <div class="field">
-      <span class="label-text">Judul Tugas</span>
-      <select id="judul" required>
-        <option value="Tugas Kolaborasi Video SPMB">Tugas Kolaborasi Video SPMB</option>
-      </select>
-    </div>
+<!-- KELAS -->
+<div class="field">
+  <span class="label-text">Kelas</span>
+  <select id="kelas" required>
+    <option value="">Pilih Kelas</option>
+    <option>Kelas 7A</option>
+    <option>Kelas 7B</option>
+    <option>Kelas 7C</option>
+    <option>Kelas 7D</option>
+    <option>Kelas 7E</option>
+    <option>Kelas 7F</option>
+    <option>Kelas 7G</option>
+    <option>Kelas 7H</option>
+    <option>Kelas 7I</option>
+  </select>
+</div>
 
-    <!-- LINK -->
-    <div class="field">
-      <span class="label-text">Link Tugas</span>
-      <input id="link" type="url" class="input-field" required>
-    </div>
+<!-- NAMA ANAK MULTI -->
+<div class="field">
+  <span class="label-text">Nama Anak (maksimal 6)</span>
+  <select id="namaAnak" multiple required>
+    <option>Memuat data...</option>
+  </select>
+</div>
 
-    <!-- CATATAN -->
-    <div class="field">
-      <span class="label-text">Catatan</span>
-      <textarea id="catatan"></textarea>
-    </div>
+<!-- JUDUL -->
+<div class="field">
+  <span class="label-text">Judul Tugas</span>
+  <select id="judul">
+    <option>Tugas Kolaborasi Video SPMB</option>
+  </select>
+</div>
 
-    <!-- BUTTON -->
-    <button type="submit" id="btnKirim" class="btn-primary">
-      Kirim Tugas
-    </button>
+<!-- LINK -->
+<div class="field">
+  <span class="label-text">Link Tugas</span>
+  <input id="link" type="url" class="input-field" required>
+</div>
 
-    <!-- REKAP -->
-    <a href="https://yanuar-moga.github.io/informatika/tugas_kelompok/rekap" target="_blank" class="btn-secondary">
-      Lihat Rekap Pengiriman Tugas
-    </a>
+<!-- CATATAN -->
+<div class="field">
+  <span class="label-text">Catatan</span>
+  <textarea id="catatan"></textarea>
+</div>
 
-  </form>
+<button type="submit" id="btnKirim" class="btn-primary">
+  Kirim Tugas
+</button>
 
-  <!-- FOOTER -->
-  <div class="footer">
-    © 2026 MB All Rights Reserved
-  </div>
+<a href="https://yanuar-moga.github.io/informatika/tugas_kelompok/rekap" target="_blank" class="btn-secondary">
+  Lihat Rekap Pengiriman Tugas
+</a>
+
+</form>
+
+<div class="footer">© 2026 MB All Rights Reserved</div>
+
 </div>
 
 <script>
 const url="https://script.google.com/macros/s/AKfycbw7UWmQGgF-yBoN6wWnZmlGkSB1qfUZGF_BtD9bnRINz766P846T1MOiXd83FKGZsYQ/exec";
 
-const formTugas=document.getElementById("formTugas");
-const btn=document.getElementById("btnKirim");
+let semuaSiswa=[];
 
-formTugas.addEventListener("submit",function(e){
+const kelas=document.getElementById("kelas");
+const namaSelect=document.getElementById("namaAnak");
+
+/* LOAD DATA */
+fetch(url+"?action=getDataSiswa")
+.then(res=>res.json())
+.then(data=>{
+  semuaSiswa=data || [];
+  namaSelect.innerHTML='<option>Pilih kelas dulu</option>';
+});
+
+/* FILTER NAMA BERDASARKAN KELAS */
+kelas.addEventListener("change",function(){
+  const k=this.value.toUpperCase().trim();
+
+  const filter=semuaSiswa.filter(s=>
+    s.rombel && s.rombel.toUpperCase().trim()===k
+  );
+
+  namaSelect.innerHTML='';
+
+  filter.forEach(s=>{
+    const opt=document.createElement("option");
+    opt.value=s.nama;
+    opt.textContent=s.nama;
+    namaSelect.appendChild(opt);
+  });
+});
+
+/* BATASI MAX 6 */
+namaSelect.addEventListener("change",function(){
+  const selected=[...this.selectedOptions];
+  if(selected.length>6){
+    alert("Maksimal 6 anak!");
+    selected[selected.length-1].selected=false;
+  }
+});
+
+/* SUBMIT */
+document.getElementById("formTugas").addEventListener("submit",function(e){
   e.preventDefault();
 
-  const kelas=document.getElementById("kelas").value;
-  const nama=document.getElementById("nama").value;
+  const kelompok=document.getElementById("kelompok").value;
+  const kelasVal=kelas.value;
+  const nama=[...namaSelect.selectedOptions].map(o=>o.value).join(", ");
   const judul=document.getElementById("judul").value;
   const link=document.getElementById("link").value;
   const catatan=document.getElementById("catatan").value;
 
-  if(!kelas || !nama || !judul || !link){
-    alert("Semua field wajib diisi!");
+  if(!kelompok || !kelasVal || !nama || !link){
+    alert("Lengkapi data!");
     return;
   }
 
+  const btn=document.getElementById("btnKirim");
   btn.disabled=true;
   btn.innerText="Mengirim...";
 
   const fd=new URLSearchParams();
   fd.append("action","submitTugas");
-  fd.append("kelas",kelas);
+  fd.append("kelompok",kelompok);
+  fd.append("kelas",kelasVal);
   fd.append("nama",nama);
   fd.append("judul",judul);
   fd.append("link",link);
   fd.append("catatan",catatan);
 
-  fetch(url,{
-    method:"POST",
-    body:fd
-  })
+  fetch(url,{method:"POST",body:fd})
   .then(res=>res.json())
   .then(res=>{
-    if(res.status==="success"){
-      alert("Tugas berhasil dikirim!");
-      formTugas.reset();
-    }else{
-      alert("Gagal mengirim");
-    }
-
+    alert(res.status==="success" ? "Berhasil!" : "Gagal!");
     btn.disabled=false;
     btn.innerText="Kirim Tugas";
   })
   .catch(()=>{
-    alert("Terjadi kesalahan koneksi");
+    alert("Error koneksi");
     btn.disabled=false;
     btn.innerText="Kirim Tugas";
   });
