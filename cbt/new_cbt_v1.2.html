@@ -17,7 +17,6 @@ body{
   background:#b0bec5;
 }
 
-/* HEADER */
 .header{
   background:#1976d2;
   color:#fff;
@@ -28,26 +27,10 @@ body{
   font-size:14px;
 }
 
-/* WRAP */
-.wrap{
-  display:flex;
-  height:calc(100vh - 50px);
-}
+.wrap{display:flex;height:calc(100vh - 50px);}
+.sidebar{width:120px;background:#fff;padding:10px;overflow:auto;}
 
-/* SIDEBAR */
-.sidebar{
-  width:120px;
-  background:#fff;
-  padding:10px;
-  overflow:auto;
-}
-
-/* GRID */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:6px;
-}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
 
 .num{
   padding:8px;
@@ -61,12 +44,7 @@ body{
 .num.active{background:var(--blue);color:#fff}
 .num.done{background:#4caf50;color:#fff}
 
-/* CONTENT */
-.content{
-  flex:1;
-  padding:12px;
-  overflow:auto;
-}
+.content{flex:1;padding:12px;overflow:auto;}
 
 .card{
   background:#fff;
@@ -75,7 +53,6 @@ body{
   box-shadow:0 3px 10px rgba(0,0,0,0.1);
 }
 
-/* BUTTON */
 .btn{
   padding:12px;
   border:none;
@@ -89,7 +66,6 @@ body{
 .blue{background:var(--blue);color:#fff}
 .red{background:var(--red);color:#fff}
 
-/* MODAL */
 .modal{
   position:fixed;
   inset:0;
@@ -110,7 +86,6 @@ body{
   text-align:center;
 }
 
-/* LOGIN */
 .login-container{
   min-height:100vh;
   display:flex;
@@ -128,7 +103,6 @@ body{
   box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
-/* FORM */
 .form-group{
   display:grid;
   grid-template-columns:100px 1fr;
@@ -144,7 +118,6 @@ body{
   border:1px solid #ccc;
 }
 
-/* MOBILE */
 @media(max-width:768px){
 .login-container{align-items:flex-start;padding-top:40px;}
 .form-group{grid-template-columns:1fr;}
@@ -178,7 +151,6 @@ const API="https://script.google.com/macros/s/AKfycbyFKeH-bb47KADy6577hEQU3zJy4W
 
 let dataSiswa=[],dataToken=[];
 let state={soal:[],index:0,jawaban:[],done:false};
-let warning=0;
 
 /* MODAL */
 function modal(t,m,btns){
@@ -255,7 +227,6 @@ CBT Browser Apps by MB<br>
 </div>
 
 </div>
-
 </div>
 </div>
 `;
@@ -300,10 +271,11 @@ let p=document.getElementById("password");
 p.type=p.type==="password"?"text":"password";
 }
 
-/* LOGIN */
+/* LOGIN (🔥 SUDAH FIX) */
 function login(){
 let kelas=document.getElementById("kelas").value;
 let username=document.getElementById("username").value;
+let password=document.getElementById("password").value.trim();
 let token=document.getElementById("token").value;
 
 if(!kelas||kelas.includes("Pilih"))
@@ -319,7 +291,12 @@ modal("Login","Memproses...",[]);
 
 fetch(API,{
 method:"POST",
-body:JSON.stringify({mode:"login",username,token})
+body:JSON.stringify({
+mode:"login",
+username,
+password, // ✅ FIX UTAMA
+token
+})
 })
 .then(r=>r.json())
 .then(res=>{
@@ -407,7 +384,7 @@ cb:()=>location.reload()
 }]);
 }
 
-/* JADWAL TABLE FIX */
+/* JADWAL */
 function jadwal(){
 let html=`
 <table style="width:100%;border-collapse:collapse;font-size:13px">
