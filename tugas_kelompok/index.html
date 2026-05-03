@@ -113,8 +113,7 @@ textarea{
   color:#777;
 }
 
-/* ================= ALERT ================= */
-
+/* ALERT */
 .alert-overlay{
   position:fixed;
   top:0;
@@ -136,14 +135,7 @@ textarea{
   text-align:center;
 }
 
-.alert-box h3{
-  margin:0 0 10px;
-}
-
-.alert-box p{
-  font-size:14px;
-  margin-bottom:15px;
-}
+.alert-box h3{ margin-bottom:10px; }
 
 .alert-box button{
   padding:8px 16px;
@@ -158,7 +150,6 @@ textarea{
 
 .alert-error h3{ color:#e53935; }
 .alert-error button{ background:#e53935; }
-
 </style>
 </head>
 
@@ -194,15 +185,15 @@ textarea{
 
 <div class="field">
   <span class="label-text">Nama Anak (maksimal 6)</span>
-  <div id="listNama" class="checkbox-list">
-    Memuat data...
-  </div>
+  <div id="listNama" class="checkbox-list">Memuat data...</div>
 </div>
 
 <div class="field">
   <span class="label-text">Judul Tugas</span>
-  <select id="judul">
-    <option>Tugas Kolaborasi Video SPMB</option>
+  <select id="judul" required>
+    <option value="">-- Pilih Judul Tugas --</option>
+    <option>Video Pengenalan Sekolah SMPB</option>
+    <option>Flyer Etika Bersosial Media</option>
   </select>
 </div>
 
@@ -230,7 +221,7 @@ textarea{
 
 </div>
 
-<!-- CUSTOM ALERT -->
+<!-- ALERT -->
 <div id="customAlert" class="alert-overlay">
   <div class="alert-box">
     <h3 id="alertTitle"></h3>
@@ -313,6 +304,7 @@ document.getElementById("formTugas").addEventListener("submit",function(e){
 
   const kelompok=document.getElementById("kelompok").value;
   const kelasVal=kelas.value;
+  const judul=document.getElementById("judul").value;
 
   const nama=[...listNama.querySelectorAll("input:checked")]
     .map(i=>i.value).join(", ");
@@ -320,7 +312,7 @@ document.getElementById("formTugas").addEventListener("submit",function(e){
   const link=document.getElementById("link").value;
   const catatan=document.getElementById("catatan").value;
 
-  if(!kelompok || !kelasVal || !nama || !link){
+  if(!kelompok || !kelasVal || !nama || !judul || !link){
     showAlert("error","Lengkapi semua data!");
     return;
   }
@@ -334,7 +326,7 @@ document.getElementById("formTugas").addEventListener("submit",function(e){
   fd.append("kelompok",kelompok);
   fd.append("kelas",kelasVal);
   fd.append("nama",nama);
-  fd.append("judul","Tugas Kolaborasi Video SPMB");
+  fd.append("judul",judul);
   fd.append("link",link);
   fd.append("catatan",catatan);
 
