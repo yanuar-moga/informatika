@@ -17,6 +17,7 @@ body{
   background:#b0bec5;
 }
 
+/* HEADER */
 .header{
   background:#1976d2;
   color:#fff;
@@ -27,11 +28,13 @@ body{
   font-size:14px;
 }
 
+/* WRAP */
 .wrap{
   display:flex;
   height:calc(100vh - 50px);
 }
 
+/* SIDEBAR */
 .sidebar{
   width:120px;
   background:#fff;
@@ -39,6 +42,7 @@ body{
   overflow:auto;
 }
 
+/* GRID NOMOR */
 .grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -57,6 +61,7 @@ body{
 .num.active{background:var(--blue);color:#fff}
 .num.done{background:#4caf50;color:#fff}
 
+/* CONTENT */
 .content{
   flex:1;
   padding:12px;
@@ -70,6 +75,7 @@ body{
   box-shadow:0 3px 10px rgba(0,0,0,0.1);
 }
 
+/* BUTTON */
 .btn{
   padding:12px;
   border:none;
@@ -77,11 +83,13 @@ body{
   margin-top:10px;
   cursor:pointer;
   font-size:14px;
+  width:100%;
 }
 
 .blue{background:var(--blue);color:#fff}
 .red{background:var(--red);color:#fff}
 
+/* MODAL */
 .modal{
   position:fixed;
   inset:0;
@@ -95,19 +103,32 @@ body{
   background:#fff;
   padding:20px;
   border-radius:12px;
-  width:300px;
+  width:90%;
+  max-width:350px;
+  max-height:80vh;
+  overflow:auto;
   text-align:center;
 }
 
+/* LOGIN FULLSCREEN STYLE */
+.login-container{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+}
+
 .login-box{
+  width:100%;
   max-width:420px;
-  margin:40px auto;
   background:#fff;
   padding:25px;
   border-radius:20px;
   box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
+/* FORM */
 .form-group{
   display:grid;
   grid-template-columns:100px 1fr;
@@ -123,22 +144,34 @@ body{
   border:1px solid #ccc;
 }
 
-.row{
-  display:flex;
-  gap:10px;
-}
-
-.row .btn{
-  flex:1;
-}
-
+/* MOBILE FIX (16:9 FEEL) */
 @media(max-width:768px){
-.wrap{flex-direction:column;}
-.sidebar{width:100%;order:2;}
-.grid{grid-template-columns:repeat(6,1fr);}
-.content{order:1;}
-.form-group{grid-template-columns:1fr;}
-.header{font-size:12px;}
+
+.login-container{
+  align-items:flex-start;
+  padding-top:40px;
+}
+
+.form-group{
+  grid-template-columns:1fr;
+}
+
+.header{
+  font-size:12px;
+}
+
+.sidebar{
+  width:100%;
+}
+
+.grid{
+  grid-template-columns:repeat(6,1fr);
+}
+
+.wrap{
+  flex-direction:column;
+}
+
 }
 </style>
 </head>
@@ -155,7 +188,7 @@ body{
 <div id="modal" class="modal">
 <div class="box">
 <h3 id="mTitle"></h3>
-<p id="mMsg"></p>
+<div id="mMsg"></div>
 <div id="mAct"></div>
 </div>
 </div>
@@ -170,7 +203,7 @@ let warning=0;
 /* MODAL */
 function modal(t,m,btns){
 document.getElementById("mTitle").innerText=t;
-document.getElementById("mMsg").innerText=m;
+document.getElementById("mMsg").innerHTML=m;
 
 const act=document.getElementById("mAct");
 act.innerHTML="";
@@ -193,6 +226,7 @@ document.getElementById("modal").style.display="none";
 /* LOGIN UI */
 function loginUI(){
 document.getElementById("app").innerHTML=`
+<div class="login-container">
 <div class="login-box">
 
 <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" 
@@ -229,116 +263,103 @@ CBT Asesmen<br>Informatika
 <input id="token">
 </div>
 
-<div class="row">
+<div style="display:flex;flex-direction:column;gap:10px">
+
 <button class="btn blue" onclick="login()">Masuk</button>
 <button class="btn red" onclick="jadwal()">Jadwal</button>
+
+<div style="height:20px"></div>
+
+<div style="text-align:center;font-size:12px;color:#555">
+CBT Browser Apps by MB<br>
+© 2026 MB All Rights Reserved
 </div>
 
-</div>`;
+</div>
+
+</div>
+</div>
+`;
 
 /* LOAD DATA */
-fetch(API)
-.then(r=>r.json())
-.then(d=>{
-dataSiswa=d || [];
-
+fetch(API).then(r=>r.json()).then(d=>{
+dataSiswa=d||[];
 let k=[...new Set(dataSiswa.map(x=>x.kelas))];
 let el=document.getElementById("kelas");
 
 el.innerHTML='<option>-- Pilih Kelas --</option>';
 k.forEach(x=>el.innerHTML+=`<option>${x}</option>`);
 
-/* FIX EVENT */
 el.addEventListener("change", loadSiswa);
 });
 
 fetch(API+"?mode=token")
 .then(r=>r.json())
-.then(d=>dataToken=d || []);
+.then(d=>dataToken=d||[]);
+}
+
+/* LOAD SISWA */
+function loadSiswa(){
+let kelas=document.getElementById("kelas").value.trim();
+let el=document.getElementById("username");
+
+el.innerHTML='<option>-- Pilih --</option>';
+
+dataSiswa
+.filter(x=>(x.kelas||"").trim()===kelas)
+.forEach(s=>{
+el.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
+});
 }
 
 /* PASSWORD */
 function togglePass(){
 let p=document.getElementById("password");
-p.type = p.type === "password" ? "text" : "password";
-}
-
-/* LOAD SISWA (FIX) */
-function loadSiswa(){
-let kelas = document.getElementById("kelas").value.trim();
-let el = document.getElementById("username");
-
-el.innerHTML='<option>-- Pilih --</option>';
-
-let list = dataSiswa.filter(x => (x.kelas || "").trim() === kelas);
-
-list.forEach(s=>{
-el.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
-});
+p.type=p.type==="password"?"text":"password";
 }
 
 /* LOGIN */
 function login(){
-
 let kelas=document.getElementById("kelas").value;
 let username=document.getElementById("username").value;
-let password=document.getElementById("password").value;
 let token=document.getElementById("token").value;
 
-if(!kelas || kelas.includes("Pilih")){
+if(!kelas||kelas.includes("Pilih"))
 return modal("Error","Pilih kelas dulu",[ {text:"OK",cls:"red"} ]);
-}
 
-if(!username){
+if(!username)
 return modal("Error","Pilih username dulu",[ {text:"OK",cls:"red"} ]);
-}
 
-if(!token){
+if(!token)
 return modal("Error","Token wajib diisi",[ {text:"OK",cls:"red"} ]);
-}
 
 modal("Login","Memproses...",[]);
 
 fetch(API,{
 method:"POST",
-body:JSON.stringify({
-mode:"login",
-username:username,
-password:password||"",
-token:token
-})
+body:JSON.stringify({mode:"login",username,token})
 })
 .then(r=>r.json())
 .then(res=>{
 modalHide();
-
-if(res.status=="success"){
+if(res.status==="success"){
 localStorage.setItem("user",JSON.stringify(res));
 startExam();
 }else{
-modal("Gagal Login",res.msg || "Tidak diketahui",[
-{text:"OK",cls:"red"}
-]);
+modal("Gagal Login",res.msg,[{text:"OK",cls:"red"}]);
 }
-})
-.catch(err=>{
-modal("ERROR",err.toString(),[{text:"OK",cls:"red"}]);
 });
 }
 
-/* START CBT */
+/* START EXAM */
 function startExam(){
 document.querySelector(".header").style.display="flex";
-enterFullscreen();
 
 fetch(API+"?mode=soal")
 .then(r=>r.json())
 .then(d=>{
-state.soal=d || [];
-
-let saved=localStorage.getItem("jawaban");
-state.jawaban = saved ? JSON.parse(saved) : new Array(d.length).fill("");
-
+state.soal=d;
+state.jawaban=new Array(d.length).fill("");
 render();
 startTimer(1800);
 });
@@ -346,29 +367,24 @@ startTimer(1800);
 
 /* RENDER */
 function render(){
-
 let side='<div class="sidebar"><div class="grid">';
-
 state.soal.forEach((s,i)=>{
 let c="num";
-if(i==state.index)c+=" active";
+if(i===state.index)c+=" active";
 if(state.jawaban[i])c+=" done";
-
 side+=`<div class="${c}" onclick="goto(${i})">${i+1}</div>`;
 });
-
 side+='</div></div>';
 
 let s=state.soal[state.index];
 
 let main=`<div class="content"><div class="card">
 <h4>Soal ${state.index+1}</h4>
-<p>${s.soal}</p>
-${s.gambar?`<img src="${s.gambar}" style="width:100%">`:""}`;
+<p>${s.soal}</p>`;
 
 ["A","B","C","D"].forEach(o=>{
 main+=`
-<div style="margin:8px 0">
+<div>
 <input type="radio" name="o"
 ${state.jawaban[state.index]==o?"checked":""}
 onchange="jawab('${o}')"> ${o}. ${s.pilihan[o]}
@@ -384,13 +400,8 @@ main+=`
 document.getElementById("app").innerHTML=`<div class="wrap">${side}${main}</div>`;
 }
 
-/* LOGIC */
-function jawab(v){
-state.jawaban[state.index]=v;
-localStorage.setItem("jawaban",JSON.stringify(state.jawaban));
-render();
-}
-
+/* NAV */
+function jawab(v){state.jawaban[state.index]=v;render();}
 function next(){if(state.index<state.soal.length-1){state.index++;render();}}
 function prev(){if(state.index>0){state.index--;render();}}
 function goto(i){state.index=i;render();}
@@ -401,75 +412,43 @@ setInterval(()=>{
 s--;
 document.getElementById("timer").innerText=
 Math.floor(s/60)+":"+("0"+s%60).slice(-2);
-
 if(s<=0)submit();
 },1000);
 }
 
 /* SUBMIT */
 function submit(){
-if(state.done)return;
-state.done=true;
-
-let u=JSON.parse(localStorage.getItem("user"));
-
-fetch(API,{
-method:"POST",
-body:JSON.stringify({
-mode:"submit",
-idLogin:u.idLogin,
-nama:u.nama,
-jk:u.jk,
-kelas:u.kelas,
-jawaban:state.jawaban
-})
-})
-.then(r=>r.json())
-.then(res=>{
-localStorage.removeItem("jawaban");
-
-modal("Selesai","Nilai: "+res.nilai,[{
+modal("Selesai","Jawaban terkirim",[{
 text:"OK",
 cls:"blue",
 cb:()=>location.reload()
 }]);
-});
 }
 
-/* ANTI NYONTEK */
-document.addEventListener("visibilitychange",()=>{
-if(document.hidden){
-warning++;
-if(warning>=3){
-modal("Dikeluarkan","Anda keluar ujian!",[
-{text:"OK",cls:"red",cb:submit}
-]);
-}else{
-modal("Peringatan","Jangan pindah tab!",[
-{text:"OK",cls:"blue"}
-]);
-}
-}
-});
-
-/* FULLSCREEN */
-function enterFullscreen(){
-let el=document.documentElement;
-if(el.requestFullscreen)el.requestFullscreen();
-}
-
-/* BLOK INSPECT */
-document.onkeydown=function(e){
-if(e.key==="F12"||e.ctrlKey&&e.key==="u") return false;
-}
-
-/* JADWAL */
+/* JADWAL TABLE */
 function jadwal(){
-let t="";
+let html=`
+<table style="width:100%;border-collapse:collapse;font-size:13px">
+<tr style="background:#1976d2;color:#fff">
+<th style="border:1px solid #ccc;padding:6px">Kelas</th>
+<th style="border:1px solid #ccc;padding:6px">Mulai</th>
+<th style="border:1px solid #ccc;padding:6px">Selesai</th>
+<th style="border:1px solid #ccc;padding:6px">Token</th>
+</tr>
+`;
+
 dataToken.forEach(x=>{
-t+=x.kelas+" "+x.mulai+"-"+x.selesai+"\n";
+html+=`
+<tr>
+<td style="border:1px solid #ccc;padding:6px">${x.kelas}</td>
+<td style="border:1px solid #ccc;padding:6px">${x.mulai}</td>
+<td style="border:1px solid #ccc;padding:6px">${x.selesai}</td>
+<td style="border:1px solid #ccc;padding:6px">${x.token||"-"}</td>
+</tr>`;
 });
-modal("Jadwal",t,[{text:"OK",cls:"blue"}]);
+
+html+=`</table>`;
+modal("Jadwal Ujian",html,[{text:"OK",cls:"blue"}]);
 }
 
 /* INIT */
