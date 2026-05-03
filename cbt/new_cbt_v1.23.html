@@ -29,7 +29,7 @@
             color: #fff;
             padding: 0 20px;
             height: 60px;
-            display: none; /* Akan diubah ke flex via JS */
+            display: none; 
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -293,7 +293,6 @@ function loginUI(){
         </div>
     </div>`;
 
-    // Ambil data tanpa parameter mode agar doGet GAS merespon list siswa
     fetch(API).then(r=>r.json()).then(d=>{
         dataSiswa=d;
         let k=[...new Set(d.map(x=>x.kelas))];
@@ -301,7 +300,7 @@ function loginUI(){
         sel.innerHTML='<option value="">-- Pilih Kelas --</option>';
         k.forEach(x=>sel.innerHTML+=`<option>${x}</option>`);
         sel.onchange=loadUser;
-    }).catch(e => alert("Gagal memuat data siswa. Cek koneksi atau URL Script."));
+    }).catch(e => alert("Gagal memuat data siswa. Cek koneksi."));
 }
 
 function loadUser(){
@@ -344,7 +343,7 @@ function login(){
     });
 }
 
-/* DASHBOARD / KONFIRMASI */
+/* KONFIRMASI */
 function showKonfirmasi(){
     const app = document.getElementById("app");
     let u=JSON.parse(localStorage.getItem("user"));
@@ -357,14 +356,11 @@ function showKonfirmasi(){
             <tr><td>Mata Pelajaran</td><td>: Informatika</td></tr>
             <tr><td>Durasi</td><td>: 90 Menit</td></tr>
         </table>
-        <div style="background:#fff3cd; padding:15px; border-radius:5px; margin-top:20px; font-size:0.9rem">
-            Pastikan koneksi internet stabil. Dilarang menutup jendela ujian sebelum selesai.
-        </div>
         <button class="btn green" style="width:100%; margin-top:20px; font-size:1.1rem" onclick="startExam()">MULAI KERJAKAN</button>
     </div>`;
 }
 
-/* CORE EXAM LOGIC */
+/* EXAM LOGIC */
 function startExam(){
     localStorage.setItem("layer","soal");
     document.querySelector(".header").style.display="flex";
@@ -381,11 +377,12 @@ function startExam(){
             state.index=0;
         }
         render();
-        startTimer(5400); // 90 Menit
+        startTimer();
     });
 }
 
-function startTimer(duration){
+function startTimer(){
+    let duration = 5400; // 90 menit
     let end=localStorage.getItem("endTime");
     if(!end){
         end=Date.now()+duration*1000;
@@ -398,7 +395,6 @@ function startTimer(duration){
         let m = Math.floor(sisa/60);
         let s = sisa%60;
         document.getElementById('timer').innerText = `${m}:${s<10?'0'+s:s}`;
-        if(sisa < 300) document.getElementById('timer').style.color = "red";
         requestAnimationFrame(update);
     }
     update();
@@ -408,7 +404,6 @@ function render(){
     const app = document.getElementById("app");
     let s = state.soal[state.index];
     
-    // Render Sidebar
     let sideGrid = '';
     state.soal.forEach((soal, i) => {
         let cls = "num";
@@ -417,7 +412,6 @@ function render(){
         sideGrid += `<div class="${cls}" onclick="goto(${i})">${i+1}</div>`;
     });
 
-    // Render Main Card
     let optionsHtml = '';
     ["A","B","C","D"].forEach(o => {
         if(s.pilihan[o]){
@@ -437,7 +431,6 @@ function render(){
                 <div class="nomor-soal">SOAL NOMOR ${state.index+1}</div>
                 <div class="teks-soal">${s.soal}</div>
                 <div class="opsi-container">${optionsHtml}</div>
-                
                 <div class="nav-footer">
                     <button class="btn blue" onclick="prev()" ${state.index==0?'disabled':''}>SEBELUMNYA</button>
                     <button class="btn yellow" onclick="jawab('')">RAGU-RAGU</button>
@@ -467,28 +460,57 @@ function goto(i){ state.index=i; save(); render(); }
 function save(){ localStorage.setItem("cbt_state", JSON.stringify(state)); }
 
 function popupSubmit(){
-    modal("Konfirmasi Selesai", "Apakah Anda yakin ingin mengakhiri ujian? Jawaban tidak dapat diubah lagi.", [
+    modal("Konfirmasi Selesai", "Yakin ingin mengakhiri ujian?", [
         {text:"BATAL", cls:"blue"},
         {text:"YA, SELESAI", cls:"red", cb:submit}
     ]);
 }
 
+/* FUNGSI SUBMIT - INI YANG MEMBUAT SHEET TERISI */
 function submit(){
     const app = document.getElementById("app");
-    localStorage.setItem("layer","hasil");
-    app.innerHTML=`<div class="content"><h2>Mengirim Jawaban...</h2></div>`;
-    setTimeout(showHasil, 1500);
+    const user = JSON.parse(localStorage.getItem("user"));
+    const stateData = JSON.parse(localStorage.getItem("cbt_state"));
+
+    localStorage.setItem("layer", "hasil");
+    app.innerHTML=`<div class="content"><h2>Mengirim Jawaban...</h2><p>Harap tidak menutup browser.</p></div>`;
+    
+    // Kirim data ke GAS
+    fetch(API, {
+        method: "POST",
+        body: JSON.stringify({
+            mode: "submit",
+            idLogin: user.idLogin, // Dari GAS saat login
+            nama: user.nama,       // Dari GAS saat login
+            kelas: user.kelas,     // Dari GAS saat login
+            jawaban: stateData.jawaban // Array ["A", "B", ...]
+        })
+    })
+    .then(r => r.json())
+    .then(res => {
+        if(res.status === "success") {
+            showHasil(true);
+        } else {
+            alert("Error: " + res.msg);
+            showHasil(false);
+        }
+    })
+    .catch(e => {
+        console.error(e);
+        alert("Koneksi gagal. Coba lagi.");
+        showHasil(false);
+    });
 }
 
-function showHasil(){
+function showHasil(success){
     const app = document.getElementById("app");
     document.querySelector(".header").style.display="none";
     app.innerHTML=`
     <div class="login-container">
         <div class="login-box" style="text-align:center">
-            <h2 style="color:var(--success)">UJIAN SELESAI</h2>
-            <p>Terima kasih telah mengikuti asesmen dengan jujur.</p>
-            <div style="font-size:3rem; margin:20px 0; font-weight:bold">✓</div>
+            <h2 style="color:${success?'var(--success)':'var(--danger)'}">${success?'UJIAN SELESAI':'GAGAL MENGIRIM'}</h2>
+            <p>${success?'Jawaban berhasil tersimpan.':'Terjadi kesalahan saat menyimpan.'}</p>
+            <div style="font-size:3rem; margin:20px 0;">${success?'✓':'✗'}</div>
             <button class="btn blue" onclick="keluar()">KEMBALI KE LOGIN</button>
         </div>
     </div>`;
@@ -504,7 +526,7 @@ function init(){
     document.getElementById("kelasDisp").innerText="Kelas: " + u.kelas;
 
     if(layer==="soal") startExam();
-    else if(layer==="hasil") showHasil();
+    else if(layer==="hasil") showHasil(true);
     else showKonfirmasi();
 }
 
@@ -512,19 +534,6 @@ function keluar(){
     localStorage.clear();
     location.reload();
 }
-
-/* ANTI CHEAT */
-document.addEventListener("visibilitychange",()=>{
-    if(document.hidden && localStorage.getItem("layer") === "soal"){
-        warning++;
-        if(warning >= 3){
-            alert("Anda keluar dari tab ujian terlalu sering. Ujian otomatis dihentikan.");
-            submit();
-        } else {
-            alert("Peringatan " + warning + "/3: Dilarang membuka tab lain!");
-        }
-    }
-});
 
 init();
 </script>
