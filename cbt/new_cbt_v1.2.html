@@ -17,19 +17,33 @@ body{
   background:#b0bec5;
 }
 
-/* HEADER */
 .header{
-  background:var(--blue);
+  background:#1976d2;
   color:#fff;
   padding:12px;
   display:none;
   justify-content:space-between;
+  align-items:center;
+  font-size:14px;
 }
 
-/* LAYOUT */
-.wrap{display:flex;height:calc(100vh - 50px);}
-.sidebar{width:120px;background:#fff;padding:10px;overflow:auto;}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.wrap{
+  display:flex;
+  height:calc(100vh - 50px);
+}
+
+.sidebar{
+  width:120px;
+  background:#fff;
+  padding:10px;
+  overflow:auto;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+}
 
 .num{
   padding:8px;
@@ -39,34 +53,59 @@ body{
   cursor:pointer;
   font-size:12px;
 }
+
 .num.active{background:var(--blue);color:#fff}
 .num.done{background:#4caf50;color:#fff}
 
-.content{flex:1;padding:12px;overflow:auto;}
+.content{
+  flex:1;
+  padding:12px;
+  overflow:auto;
+}
 
 .card{
   background:#fff;
   padding:15px;
   border-radius:12px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.1);
 }
 
-/* BUTTON */
 .btn{
-  padding:10px;
+  padding:12px;
   border:none;
   border-radius:8px;
+  margin-top:10px;
   cursor:pointer;
+  font-size:14px;
 }
+
 .blue{background:var(--blue);color:#fff}
 .red{background:var(--red);color:#fff}
 
-/* LOGIN */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+
+.box{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  width:300px;
+  text-align:center;
+}
+
 .login-box{
   max-width:420px;
   margin:40px auto;
   background:#fff;
   padding:25px;
   border-radius:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
 .form-group{
@@ -74,33 +113,37 @@ body{
   grid-template-columns:100px 1fr;
   gap:10px;
   margin-bottom:10px;
+  align-items:center;
 }
 
 .form-group input,
 .form-group select{
   padding:8px;
+  border-radius:6px;
+  border:1px solid #ccc;
 }
 
-/* MODAL */
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.5);
-  display:none;
-  justify-content:center;
-  align-items:center;
+.row{
+  display:flex;
+  gap:10px;
 }
 
-.box{
-  background:#fff;
-  padding:20px;
-  border-radius:10px;
-  width:300px;
+.row .btn{
+  flex:1;
+}
+
+@media(max-width:768px){
+.wrap{flex-direction:column;}
+.sidebar{width:100%;order:2;}
+.grid{grid-template-columns:repeat(6,1fr);}
+.content{order:1;}
+.form-group{grid-template-columns:1fr;}
+.header{font-size:12px;}
 }
 </style>
 </head>
 
-<body>
+<body oncontextmenu="return false">
 
 <div class="header">
 <div>CBT SMPN 1 MOGA</div>
@@ -118,27 +161,46 @@ body{
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbyFKeH-bb47KADy6577hEQU3zJy4WmkBAAxzIHuRqmqY6dNnPCDaXrl-UP-v78lj72c/exec";
+const API="https://script.google.com/macros/s/AKfycbyFKeH-bb47KADy6577hEQU3zJy4WmkBAAxzIHuRqmqY6dNnPCDaXrl-UP-v78lj72c/exec";
 
-let dataSiswa = [];
-let state = { soal:[], index:0, jawaban:[], done:false };
+let dataSiswa=[],dataToken=[];
+let state={soal:[],index:0,jawaban:[],done:false};
+let warning=0;
 
 /* MODAL */
-function modal(t,m){
-document.getElementById("mTitle").innerText = t;
-document.getElementById("mMsg").innerText = m;
-document.getElementById("modal").style.display = "flex";
+function modal(t,m,btns){
+document.getElementById("mTitle").innerText=t;
+document.getElementById("mMsg").innerText=m;
+
+const act=document.getElementById("mAct");
+act.innerHTML="";
+
+btns.forEach(b=>{
+let x=document.createElement("button");
+x.className="btn "+b.cls;
+x.innerText=b.text;
+x.onclick=()=>{modalHide();if(b.cb)b.cb()};
+act.appendChild(x);
+});
+
+document.getElementById("modal").style.display="flex";
 }
+
 function modalHide(){
-document.getElementById("modal").style.display = "none";
+document.getElementById("modal").style.display="none";
 }
 
 /* LOGIN UI */
 function loginUI(){
-document.getElementById("app").innerHTML = `
+document.getElementById("app").innerHTML=`
 <div class="login-box">
 
-<h2 style="text-align:center">CBT Informatika</h2>
+<img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" 
+style="width:80px;display:block;margin:auto">
+
+<h2 style="text-align:center;color:#1e4f8a">
+CBT Asesmen<br>Informatika
+</h2>
 
 <div class="form-group">
 <label>Kelas</label>
@@ -156,80 +218,127 @@ document.getElementById("app").innerHTML = `
 </div>
 
 <div class="form-group">
+<label></label>
+<div>
+<input type="checkbox" onclick="togglePass()"> Tampilkan Password
+</div>
+</div>
+
+<div class="form-group">
 <label>Token</label>
 <input id="token">
 </div>
 
+<div class="row">
 <button class="btn blue" onclick="login()">Masuk</button>
-
+<button class="btn red" onclick="jadwal()">Jadwal</button>
 </div>
-`;
 
+</div>`;
+
+/* LOAD DATA */
 fetch(API)
 .then(r=>r.json())
 .then(d=>{
-dataSiswa = d || [];
+dataSiswa=d || [];
 
-const kelasList = [...new Set(dataSiswa.map(x=>x.kelas))];
+let k=[...new Set(dataSiswa.map(x=>x.kelas))];
+let el=document.getElementById("kelas");
 
-let kelasEl = document.getElementById("kelas");
-kelasEl.innerHTML = `<option value="">-- Pilih Kelas --</option>`;
+el.innerHTML='<option>-- Pilih Kelas --</option>';
+k.forEach(x=>el.innerHTML+=`<option>${x}</option>`);
 
-kelasList.forEach(k=>{
-kelasEl.innerHTML += `<option value="${k}">${k}</option>`;
+/* FIX EVENT */
+el.addEventListener("change", loadSiswa);
 });
 
-/* event change */
-kelasEl.addEventListener("change", loadSiswa);
-
-});
+fetch(API+"?mode=token")
+.then(r=>r.json())
+.then(d=>dataToken=d || []);
 }
 
-/* LOAD USERNAME */
+/* PASSWORD */
+function togglePass(){
+let p=document.getElementById("password");
+p.type = p.type === "password" ? "text" : "password";
+}
+
+/* LOAD SISWA (FIX) */
 function loadSiswa(){
 let kelas = document.getElementById("kelas").value.trim();
 let el = document.getElementById("username");
 
-el.innerHTML = `<option value="">-- Pilih --</option>`;
+el.innerHTML='<option>-- Pilih --</option>';
 
-let list = dataSiswa.filter(x => (x.kelas||"").trim() === kelas);
+let list = dataSiswa.filter(x => (x.kelas || "").trim() === kelas);
 
 list.forEach(s=>{
-el.innerHTML += `<option value="${s.username}">${s.nama}</option>`;
+el.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
 });
 }
 
 /* LOGIN */
 function login(){
-let username = document.getElementById("username").value;
-let token = document.getElementById("token").value;
 
-if(!username) return modal("Error","Pilih username");
-if(!token) return modal("Error","Isi token");
+let kelas=document.getElementById("kelas").value;
+let username=document.getElementById("username").value;
+let password=document.getElementById("password").value;
+let token=document.getElementById("token").value;
+
+if(!kelas || kelas.includes("Pilih")){
+return modal("Error","Pilih kelas dulu",[ {text:"OK",cls:"red"} ]);
+}
+
+if(!username){
+return modal("Error","Pilih username dulu",[ {text:"OK",cls:"red"} ]);
+}
+
+if(!token){
+return modal("Error","Token wajib diisi",[ {text:"OK",cls:"red"} ]);
+}
+
+modal("Login","Memproses...",[]);
 
 fetch(API,{
 method:"POST",
-body:JSON.stringify({mode:"login",username,token})
+body:JSON.stringify({
+mode:"login",
+username:username,
+password:password||"",
+token:token
+})
 })
 .then(r=>r.json())
 .then(res=>{
-if(res.status === "success"){
+modalHide();
+
+if(res.status=="success"){
+localStorage.setItem("user",JSON.stringify(res));
 startExam();
 }else{
-modal("Login Gagal",res.msg || "Error");
+modal("Gagal Login",res.msg || "Tidak diketahui",[
+{text:"OK",cls:"red"}
+]);
 }
+})
+.catch(err=>{
+modal("ERROR",err.toString(),[{text:"OK",cls:"red"}]);
 });
 }
 
 /* START CBT */
 function startExam(){
-document.querySelector(".header").style.display = "flex";
+document.querySelector(".header").style.display="flex";
+enterFullscreen();
 
 fetch(API+"?mode=soal")
 .then(r=>r.json())
 .then(d=>{
-state.soal = d || [];
-state.jawaban = new Array(d.length).fill("");
+state.soal=d || [];
+
+let saved=localStorage.getItem("jawaban");
+state.jawaban = saved ? JSON.parse(saved) : new Array(d.length).fill("");
+
 render();
 startTimer(1800);
 });
@@ -237,61 +346,130 @@ startTimer(1800);
 
 /* RENDER */
 function render(){
-let soal = state.soal[state.index];
 
-let html = `
-<div class="wrap">
+let side='<div class="sidebar"><div class="grid">';
 
-<div class="sidebar">
-<div class="grid">
-${state.soal.map((_,i)=>`
-<div class="num ${i===state.index?'active':''}" onclick="goto(${i})">${i+1}</div>
-`).join("")}
-</div>
-</div>
+state.soal.forEach((s,i)=>{
+let c="num";
+if(i==state.index)c+=" active";
+if(state.jawaban[i])c+=" done";
 
-<div class="content">
-<div class="card">
+side+=`<div class="${c}" onclick="goto(${i})">${i+1}</div>`;
+});
+
+side+='</div></div>';
+
+let s=state.soal[state.index];
+
+let main=`<div class="content"><div class="card">
 <h4>Soal ${state.index+1}</h4>
-<p>${soal.soal}</p>
+<p>${s.soal}</p>
+${s.gambar?`<img src="${s.gambar}" style="width:100%">`:""}`;
 
-${["A","B","C","D"].map(o=>`
-<label>
-<input type="radio" name="o" 
-${state.jawaban[state.index]===o?'checked':''}
-onclick="jawab('${o}')">
-${o}. ${soal.pilihan[o]}
-</label><br>
-`).join("")}
+["A","B","C","D"].forEach(o=>{
+main+=`
+<div style="margin:8px 0">
+<input type="radio" name="o"
+${state.jawaban[state.index]==o?"checked":""}
+onchange="jawab('${o}')"> ${o}. ${s.pilihan[o]}
+</div>`;
+});
 
-<br>
-<button onclick="prev()">Prev</button>
-<button onclick="next()">Next</button>
-</div>
-</div>
+main+=`
+<button class="btn" onclick="prev()">Prev</button>
+<button class="btn blue" onclick="next()">Next</button>
+<button class="btn red" onclick="submit()">Kirim</button>
+</div></div>`;
 
-</div>
-`;
-
-document.getElementById("app").innerHTML = html;
+document.getElementById("app").innerHTML=`<div class="wrap">${side}${main}</div>`;
 }
 
-/* NAV */
+/* LOGIC */
 function jawab(v){
-state.jawaban[state.index] = v;
+state.jawaban[state.index]=v;
+localStorage.setItem("jawaban",JSON.stringify(state.jawaban));
 render();
 }
-function next(){ if(state.index < state.soal.length-1){state.index++; render();}}
-function prev(){ if(state.index > 0){state.index--; render();}}
-function goto(i){ state.index = i; render(); }
+
+function next(){if(state.index<state.soal.length-1){state.index++;render();}}
+function prev(){if(state.index>0){state.index--;render();}}
+function goto(i){state.index=i;render();}
 
 /* TIMER */
 function startTimer(s){
 setInterval(()=>{
 s--;
-document.getElementById("timer").innerText =
+document.getElementById("timer").innerText=
 Math.floor(s/60)+":"+("0"+s%60).slice(-2);
+
+if(s<=0)submit();
 },1000);
+}
+
+/* SUBMIT */
+function submit(){
+if(state.done)return;
+state.done=true;
+
+let u=JSON.parse(localStorage.getItem("user"));
+
+fetch(API,{
+method:"POST",
+body:JSON.stringify({
+mode:"submit",
+idLogin:u.idLogin,
+nama:u.nama,
+jk:u.jk,
+kelas:u.kelas,
+jawaban:state.jawaban
+})
+})
+.then(r=>r.json())
+.then(res=>{
+localStorage.removeItem("jawaban");
+
+modal("Selesai","Nilai: "+res.nilai,[{
+text:"OK",
+cls:"blue",
+cb:()=>location.reload()
+}]);
+});
+}
+
+/* ANTI NYONTEK */
+document.addEventListener("visibilitychange",()=>{
+if(document.hidden){
+warning++;
+if(warning>=3){
+modal("Dikeluarkan","Anda keluar ujian!",[
+{text:"OK",cls:"red",cb:submit}
+]);
+}else{
+modal("Peringatan","Jangan pindah tab!",[
+{text:"OK",cls:"blue"}
+]);
+}
+}
+});
+
+/* FULLSCREEN */
+function enterFullscreen(){
+let el=document.documentElement;
+if(el.requestFullscreen)el.requestFullscreen();
+}
+
+/* BLOK INSPECT */
+document.onkeydown=function(e){
+if(e.key==="F12"||e.ctrlKey&&e.key==="u") return false;
+}
+
+/* JADWAL */
+function jadwal(){
+let t="";
+dataToken.forEach(x=>{
+t+=x.kelas+" "+x.mulai+"-"+x.selesai+"\n";
+});
+modal("Jadwal",t,[{text:"OK",cls:"blue"}]);
 }
 
 /* INIT */
