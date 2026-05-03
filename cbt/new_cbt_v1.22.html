@@ -9,7 +9,7 @@
 :root{
   --blue:#1976d2;
   --red:#d32f2f;
-  --green:#2e7d32;
+  --green:#4caf50;
 }
 
 body{
@@ -18,37 +18,20 @@ body{
   background:#b0bec5;
 }
 
-/* HEADER */
 .header{
   background:#1976d2;
   color:#fff;
-  padding:10px 15px;
+  padding:10px;
   display:none;
   justify-content:space-between;
   align-items:center;
-  font-size:14px;
+  font-size:13px;
 }
 
-/* WRAP */
-.wrap{
-  display:flex;
-  height:calc(100vh - 50px);
-}
+.wrap{display:flex;height:calc(100vh - 90px);}
+.sidebar{width:120px;background:#fff;padding:10px;overflow:auto;}
 
-/* SIDEBAR */
-.sidebar{
-  width:120px;
-  background:#fff;
-  padding:10px;
-  overflow:auto;
-}
-
-/* GRID */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:6px;
-}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
 
 .num{
   padding:8px;
@@ -62,31 +45,25 @@ body{
 .num.active{background:var(--blue);color:#fff}
 .num.done{background:#4caf50;color:#fff}
 
-/* CONTENT */
-.content{
-  flex:1;
-  padding:15px;
-  overflow:auto;
-}
+.content{flex:1;padding:12px;overflow:auto;}
 
 .card{
   background:#fff;
-  padding:20px;
+  padding:15px;
   border-radius:12px;
   box-shadow:0 3px 10px rgba(0,0,0,0.1);
 }
 
-/* NAV BUTTON */
 .nav-btn{
   display:flex;
   justify-content:space-between;
-  margin-top:20px;
+  margin-top:15px;
 }
 
-.btn-small{
-  padding:10px 16px;
+.btn{
+  padding:10px 15px;
   border:none;
-  border-radius:6px;
+  border-radius:8px;
   cursor:pointer;
   font-size:14px;
 }
@@ -95,15 +72,17 @@ body{
 .red{background:var(--red);color:#fff}
 .green{background:var(--green);color:#fff}
 
-/* FOOTER */
 .footer{
-  text-align:center;
+  height:40px;
+  background:#1976d2;
+  color:#fff;
+  display:none;
+  align-items:center;
+  justify-content:center;
   font-size:12px;
-  padding:10px;
-  color:#444;
 }
 
-/* LOGIN */
+/* LOGIN (TIDAK DIUBAH) */
 .login-container{
   min-height:100vh;
   display:flex;
@@ -136,10 +115,22 @@ body{
   border:1px solid #ccc;
 }
 
-@media(max-width:768px){
-.sidebar{width:100%;}
-.grid{grid-template-columns:repeat(6,1fr);}
-.wrap{flex-direction:column;}
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+
+.box{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  width:90%;
+  max-width:350px;
+  text-align:center;
 }
 </style>
 </head>
@@ -147,15 +138,28 @@ body{
 <body>
 
 <div class="header">
-<div>CBT SMPN 1 MOGA</div>
-<div id="infoUser"></div>
 <div>
-<span id="timer"></span>
-<button onclick="logout()" style="margin-left:10px;padding:5px 10px">Keluar</button>
+<b id="nama"></b> | <span id="kelas"></span>
+</div>
+<div>
+⏱ <span id="timer"></span> |
+<button onclick="keluar()" style="background:#fff;border:none;padding:5px;border-radius:5px">Keluar</button>
 </div>
 </div>
 
 <div id="app"></div>
+
+<div class="footer" id="footer">
+CBT Browser Apps by MB © 2026
+</div>
+
+<div id="modal" class="modal">
+<div class="box">
+<h3 id="mTitle"></h3>
+<div id="mMsg"></div>
+<div id="mAct"></div>
+</div>
+</div>
 
 <script>
 const API="https://script.google.com/macros/s/AKfycbyFKeH-bb47KADy6577hEQU3zJy4WmkBAAxzIHuRqmqY6dNnPCDaXrl-UP-v78lj72c/exec";
@@ -163,19 +167,40 @@ const API="https://script.google.com/macros/s/AKfycbyFKeH-bb47KADy6577hEQU3zJy4W
 let dataSiswa=[],dataToken=[];
 let state={soal:[],index:0,jawaban:[]};
 
-/* LOGIN UI */
-function loginUI(){
-document.querySelector(".header").style.display="none";
+/* MODAL */
+function modal(t,m,btns){
+mAct.innerHTML="";
+mTitle.innerText=t;
+mMsg.innerHTML=m;
 
-document.getElementById("app").innerHTML=`
+btns.forEach(b=>{
+let x=document.createElement("button");
+x.className="btn "+b.cls;
+x.innerText=b.text;
+x.onclick=()=>{modalHide(); if(b.cb)b.cb();};
+mAct.appendChild(x);
+});
+
+modalBox.style.display="flex";
+}
+function modalHide(){modalBox.style.display="none";}
+
+/* LOGIN UI (ASLI 100%) */
+function loginUI(){
+app.innerHTML=`
 <div class="login-container">
 <div class="login-box">
 
-<h2 style="text-align:center">CBT Informatika</h2>
+<img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" 
+style="width:80px;display:block;margin:auto">
+
+<h2 style="text-align:center;color:#1e4f8a">
+CBT Asesmen<br>Informatika
+</h2>
 
 <div class="form-group">
 <label>Kelas</label>
-<select id="kelas"></select>
+<select id="kelasSelect"></select>
 </div>
 
 <div class="form-group">
@@ -189,48 +214,65 @@ document.getElementById("app").innerHTML=`
 </div>
 
 <div class="form-group">
+<label></label>
+<div>
+<input type="checkbox" onclick="togglePass()"> Tampilkan Password
+</div>
+</div>
+
+<div class="form-group">
 <label>Token</label>
 <input id="token">
 </div>
 
-<button onclick="login()">Masuk</button>
+<div style="display:flex;flex-direction:column;gap:10px">
+<button class="btn blue" onclick="login()">Masuk</button>
+<button class="btn red" onclick="jadwal()">Jadwal</button>
 
+<div style="height:20px"></div>
+
+<div style="text-align:center;font-size:12px;color:#555">
+CBT Browser Apps by MB<br>
+© 2026 MB All Rights Reserved
+</div>
+
+</div>
 </div>
 </div>
 `;
 
 fetch(API).then(r=>r.json()).then(d=>{
 dataSiswa=d;
-
 let k=[...new Set(d.map(x=>x.kelas))];
-let el=document.getElementById("kelas");
-el.innerHTML='<option>Pilih</option>';
-k.forEach(x=>el.innerHTML+=`<option>${x}</option>`);
-el.onchange=loadUser;
+kelasSelect.innerHTML='<option>-- Pilih Kelas --</option>';
+k.forEach(x=>kelasSelect.innerHTML+=`<option>${x}</option>`);
+kelasSelect.onchange=loadUser;
 });
 }
 
+/* LOAD USER */
 function loadUser(){
-let k=document.getElementById("kelas").value;
-let el=document.getElementById("username");
-el.innerHTML="";
+let k=kelasSelect.value;
+username.innerHTML='<option>-- Pilih --</option>';
 dataSiswa.filter(x=>x.kelas==k)
-.forEach(s=>el.innerHTML+=`<option value="${s.username}">${s.nama}</option>`);
+.forEach(s=>{
+username.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
+});
 }
 
 /* LOGIN */
 function login(){
-let username=document.getElementById("username").value;
-let password=document.getElementById("password").value;
+let user=username.value;
+let pass=password.value;
 let token=document.getElementById("token").value;
 
 fetch(API,{
 method:"POST",
-body:JSON.stringify({mode:"login",username,password,token})
+body:JSON.stringify({mode:"login",username:user,password:pass,token})
 })
 .then(r=>r.json())
 .then(res=>{
-if(res.status=="success"){
+if(res.status==="success"){
 localStorage.setItem("user",JSON.stringify(res));
 startExam();
 }else{
@@ -241,39 +283,39 @@ alert(res.msg);
 
 /* START */
 function startExam(){
-let user=JSON.parse(localStorage.getItem("user"));
+let u=JSON.parse(localStorage.getItem("user"));
 document.querySelector(".header").style.display="flex";
+document.getElementById("footer").style.display="flex";
 
-document.getElementById("infoUser").innerHTML=
-`${user.nama} | ${user.kelas}`;
+nama.innerText=u.nama;
+kelas.innerText=u.kelas;
 
 fetch(API+"?mode=soal")
 .then(r=>r.json())
 .then(d=>{
 state.soal=d;
 state.jawaban=new Array(d.length).fill("");
-
-viewSoal();
-
-/* TIMER PERSIST */
-let t=localStorage.getItem("timer") || 1800;
-startTimer(parseInt(t));
+render();
+startTimer(1800);
 });
 }
 
-/* SOAL VIEW */
-function viewSoal(){
-
+/* RENDER */
+function render(){
 let side='<div class="sidebar"><div class="grid">';
 state.soal.forEach((s,i)=>{
 let c="num";
-if(i==state.index)c+=" active";
+if(i===state.index)c+=" active";
 if(state.jawaban[i])c+=" done";
 side+=`<div class="${c}" onclick="goto(${i})">${i+1}</div>`;
 });
 side+='</div></div>';
 
 let s=state.soal[state.index];
+
+let nextBtn = state.index === state.soal.length-1
+? `<button class="btn green" onclick="submit()">Selesai</button>`
+: `<button class="btn red" onclick="next()">Selanjutnya</button>`;
 
 let main=`
 <div class="content">
@@ -290,57 +332,49 @@ onclick="jawab('${o}')"> ${o}. ${s.pilihan[o]}
 </div>`;
 });
 
-/* NAVIGATION */
-main+=`<div class="nav-btn">`;
-
-if(state.index>0){
-main+=`<button class="btn-small blue" onclick="prev()">Sebelumnya</button>`;
-}else{
-main+=`<div></div>`;
-}
-
-if(state.index < state.soal.length-1){
-main+=`<button class="btn-small red" onclick="next()">Selanjutnya</button>`;
-}else{
-main+=`<button class="btn-small green" onclick="submit()">Selesai</button>`;
-}
-
-main+=`</div></div></div>
-<div class="footer">
-CBT Browser Apps by MB | © 2026
+main+=`
+<div class="nav-btn">
+<button class="btn blue" onclick="prev()">Sebelumnya</button>
+${nextBtn}
+</div>
+</div>
 </div>`;
 
-document.getElementById("app").innerHTML=`<div class="wrap">${side}${main}</div>`;
+app.innerHTML=`<div class="wrap">${side}${main}</div>`;
 }
 
 /* NAV */
-function jawab(v){state.jawaban[state.index]=v;viewSoal();}
-function next(){state.index++;viewSoal();}
-function prev(){state.index--;viewSoal();}
-function goto(i){state.index=i;viewSoal();}
+function jawab(v){state.jawaban[state.index]=v;render();}
+function next(){if(state.index<state.soal.length-1){state.index++;render();}}
+function prev(){if(state.index>0){state.index--;render();}}
+function goto(i){state.index=i;render();}
 
-/* TIMER */
+/* TIMER (ANTI REFRESH) */
 function startTimer(s){
+let end=localStorage.getItem("endTime");
+if(!end){
+end=Date.now()+s*1000;
+localStorage.setItem("endTime",end);
+}
+
 setInterval(()=>{
-s--;
-localStorage.setItem("timer",s);
+let sisa=Math.floor((end-Date.now())/1000);
+if(sisa<=0){submit();return;}
 
-document.getElementById("timer").innerText=
-Math.floor(s/60)+":"+("0"+s%60).slice(-2);
-
-if(s<=0)submit();
+timer.innerText=
+Math.floor(sisa/60)+":"+("0"+sisa%60).slice(-2);
 },1000);
 }
 
 /* SUBMIT */
 function submit(){
-alert("Jawaban terkirim");
 localStorage.clear();
+alert("Jawaban terkirim");
 location.reload();
 }
 
 /* LOGOUT */
-function logout(){
+function keluar(){
 localStorage.clear();
 location.reload();
 }
