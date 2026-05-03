@@ -10,64 +10,123 @@
   --blue:#1976d2;
   --red:#d32f2f;
 }
-body{margin:0;font-family:Arial;background:#b0bec5}
 
-/* HEADER */
-.header{
-  background:#1976d2;color:#fff;padding:12px;
-  display:none;justify-content:space-between;align-items:center;
+body{
+  margin:0;
+  font-family:Arial;
+  background:#b0bec5;
 }
 
-/* LAYOUT */
-.wrap{display:flex;height:calc(100vh - 50px)}
+.header{
+  background:#1976d2;
+  color:#fff;
+  padding:12px;
+  display:none;
+  justify-content:space-between;
+  align-items:center;
+  font-size:14px;
+}
 
-/* SIDEBAR */
-.sidebar{width:120px;background:#fff;padding:10px;overflow:auto}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.num{padding:8px;background:#ddd;text-align:center;border-radius:6px;cursor:pointer;font-size:12px}
+.wrap{
+  display:flex;
+  height:calc(100vh - 50px);
+}
+
+.sidebar{
+  width:120px;
+  background:#fff;
+  padding:10px;
+  overflow:auto;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+}
+
+.num{
+  padding:8px;
+  background:#ddd;
+  text-align:center;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:12px;
+}
+
 .num.active{background:var(--blue);color:#fff}
 .num.done{background:#4caf50;color:#fff}
 
-/* CONTENT */
-.content{flex:1;padding:12px;overflow:auto}
-.card{background:#fff;padding:15px;border-radius:12px;box-shadow:0 3px 10px rgba(0,0,0,0.1)}
+.content{
+  flex:1;
+  padding:12px;
+  overflow:auto;
+}
 
-/* BUTTON */
-.btn{padding:12px;border:none;border-radius:8px;margin-top:10px;cursor:pointer}
+.card{
+  background:#fff;
+  padding:15px;
+  border-radius:12px;
+}
+
+.btn{
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  margin-top:10px;
+  cursor:pointer;
+}
+
 .blue{background:var(--blue);color:#fff}
 .red{background:var(--red);color:#fff}
 
-/* MODAL */
 .modal{
-  position:fixed;inset:0;background:rgba(0,0,0,.5);
-  display:none;align-items:center;justify-content:center;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
 }
+
 .box{
-  background:#fff;padding:20px;border-radius:12px;width:300px;text-align:center;
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  width:300px;
+  text-align:center;
 }
 
-/* LOGIN */
 .login-box{
-  max-width:420px;margin:40px auto;background:#fff;
-  padding:25px;border-radius:20px;
+  max-width:420px;
+  margin:40px auto;
+  background:#fff;
+  padding:25px;
+  border-radius:20px;
 }
-.form-group{
-  display:grid;grid-template-columns:100px 1fr;
-  gap:10px;margin-bottom:10px;
-}
-.form-group input,.form-group select{
-  padding:8px;border-radius:6px;border:1px solid #ccc;
-}
-.row{display:flex;gap:10px}
-.row .btn{flex:1}
 
-/* MOBILE */
+.form-group{
+  display:grid;
+  grid-template-columns:100px 1fr;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.row{
+  display:flex;
+  gap:10px;
+}
+
+.row .btn{
+  flex:1;
+}
+
 @media(max-width:768px){
-.wrap{flex-direction:column}
-.sidebar{width:100%;order:2}
-.grid{grid-template-columns:repeat(6,1fr)}
-.content{order:1}
-.form-group{grid-template-columns:1fr}
+.wrap{flex-direction:column;}
+.sidebar{width:100%;order:2;}
+.grid{grid-template-columns:repeat(6,1fr);}
+.content{order:1;}
+.form-group{grid-template-columns:1fr;}
 }
 </style>
 </head>
@@ -92,37 +151,29 @@ body{margin:0;font-family:Arial;background:#b0bec5}
 <script>
 const API="https://script.google.com/macros/s/AKfycbyFKeH-bb47KADy6577hEQU3zJy4WmkBAAxzIHuRqmqY6dNnPCDaXrl-UP-v78lj72c/exec";
 
-let dataSiswa=[],dataToken=[];
-let state={soal:[],index:0,jawaban:[],done:false};
-let warning=0;
-let timerInterval=null;
+let dataSiswa=[];
 
 /* ===== MODAL ===== */
-function modal(t,m,btns){
-mTitle.innerText=t;
-mMsg.innerHTML=m;
-mAct.innerHTML="";
-btns.forEach(b=>{
-let x=document.createElement("button");
-x.className="btn "+b.cls;
-x.innerText=b.text;
-x.onclick=()=>{modalHide();if(b.cb)b.cb()};
-mAct.appendChild(x);
-});
-modalShow();
+function modal(t,m){
+document.getElementById("mTitle").innerText=t;
+document.getElementById("mMsg").innerText=m;
+document.getElementById("modal").style.display="flex";
 }
-function modalShow(){modal.style.display="flex"}
-function modalHide(){modal.style.display="none"}
+function modalHide(){
+document.getElementById("modal").style.display="none";
+}
 
 /* ===== LOGIN UI ===== */
 function loginUI(){
-app.innerHTML=`<div class="login-box">
-<img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" style="width:80px;margin:auto;display:block">
-<h2 style="text-align:center;color:#1e4f8a">CBT Asesmen<br>Informatika</h2>
+
+document.getElementById("app").innerHTML=`
+<div class="login-box">
+
+<h2 style="text-align:center">CBT Informatika</h2>
 
 <div class="form-group">
 <label>Kelas</label>
-<select id="kelas" onchange="loadSiswa()"></select>
+<select id="kelas"></select>
 </div>
 
 <div class="form-group">
@@ -136,167 +187,87 @@ app.innerHTML=`<div class="login-box">
 </div>
 
 <div class="form-group">
-<label></label>
-<div><input type="checkbox" onclick="togglePass()"> Tampilkan Password</div>
-</div>
-
-<div class="form-group">
 <label>Token</label>
 <input id="token">
 </div>
 
 <div class="row">
 <button class="btn blue" onclick="login()">Masuk</button>
-<button class="btn red" onclick="jadwal()">Jadwal</button>
 </div>
+
 </div>`;
 
+/* LOAD SISWA */
 fetch(API)
 .then(r=>r.json())
 .then(d=>{
+
+if(!Array.isArray(d)){
+modal("Error","Data siswa gagal load");
+return;
+}
+
 dataSiswa=d;
-let k=[...new Set(d.map(x=>x.kelas))];
-kelas.innerHTML='<option>-- Pilih Kelas --</option>';
-k.forEach(x=>kelas.innerHTML+=`<option>${x}</option>`);
+
+let kelasList=[...new Set(d.map(x=>x.kelas))];
+
+let kelasEl=document.getElementById("kelas");
+kelasEl.innerHTML='<option value="">-- Pilih Kelas --</option>';
+
+kelasList.forEach(k=>{
+kelasEl.innerHTML+=`<option value="${k}">${k}</option>`;
 });
 
-fetch(API+"?mode=token").then(r=>r.json()).then(d=>dataToken=d);
+/* EVENT CHANGE */
+kelasEl.addEventListener("change",loadSiswa);
+
+});
+}
+
+/* ===== LOAD USERNAME ===== */
+function loadSiswa(){
+
+let kelas=document.getElementById("kelas").value;
+let userEl=document.getElementById("username");
+
+userEl.innerHTML='<option value="">-- Pilih Username --</option>';
+
+let hasil=dataSiswa.filter(x=>x.kelas==kelas);
+
+hasil.forEach(s=>{
+userEl.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
+});
 }
 
 /* ===== LOGIN ===== */
 function login(){
-let usernameVal=username.value;
-let tokenVal=token.value;
 
-if(!usernameVal) return modal("Error","Pilih username",[ {text:"OK",cls:"red"} ]);
-if(!tokenVal) return modal("Error","Token wajib diisi",[ {text:"OK",cls:"red"} ]);
+let username=document.getElementById("username").value;
+let password=document.getElementById("password").value;
+let token=document.getElementById("token").value;
 
-modal("Login","Memproses...",[]);
+if(!username) return modal("Error","Username belum dipilih");
+if(!token) return modal("Error","Token wajib diisi");
 
 fetch(API,{
 method:"POST",
 body:JSON.stringify({
 mode:"login",
-username:usernameVal,
-password:password.value||"",
-token:tokenVal
+username:username,
+password:password,
+token:token
 })
 })
 .then(r=>r.json())
 .then(res=>{
-modalHide();
-
-if(res.status==="success"){
-localStorage.setItem("user",JSON.stringify(res));
-startExam();
+if(res.status=="success"){
+alert("Login sukses");
 }else{
-modal("Gagal Login",res.msg,[{text:"OK",cls:"red"}]);
+modal("Login gagal",res.msg);
 }
 })
-.catch(()=>{
-modal("Error","Tidak bisa konek ke server",[ {text:"OK",cls:"red"} ]);
-});
-}
-
-/* ===== START CBT ===== */
-function startExam(){
-document.querySelector(".header").style.display="flex";
-
-fetch(API+"?mode=soal")
-.then(r=>r.json())
-.then(d=>{
-
-if(!d || d.length===0){
-modal("Error","Soal tidak ditemukan",[ {text:"OK",cls:"red"} ]);
-return;
-}
-
-state.soal=d;
-
-let saved=localStorage.getItem("jawaban");
-state.jawaban = saved ? JSON.parse(saved) : new Array(d.length).fill("");
-
-render();
-startTimer(1800);
-});
-}
-
-/* ===== RENDER ===== */
-function render(){
-
-let side='<div class="sidebar"><div class="grid">';
-
-state.soal.forEach((s,i)=>{
-let c="num";
-if(i==state.index)c+=" active";
-if(state.jawaban[i])c+=" done";
-side+=`<div class="${c}" onclick="goto(${i})">${i+1}</div>`;
-});
-
-side+='</div></div>';
-
-let s=state.soal[state.index];
-
-let main=`<div class="content"><div class="card">
-<h4>Soal ${state.index+1}</h4>
-<p>${s.soal}</p>
-${s.gambar?`<img src="${s.gambar}" style="width:100%">`:""}`;
-
-["A","B","C","D"].forEach(o=>{
-main+=`
-<div>
-<input type="radio" name="o"
-${state.jawaban[state.index]==o?"checked":""}
-onchange="jawab('${o}')"> ${o}. ${s.pilihan[o]}
-</div>`;
-});
-
-main+=`
-<button class="btn" onclick="prev()">Prev</button>
-<button class="btn blue" onclick="next()">Next</button>
-<button class="btn red" onclick="submit()">Kirim</button>
-</div></div>`;
-
-app.innerHTML=`<div class="wrap">${side}${main}</div>`;
-}
-
-/* ===== TIMER ===== */
-function startTimer(s){
-if(timerInterval) clearInterval(timerInterval);
-
-timerInterval=setInterval(()=>{
-s--;
-timer.innerText=Math.floor(s/60)+":"+("0"+s%60).slice(-2);
-if(s<=0) submit();
-},1000);
-}
-
-/* ===== SUBMIT ===== */
-function submit(){
-if(state.done) return;
-state.done=true;
-
-let u=JSON.parse(localStorage.getItem("user"));
-
-fetch(API,{
-method:"POST",
-body:JSON.stringify({
-mode:"submit",
-idLogin:u.idLogin,
-nama:u.nama,
-jk:u.jk,
-kelas:u.kelas,
-jawaban:state.jawaban
-})
-})
-.then(r=>r.json())
-.then(res=>{
-localStorage.removeItem("jawaban");
-modal("Selesai","Nilai: "+res.nilai,[{
-text:"OK",
-cls:"blue",
-cb:()=>location.reload()
-}]);
+.catch(e=>{
+modal("Error",e.toString());
 });
 }
 
