@@ -332,12 +332,17 @@ function startExam() {
 function startTimer() {
     let end = localStorage.getItem("endTime");
     if (!end) {
-        end = Date.now() + (90 * 60 * 1000);
+        end = Date.now() + (90 * 60 * 1000); // 90 Menit
         localStorage.setItem("endTime", end);
     }
     const timerInt = setInterval(() => {
         let sisa = Math.floor((end - Date.now()) / 1000);
-        if (sisa <= 0) { clearInterval(timerInt); submit(); return; }
+        if (sisa <= 0) { 
+            clearInterval(timerInt); 
+            // Kirim otomatis jika waktu habis
+            submitAction(); 
+            return; 
+        }
         let m = Math.floor(sisa / 60);
         let s = sisa % 60;
         document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
@@ -362,7 +367,7 @@ function render() {
         if(s.pilihan[o]) {
             let isSel = state.jawaban[state.index] === o;
             opsHtml += `<div class="opsi-item ${isSel?'selected':''}" onclick="jawab('${o}')">
-                <input type="radio" ${isSel?'checked':''}> <span>${o}. ${s.pilihan[o]}</span>
+                <input type="radio" name="q" ${isSel?'checked':''}> <span>${o}. ${s.pilihan[o]}</span>
             </div>`;
         }
     });
@@ -378,7 +383,7 @@ function render() {
                 <div class="nav-footer">
                     <button class="btn blue" onclick="state.index--;render()" ${state.index==0?'disabled':''}>KEMBALI</button>
                     ${state.index == state.soal.length-1 
-                        ? `<button class="btn green" onclick="popupSubmit()">SELESAI</button>`
+                        ? `<button class="btn green" onclick="popupSubmit()">SELESAI</button>` 
                         : `<button class="btn blue" onclick="state.index++;render()">LANJUT</button>`}
                 </div>
             </div>
@@ -396,11 +401,11 @@ function jawab(v) {
 }
 
 function popupSubmit() {
-    modal("Selesai?", "Kirim jawaban sekarang?", [{text:"BATAL",cls:"blue"}, {text:"KIRIM",cls:"green",cb:submit}]);
+    modal("Selesai?", "Kirim jawaban sekarang?", [{text:"BATAL",cls:"blue"}, {text:"KIRIM",cls:"green",cb:submitAction}]);
 }
 
-function submit() {
-    document.getElementById("app").innerHTML = "<h2>Mengirim... Mohon Tunggu</h2>";
+function submitAction() {
+    document.getElementById("app").innerHTML = "<div style='text-align:center;padding:50px'><h2>Mengirim... Mohon Tunggu</h2></div>";
     let u = JSON.parse(localStorage.getItem("user"));
     fetch(API, {
         method: "POST",
@@ -411,13 +416,24 @@ function submit() {
             kelas: u.kelas,
             jawaban: state.jawaban
         })
-    }).then(() => {
+    }).then(r => r.json()).then(res => {
         localStorage.clear();
-        document.getElementById("app").innerHTML = "<div style='text-align:center;padding:50px'><h2>TERIMA KASIH</h2><p>Jawaban Berhasil Dikirim.</p><button class='btn blue' onclick='location.reload()'>LOGOUT</button></div>";
+        document.getElementById("app").innerHTML = `
+        <div style='text-align:center;padding:50px'>
+            <h2>TERIMA KASIH</h2>
+            <p>Jawaban Berhasil Dikirim.</p>
+            <p>Nilai Anda: <b>${res.nilai}</b></p>
+            <button class='btn blue' onclick='location.reload()'>LOGOUT</button>
+        </div>`;
     });
 }
 
-function keluar() { localStorage.clear(); location.reload(); }
+function keluar() { 
+    if(confirm("Keluar dari ujian? Data yang belum terkirim akan hilang.")) {
+        localStorage.clear(); 
+        location.reload(); 
+    }
+}
 
 function init() {
     let layer = localStorage.getItem("layer");
