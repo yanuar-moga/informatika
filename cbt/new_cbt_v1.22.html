@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
-    <title>CBT SMPN 1 MOGA - Profesional</title>
+    <title>CBT Asesmen Informatika</title>
 
     <style>
         :root {
@@ -20,7 +20,8 @@
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg);
             color: var(--text);
-            overflow: hidden;
+            overflow-x: hidden;
+            user-select: none;
         }
 
         /* HEADER */
@@ -29,12 +30,13 @@
             color: #fff;
             padding: 0 20px;
             height: 60px;
-            display: none; /* Akan diubah ke flex via JS */
+            display: none; 
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             z-index: 10;
-            position: relative;
+            position: sticky;
+            top: 0;
         }
 
         .timer-box {
@@ -49,14 +51,12 @@
         /* LAYOUT UTAMA */
         .wrap {
             display: flex;
-            height: calc(100vh - 60px);
+            min-height: calc(100vh - 60px);
         }
 
-        /* KONTEN SOAL */
         .content {
             flex: 1;
-            padding: 30px;
-            overflow-y: auto;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -64,14 +64,12 @@
 
         .card-soal {
             background: #fff;
-            padding: 30px;
+            padding: 25px;
             border-radius: 8px;
             width: 100%;
             max-width: 800px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             min-height: 400px;
-            display: flex;
-            flex-direction: column;
         }
 
         .nomor-soal {
@@ -87,6 +85,13 @@
             font-size: 1.15rem;
             line-height: 1.6;
             margin-bottom: 25px;
+        }
+
+        .img-soal {
+            max-width: 100%;
+            display: block;
+            margin: 0 auto 20px;
+            border-radius: 4px;
         }
 
         /* PILIHAN JAWABAN */
@@ -106,50 +111,26 @@
             transition: all 0.2s;
         }
 
-        .opsi-item:hover {
-            background: #f0f4ff;
-            border-color: var(--primary);
-        }
-
-        .opsi-item input {
-            margin-right: 15px;
-            transform: scale(1.2);
-        }
-
+        .opsi-item:hover { background: #f0f4ff; }
+        .opsi-item input { margin-right: 15px; transform: scale(1.2); }
         .opsi-item.selected {
             background: #e8f0fe;
             border-color: var(--primary);
             font-weight: 600;
         }
 
-        .huruf-opsi {
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        /* SIDEBAR NAVIGASI */
+        /* SIDEBAR */
         .sidebar {
-            width: 300px;
+            width: 280px;
             background: #fff;
             border-left: 1px solid #ddd;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar-title {
-            font-weight: bold;
-            margin-bottom: 15px;
-            text-align: center;
-            font-size: 0.9rem;
-            color: #666;
         }
 
         .grid-nomor {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 8px;
-            overflow-y: auto;
         }
 
         .num {
@@ -161,63 +142,54 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
         }
 
         .num.active { border: 2px solid var(--primary); color: var(--primary); }
         .num.done { background: var(--success); color: #fff; border-color: var(--success); }
 
-        /* TOMBOL NAVIGASI */
         .nav-footer {
-            margin-top: auto;
-            padding-top: 20px;
+            margin-top: 30px;
             display: flex;
             justify-content: space-between;
             gap: 10px;
         }
 
         .btn {
-            padding: 12px 24px;
+            padding: 10px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.9rem;
-            transition: opacity 0.2s;
         }
 
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .blue { background: var(--primary); color: #fff; }
-        .yellow { background: var(--accent); color: #000; }
         .green { background: var(--success); color: #fff; }
         .red { background: var(--danger); color: #fff; }
 
-        /* MODAL & LOGIN (Tetap Fungsional) */
         .modal { position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:100; }
         .box { background:#fff; padding:25px; border-radius:8px; width:90%; max-width:400px; text-align:center; }
         
-        .login-container { min-height:100vh; display:flex; align-items:center; justify-content:center; background: linear-gradient(135deg, #2f5597 0%, #1976d2 100%); }
-        .login-box { width:100%; max-width:400px; background:#fff; padding:40px; border-radius:12px; box-shadow:0 15px 35px rgba(0,0,0,0.3); }
+        .login-container { min-height:100vh; display:flex; align-items:center; justify-content:center; background: var(--primary); }
+        .login-box { width:90%; max-width:380px; background:#fff; padding:30px; border-radius:12px; }
         .form-group { margin-bottom: 15px; text-align: left; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.85rem; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.8rem; }
         .form-group input, .form-group select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
 
         @media (max-width: 768px) {
-            .wrap { flex-direction: column; overflow-y: auto; }
-            .sidebar { width: 100%; order: 2; height: auto; border-left: none; border-top: 1px solid #ddd; }
-            .content { order: 1; padding: 15px; }
-            .header { font-size: 12px; }
+            .wrap { flex-direction: column; }
+            .sidebar { width: 100%; border-left: none; border-top: 1px solid #ddd; order: 2; }
+            .content { order: 1; }
         }
     </style>
 </head>
+<body oncontextmenu="return false;">
 
-<body>
-
-<div class="header">
-    <div id="info-siswa">
-        <strong id="nama"></strong><br>
-        <span id="kelas" style="opacity: 0.8; font-size: 0.8rem;"></span>
+<div class="header" id="mainHeader">
+    <div>
+        <strong id="namaDisp"></strong><br>
+        <span id="kelasDisp" style="font-size: 0.75rem; opacity: 0.8;"></span>
     </div>
     <div class="timer-box" id="timer">00:00</div>
     <button onclick="keluar()" class="btn red" style="padding: 5px 10px; font-size: 0.7rem;">KELUAR</button>
@@ -225,6 +197,7 @@
 
 <div id="app"></div>
 
+<!-- Modal Box Custom -->
 <div id="modalBox" class="modal">
     <div class="box">
         <h3 id="mTitle"></h3>
@@ -234,274 +207,289 @@
 </div>
 
 <script>
-const API="https://script.google.com/macros/s/AKfycbzb6lxGToLfJbgnjbmK_NL5Ikfgr16pH54s_De3AmkSu3xZtgo-6s1veUuIPUlfE_Jo/exec";
+const API = "https://script.google.com/macros/s/AKfycbxekBQTqWXuF4-PFIm3YNLhv4wvC7Mqi5hLzxy9pIvGO0OkXDFHQ4BxFsLzKj5E5MWs/exec"; 
 
-let dataSiswa=[];
-let state={soal:[],index:0,jawaban:[]};
-let warning=0;
+let dataSiswa = [];
+let state = { soal: [], index: 0, jawaban: [] };
 
-/* MODAL CONTROL */
-function modal(t,m,btns){
-    mAct.innerHTML="";
-    mTitle.innerText=t;
-    mMsg.innerHTML=m;
-    btns.forEach(b=>{
-        let x=document.createElement("button");
-        x.className="btn "+b.cls;
-        x.innerText=b.text;
-        x.onclick=()=>{modalHide(); if(b.cb)b.cb();};
+// Fungsi Modal Pengganti Alert
+function modal(t, m, btns) {
+    const mAct = document.getElementById("mAct");
+    mAct.innerHTML = "";
+    document.getElementById("mTitle").innerText = t;
+    document.getElementById("mMsg").innerHTML = m;
+    btns.forEach(b => {
+        let x = document.createElement("button");
+        x.className = "btn " + b.cls;
+        x.innerText = b.text;
+        x.onclick = () => { 
+            document.getElementById("modalBox").style.display = "none"; 
+            if (b.cb) b.cb(); 
+        };
         mAct.appendChild(x);
     });
-    modalBox.style.display="flex";
+    document.getElementById("modalBox").style.display = "flex";
 }
-function modalHide(){modalBox.style.display="none";}
 
-/* UI LOGIN */
-function loginUI(){
-    app.innerHTML=`
+function loginUI() {
+    document.getElementById("mainHeader").style.display = "none";
+    const app = document.getElementById("app");
+    app.innerHTML = `
     <div class="login-container">
         <div class="login-box">
-            <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" style="width:70px;display:block;margin:0 auto 20px">
-            <h2 style="text-align:center; color:var(--primary); margin-bottom:30px">CBT ASESMEN</h2>
+            <div style="text-align:center; margin-bottom: 15px;">
+                <img src="https://yanuar-moga.github.io/informatika/asesmen/assets/logo.png" alt="Logo" style="width: 80px; height: auto;">
+            </div>
+            <h2 style="text-align:center; color:var(--primary); margin-top: 0;">CBT ASESMEN</h2>
+            <p style="text-align:center; font-size: 0.85rem; color: #666; margin-top: -10px; margin-bottom: 20px;">Informatika Kelas 7</p>
+            
             <div class="form-group">
                 <label>PILIH KELAS</label>
                 <select id="kelasSelect"><option>Memuat kelas...</option></select>
             </div>
             <div class="form-group">
                 <label>NAMA SISWA</label>
-                <select id="username"><option>-- Pilih Nama --</option></select>
-            </div>
-            <div class="form-group">
-                <label>PASSWORD</label>
-                <input type="password" id="password" placeholder="Masukkan Password">
+                <select id="username"><option value="">-- Pilih Nama --</option></select>
             </div>
             <div class="form-group">
                 <label>TOKEN</label>
-                <input id="token" style="text-transform: uppercase; font-weight:bold; letter-spacing:2px">
+                <input id="token" style="text-transform: uppercase; font-weight:bold; text-align:center" placeholder="Ketik Token">
             </div>
-            <button class="btn blue" style="width:100%; margin-top:10px" onclick="login()">MASUK UJIAN</button>
-            <p style="text-align:center; font-size:11px; color:#999; margin-top:20px">© 2026 SMPN 1 MOGA. All Rights Reserved.</p>
+            <button id="btnLogin" class="btn blue" style="width:100%;" onclick="login()">MASUK UJIAN</button>
+            <p style="text-align:center; font-size:10px; color:#999; margin-top:20px">CBT Browser Apps by MB</p>
         </div>
     </div>`;
 
-    fetch(API).then(r=>r.json()).then(d=>{
-        dataSiswa=d;
-        let k=[...new Set(d.map(x=>x.kelas))];
+    fetch(API).then(r => r.json()).then(d => {
+        dataSiswa = d;
+        let k = [...new Set(d.map(x => x.kelas))];
         let sel = document.getElementById('kelasSelect');
-        sel.innerHTML='<option>-- Pilih Kelas --</option>';
-        k.forEach(x=>sel.innerHTML+=`<option>${x}</option>`);
-        sel.onchange=loadUser;
-    });
+        sel.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+        k.forEach(x => sel.innerHTML += `<option>${x}</option>`);
+        sel.onchange = () => {
+            let kVal = sel.value;
+            let un = document.getElementById('username');
+            un.innerHTML = '<option value="">-- Pilih Nama --</option>';
+            dataSiswa.filter(x => x.kelas == kVal).forEach(s => {
+                un.innerHTML += `<option value="${s.username}" data-nama="${s.nama}">${s.nama}</option>`;
+            });
+        };
+    }).catch(() => modal("Koneksi Gagal", "Gagal terhubung ke server.", [{text:"OKE", cls:"red"}]));
 }
 
-function loadUser(){
-    let k=document.getElementById('kelasSelect').value;
-    let un = document.getElementById('username');
-    un.innerHTML='<option>-- Pilih Nama --</option>';
-    dataSiswa.filter(x=>x.kelas==k).forEach(s=>{
-        un.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
-    });
-}
+async function login() {
+    let selName = document.getElementById('username');
+    let user = selName.value;
+    let namaReal = selName.options[selName.selectedIndex]?.getAttribute('data-nama');
+    let kls = document.getElementById('kelasSelect').value;
+    let token = document.getElementById('token').value;
 
-function login(){
-    let user=document.getElementById('username').value;
-    let pass=document.getElementById('password').value;
-    let token=document.getElementById('token').value;
+    if (!user || !token) {
+        modal("Peringatan", "Silakan pilih Nama dan isi Token!", [{text:"OKE", cls:"blue"}]);
+        return;
+    }
 
-    if(!user || !pass || !token) return alert("Lengkapi data!");
+    document.getElementById('btnLogin').innerText = "Verifikasi...";
+    
+    let device = navigator.userAgent;
+    let ip = "-";
 
-    fetch(API,{
-        method:"POST",
-        body:JSON.stringify({mode:"login",username:user,password:pass,token})
+    try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        ip = data.ip;
+    } catch (e) { console.error(e); }
+    
+    fetch(API, {
+        method: "POST",
+        body: JSON.stringify({ 
+            mode: "login", 
+            username: user, 
+            nama: namaReal, 
+            kelas: kls, 
+            token: token,
+            ip: ip,      
+            device: device 
+        })
     })
-    .then(r=>r.json())
-    .then(res=>{
-        if(res.status==="success"){
-            localStorage.setItem("user",JSON.stringify(res));
-            localStorage.setItem("layer","konfirmasi");
+    .then(r => r.json())
+    .then(res => {
+        if (res.status === "success") {
+            localStorage.setItem("user", JSON.stringify(res));
+            localStorage.setItem("layer", "konfirmasi");
             init();
-        }else alert(res.msg);
+        } else {
+            modal("Gagal Masuk", res.msg, [{text:"OKE", cls:"red"}]);
+            document.getElementById('btnLogin').innerText = "MASUK UJIAN";
+        }
+    })
+    .catch(err => {
+        modal("Kesalahan", "Terjadi kesalahan koneksi.", [{text:"OKE", cls:"red"}]);
+        document.getElementById('btnLogin').innerText = "MASUK UJIAN";
     });
 }
 
-/* DASHBOARD / KONFIRMASI */
-function showKonfirmasi(){
-    let u=JSON.parse(localStorage.getItem("user"));
-    app.innerHTML=`
-    <div style="max-width:600px; margin:40px auto; background:#fff; padding:30px; border-radius:8px; box-shadow:0 5px 15px rgba(0,0,0,0.1)">
-        <h3 style="border-bottom:2px solid #eee; padding-bottom:10px">Konfirmasi Peserta</h3>
-        <table style="width:100%; line-height:2.5">
-            <tr><td>Nama Peserta</td><td>: <strong>${u.nama}</strong></td></tr>
-            <tr><td>Kelas</td><td>: ${u.kelas}</td></tr>
-            <tr><td>Mata Pelajaran</td><td>: Informatika</td></tr>
-            <tr><td>Durasi</td><td>: 90 Menit</td></tr>
-        </table>
-        <div style="background:#fff3cd; padding:15px; border-radius:5px; margin-top:20px; font-size:0.9rem">
-            Pastikan koneksi internet stabil. Dilarang menutup jendela ujian sebelum selesai.
+function showKonfirmasi() {
+    let u = JSON.parse(localStorage.getItem("user"));
+    document.getElementById("mainHeader").style.display = "none";
+    document.getElementById("app").innerHTML = `
+    <div style="max-width:600px; margin:40px auto; background:#e0e0e0; padding:30px; border-radius:15px; box-shadow:0 10px 25px rgba(0,0,0,0.1); font-family: Arial, sans-serif; color: #333;">
+        <div style="line-height: 1.8; font-size: 1.1rem;">
+            <p style="margin: 5px 0;">Nama : <b>${u.nama}</b></p>
+            <p style="margin: 5px 0;">Kelas : <b>${u.kelas}</b></p>
+            <p style="margin: 5px 0;">Mata Pelajaran : <b>Informatika</b></p>
+            <p style="margin: 5px 0;">Semester : <b>Genap</b></p>
+            <p style="margin: 5px 0;">Tahun Pelajaran : <b>2026 - 2027</b></p>
         </div>
-        <button class="btn green" style="width:100%; margin-top:20px; font-size:1.1rem" onclick="startExam()">MULAI KERJAKAN</button>
+        <hr style="border: 0; border-top: 1px solid #999; margin: 20px 0;">
+        <div style="font-size: 1.05rem;">
+            <p><b>Informasi Ujian:</b></p>
+            <ul style="margin-left: -10px;">
+                <li>Jumlah soal: Otomatis</li>
+                <li>Durasi: 90 menit</li>
+            </ul>
+        </div>
+        <button class="btn" onclick="startExam()" 
+            style="width:100%; background: #ff5722; color: white; padding: 15px; font-size: 1.1rem; border-radius: 10px; margin-top: 25px; font-weight: bold; border: none; cursor: pointer;">
+            KERJAKAN UJIAN
+        </button>
     </div>`;
 }
 
-/* CORE EXAM LOGIC */
-function startExam(){
-    localStorage.setItem("layer","soal");
-    document.querySelector(".header").style.display="flex";
-
-    fetch(API+"?mode=soal")
-    .then(r=>r.json())
-    .then(d=>{
-        let saved=localStorage.getItem("cbt_state");
-        if(saved){
-            state=JSON.parse(saved);
+function startExam() {
+    localStorage.setItem("layer", "soal");
+    fetch(API + "?mode=soal").then(r => r.json()).then(d => {
+        let saved = localStorage.getItem("cbt_state");
+        if (saved) {
+            state = JSON.parse(saved);
         } else {
-            state.soal=d;
-            state.jawaban=new Array(d.length).fill("");
-            state.index=0;
+            state.soal = d;
+            state.jawaban = new Array(d.length).fill("");
+            state.index = 0;
+            localStorage.setItem("cbt_state", JSON.stringify(state));
         }
         render();
-        startTimer(5400); // 90 Menit
+        startTimer();
     });
 }
 
-function startTimer(duration){
-    let end=localStorage.getItem("endTime");
-    if(!end){
-        end=Date.now()+duration*1000;
-        localStorage.setItem("endTime",end);
-    }else end=parseInt(end);
-
-    function update(){
-        let sisa=Math.floor((end-Date.now())/1000);
-        if(sisa<=0){ submit(); return; }
-        let m = Math.floor(sisa/60);
-        let s = sisa%60;
-        document.getElementById('timer').innerText = `${m}:${s<10?'0'+s:s}`;
-        if(sisa < 300) document.getElementById('timer').style.color = "red";
-        requestAnimationFrame(update);
+function startTimer() {
+    let end = localStorage.getItem("endTime");
+    if (!end) {
+        end = Date.now() + (90 * 60 * 1000); 
+        localStorage.setItem("endTime", end);
     }
-    update();
+    const timerInt = setInterval(() => {
+        let sisa = Math.floor((end - Date.now()) / 1000);
+        if (sisa <= 0) { 
+            clearInterval(timerInt); 
+            submitAction(); 
+            return; 
+        }
+        let m = Math.floor(sisa / 60);
+        let s = sisa % 60;
+        document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+    }, 1000);
 }
 
-function render(){
+function render() {
+    document.getElementById("mainHeader").style.display = "flex";
+    let u = JSON.parse(localStorage.getItem("user"));
+    document.getElementById("namaDisp").innerText = u.nama;
+    document.getElementById("kelasDisp").innerText = u.kelas;
+
     let s = state.soal[state.index];
-    
-    // Render Sidebar
     let sideGrid = '';
-    state.soal.forEach((soal, i) => {
-        let cls = "num";
-        if(i === state.index) cls += " active";
-        if(state.jawaban[i]) cls += " done";
-        sideGrid += `<div class="${cls}" onclick="goto(${i})">${i+1}</div>`;
+    state.soal.forEach((_, i) => {
+        let cls = "num" + (i === state.index ? " active" : "") + (state.jawaban[i] ? " done" : "");
+        sideGrid += `<div class="${cls}" onclick="state.index=${i};render()">${i+1}</div>`;
     });
 
-    // Render Main Card
-    let optionsHtml = '';
+    let opsHtml = '';
     ["A","B","C","D","E"].forEach(o => {
-        if(s.pilihan[o]){
-            let isSel = state.jawaban[state.index] === o ? 'selected' : '';
-            optionsHtml += `
-            <div class="opsi-item ${isSel}" onclick="jawab('${o}')">
-                <input type="radio" name="q" ${isSel?'checked':''}>
-                <span class="huruf-opsi">${o}.</span> ${s.pilihan[o]}
+        if(s.pilihan[o]) {
+            let isSel = state.jawaban[state.index] === o;
+            opsHtml += `<div class="opsi-item ${isSel?'selected':''}" onclick="jawab('${o}')">
+                <input type="radio" name="q" ${isSel?'checked':''}> <span>${o}. ${s.pilihan[o]}</span>
             </div>`;
         }
     });
 
-    app.innerHTML = `
+    document.getElementById("app").innerHTML = `
     <div class="wrap">
         <div class="content">
             <div class="card-soal">
-                <div class="nomor-soal">SOAL NOMOR ${state.index+1}</div>
+                <div class="nomor-soal">NOMOR ${state.index + 1}</div>
+                ${s.gambar ? `<img src="${s.gambar}" class="img-soal">` : ''}
                 <div class="teks-soal">${s.soal}</div>
-                <div class="opsi-container">${optionsHtml}</div>
-                
+                <div class="opsi-container">${opsHtml}</div>
                 <div class="nav-footer">
-                    <button class="btn blue" onclick="prev()" ${state.index==0?'disabled':''}>SEBELUMNYA</button>
-                    <button class="btn yellow" onclick="jawab('')">RAGU-RAGU</button>
+                    <button class="btn blue" onclick="state.index--;render()" ${state.index==0?'disabled':''}>KEMBALI</button>
                     ${state.index == state.soal.length-1 
                         ? `<button class="btn green" onclick="popupSubmit()">SELESAI</button>` 
-                        : `<button class="btn blue" onclick="next()">SELANJUTNYA</button>`
-                    }
+                        : `<button class="btn blue" onclick="state.index++;render()">LANJUT</button>`}
                 </div>
             </div>
         </div>
         <div class="sidebar">
-            <div class="sidebar-title">NAVIGASI SOAL</div>
             <div class="grid-nomor">${sideGrid}</div>
         </div>
     </div>`;
 }
 
-function jawab(v){
-    state.jawaban[state.index]=v;
-    save();
+function jawab(v) {
+    state.jawaban[state.index] = v;
+    localStorage.setItem("cbt_state", JSON.stringify(state));
     render();
 }
 
-function next(){ if(state.index < state.soal.length-1){ state.index++; save(); render(); } }
-function prev(){ if(state.index > 0){ state.index--; save(); render(); } }
-function goto(i){ state.index=i; save(); render(); }
-function save(){ localStorage.setItem("cbt_state", JSON.stringify(state)); }
-
-function popupSubmit(){
-    modal("Konfirmasi Selesai", "Apakah Anda yakin ingin mengakhiri ujian? Jawaban tidak dapat diubah lagi.", [
-        {text:"BATAL", cls:"blue"},
-        {text:"YA, SELESAI", cls:"red", cb:submit}
+function popupSubmit() {
+    modal("Selesai?", "Kirim jawaban sekarang?", [
+        {text:"BATAL", cls:"blue"}, 
+        {text:"KIRIM", cls:"green", cb:submitAction}
     ]);
 }
 
-function submit(){
-    localStorage.setItem("layer","hasil");
-    app.innerHTML=`<div class="content"><h2>Mengirim Jawaban...</h2></div>`;
-    // Simulasi pengiriman data
-    setTimeout(showHasil, 1500);
+function submitAction() {
+    document.getElementById("app").innerHTML = "<div style='text-align:center;padding:50px'><h2>Mengirim Jawaban...</h2><p>Mohon tunggu, jangan tutup halaman ini.</p></div>";
+    let u = JSON.parse(localStorage.getItem("user"));
+    fetch(API, {
+        method: "POST",
+        body: JSON.stringify({
+            mode: "submit",
+            idLogin: u.idLogin,
+            nama: u.nama,
+            kelas: u.kelas,
+            jawaban: state.jawaban
+        })
+    }).then(r => r.json()).then(res => {
+        localStorage.clear();
+        document.getElementById("mainHeader").style.display = "none";
+        document.getElementById("app").innerHTML = `
+        <div style='text-align:center;padding:50px'>
+            <h2 style="color:var(--success)">TERIMA KASIH</h2>
+            <p>Jawaban berhasil dikirim dan tersimpan di server.</p>
+            <div style="font-size:2rem; margin:20px 0;">Nilai Anda: <b>${res.nilai}</b></div>
+            <button class='btn blue' onclick='location.reload()'>LOGOUT</button>
+        </div>`;
+    }).catch(err => {
+        modal("Gagal Kirim", "Gagal mengirim jawaban. Silakan coba lagi.", [{text:"COBA LAGI", cls:"blue", cb:render}]);
+    });
 }
 
-function showHasil(){
-    document.querySelector(".header").style.display="none";
-    app.innerHTML=`
-    <div class="login-container">
-        <div class="login-box" style="text-align:center">
-            <h2 style="color:var(--success)">UJIAN SELESAI</h2>
-            <p>Terima kasih telah mengikuti asesmen dengan jujur.</p>
-            <div style="font-size:3rem; margin:20px 0; font-weight:bold">✓</div>
-            <button class="btn blue" onclick="keluar()">KEMBALI KE LOGIN</button>
-        </div>
-    </div>`;
+function keluar() { 
+    modal("Konfirmasi Keluar", "Keluar dari ujian? Data yang belum terkirim akan hilang.", [
+        {text:"BATAL", cls:"blue"}, 
+        {text:"KELUAR", cls:"red", cb: () => { localStorage.clear(); location.reload(); }}
+    ]);
 }
 
-function init(){
-    let user=localStorage.getItem("user");
-    let layer=localStorage.getItem("layer");
-    if(!user){ loginUI(); return; }
-    
-    let u=JSON.parse(user);
-    document.getElementById("nama").innerText=u.nama;
-    document.getElementById("kelas").innerText="Kelas: " + u.kelas;
-
-    if(layer==="soal") startExam();
-    else if(layer==="hasil") showHasil();
-    else showKonfirmasi();
+function init() {
+    let layer = localStorage.getItem("layer");
+    if (!localStorage.getItem("user")) loginUI();
+    else if (layer === "konfirmasi") showKonfirmasi();
+    else if (layer === "soal") startExam();
 }
-
-function keluar(){
-    localStorage.clear();
-    location.reload();
-}
-
-/* ANTI CHEAT */
-document.addEventListener("visibilitychange",()=>{
-    if(document.hidden && localStorage.getItem("layer") === "soal"){
-        warning++;
-        if(warning >= 3){
-            alert("Anda keluar dari tab ujian terlalu sering. Ujian otomatis dihentikan.");
-            submit();
-        } else {
-            alert("Peringatan " + warning + "/3: Dilarang membuka tab lain!");
-        }
-    }
-});
 
 init();
 </script>
