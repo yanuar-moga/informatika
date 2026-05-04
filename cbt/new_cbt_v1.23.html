@@ -21,6 +21,7 @@
             background: var(--bg);
             color: var(--text);
             overflow-x: hidden;
+            user-select: none; /* Mencegah copy-paste soal */
         }
 
         /* HEADER */
@@ -53,7 +54,6 @@
             min-height: calc(100vh - 60px);
         }
 
-        /* KONTEN SOAL */
         .content {
             flex: 1;
             padding: 20px;
@@ -112,9 +112,7 @@
         }
 
         .opsi-item:hover { background: #f0f4ff; }
-
         .opsi-item input { margin-right: 15px; transform: scale(1.2); }
-
         .opsi-item.selected {
             background: #e8f0fe;
             border-color: var(--primary);
@@ -166,16 +164,14 @@
             font-weight: 600;
         }
 
-        .btn:disabled { opacity: 0.5; }
         .blue { background: var(--primary); color: #fff; }
-        .yellow { background: var(--accent); color: #000; }
         .green { background: var(--success); color: #fff; }
         .red { background: var(--danger); color: #fff; }
 
         .modal { position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:100; }
         .box { background:#fff; padding:25px; border-radius:8px; width:90%; max-width:400px; text-align:center; }
         
-        .login-container { min-height:100vh; display:flex; align-items:center; justify-content:center; background: #2f5597; }
+        .login-container { min-height:100vh; display:flex; align-items:center; justify-content:center; background: var(--primary); }
         .login-box { width:90%; max-width:380px; background:#fff; padding:30px; border-radius:12px; }
         .form-group { margin-bottom: 15px; text-align: left; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.8rem; }
@@ -188,7 +184,7 @@
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;"> <!-- Proteksi Klik Kanan -->
 
 <div class="header" id="mainHeader">
     <div>
@@ -302,13 +298,40 @@ function login() {
 
 function showKonfirmasi() {
     let u = JSON.parse(localStorage.getItem("user"));
+    document.getElementById("mainHeader").style.display = "none";
     document.getElementById("app").innerHTML = `
-    <div style="max-width:500px; margin:40px auto; background:#fff; padding:25px; border-radius:8px; box-shadow:0 5px 15px rgba(0,0,0,0.1)">
-        <h3>Konfirmasi Data</h3>
-        <p>Nama: <b>${u.nama}</b></p>
-        <p>Kelas: <b>${u.kelas}</b></p>
-        <hr>
-        <button class="btn green" style="width:100%" onclick="startExam()">MULAI UJIAN</button>
+    <div style="max-width:600px; margin:40px auto; background:#e0e0e0; padding:30px; border-radius:15px; box-shadow:0 10px 25px rgba(0,0,0,0.1); font-family: Arial, sans-serif; color: #333;">
+        <div style="line-height: 1.8; font-size: 1.1rem;">
+            <p style="margin: 5px 0;">Nama : <b>${u.nama}</b></p>
+            <p style="margin: 5px 0;">Kelas : <b>${u.kelas}</b></p>
+            <p style="margin: 5px 0;">Mata Pelajaran : <b>Informatika</b></p>
+            <p style="margin: 5px 0;">Semester : <b>Genap</b></p>
+            <p style="margin: 5px 0;">Tahun Pelajaran : <b>2026 - 2027</b></p>
+        </div>
+        
+        <hr style="border: 0; border-top: 1px solid #999; margin: 20px 0;">
+        
+        <div style="font-size: 1.05rem;">
+            <p><b>Informasi Ujian:</b></p>
+            <ul style="margin-left: -10px;">
+                <li>Jumlah soal: 40</li>
+                <li>Durasi: 90 menit</li>
+            </ul>
+        </div>
+
+        <div style="font-size: 1.05rem; margin-top: 20px;">
+            <p><b>Penting:</b></p>
+            <ul style="margin-left: -10px;">
+                <li>Dilarang membuka tab/aplikasi lain</li>
+                <li>Jangan refresh saat ujian berlangsung</li>
+                <li>Kerjakan dengan jujur</li>
+            </ul>
+        </div>
+
+        <button class="btn" onclick="startExam()" 
+            style="width:100%; background: #ff5722; color: white; padding: 15px; font-size: 1.1rem; border-radius: 10px; margin-top: 25px; font-weight: bold; border: none; cursor: pointer;">
+            KERJAKAN UJIAN
+        </button>
     </div>`;
 }
 
@@ -339,7 +362,6 @@ function startTimer() {
         let sisa = Math.floor((end - Date.now()) / 1000);
         if (sisa <= 0) { 
             clearInterval(timerInt); 
-            // Kirim otomatis jika waktu habis
             submitAction(); 
             return; 
         }
@@ -405,7 +427,7 @@ function popupSubmit() {
 }
 
 function submitAction() {
-    document.getElementById("app").innerHTML = "<div style='text-align:center;padding:50px'><h2>Mengirim... Mohon Tunggu</h2></div>";
+    document.getElementById("app").innerHTML = "<div style='text-align:center;padding:50px'><h2>Mengirim Jawaban...</h2></div>";
     let u = JSON.parse(localStorage.getItem("user"));
     fetch(API, {
         method: "POST",
@@ -418,11 +440,12 @@ function submitAction() {
         })
     }).then(r => r.json()).then(res => {
         localStorage.clear();
+        document.getElementById("mainHeader").style.display = "none";
         document.getElementById("app").innerHTML = `
         <div style='text-align:center;padding:50px'>
-            <h2>TERIMA KASIH</h2>
-            <p>Jawaban Berhasil Dikirim.</p>
-            <p>Nilai Anda: <b>${res.nilai}</b></p>
+            <h2 style="color:var(--success)">TERIMA KASIH</h2>
+            <p>Jawaban berhasil dikirim dan tersimpan di server.</p>
+            <div style="font-size:2rem; margin:20px 0;">Nilai Anda: <b>${res.nilai}</b></div>
             <button class='btn blue' onclick='location.reload()'>LOGOUT</button>
         </div>`;
     });
