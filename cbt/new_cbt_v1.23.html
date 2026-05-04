@@ -273,10 +273,10 @@ function loginUI() {
     }).catch(() => alert("Gagal koneksi ke server."));
 }
 
-function login() {
+async function login() {
     let selName = document.getElementById('username');
     let user = selName.value;
-    let namaReal = selName.options[selName.selectedIndex].getAttribute('data-nama');
+    let namaReal = selName.options[selName.selectedIndex]?.getAttribute('data-nama');
     let kls = document.getElementById('kelasSelect').value;
     let token = document.getElementById('token').value;
 
@@ -284,9 +284,29 @@ function login() {
 
     document.getElementById('btnLogin').innerText = "Verifikasi...";
     
+    // --- AMBIL DATA IP & DEVICE ---
+    let device = navigator.userAgent;
+    let ip = "-";
+    try {
+        // Mengambil IP publik siswa via ipify API
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        ip = data.ip;
+    } catch (e) {
+        console.error("Gagal mendapatkan IP:", e);
+    }
+    
     fetch(API, {
         method: "POST",
-        body: JSON.stringify({ mode: "login", username: user, nama: namaReal, kelas: kls, token: token })
+        body: JSON.stringify({ 
+            mode: "login", 
+            username: user, 
+            nama: namaReal, 
+            kelas: kls, 
+            token: token,
+            ip: ip,         // Dikirim ke GAS untuk kolom F
+            device: device  // Dikirim ke GAS untuk kolom G
+        })
     })
     .then(r => r.json())
     .then(res => {
