@@ -89,6 +89,13 @@
             margin-bottom: 25px;
         }
 
+        .img-soal {
+            max-width: 100%;
+            max-height: 300px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
         /* PILIHAN JAWABAN */
         .opsi-container {
             display: flex;
@@ -235,38 +242,36 @@
 </div>
 
 <script>
-// URL API dari Google Script Anda
-const API="https://script.google.com/macros/s/AKfycbzb6lxGToLfJbgnjbmK_NL5Ikfgr16pH54s_De3AmkSu3xZtgo-6s1veUuIPUlfE_Jo/exec";
+const API = "SESUAIKAN_URL_WEB_APP_ANDA"; // Masukkan URL GAS Anda di sini
 
-let dataSiswa=[];
-let state={soal:[],index:0,jawaban:[]};
-let warning=0;
+let dataSiswa = [];
+let state = { soal: [], index: 0, jawaban: [] };
 
 /* MODAL CONTROL */
-function modal(t,m,btns){
+function modal(t, m, btns) {
     const mAct = document.getElementById("mAct");
     const mTitle = document.getElementById("mTitle");
     const mMsg = document.getElementById("mMsg");
     const modalBox = document.getElementById("modalBox");
     
-    mAct.innerHTML="";
-    mTitle.innerText=t;
-    mMsg.innerHTML=m;
-    btns.forEach(b=>{
-        let x=document.createElement("button");
-        x.className="btn "+b.cls;
-        x.innerText=b.text;
-        x.onclick=()=>{modalHide(); if(b.cb)b.cb();};
+    mAct.innerHTML = "";
+    mTitle.innerText = t;
+    mMsg.innerHTML = m;
+    btns.forEach(b => {
+        let x = document.createElement("button");
+        x.className = "btn " + b.cls;
+        x.innerText = b.text;
+        x.onclick = () => { modalHide(); if (b.cb) b.cb(); };
         mAct.appendChild(x);
     });
-    modalBox.style.display="flex";
+    modalBox.style.display = "flex";
 }
-function modalHide(){ document.getElementById("modalBox").style.display="none"; }
+function modalHide() { document.getElementById("modalBox").style.display = "none"; }
 
 /* UI LOGIN */
-function loginUI(){
+function loginUI() {
     const app = document.getElementById("app");
-    app.innerHTML=`
+    app.innerHTML = `
     <div class="login-container">
         <div class="login-box">
             <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" style="width:80px;display:block;margin:0 auto 20px">
@@ -277,7 +282,7 @@ function loginUI(){
             </div>
             <div class="form-group">
                 <label>NAMA SISWA</label>
-                <select id="username"><option>-- Pilih Nama --</option></select>
+                <select id="username"><option value="">-- Pilih Nama --</option></select>
             </div>
             <div class="form-group">
                 <label>PASSWORD</label>
@@ -293,22 +298,22 @@ function loginUI(){
         </div>
     </div>`;
 
-    fetch(API).then(r=>r.json()).then(d=>{
-        dataSiswa=d;
-        let k=[...new Set(d.map(x=>x.kelas))];
+    fetch(API).then(r => r.json()).then(d => {
+        dataSiswa = d;
+        let k = [...new Set(d.map(x => x.kelas))];
         let sel = document.getElementById('kelasSelect');
-        sel.innerHTML='<option value="">-- Pilih Kelas --</option>';
-        k.forEach(x=>sel.innerHTML+=`<option>${x}</option>`);
-        sel.onchange=loadUser;
-    }).catch(e => alert("Gagal memuat data siswa. Cek koneksi."));
+        sel.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+        k.forEach(x => sel.innerHTML += `<option>${x}</option>`);
+        sel.onchange = loadUser;
+    }).catch(e => alert("Gagal memuat data siswa."));
 }
 
-function loadUser(){
-    let k=document.getElementById('kelasSelect').value;
+function loadUser() {
+    let k = document.getElementById('kelasSelect').value;
     let un = document.getElementById('username');
-    un.innerHTML='<option value="">-- Pilih Nama --</option>';
-    dataSiswa.filter(x=>x.kelas==k).forEach(s=>{
-        un.innerHTML+=`<option value="${s.username}">${s.nama}</option>`;
+    un.innerHTML = '<option value="">-- Pilih Nama --</option>';
+    dataSiswa.filter(x => x.kelas == k).forEach(s => {
+        un.innerHTML += `<option value="${s.username}">${s.nama}</option>`;
     });
 }
 
@@ -317,37 +322,43 @@ function togglePass() {
     x.type = x.type === "password" ? "text" : "password";
 }
 
-function login(){
-    let user=document.getElementById('username').value;
-    let pass=document.getElementById('password').value;
-    let token=document.getElementById('token').value;
+function login() {
+    let user = document.getElementById('username').value;
+    let pass = document.getElementById('password').value;
+    let token = document.getElementById('token').value;
     let btn = document.getElementById('btnLogin');
 
-    if(!user || !token) return alert("Lengkapi data!");
+    if (!user || !token) return alert("Lengkapi data!");
 
     btn.innerText = "Proses...";
-    fetch(API,{
-        method:"POST",
-        body:JSON.stringify({mode:"login",username:user,password:pass,token:token})
+    btn.disabled = true;
+
+    fetch(API, {
+        method: "POST",
+        body: JSON.stringify({ mode: "login", username: user, password: pass, token: token })
     })
-    .then(r=>r.json())
-    .then(res=>{
-        if(res.status==="success"){
-            localStorage.setItem("user",JSON.stringify(res));
-            localStorage.setItem("layer","konfirmasi");
+    .then(r => r.json())
+    .then(res => {
+        if (res.status === "success") {
+            localStorage.setItem("user", JSON.stringify(res));
+            localStorage.setItem("layer", "konfirmasi");
             init();
-        }else {
+        } else {
             alert(res.msg);
             btn.innerText = "MASUK UJIAN";
+            btn.disabled = false;
         }
+    }).catch(() => {
+        alert("Terjadi kesalahan koneksi.");
+        btn.disabled = false;
     });
 }
 
 /* KONFIRMASI */
-function showKonfirmasi(){
+function showKonfirmasi() {
     const app = document.getElementById("app");
-    let u=JSON.parse(localStorage.getItem("user"));
-    app.innerHTML=`
+    let u = JSON.parse(localStorage.getItem("user"));
+    app.innerHTML = `
     <div style="max-width:600px; margin:40px auto; background:#fff; padding:30px; border-radius:8px; box-shadow:0 5px 15px rgba(0,0,0,0.1)">
         <h3 style="border-bottom:2px solid #eee; padding-bottom:10px">Konfirmasi Peserta</h3>
         <table style="width:100%; line-height:2.5">
@@ -361,64 +372,65 @@ function showKonfirmasi(){
 }
 
 /* EXAM LOGIC */
-function startExam(){
-    localStorage.setItem("layer","soal");
-    document.querySelector(".header").style.display="flex";
+function startExam() {
+    localStorage.setItem("layer", "soal");
+    document.querySelector(".header").style.display = "flex";
 
-    fetch(API+"?mode=soal")
-    .then(r=>r.json())
-    .then(d=>{
-        let saved=localStorage.getItem("cbt_state");
-        if(saved){
-            state=JSON.parse(saved);
+    fetch(API + "?mode=soal")
+    .then(r => r.json())
+    .then(d => {
+        let saved = localStorage.getItem("cbt_state");
+        if (saved) {
+            state = JSON.parse(saved);
         } else {
-            state.soal=d;
-            state.jawaban=new Array(d.length).fill("");
-            state.index=0;
+            state.soal = d;
+            state.jawaban = new Array(d.length).fill("");
+            state.index = 0;
         }
         render();
         startTimer();
     });
 }
 
-function startTimer(){
+function startTimer() {
     let duration = 5400; // 90 menit
-    let end=localStorage.getItem("endTime");
-    if(!end){
-        end=Date.now()+duration*1000;
-        localStorage.setItem("endTime",end);
-    }else end=parseInt(end);
+    let end = localStorage.getItem("endTime");
+    if (!end) {
+        end = Date.now() + duration * 1000;
+        localStorage.setItem("endTime", end);
+    } else end = parseInt(end);
 
-    function update(){
-        let sisa=Math.floor((end-Date.now())/1000);
-        if(sisa<=0){ submit(); return; }
-        let m = Math.floor(sisa/60);
-        let s = sisa%60;
-        document.getElementById('timer').innerText = `${m}:${s<10?'0'+s:s}`;
-        requestAnimationFrame(update);
+    function update() {
+        let sisa = Math.floor((end - Date.now()) / 1000);
+        if (sisa <= 0) { submit(); return; }
+        let m = Math.floor(sisa / 60);
+        let s = sisa % 60;
+        document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' + s : s}`;
+        if(localStorage.getItem("layer") === "soal") requestAnimationFrame(update);
     }
     update();
 }
 
-function render(){
+function render() {
     const app = document.getElementById("app");
     let s = state.soal[state.index];
     
     let sideGrid = '';
     state.soal.forEach((soal, i) => {
         let cls = "num";
-        if(i === state.index) cls += " active";
-        if(state.jawaban[i]) cls += " done";
-        sideGrid += `<div class="${cls}" onclick="goto(${i})">${i+1}</div>`;
+        if (i === state.index) cls += " active";
+        if (state.jawaban[i]) cls += " done";
+        sideGrid += `<div class="${cls}" onclick="goto(${i})">${i + 1}</div>`;
     });
 
     let optionsHtml = '';
-    ["A","B","C","D"].forEach(o => {
-        if(s.pilihan[o]){
+    // DISESUAIKAN: Menambah Opsi E
+    ["A", "B", "C", "D", "E"].forEach(o => {
+        if (s.pilihan[o]) {
             let isSel = state.jawaban[state.index] === o ? 'selected' : '';
             optionsHtml += `
             <div class="opsi-item ${isSel}" onclick="jawab('${o}')">
-                <input type="radio" name="q" ${isSel?'checked':''}>
+                <input type="radio" name="q" ${isSel ? 'checked' : ''}>
                 <span class="huruf-opsi">${o}.</span> ${s.pilihan[o]}
             </div>`;
         }
@@ -428,13 +440,14 @@ function render(){
     <div class="wrap">
         <div class="content">
             <div class="card-soal">
-                <div class="nomor-soal">SOAL NOMOR ${state.index+1}</div>
+                <div class="nomor-soal">SOAL NOMOR ${state.index + 1}</div>
+                ${s.gambar ? `<img src="${s.gambar}" class="img-soal">` : ''}
                 <div class="teks-soal">${s.soal}</div>
                 <div class="opsi-container">${optionsHtml}</div>
                 <div class="nav-footer">
-                    <button class="btn blue" onclick="prev()" ${state.index==0?'disabled':''}>SEBELUMNYA</button>
-                    <button class="btn yellow" onclick="jawab('')">RAGU-RAGU</button>
-                    ${state.index == state.soal.length-1 
+                    <button class="btn blue" onclick="prev()" ${state.index == 0 ? 'disabled' : ''}>SEBELUMNYA</button>
+                    <button class="btn yellow" onclick="jawab('')">KOSONGKAN</button>
+                    ${state.index == state.soal.length - 1 
                         ? `<button class="btn green" onclick="popupSubmit()">SELESAI</button>` 
                         : `<button class="btn blue" onclick="next()">SELANJUTNYA</button>`
                     }
@@ -448,89 +461,87 @@ function render(){
     </div>`;
 }
 
-function jawab(v){
-    state.jawaban[state.index]=v;
+function jawab(v) {
+    state.jawaban[state.index] = v;
     save();
     render();
 }
 
-function next(){ if(state.index < state.soal.length-1){ state.index++; save(); render(); } }
-function prev(){ if(state.index > 0){ state.index--; save(); render(); } }
-function goto(i){ state.index=i; save(); render(); }
-function save(){ localStorage.setItem("cbt_state", JSON.stringify(state)); }
+function next() { if (state.index < state.soal.length - 1) { state.index++; save(); render(); } }
+function prev() { if (state.index > 0) { state.index--; save(); render(); } }
+function goto(i) { state.index = i; save(); render(); }
+function save() { localStorage.setItem("cbt_state", JSON.stringify(state)); }
 
-function popupSubmit(){
-    modal("Konfirmasi Selesai", "Yakin ingin mengakhiri ujian?", [
-        {text:"BATAL", cls:"blue"},
-        {text:"YA, SELESAI", cls:"red", cb:submit}
+function popupSubmit() {
+    modal("Konfirmasi Selesai", "Yakin ingin mengakhiri ujian dan mengirim jawaban?", [
+        { text: "BATAL", cls: "blue" },
+        { text: "YA, SELESAI", cls: "red", cb: submit }
     ]);
 }
 
-/* FUNGSI SUBMIT - INI YANG MEMBUAT SHEET TERISI */
-function submit(){
+function submit() {
     const app = document.getElementById("app");
     const user = JSON.parse(localStorage.getItem("user"));
     const stateData = JSON.parse(localStorage.getItem("cbt_state"));
 
     localStorage.setItem("layer", "hasil");
-    app.innerHTML=`<div class="content"><h2>Mengirim Jawaban...</h2><p>Harap tidak menutup browser.</p></div>`;
+    app.innerHTML = `<div class="content"><h2>Mengirim Jawaban...</h2><p>Harap tidak menutup browser atau mematikan koneksi.</p></div>`;
     
-    // Kirim data ke GAS
     fetch(API, {
         method: "POST",
         body: JSON.stringify({
             mode: "submit",
-            idLogin: user.idLogin, // Dari GAS saat login
-            nama: user.nama,       // Dari GAS saat login
-            kelas: user.kelas,     // Dari GAS saat login
-            jawaban: stateData.jawaban // Array ["A", "B", ...]
+            idLogin: user.idLogin,
+            nama: user.nama,
+            kelas: user.kelas,
+            jawaban: stateData.jawaban
         })
     })
     .then(r => r.json())
     .then(res => {
-        if(res.status === "success") {
+        if (res.status === "success") {
             showHasil(true);
         } else {
-            alert("Error: " + res.msg);
+            alert("Gagal: " + res.msg);
             showHasil(false);
         }
     })
     .catch(e => {
-        console.error(e);
-        alert("Koneksi gagal. Coba lagi.");
+        alert("Koneksi gagal saat mengirim.");
         showHasil(false);
     });
 }
 
-function showHasil(success){
+function showHasil(success) {
     const app = document.getElementById("app");
-    document.querySelector(".header").style.display="none";
-    app.innerHTML=`
+    document.querySelector(".header").style.display = "none";
+    app.innerHTML = `
     <div class="login-container">
         <div class="login-box" style="text-align:center">
-            <h2 style="color:${success?'var(--success)':'var(--danger)'}">${success?'UJIAN SELESAI':'GAGAL MENGIRIM'}</h2>
-            <p>${success?'Jawaban berhasil tersimpan.':'Terjadi kesalahan saat menyimpan.'}</p>
-            <div style="font-size:3rem; margin:20px 0;">${success?'✓':'✗'}</div>
+            <h2 style="color:${success ? 'var(--success)' : 'var(--danger)'}">${success ? 'UJIAN SELESAI' : 'GAGAL MENGIRIM'}</h2>
+            <p>${success ? 'Jawaban Anda telah aman tersimpan di server.' : 'Terjadi kendala teknis saat menyimpan.'}</p>
+            <div style="font-size:4rem; margin:20px 0;">${success ? '✓' : '✗'}</div>
             <button class="btn blue" onclick="keluar()">KEMBALI KE LOGIN</button>
         </div>
     </div>`;
 }
 
-function init(){
-    let user=localStorage.getItem("user");
-    let layer=localStorage.getItem("layer");
-    if(!user){ loginUI(); return; }
+function init() {
+    let user = localStorage.getItem("user");
+    let layer = localStorage.getItem("layer");
     
-    let u=JSON.parse(user);
-    document.getElementById("namaDisp").innerText=u.nama;
-    document.getElementById("kelasDisp").innerText="Kelas: " + u.kelas;
+    if (!user) { loginUI(); return; }
+    
+    let u = JSON.parse(user);
+    document.getElementById("namaDisp").innerText = u.nama;
+    document.getElementById("kelasDisp").innerText = "Kelas: " + u.kelas;
 
-    if(layer==="soal") startExam();
-    else if(layer==="hasil") showHasil(true);
+    if (layer === "soal") startExam();
+    else if (layer === "hasil") showHasil(true);
     else showKonfirmasi();
 }
 
-function keluar(){
+function keluar() {
     localStorage.clear();
     location.reload();
 }
