@@ -20,7 +20,7 @@
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg);
             color: var(--text);
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         /* HEADER */
@@ -34,7 +34,8 @@
             align-items: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             z-index: 10;
-            position: relative;
+            position: sticky;
+            top: 0;
         }
 
         .timer-box {
@@ -49,14 +50,13 @@
         /* LAYOUT UTAMA */
         .wrap {
             display: flex;
-            height: calc(100vh - 60px);
+            min-height: calc(100vh - 60px);
         }
 
         /* KONTEN SOAL */
         .content {
             flex: 1;
-            padding: 30px;
-            overflow-y: auto;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -64,14 +64,12 @@
 
         .card-soal {
             background: #fff;
-            padding: 30px;
+            padding: 25px;
             border-radius: 8px;
             width: 100%;
             max-width: 800px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             min-height: 400px;
-            display: flex;
-            flex-direction: column;
         }
 
         .nomor-soal {
@@ -91,8 +89,8 @@
 
         .img-soal {
             max-width: 100%;
-            max-height: 300px;
-            margin-bottom: 20px;
+            display: block;
+            margin: 0 auto 20px;
             border-radius: 4px;
         }
 
@@ -113,15 +111,9 @@
             transition: all 0.2s;
         }
 
-        .opsi-item:hover {
-            background: #f0f4ff;
-            border-color: var(--primary);
-        }
+        .opsi-item:hover { background: #f0f4ff; }
 
-        .opsi-item input {
-            margin-right: 15px;
-            transform: scale(1.2);
-        }
+        .opsi-item input { margin-right: 15px; transform: scale(1.2); }
 
         .opsi-item.selected {
             background: #e8f0fe;
@@ -129,34 +121,18 @@
             font-weight: 600;
         }
 
-        .huruf-opsi {
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        /* SIDEBAR NAVIGASI */
+        /* SIDEBAR */
         .sidebar {
-            width: 300px;
+            width: 280px;
             background: #fff;
             border-left: 1px solid #ddd;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar-title {
-            font-weight: bold;
-            margin-bottom: 15px;
-            text-align: center;
-            font-size: 0.9rem;
-            color: #666;
         }
 
         .grid-nomor {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 8px;
-            overflow-y: auto;
         }
 
         .num {
@@ -168,64 +144,56 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
         }
 
         .num.active { border: 2px solid var(--primary); color: var(--primary); }
         .num.done { background: var(--success); color: #fff; border-color: var(--success); }
 
-        /* TOMBOL NAVIGASI */
         .nav-footer {
-            margin-top: auto;
-            padding-top: 20px;
+            margin-top: 30px;
             display: flex;
             justify-content: space-between;
             gap: 10px;
         }
 
         .btn {
-            padding: 12px 24px;
+            padding: 10px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.9rem;
-            transition: opacity 0.2s;
         }
 
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn:disabled { opacity: 0.5; }
         .blue { background: var(--primary); color: #fff; }
         .yellow { background: var(--accent); color: #000; }
         .green { background: var(--success); color: #fff; }
         .red { background: var(--danger); color: #fff; }
 
-        /* MODAL & LOGIN */
         .modal { position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:100; }
         .box { background:#fff; padding:25px; border-radius:8px; width:90%; max-width:400px; text-align:center; }
         
-        .login-container { min-height:100vh; display:flex; align-items:center; justify-content:center; background: linear-gradient(135deg, #2f5597 0%, #1976d2 100%); }
-        .login-box { width:100%; max-width:400px; background:#fff; padding:40px; border-radius:12px; box-shadow:0 15px 35px rgba(0,0,0,0.3); }
+        .login-container { min-height:100vh; display:flex; align-items:center; justify-content:center; background: #2f5597; }
+        .login-box { width:90%; max-width:380px; background:#fff; padding:30px; border-radius:12px; }
         .form-group { margin-bottom: 15px; text-align: left; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.85rem; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.8rem; }
         .form-group input, .form-group select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        .show-pass { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #666; margin-top: 5px; cursor: pointer; }
 
         @media (max-width: 768px) {
-            .wrap { flex-direction: column; overflow-y: auto; }
-            .sidebar { width: 100%; order: 2; height: auto; border-left: none; border-top: 1px solid #ddd; }
-            .content { order: 1; padding: 15px; }
-            .header { font-size: 12px; }
+            .wrap { flex-direction: column; }
+            .sidebar { width: 100%; border-left: none; border-top: 1px solid #ddd; order: 2; }
+            .content { order: 1; }
         }
     </style>
 </head>
-
 <body>
 
-<div class="header">
-    <div id="info-siswa">
+<div class="header" id="mainHeader">
+    <div>
         <strong id="namaDisp"></strong><br>
-        <span id="kelasDisp" style="opacity: 0.8; font-size: 0.8rem;"></span>
+        <span id="kelasDisp" style="font-size: 0.75rem; opacity: 0.8;"></span>
     </div>
     <div class="timer-box" id="timer">00:00</div>
     <button onclick="keluar()" class="btn red" style="padding: 5px 10px; font-size: 0.7rem;">KELUAR</button>
@@ -242,40 +210,34 @@
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbxekBQTqWXuF4-PFIm3YNLhv4wvC7Mqi5hLzxy9pIvGO0OkXDFHQ4BxFsLzKj5E5MWs/exec"; // Masukkan URL GAS Anda di sini
+// GANTI DENGAN URL WEB APP GAS ANDA
+const API = "https://script.google.com/macros/s/AKfycbxekBQTqWXuF4-PFIm3YNLhv4wvC7Mqi5hLzxy9pIvGO0OkXDFHQ4BxFsLzKj5E5MWs/exec"; 
 
 let dataSiswa = [];
 let state = { soal: [], index: 0, jawaban: [] };
 
-/* MODAL CONTROL */
 function modal(t, m, btns) {
     const mAct = document.getElementById("mAct");
-    const mTitle = document.getElementById("mTitle");
-    const mMsg = document.getElementById("mMsg");
-    const modalBox = document.getElementById("modalBox");
-    
     mAct.innerHTML = "";
-    mTitle.innerText = t;
-    mMsg.innerHTML = m;
+    document.getElementById("mTitle").innerText = t;
+    document.getElementById("mMsg").innerHTML = m;
     btns.forEach(b => {
         let x = document.createElement("button");
         x.className = "btn " + b.cls;
         x.innerText = b.text;
-        x.onclick = () => { modalHide(); if (b.cb) b.cb(); };
+        x.onclick = () => { document.getElementById("modalBox").style.display = "none"; if (b.cb) b.cb(); };
         mAct.appendChild(x);
     });
-    modalBox.style.display = "flex";
+    document.getElementById("modalBox").style.display = "flex";
 }
-function modalHide() { document.getElementById("modalBox").style.display = "none"; }
 
-/* UI LOGIN */
 function loginUI() {
+    document.getElementById("mainHeader").style.display = "none";
     const app = document.getElementById("app");
     app.innerHTML = `
     <div class="login-container">
         <div class="login-box">
-            <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" style="width:80px;display:block;margin:0 auto 20px">
-            <h2 style="text-align:center; color:var(--primary); margin-bottom:30px; margin-top:0;">CBT ASESMEN</h2>
+            <h2 style="text-align:center; color:var(--primary);">CBT ASESMEN</h2>
             <div class="form-group">
                 <label>PILIH KELAS</label>
                 <select id="kelasSelect"><option>Memuat kelas...</option></select>
@@ -285,16 +247,11 @@ function loginUI() {
                 <select id="username"><option value="">-- Pilih Nama --</option></select>
             </div>
             <div class="form-group">
-                <label>PASSWORD</label>
-                <input type="password" id="password" placeholder="Masukkan Password">
-                <label class="show-pass"><input type="checkbox" onclick="togglePass()"> Lihat Password</label>
-            </div>
-            <div class="form-group">
                 <label>TOKEN</label>
-                <input id="token" style="text-transform: uppercase; font-weight:bold; letter-spacing:2px">
+                <input id="token" style="text-transform: uppercase; font-weight:bold; text-align:center" placeholder="Ketik Token">
             </div>
-            <button id="btnLogin" class="btn blue" style="width:100%; margin-top:10px" onclick="login()">MASUK UJIAN</button>
-            <p style="text-align:center; font-size:11px; color:#999; margin-top:20px">© 2026 SMPN 1 MOGA. All Rights Reserved.</p>
+            <button id="btnLogin" class="btn blue" style="width:100%;" onclick="login()">MASUK UJIAN</button>
+            <p style="text-align:center; font-size:10px; color:#999; margin-top:20px">© 2026 SMPN 1 MOGA</p>
         </div>
     </div>`;
 
@@ -304,38 +261,31 @@ function loginUI() {
         let sel = document.getElementById('kelasSelect');
         sel.innerHTML = '<option value="">-- Pilih Kelas --</option>';
         k.forEach(x => sel.innerHTML += `<option>${x}</option>`);
-        sel.onchange = loadUser;
-    }).catch(e => alert("Gagal memuat data siswa."));
-}
-
-function loadUser() {
-    let k = document.getElementById('kelasSelect').value;
-    let un = document.getElementById('username');
-    un.innerHTML = '<option value="">-- Pilih Nama --</option>';
-    dataSiswa.filter(x => x.kelas == k).forEach(s => {
-        un.innerHTML += `<option value="${s.username}">${s.nama}</option>`;
-    });
-}
-
-function togglePass() {
-    let x = document.getElementById("password");
-    x.type = x.type === "password" ? "text" : "password";
+        sel.onchange = () => {
+            let kVal = sel.value;
+            let un = document.getElementById('username');
+            un.innerHTML = '<option value="">-- Pilih Nama --</option>';
+            dataSiswa.filter(x => x.kelas == kVal).forEach(s => {
+                un.innerHTML += `<option value="${s.username}" data-nama="${s.nama}">${s.nama}</option>`;
+            });
+        };
+    }).catch(() => alert("Gagal koneksi ke server."));
 }
 
 function login() {
-    let user = document.getElementById('username').value;
-    let pass = document.getElementById('password').value;
+    let selName = document.getElementById('username');
+    let user = selName.value;
+    let namaReal = selName.options[selName.selectedIndex].getAttribute('data-nama');
+    let kls = document.getElementById('kelasSelect').value;
     let token = document.getElementById('token').value;
-    let btn = document.getElementById('btnLogin');
 
-    if (!user || !token) return alert("Lengkapi data!");
+    if (!user || !token) return alert("Pilih Nama & Isi Token!");
 
-    btn.innerText = "Proses...";
-    btn.disabled = true;
-
+    document.getElementById('btnLogin').innerText = "Verifikasi...";
+    
     fetch(API, {
         method: "POST",
-        body: JSON.stringify({ mode: "login", username: user, password: pass, token: token })
+        body: JSON.stringify({ mode: "login", username: user, nama: namaReal, kelas: kls, token: token })
     })
     .then(r => r.json())
     .then(res => {
@@ -345,40 +295,26 @@ function login() {
             init();
         } else {
             alert(res.msg);
-            btn.innerText = "MASUK UJIAN";
-            btn.disabled = false;
+            document.getElementById('btnLogin').innerText = "MASUK UJIAN";
         }
-    }).catch(() => {
-        alert("Terjadi kesalahan koneksi.");
-        btn.disabled = false;
     });
 }
 
-/* KONFIRMASI */
 function showKonfirmasi() {
-    const app = document.getElementById("app");
     let u = JSON.parse(localStorage.getItem("user"));
-    app.innerHTML = `
-    <div style="max-width:600px; margin:40px auto; background:#fff; padding:30px; border-radius:8px; box-shadow:0 5px 15px rgba(0,0,0,0.1)">
-        <h3 style="border-bottom:2px solid #eee; padding-bottom:10px">Konfirmasi Peserta</h3>
-        <table style="width:100%; line-height:2.5">
-            <tr><td>Nama Peserta</td><td>: <strong>${u.nama}</strong></td></tr>
-            <tr><td>Kelas</td><td>: ${u.kelas}</td></tr>
-            <tr><td>Mata Pelajaran</td><td>: Informatika</td></tr>
-            <tr><td>Durasi</td><td>: 90 Menit</td></tr>
-        </table>
-        <button class="btn green" style="width:100%; margin-top:20px; font-size:1.1rem" onclick="startExam()">MULAI KERJAKAN</button>
+    document.getElementById("app").innerHTML = `
+    <div style="max-width:500px; margin:40px auto; background:#fff; padding:25px; border-radius:8px; box-shadow:0 5px 15px rgba(0,0,0,0.1)">
+        <h3>Konfirmasi Data</h3>
+        <p>Nama: <b>${u.nama}</b></p>
+        <p>Kelas: <b>${u.kelas}</b></p>
+        <hr>
+        <button class="btn green" style="width:100%" onclick="startExam()">MULAI UJIAN</button>
     </div>`;
 }
 
-/* EXAM LOGIC */
 function startExam() {
     localStorage.setItem("layer", "soal");
-    document.querySelector(".header").style.display = "flex";
-
-    fetch(API + "?mode=soal")
-    .then(r => r.json())
-    .then(d => {
+    fetch(API + "?mode=soal").then(r => r.json()).then(d => {
         let saved = localStorage.getItem("cbt_state");
         if (saved) {
             state = JSON.parse(saved);
@@ -386,6 +322,7 @@ function startExam() {
             state.soal = d;
             state.jawaban = new Array(d.length).fill("");
             state.index = 0;
+            localStorage.setItem("cbt_state", JSON.stringify(state));
         }
         render();
         startTimer();
@@ -393,69 +330,60 @@ function startExam() {
 }
 
 function startTimer() {
-    let duration = 5400; // 90 menit
     let end = localStorage.getItem("endTime");
     if (!end) {
-        end = Date.now() + duration * 1000;
+        end = Date.now() + (90 * 60 * 1000);
         localStorage.setItem("endTime", end);
-    } else end = parseInt(end);
-
-    function update() {
+    }
+    const timerInt = setInterval(() => {
         let sisa = Math.floor((end - Date.now()) / 1000);
-        if (sisa <= 0) { submit(); return; }
+        if (sisa <= 0) { clearInterval(timerInt); submit(); return; }
         let m = Math.floor(sisa / 60);
         let s = sisa % 60;
-        document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' + s : s}`;
-        if(localStorage.getItem("layer") === "soal") requestAnimationFrame(update);
-    }
-    update();
+        document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+    }, 1000);
 }
 
 function render() {
-    const app = document.getElementById("app");
+    document.getElementById("mainHeader").style.display = "flex";
+    let u = JSON.parse(localStorage.getItem("user"));
+    document.getElementById("namaDisp").innerText = u.nama;
+    document.getElementById("kelasDisp").innerText = u.kelas;
+
     let s = state.soal[state.index];
-    
     let sideGrid = '';
-    state.soal.forEach((soal, i) => {
-        let cls = "num";
-        if (i === state.index) cls += " active";
-        if (state.jawaban[i]) cls += " done";
-        sideGrid += `<div class="${cls}" onclick="goto(${i})">${i + 1}</div>`;
+    state.soal.forEach((_, i) => {
+        let cls = "num" + (i === state.index ? " active" : "") + (state.jawaban[i] ? " done" : "");
+        sideGrid += `<div class="${cls}" onclick="state.index=${i};render()">${i+1}</div>`;
     });
 
-    let optionsHtml = '';
-    // DISESUAIKAN: Menambah Opsi E
-    ["A", "B", "C", "D", "E"].forEach(o => {
-        if (s.pilihan[o]) {
-            let isSel = state.jawaban[state.index] === o ? 'selected' : '';
-            optionsHtml += `
-            <div class="opsi-item ${isSel}" onclick="jawab('${o}')">
-                <input type="radio" name="q" ${isSel ? 'checked' : ''}>
-                <span class="huruf-opsi">${o}.</span> ${s.pilihan[o]}
+    let opsHtml = '';
+    ["A","B","C","D","E"].forEach(o => {
+        if(s.pilihan[o]) {
+            let isSel = state.jawaban[state.index] === o;
+            opsHtml += `<div class="opsi-item ${isSel?'selected':''}" onclick="jawab('${o}')">
+                <input type="radio" ${isSel?'checked':''}> <span>${o}. ${s.pilihan[o]}</span>
             </div>`;
         }
     });
 
-    app.innerHTML = `
+    document.getElementById("app").innerHTML = `
     <div class="wrap">
         <div class="content">
             <div class="card-soal">
-                <div class="nomor-soal">SOAL NOMOR ${state.index + 1}</div>
+                <div class="nomor-soal">NOMOR ${state.index + 1}</div>
                 ${s.gambar ? `<img src="${s.gambar}" class="img-soal">` : ''}
                 <div class="teks-soal">${s.soal}</div>
-                <div class="opsi-container">${optionsHtml}</div>
+                <div class="opsi-container">${opsHtml}</div>
                 <div class="nav-footer">
-                    <button class="btn blue" onclick="prev()" ${state.index == 0 ? 'disabled' : ''}>SEBELUMNYA</button>
-                    <button class="btn yellow" onclick="jawab('')">KOSONGKAN</button>
-                    ${state.index == state.soal.length - 1 
-                        ? `<button class="btn green" onclick="popupSubmit()">SELESAI</button>` 
-                        : `<button class="btn blue" onclick="next()">SELANJUTNYA</button>`
-                    }
+                    <button class="btn blue" onclick="state.index--;render()" ${state.index==0?'disabled':''}>KEMBALI</button>
+                    ${state.index == state.soal.length-1 
+                        ? `<button class="btn green" onclick="popupSubmit()">SELESAI</button>`
+                        : `<button class="btn blue" onclick="state.index++;render()">LANJUT</button>`}
                 </div>
             </div>
         </div>
         <div class="sidebar">
-            <div class="sidebar-title">NAVIGASI SOAL</div>
             <div class="grid-nomor">${sideGrid}</div>
         </div>
     </div>`;
@@ -463,87 +391,39 @@ function render() {
 
 function jawab(v) {
     state.jawaban[state.index] = v;
-    save();
+    localStorage.setItem("cbt_state", JSON.stringify(state));
     render();
 }
 
-function next() { if (state.index < state.soal.length - 1) { state.index++; save(); render(); } }
-function prev() { if (state.index > 0) { state.index--; save(); render(); } }
-function goto(i) { state.index = i; save(); render(); }
-function save() { localStorage.setItem("cbt_state", JSON.stringify(state)); }
-
 function popupSubmit() {
-    modal("Konfirmasi Selesai", "Yakin ingin mengakhiri ujian dan mengirim jawaban?", [
-        { text: "BATAL", cls: "blue" },
-        { text: "YA, SELESAI", cls: "red", cb: submit }
-    ]);
+    modal("Selesai?", "Kirim jawaban sekarang?", [{text:"BATAL",cls:"blue"}, {text:"KIRIM",cls:"green",cb:submit}]);
 }
 
 function submit() {
-    const app = document.getElementById("app");
-    const user = JSON.parse(localStorage.getItem("user"));
-    const stateData = JSON.parse(localStorage.getItem("cbt_state"));
-
-    localStorage.setItem("layer", "hasil");
-    app.innerHTML = `<div class="content"><h2>Mengirim Jawaban...</h2><p>Harap tidak menutup browser atau mematikan koneksi.</p></div>`;
-    
+    document.getElementById("app").innerHTML = "<h2>Mengirim... Mohon Tunggu</h2>";
+    let u = JSON.parse(localStorage.getItem("user"));
     fetch(API, {
         method: "POST",
         body: JSON.stringify({
             mode: "submit",
-            idLogin: user.idLogin,
-            nama: user.nama,
-            kelas: user.kelas,
-            jawaban: stateData.jawaban
+            idLogin: u.idLogin,
+            nama: u.nama,
+            kelas: u.kelas,
+            jawaban: state.jawaban
         })
-    })
-    .then(r => r.json())
-    .then(res => {
-        if (res.status === "success") {
-            showHasil(true);
-        } else {
-            alert("Gagal: " + res.msg);
-            showHasil(false);
-        }
-    })
-    .catch(e => {
-        alert("Koneksi gagal saat mengirim.");
-        showHasil(false);
+    }).then(() => {
+        localStorage.clear();
+        document.getElementById("app").innerHTML = "<div style='text-align:center;padding:50px'><h2>TERIMA KASIH</h2><p>Jawaban Berhasil Dikirim.</p><button class='btn blue' onclick='location.reload()'>LOGOUT</button></div>";
     });
 }
 
-function showHasil(success) {
-    const app = document.getElementById("app");
-    document.querySelector(".header").style.display = "none";
-    app.innerHTML = `
-    <div class="login-container">
-        <div class="login-box" style="text-align:center">
-            <h2 style="color:${success ? 'var(--success)' : 'var(--danger)'}">${success ? 'UJIAN SELESAI' : 'GAGAL MENGIRIM'}</h2>
-            <p>${success ? 'Jawaban Anda telah aman tersimpan di server.' : 'Terjadi kendala teknis saat menyimpan.'}</p>
-            <div style="font-size:4rem; margin:20px 0;">${success ? '✓' : '✗'}</div>
-            <button class="btn blue" onclick="keluar()">KEMBALI KE LOGIN</button>
-        </div>
-    </div>`;
-}
+function keluar() { localStorage.clear(); location.reload(); }
 
 function init() {
-    let user = localStorage.getItem("user");
     let layer = localStorage.getItem("layer");
-    
-    if (!user) { loginUI(); return; }
-    
-    let u = JSON.parse(user);
-    document.getElementById("namaDisp").innerText = u.nama;
-    document.getElementById("kelasDisp").innerText = "Kelas: " + u.kelas;
-
-    if (layer === "soal") startExam();
-    else if (layer === "hasil") showHasil(true);
-    else showKonfirmasi();
-}
-
-function keluar() {
-    localStorage.clear();
-    location.reload();
+    if (!localStorage.getItem("user")) loginUI();
+    else if (layer === "konfirmasi") showKonfirmasi();
+    else if (layer === "soal") startExam();
 }
 
 init();
