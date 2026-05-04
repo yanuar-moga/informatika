@@ -87,13 +87,6 @@
             margin-bottom: 25px;
         }
 
-        .img-soal {
-            max-width: 100%;
-            display: block;
-            margin: 0 auto 20px;
-            border-radius: 4px;
-        }
-
         /* PILIHAN JAWABAN */
         .opsi-container {
             display: flex;
@@ -112,9 +105,7 @@
         }
 
         .opsi-item:hover { background: #f0f4ff; }
-
         .opsi-item input { margin-right: 15px; transform: scale(1.2); }
-
         .opsi-item.selected {
             background: #e8f0fe;
             border-color: var(--primary);
@@ -175,10 +166,11 @@
         .modal { position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:100; }
         .box { background:#fff; padding:25px; border-radius:8px; width:90%; max-width:400px; text-align:center; }
         
-        .login-container { min-height:100vh; display:flex; align-items:center; justify-content:center; background: #2f5597; }
-        .login-box { width:90%; max-width:380px; background:#fff; padding:30px; border-radius:12px; }
+        /* LOGIN STYLES */
+        .login-container { min-height:100vh; display:flex; align-items:center; justify-content:center; background: linear-gradient(135deg, #2f5597 0%, #1976d2 100%); }
+        .login-box { width:100%; max-width:400px; background:#fff; padding:40px; border-radius:12px; box-shadow:0 15px 35px rgba(0,0,0,0.3); }
         .form-group { margin-bottom: 15px; text-align: left; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.8rem; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.85rem; }
         .form-group input, .form-group select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
 
         @media (max-width: 768px) {
@@ -210,11 +202,11 @@
 </div>
 
 <script>
-// GANTI DENGAN URL WEB APP GAS ANDA
-const API = "https://script.google.com/macros/s/AKfycbxekBQTqWXuF4-PFIm3YNLhv4wvC7Mqi5hLzxy9pIvGO0OkXDFHQ4BxFsLzKj5E5MWs/exec"; 
+const API = "https://script.google.com/macros/s/AKfycbzb6lxGToLfJbgnjbmK_NL5Ikfgr16pH54s_De3AmkSu3xZtgo-6s1veUuIPUlfE_Jo/exec";
 
 let dataSiswa = [];
 let state = { soal: [], index: 0, jawaban: [] };
+let warning = 0;
 
 function modal(t, m, btns) {
     const mAct = document.getElementById("mAct");
@@ -237,7 +229,8 @@ function loginUI() {
     app.innerHTML = `
     <div class="login-container">
         <div class="login-box">
-            <h2 style="text-align:center; color:var(--primary);">CBT ASESMEN</h2>
+            <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" style="width:70px;display:block;margin:0 auto 20px">
+            <h2 style="text-align:center; color:var(--primary); margin-bottom:30px">CBT ASESMEN</h2>
             <div class="form-group">
                 <label>PILIH KELAS</label>
                 <select id="kelasSelect"><option>Memuat kelas...</option></select>
@@ -247,11 +240,15 @@ function loginUI() {
                 <select id="username"><option value="">-- Pilih Nama --</option></select>
             </div>
             <div class="form-group">
-                <label>TOKEN</label>
-                <input id="token" style="text-transform: uppercase; font-weight:bold; text-align:center" placeholder="Ketik Token">
+                <label>PASSWORD</label>
+                <input type="password" id="password" placeholder="Masukkan Password">
             </div>
-            <button id="btnLogin" class="btn blue" style="width:100%;" onclick="login()">MASUK UJIAN</button>
-            <p style="text-align:center; font-size:10px; color:#999; margin-top:20px">© 2026 SMPN 1 MOGA</p>
+            <div class="form-group">
+                <label>TOKEN</label>
+                <input id="token" style="text-transform: uppercase; font-weight:bold; letter-spacing:2px">
+            </div>
+            <button id="btnLogin" class="btn blue" style="width:100%; margin-top:10px" onclick="login()">MASUK UJIAN</button>
+            <p style="text-align:center; font-size:11px; color:#999; margin-top:20px">© 2026 SMPN 1 MOGA</p>
         </div>
     </div>`;
 
@@ -269,23 +266,22 @@ function loginUI() {
                 un.innerHTML += `<option value="${s.username}" data-nama="${s.nama}">${s.nama}</option>`;
             });
         };
-    }).catch(() => alert("Gagal koneksi ke server."));
+    });
 }
 
 function login() {
     let selName = document.getElementById('username');
     let user = selName.value;
-    let namaReal = selName.options[selName.selectedIndex].getAttribute('data-nama');
-    let kls = document.getElementById('kelasSelect').value;
+    let pass = document.getElementById('password').value;
     let token = document.getElementById('token').value;
 
-    if (!user || !token) return alert("Pilih Nama & Isi Token!");
+    if (!user || !pass || !token) return alert("Lengkapi semua data!");
 
     document.getElementById('btnLogin').innerText = "Verifikasi...";
     
     fetch(API, {
         method: "POST",
-        body: JSON.stringify({ mode: "login", username: user, nama: namaReal, kelas: kls, token: token })
+        body: JSON.stringify({ mode: "login", username: user, password: pass, token: token })
     })
     .then(r => r.json())
     .then(res => {
@@ -307,6 +303,7 @@ function showKonfirmasi() {
         <h3>Konfirmasi Data</h3>
         <p>Nama: <b>${u.nama}</b></p>
         <p>Kelas: <b>${u.kelas}</b></p>
+        <p>Mata Pelajaran: <b>Informatika</b></p>
         <hr>
         <button class="btn green" style="width:100%" onclick="startExam()">MULAI UJIAN</button>
     </div>`;
@@ -332,17 +329,12 @@ function startExam() {
 function startTimer() {
     let end = localStorage.getItem("endTime");
     if (!end) {
-        end = Date.now() + (90 * 60 * 1000); // 90 Menit
+        end = Date.now() + (90 * 60 * 1000); 
         localStorage.setItem("endTime", end);
     }
     const timerInt = setInterval(() => {
         let sisa = Math.floor((end - Date.now()) / 1000);
-        if (sisa <= 0) { 
-            clearInterval(timerInt); 
-            // Kirim otomatis jika waktu habis
-            submitAction(); 
-            return; 
-        }
+        if (sisa <= 0) { clearInterval(timerInt); submitAction(); return; }
         let m = Math.floor(sisa / 60);
         let s = sisa % 60;
         document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
@@ -367,7 +359,7 @@ function render() {
         if(s.pilihan[o]) {
             let isSel = state.jawaban[state.index] === o;
             opsHtml += `<div class="opsi-item ${isSel?'selected':''}" onclick="jawab('${o}')">
-                <input type="radio" name="q" ${isSel?'checked':''}> <span>${o}. ${s.pilihan[o]}</span>
+                <input type="radio" ${isSel?'checked':''}> <span><b>${o}.</b> ${s.pilihan[o]}</span>
             </div>`;
         }
     });
@@ -377,7 +369,7 @@ function render() {
         <div class="content">
             <div class="card-soal">
                 <div class="nomor-soal">NOMOR ${state.index + 1}</div>
-                ${s.gambar ? `<img src="${s.gambar}" class="img-soal">` : ''}
+                ${s.gambar ? `<img src="${s.gambar}" style="max-width:100%; margin-bottom:15px">` : ''}
                 <div class="teks-soal">${s.soal}</div>
                 <div class="opsi-container">${opsHtml}</div>
                 <div class="nav-footer">
@@ -405,7 +397,7 @@ function popupSubmit() {
 }
 
 function submitAction() {
-    document.getElementById("app").innerHTML = "<div style='text-align:center;padding:50px'><h2>Mengirim... Mohon Tunggu</h2></div>";
+    document.getElementById("app").innerHTML = "<h2>Mengirim... Mohon Tunggu</h2>";
     let u = JSON.parse(localStorage.getItem("user"));
     fetch(API, {
         method: "POST",
@@ -416,23 +408,14 @@ function submitAction() {
             kelas: u.kelas,
             jawaban: state.jawaban
         })
-    }).then(r => r.json()).then(res => {
+    }).then(() => {
         localStorage.clear();
-        document.getElementById("app").innerHTML = `
-        <div style='text-align:center;padding:50px'>
-            <h2>TERIMA KASIH</h2>
-            <p>Jawaban Berhasil Dikirim.</p>
-            <p>Nilai Anda: <b>${res.nilai}</b></p>
-            <button class='btn blue' onclick='location.reload()'>LOGOUT</button>
-        </div>`;
+        document.getElementById("app").innerHTML = "<div style='text-align:center;padding:50px'><h2>TERIMA KASIH</h2><p>Jawaban Berhasil Dikirim.</p><button class='btn blue' onclick='location.reload()'>LOGOUT</button></div>";
     });
 }
 
 function keluar() { 
-    if(confirm("Keluar dari ujian? Data yang belum terkirim akan hilang.")) {
-        localStorage.clear(); 
-        location.reload(); 
-    }
+    if(confirm("Keluar dari ujian?")) { localStorage.clear(); location.reload(); }
 }
 
 function init() {
@@ -441,6 +424,19 @@ function init() {
     else if (layer === "konfirmasi") showKonfirmasi();
     else if (layer === "soal") startExam();
 }
+
+/* ANTI-CHEAT LOGIC */
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden && localStorage.getItem("layer") === "soal") {
+        warning++;
+        if (warning >= 3) {
+            alert("Pelanggaran: Anda terlalu sering keluar tab! Ujian dihentikan.");
+            submitAction();
+        } else {
+            alert("Peringatan " + warning + "/3: Dilarang membuka tab lain!");
+        }
+    }
+});
 
 init();
 </script>
