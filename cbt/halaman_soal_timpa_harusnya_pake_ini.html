@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBT Asesmen Informatika</title>
+
+    <style>
+        :root {
+            --primary-blue: #1f4e94;
+            --btn-blue: #007bff; 
+            --btn-red: #ed1c24;
+            --gold: #d4af37;
+            --light-bg: #f4f7fa;
+            --success: #28a745;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--light-bg); 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh;
+        }
+
+        .header { 
+            background: var(--primary-blue); 
+            color: white; 
+            padding: 10px 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-bottom: 4px solid var(--gold);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .timer { 
+            background: white; 
+            color: var(--primary-blue); 
+            padding: 5px 15px; 
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .main-layout { 
+            display: flex; 
+            flex-direction: column; 
+            max-width: 1100px; 
+            margin: 20px auto; 
+            gap: 20px; 
+            padding: 0 15px 160px;
+        }
+
+        @media(min-width: 768px) { .main-layout { flex-direction: row; } }
+
+        .quiz-container { flex: 3; }
+        .sidebar { flex: 1; }
+
+        .soal-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid var(--primary-blue);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .opsi {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .opsi:hover { background: #f0f4f8; }
+        .opsi.selected {
+            background: #e1ecff;
+            border-color: var(--btn-blue);
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        .grid-nomor { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 15px; }
+        .kotak-nomor {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .kotak-nomor.sudah { background: var(--success); color: white; }
+        .kotak-nomor.aktif { border: 3px solid var(--gold); transform: scale(1.1); }
+
+        .nav-bottom {
+            position: fixed; bottom: 40px; width: 100%;
+            display: flex; justify-content: space-between;
+            background: white; padding: 10px 20px;
+            border-top: 1px solid #eee; box-sizing: border-box; z-index: 900;
+        }
+
+        .footer-info {
+            position: fixed; bottom: 0; width: 100%;
+            background: #222; color: #ccc;
+            text-align: center; padding: 8px 0;
+            font-size: 0.85em; border-top: 2px solid var(--gold); z-index: 1000;
+        }
+
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-nav { background: var(--btn-blue); color: white; }
+
+        #layarHasil {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; display: none;
+            flex-direction: column; justify-content: center;
+            align-items: center; z-index: 10001; text-align: center; padding: 20px;
+        }
+
+        .skor-box { font-size: 4em; color: var(--primary-blue); font-weight: 900; margin: 15px 0; }
+
+        #loading {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 9999;
+        }
+
+        /* ===== CUSTOM ALERT ===== */
+        .custom-alert-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10002;
+        }
+
+        .custom-alert {
+            background: #fff;
+            width: 340px;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: zoomIn 0.2s ease;
+        }
+
+        .custom-alert h3 { margin: 0 0 10px; color: var(--primary-blue); }
+        .custom-alert p { margin: 0 0 15px; font-size: 14px; }
+        .alert-buttons { display: flex; gap: 10px; margin-top: 15px; }
+
+        .alert-btn {
+            flex: 1; border: none; padding: 10px;
+            border-radius: 8px; cursor: pointer; font-weight: bold;
+        }
+
+        .btn-batal { background: var(--btn-blue); color: white; }
+        .btn-kirim { background: var(--btn-red); color: white; }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="loading">
+    <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" width="80">
+    <p id="loadingText" style="margin-top:15px; font-weight:bold; color:var(--primary-blue);">Menghubungkan ke Server...</p>
+</div>
+
+<div id="layarHasil">
+    <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" width="100">
+    <h2 style="color:var(--primary-blue); margin-top:20px;">Terima Kasih!</h2>
+    <p style="font-size:1.1em; color:#555;">Anda telah berhasil melaksanakan asesmen.</p>
+    
+    <div style="margin: 25px 0; padding:20px; background:#f0f7ff; border-radius:20px; width:100%; max-width:280px;">
+        <span style="font-weight:bold; color:#777; font-size:0.9em;">NILAI HASIL TES</span>
+        <div class="skor-box" id="nilaiFinal">0</div>
+    </div>
+
+    <p style="color: #888; font-size: 0.9em; margin-bottom: 20px;">Klik tombol di bawah untuk keluar dengan aman.</p>
+    
+    <button class="btn" style="background:var(--btn-red); color:white; padding:15px 50px; font-size:1em;" onclick="logOutSiswa()">
+        Keluar
+    </button>
+</div>
+
+<div id="app-content">
+    <div class="header">
+        <div>
+            <b id="displayNama" style="font-size:1.1em;">-</b><br>
+            <small id="displayKelas">-</small>
+        </div>
+        <div class="timer" id="timerDisplay">00:00:00</div>
+    </div>
+
+    <div class="main-layout">
+        <div class="quiz-container">
+            <div id="quizArea"></div>
+        </div>
+
+        <div class="sidebar">
+            <div style="background:white; padding:20px; border-radius:15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <h4 style="margin-top:0; border-bottom:1px solid #eee; padding-bottom:10px;">Navigasi Soal</h4>
+                <div id="gridNomor" class="grid-nomor"></div>
+                <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
+                <button class="btn" style="background:var(--success); color:white; width:100%; font-size:1.1em;" onclick="kirimJawaban()">SELESAI</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-bottom">
+        <button class="btn btn-nav" onclick="changeSoal(-1)"> Sebelumnya</button>
+        <div id="infoHalaman" style="font-weight:bold; color:var(--primary-blue); padding-top:10px;">Soal -/-</div>
+        <button class="btn btn-nav" onclick="changeSoal(1)">Berikutnya </button>
+    </div>
+
+    <div class="footer-info">
+         CBT Asesmen Informatika Ver 1.0 | Dev by MB © 2026 
+    </div>
+</div>
+
+<!-- CUSTOM ALERT -->
+<div class="custom-alert-overlay" id="alertBox">
+    <div class="custom-alert">
+        <h3>Konfirmasi Ujian</h3>
+        <p id="alertText">-</p>
+        <div class="alert-buttons">
+            <button class="alert-btn btn-batal" onclick="tutupAlert()">Batal</button>
+            <button class="alert-btn btn-kirim" onclick="lanjutKirim()">Kirim</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// URL UNTUK AMBIL SOAL & SIMPAN JAWABAN (Script Soal)
+const API_SOAL = "https://script.google.com/macros/s/AKfycbzTacoBkA6md69TmVNi-uCwtXoUzu15_YlBfwmYqzpHGha_ad-nKnMAPD0c7VkG42Q/exec";
+
+// URL UNTUK LOGOUT / STATUS LOG (Script Login Bapak)
+const API_LOGOUT = "https://script.google.com/macros/s/AKfycbwf_Hza9uzl9mdE-iiYZExPQ1Q7e2NsrVKhy48Bn15YtKzZGw_OLRTM3AYDu0d5mx2X/exec";
+
+let listSoal = [];
+let sudahKirim = false;
+let jawabanSiswa = JSON.parse(localStorage.getItem("jawabanSiswa")) || {};
+let currentIdx = 0;
+let userSession = JSON.parse(localStorage.getItem("user"));
+
+/* ===== TIMER COUNTDOWN ===== */
+const DURASI = 90 * 60 * 1000;
+let endTime = localStorage.getItem("endTime");
+let durasiTersimpan = localStorage.getItem("durasi");
+
+if (!endTime || durasiTersimpan != DURASI) {
+    endTime = new Date().getTime() + DURASI;
+    localStorage.setItem("endTime", endTime);
+    localStorage.setItem("durasi", DURASI);
+} else {
+    endTime = parseInt(endTime);
+}
+
+function startTimer() {
+    setInterval(() => {
+        const now = new Date().getTime();
+        let sisa = endTime - now;
+
+        if (sisa <= 0 && !sudahKirim) {
+            sudahKirim = true;
+            document.getElementById("timerDisplay").innerText = "00:00:00";
+            kirimJawaban();
+            return;
+        }
+
+        const jam = Math.floor(sisa / (1000*60*60));
+        const menit = Math.floor((sisa / (1000*60)) % 60);
+        const detik = Math.floor((sisa/1000)%60);
+
+        document.getElementById("timerDisplay").innerText =
+            `${String(jam).padStart(2,'0')}:${String(menit).padStart(2,'0')}:${String(detik).padStart(2,'0')}`;
+    }, 1000);
+}
+
+window.onload = async () => {
+    if (!userSession) { window.location.href = "index.html"; return; }
+
+    document.getElementById("displayNama").innerText = userSession.nama;
+    document.getElementById("displayKelas").innerText = "Kelas " + userSession.kelas;
+
+    startTimer();
+    await laporMulaiUjian();
+    await loadSoal();
+};
+
+async function laporMulaiUjian() {
+    try {
+        await fetch(API_SOAL, {
+            method: "POST", mode: "no-cors",
+            body: JSON.stringify({ action: "mulaiUjian", idLogin: userSession.idLogin, nama: userSession.nama })
+        });
+    } catch (e) {}
+}
+
+async function loadSoal() {
+    try {
+        const response = await fetch(API_SOAL + "?mode=getSoal");
+        listSoal = await response.json();
+        renderSoal();
+        document.getElementById("loading").style.display = "none";
+    } catch (error) { alert("Gagal memuat soal."); }
+}
+
+function renderSoal() {
+    if (listSoal.length === 0) return;
+    const s = listSoal[currentIdx];
+    document.getElementById("infoHalaman").innerText = `Soal ${currentIdx + 1} dari ${listSoal.length}`;
+    document.getElementById("quizArea").innerHTML = `
+        <div class="soal-card">
+            <div style="font-size:1.2em; margin-bottom:20px; line-height:1.5;"><b>${currentIdx + 1}.</b> ${s.pertanyaan}</div>
+            <div class="daftar-opsi">
+                ${['A', 'B', 'C', 'D', 'E'].map(k => {
+                    if (!s.opsi[k]) return '';
+                    const isSelected = jawabanSiswa[s.no] === k ? 'selected' : '';
+                    return `<div class="opsi ${isSelected}" onclick="pilih('${s.no}', '${k}')"><strong>${k}.</strong> ${s.opsi[k]}</div>`;
+                }).join('')}
+            </div>
+        </div>`;
+    renderGrid();
+}
+
+function pilih(noSoal, kodeOpsi) {
+    jawabanSiswa[noSoal] = kodeOpsi;
+    localStorage.setItem("jawabanSiswa", JSON.stringify(jawabanSiswa));
+    renderSoal();
+}
+
+function renderGrid() {
+    const gridNomor = document.getElementById("gridNomor");
+    gridNomor.innerHTML = listSoal.map((s, i) => `
+        <div class="kotak-nomor ${jawabanSiswa[s.no] ? 'sudah' : ''} ${currentIdx === i ? 'aktif' : ''}" onclick="currentIdx=${i};renderSoal()">${i + 1}</div>
+    `).join('');
+}
+
+function changeSoal(arah) {
+    if (currentIdx + arah >= 0 && currentIdx + arah < listSoal.length) {
+        currentIdx += arah; renderSoal();
+    }
+}
+
+async function kirimJawaban() {
+    if (sudahKirim) return;
+    const jumlahDijawab = Object.keys(jawabanSiswa).length;
+    tampilAlert(
+        `Anda menjawab ${jumlahDijawab}/${listSoal.length} soal. Selesaikan ujian?`,
+        prosesKirimJawaban
+    );
+}
+
+// FUNGSI LOGOUT DENGAN TRIGER OFF KE SCRIPT LOGIN
+async function logOutSiswa() {
+    const idLogin = userSession ? userSession.idLogin : "";
+    document.getElementById("layarHasil").style.opacity = "0.7";
+
+    try {
+        // Kirim sinyal logout ke API_LOGOUT (Script Login)
+        await fetch(`${API_LOGOUT}?mode=logout&idLogin=${idLogin}`, {
+            method: "GET",
+            mode: "no-cors"
+        });
+    } catch (e) {
+        console.log("Koneksi gagal saat logout.");
+    } finally {
+        localStorage.clear();
+        window.location.href = "index.html"; 
+    }
+}
+
+let aksiSetelahKonfirmasi = null;
+
+function tampilAlert(pesan, aksi) {
+    document.getElementById("alertText").innerText = pesan;
+    document.getElementById("alertBox").style.display = "flex";
+    aksiSetelahKonfirmasi = aksi;
+}
+
+function tutupAlert() {
+    document.getElementById("alertBox").style.display = "none";
+}
+
+function lanjutKirim() {
+    tutupAlert();
+    if (aksiSetelahKonfirmasi) aksiSetelahKonfirmasi();
+}
+
+async function prosesKirimJawaban() {
+    sudahKirim = true; // Set di awal agar tidak dobel klik
+    document.getElementById("loading").style.display = "flex";
+    document.getElementById("loadingText").innerText = "Menyimpan & Menghitung Skor...";
+
+    const payload = {
+        action: "kirimJawaban",
+        idLogin: userSession.idLogin,
+        nama: userSession.nama,
+        kelas: userSession.kelas,
+        jawaban: jawabanSiswa
+    };
+
+    try {
+        await fetch(API_SOAL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+        
+        let skorLokal = 0;
+        listSoal.forEach(s => { 
+            if(jawabanSiswa[s.no] === s.kunci) skorLokal += Number(s.skor); 
+        });
+
+        localStorage.removeItem("endTime");
+        localStorage.removeItem("jawabanSiswa");
+
+        setTimeout(() => {
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("app-content").style.display = "none";
+            document.getElementById("layarHasil").style.display = "flex";
+            document.getElementById("nilaiFinal").innerText = skorLokal;
+        }, 2000);
+
+    } catch (error) {
+        document.getElementById("layarHasil").style.display = "flex";
+    }
+}
+</script>
+
+</body>
+</html>
