@@ -128,71 +128,44 @@
             background: white; display: flex; flex-direction: column;
             justify-content: center; align-items: center; z-index: 9999;
         }
-/* ===== CUSTOM ALERT ===== */
-.custom-alert-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.4);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 10002;
-}
 
-.custom-alert h3 {
-    margin: 0 0 10px;
-    color: var(--primary-blue);
-}
+        .custom-alert-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10002;
+        }
 
-.custom-alert p {
-    margin: 0 0 15px;
-    font-size: 14px;
-}
+        .custom-alert {
+            background: #fff;
+            width: 340px;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: zoomIn 0.2s ease;
+        }
 
-.alert-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-}
+        .custom-alert h3 { margin: 0 0 10px; color: var(--primary-blue); }
+        .custom-alert p { margin: 0 0 15px; font-size: 14px; }
 
-.alert-btn {
-    flex: 1;
-    border: none;
-    padding: 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-}
+        .alert-buttons { display: flex; gap: 10px; margin-top: 15px; }
 
-.btn-batal {
-    background: var(--btn-blue);
-    color: white;
-}
+        .alert-btn {
+            flex: 1; border: none; padding: 10px;
+            border-radius: 8px; cursor: pointer; font-weight: bold;
+        }
 
-.btn-kirim {
-    background: var(--btn-red);
-    color: white;
-}
+        .btn-batal { background: var(--btn-blue); color: white; }
+        .btn-kirim { background: var(--btn-red); color: white; }
 
-/* ANIMASI ALERT */
-.custom-alert {
-    background: #fff;
-    width: 340px;
-    border-radius: 16px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-
-    animation: zoomIn 0.2s ease;
-}
-
-@keyframes zoomIn {
-    from { transform: scale(0.8); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
     </style>
 </head>
 
@@ -255,6 +228,18 @@
     </div>
 </div>
 
+<!-- CUSTOM ALERT -->
+<div class="custom-alert-overlay" id="alertBox">
+    <div class="custom-alert">
+        <h3>Konfirmasi Ujian</h3>
+        <p id="alertText">-</p>
+        <div class="alert-buttons">
+            <button class="alert-btn btn-batal" onclick="tutupAlert()">Batal</button>
+            <button class="alert-btn btn-kirim" onclick="lanjutKirim()">Kirim</button>
+        </div>
+    </div>
+</div>
+
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzgM9OcqTaaNv4ngJH1py01xEj9IEqbdZJI0L3kl8Tw4_ll4TuCqqTGp_qgqF9AiMk0og/exec";
 
@@ -282,22 +267,20 @@ function startTimer() {
         const now = new Date().getTime();
         let sisa = endTime - now;
 
-if (sisa <= 0 && !sudahKirim) {
-    sudahKirim = true;
-    document.getElementById("timerDisplay").innerText = "00:00:00";
-    kirimJawaban();
-    return;
-}
+        if (sisa <= 0 && !sudahKirim) {
+            sudahKirim = true;
+            document.getElementById("timerDisplay").innerText = "00:00:00";
+            kirimJawaban();
+            return;
+        }
 
         const jam = Math.floor(sisa / (1000*60*60));
         const menit = Math.floor((sisa / (1000*60)) % 60);
         const detik = Math.floor((sisa/1000)%60);
 
         document.getElementById("timerDisplay").innerText =
-            `${String(jam).padStart(2,'0')}:`+
-            `${String(menit).padStart(2,'0')}:`+
-            `${String(detik).padStart(2,'0')}`;
-    },1000);
+            `${String(jam).padStart(2,'0')}:${String(menit).padStart(2,'0')}:${String(detik).padStart(2,'0')}`;
+    }, 1000);
 }
 
 window.onload = async () => {
@@ -307,7 +290,6 @@ window.onload = async () => {
     document.getElementById("displayKelas").innerText = "Kelas " + userSession.kelas;
 
     startTimer();
-
     await laporMulaiUjian();
     await loadSoal();
 };
@@ -368,17 +350,33 @@ function changeSoal(arah) {
 }
 
 async function kirimJawaban() {
-if (sudahKirim) return;
-sudahKirim = true;
+    if (sudahKirim) return;
     const jumlahDijawab = Object.keys(jawabanSiswa).length;
     tampilAlert(
-    `Anda menjawab ${jumlahDijawab}/${listSoal.length} soal. Selesaikan ujian?`,
-    prosesKirimJawaban
-);
+        `Anda menjawab ${jumlahDijawab}/${listSoal.length} soal. Selesaikan ujian?`,
+        prosesKirimJawaban
+    );
 }
-function logOutSiswa() {
-    localStorage.clear();
-    window.location.href = "index.html"; 
+
+// FUNGSI LOGOUT YANG DISESUAIKAN DENGAN BACKEND GAS BAPAK
+async function logOutSiswa() {
+    const idLogin = userSession ? userSession.idLogin : "";
+    
+    // Tampilkan indikasi loading pada tombol
+    document.getElementById("layarHasil").style.opacity = "0.7";
+
+    try {
+        // Memanggil fungsi prosesLogout di GAS via mode=logout
+        await fetch(`${API_URL}?mode=logout&idLogin=${idLogin}`, {
+            method: "GET",
+            mode: "no-cors"
+        });
+    } catch (e) {
+        console.log("Koneksi gagal, membersihkan data lokal...");
+    } finally {
+        localStorage.clear();
+        window.location.href = "index.html"; 
+    }
 }
 
 let aksiSetelahKonfirmasi = null;
@@ -399,7 +397,7 @@ function lanjutKirim() {
 }
 
 async function prosesKirimJawaban() {
-
+    sudahKirim = true;
     document.getElementById("loading").style.display = "flex";
     document.getElementById("loadingText").innerText = "Menyimpan & Menghitung Skor...";
 
@@ -434,17 +432,6 @@ async function prosesKirimJawaban() {
     }
 }
 </script>
-<!-- CUSTOM ALERT -->
-<div class="custom-alert-overlay" id="alertBox">
-    <div class="custom-alert">
-        <h3>Konfirmasi Ujian</h3>
-        <p id="alertText">-</p>
 
-        <div class="alert-buttons">
-            <button class="alert-btn btn-batal" onclick="tutupAlert()">Batal</button>
-            <button class="alert-btn btn-kirim" onclick="lanjutKirim()">Kirim</button>
-        </div>
-    </div>
-</div>
 </body>
 </html>
