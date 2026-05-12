@@ -129,6 +129,7 @@
             justify-content: center; align-items: center; z-index: 9999;
         }
 
+        /* ===== CUSTOM ALERT ===== */
         .custom-alert-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -151,7 +152,6 @@
 
         .custom-alert h3 { margin: 0 0 10px; color: var(--primary-blue); }
         .custom-alert p { margin: 0 0 15px; font-size: 14px; }
-
         .alert-buttons { display: flex; gap: 10px; margin-top: 15px; }
 
         .alert-btn {
@@ -241,7 +241,11 @@
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzgM9OcqTaaNv4ngJH1py01xEj9IEqbdZJI0L3kl8Tw4_ll4TuCqqTGp_qgqF9AiMk0og/exec";
+// URL UNTUK AMBIL SOAL & SIMPAN JAWABAN (Script Soal)
+const API_SOAL = "https://script.google.com/macros/s/AKfycbzgM9OcqTaaNv4ngJH1py01xEj9IEqbdZJI0L3kl8Tw4_ll4TuCqqTGp_qgqF9AiMk0og/exec";
+
+// URL UNTUK LOGOUT / STATUS LOG (Script Login Bapak)
+const API_LOGOUT = "https://script.google.com/macros/s/AKfycbx0fFte2WpCGtVMWL8iNhjnka_DNA6D0KT1zAJqd7Vffx5HGC0UEahL3bBW2RkUH9Dz/exec";
 
 let listSoal = [];
 let sudahKirim = false;
@@ -296,7 +300,7 @@ window.onload = async () => {
 
 async function laporMulaiUjian() {
     try {
-        await fetch(API_URL, {
+        await fetch(API_SOAL, {
             method: "POST", mode: "no-cors",
             body: JSON.stringify({ action: "mulaiUjian", idLogin: userSession.idLogin, nama: userSession.nama })
         });
@@ -305,7 +309,7 @@ async function laporMulaiUjian() {
 
 async function loadSoal() {
     try {
-        const response = await fetch(API_URL + "?mode=getSoal");
+        const response = await fetch(API_SOAL + "?mode=getSoal");
         listSoal = await response.json();
         renderSoal();
         document.getElementById("loading").style.display = "none";
@@ -358,21 +362,19 @@ async function kirimJawaban() {
     );
 }
 
-// FUNGSI LOGOUT YANG DISESUAIKAN DENGAN BACKEND GAS BAPAK
+// FUNGSI LOGOUT DENGAN TRIGER OFF KE SCRIPT LOGIN
 async function logOutSiswa() {
     const idLogin = userSession ? userSession.idLogin : "";
-    
-    // Tampilkan indikasi loading pada tombol
     document.getElementById("layarHasil").style.opacity = "0.7";
 
     try {
-        // Memanggil fungsi prosesLogout di GAS via mode=logout
-        await fetch(`${API_URL}?mode=logout&idLogin=${idLogin}`, {
+        // Kirim sinyal logout ke API_LOGOUT (Script Login)
+        await fetch(`${API_LOGOUT}?mode=logout&idLogin=${idLogin}`, {
             method: "GET",
             mode: "no-cors"
         });
     } catch (e) {
-        console.log("Koneksi gagal, membersihkan data lokal...");
+        console.log("Koneksi gagal saat logout.");
     } finally {
         localStorage.clear();
         window.location.href = "index.html"; 
@@ -397,7 +399,7 @@ function lanjutKirim() {
 }
 
 async function prosesKirimJawaban() {
-    sudahKirim = true;
+    sudahKirim = true; // Set di awal agar tidak dobel klik
     document.getElementById("loading").style.display = "flex";
     document.getElementById("loadingText").innerText = "Menyimpan & Menghitung Skor...";
 
@@ -410,7 +412,7 @@ async function prosesKirimJawaban() {
     };
 
     try {
-        await fetch(API_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+        await fetch(API_SOAL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
         
         let skorLokal = 0;
         listSoal.forEach(s => { 
