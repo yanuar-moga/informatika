@@ -100,6 +100,10 @@ button {
 .btn-jadwal { background:#d9534f; color:white; }
 .btn-jadwal:hover { background:#c9302c; }
 
+/* Tambahan Style Tombol Reset */
+.btn-reset { background:#6c757d; color:white; margin-top: 8px; }
+.btn-reset:hover { background:#5a6268; }
+
 .btn-start {
   background:#ff5722;
   color:white;
@@ -272,6 +276,8 @@ th { background-color: #f9f9f9; }
 
     <button class="btn-login" onclick="login()">Masuk</button>
     <button class="btn-jadwal" onclick="openModal()">Lihat Jadwal Token</button>
+    <!-- Tombol Reset Tambahan -->
+    <button class="btn-reset" onclick="resetSesiManual()">Reset Login / Sesi</button>
 
     <p id="msg"></p>
     
@@ -368,19 +374,17 @@ let sessionChecker;
 // --- FUNGSI AUTO LOGOUT INAKTIVITAS (20 MENIT) ---
 function resetIdleTimer() {
     clearTimeout(idleTimer);
-    // 20 menit = 1200000 ms
     idleTimer = setTimeout(() => {
         alert("Sesi berakhir karena tidak ada aktivitas selama 20 menit.");
         logout();
     }, 1200000); 
 }
 
-// Pantau aktivitas user
 window.onload = resetIdleTimer;
 window.onmousemove = resetIdleTimer;
 window.onmousedown = resetIdleTimer; 
 window.ontouchstart = resetIdleTimer;
-window.onclick = resetIdleTimer;     
+window.onclick = resetIdleTimer;      
 window.onkeypress = resetIdleTimer;   
 
 // --- FUNGSI CEK STATUS DARI ADMIN (SHEET LOG) ---
@@ -393,7 +397,10 @@ function checkSessionStatus() {
         .then(data => {
             if (data.status === "off") {
                 alert(data.msg || "Sesi Anda telah dihentikan oleh Admin.");
-                logout();
+                // Langsung bersihkan tanpa fetch lagi karena sudah off di server
+                localStorage.removeItem("user");
+                clearInterval(sessionChecker);
+                location.reload();
             }
         })
         .catch(err => console.log("Gagal sinkronisasi sesi."));
@@ -482,7 +489,6 @@ function showDashboard(user) {
   setTanggal();
   setInterval(getLocalTime, 1000);
   
-  // Mulai cek status sesi ke server setiap 15 detik
   checkSessionStatus();
   sessionChecker = setInterval(checkSessionStatus, 15000);
 }
@@ -498,10 +504,50 @@ function getLocalTime() {
   document.getElementById('jamServer').innerText = "⏰ " + new Date().toLocaleTimeString() + " WIB";
 }
 
+// FUNGSI LOGOUT DENGAN SINKRONISASI SERVER
 function logout() {
-  localStorage.removeItem("user");
-  clearInterval(sessionChecker);
-  location.reload();
+  const savedUser = JSON.parse(localStorage.getItem("user"));
+  if (savedUser && savedUser.idLogin) {
+    // Memberi tahu server untuk set OFF di kolom H
+    fetch(`${API_URL}?mode=logout&idLogin=${savedUser.idLogin}`)
+      .then(() => {
+        localStorage.removeItem("user");
+        clearInterval(sessionChecker);
+        location.reload();
+      })
+      .catch(() => {
+        // Tetap logout meski gagal koneksi
+        localStorage.removeItem("user");
+        location.reload();
+      });
+  } else {
+    localStorage.removeItem("user");
+    location.reload();
+  }
+}
+
+// FUNGSI RESET MANUAL (UNTUK LOGIN ULANG)
+function resetSesiManual() {
+  const userVal = document.getElementById('username').value;
+  if (!userVal) {
+    alert("Silakan pilih Nama Siswa terlebih dahulu pada dropdown!");
+    return;
+  }
+
+  if (confirm("Reset sesi untuk " + userVal + "? Anda akan bisa login kembali setelah ini.")) {
+    fetch(`${API_URL}?mode=reset_manual&username=${userVal}`)
+      .then(res => res.json())
+      .then(data => {
+        alert("Sesi berhasil direset. Silakan login kembali.");
+        localStorage.removeItem("user");
+        location.reload();
+      })
+      .catch(err => {
+        alert("Proses reset selesai.");
+        localStorage.removeItem("user");
+        location.reload();
+      });
+  }
 }
 
 function openConfirm() {
@@ -540,7 +586,7 @@ function closeModal() {
   document.getElementById('modalJadwal').style.display = "none";
 }
 
-// Cek Session jika sudah login
+// Check session on load
 window.onload = function() {
   resetIdleTimer();
   const savedUser = localStorage.getItem("user");
