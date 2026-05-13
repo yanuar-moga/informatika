@@ -159,7 +159,7 @@
             border-radius: 8px; cursor: pointer; font-weight: bold;
         }
 
-        .btn-batal { background: var(--btn-blue); color: white; }
+        .btn-batal { background: #ccc; color: #333; }
         .btn-kirim { background: var(--btn-red); color: white; }
 
         @keyframes zoomIn {
@@ -235,16 +235,13 @@
         <p id="alertText">-</p>
         <div class="alert-buttons">
             <button class="alert-btn btn-batal" onclick="tutupAlert()">Batal</button>
-            <button class="alert-btn btn-kirim" onclick="lanjutKirim()">Kirim</button>
+            <button class="alert-btn btn-kirim" onclick="lanjutKirim()">Kirim Sekarang</button>
         </div>
     </div>
 </div>
 
 <script>
-// URL UNTUK AMBIL SOAL & SIMPAN JAWABAN (Script Soal)
 const API_SOAL = "https://script.google.com/macros/s/AKfycbzTacoBkA6md69TmVNi-uCwtXoUzu15_YlBfwmYqzpHGha_ad-nKnMAPD0c7VkG42Q/exec";
-
-// URL UNTUK LOGOUT / STATUS LOG (Script Login Bapak)
 const API_LOGOUT = "https://script.google.com/macros/s/AKfycbwf_Hza9uzl9mdE-iiYZExPQ1Q7e2NsrVKhy48Bn15YtKzZGw_OLRTM3AYDu0d5mx2X/exec";
 
 let listSoal = [];
@@ -252,8 +249,8 @@ let sudahKirim = false;
 let jawabanSiswa = JSON.parse(localStorage.getItem("jawabanSiswa")) || {};
 let currentIdx = 0;
 let userSession = JSON.parse(localStorage.getItem("user"));
+let aksiSetelahKonfirmasi = null; // Inisialisasi callback
 
-/* ===== TIMER COUNTDOWN ===== */
 const DURASI = 90 * 60 * 1000;
 let endTime = localStorage.getItem("endTime");
 let durasiTersimpan = localStorage.getItem("durasi");
@@ -274,7 +271,8 @@ function startTimer() {
         if (sisa <= 0 && !sudahKirim) {
             sudahKirim = true;
             document.getElementById("timerDisplay").innerText = "00:00:00";
-            kirimJawaban();
+            // Langsung panggil tanpa konfirmasi jika waktu habis
+            prosesKirimJawaban();
             return;
         }
 
@@ -289,7 +287,6 @@ function startTimer() {
 
 window.onload = async () => {
     if (!userSession) { window.location.href = "index.html"; return; }
-
     document.getElementById("displayNama").innerText = userSession.nama;
     document.getElementById("displayKelas").innerText = "Kelas " + userSession.kelas;
 
@@ -335,6 +332,7 @@ function renderSoal() {
 }
 
 function pilih(noSoal, kodeOpsi) {
+    if (sudahKirim) return;
     jawabanSiswa[noSoal] = kodeOpsi;
     localStorage.setItem("jawabanSiswa", JSON.stringify(jawabanSiswa));
     renderSoal();
@@ -353,35 +351,14 @@ function changeSoal(arah) {
     }
 }
 
-async function kirimJawaban() {
+function kirimJawaban() {
     if (sudahKirim) return;
     const jumlahDijawab = Object.keys(jawabanSiswa).length;
     tampilAlert(
-        `Anda menjawab ${jumlahDijawab}/${listSoal.length} soal. Selesaikan ujian?`,
+        `Anda baru menjawab ${jumlahDijawab} dari ${listSoal.length} soal. Yakin ingin mengakhiri ujian?`,
         prosesKirimJawaban
     );
 }
-
-// FUNGSI LOGOUT DENGAN TRIGER OFF KE SCRIPT LOGIN
-async function logOutSiswa() {
-    const idLogin = userSession ? userSession.idLogin : "";
-    document.getElementById("layarHasil").style.opacity = "0.7";
-
-    try {
-        // Kirim sinyal logout ke API_LOGOUT (Script Login)
-        await fetch(`${API_LOGOUT}?mode=logout&idLogin=${idLogin}`, {
-            method: "GET",
-            mode: "no-cors"
-        });
-    } catch (e) {
-        console.log("Koneksi gagal saat logout.");
-    } finally {
-        localStorage.clear();
-        window.location.href = "index.html"; 
-    }
-}
-
-let aksiSetelahKonfirmasi = null;
 
 function tampilAlert(pesan, aksi) {
     document.getElementById("alertText").innerText = pesan;
@@ -391,15 +368,21 @@ function tampilAlert(pesan, aksi) {
 
 function tutupAlert() {
     document.getElementById("alertBox").style.display = "none";
+    aksiSetelahKonfirmasi = null;
 }
 
 function lanjutKirim() {
-    tutupAlert();
-    if (aksiSetelahKonfirmasi) aksiSetelahKonfirmasi();
+    if (typeof aksiSetelahKonfirmasi === 'function') {
+        const callback = aksiSetelahKonfirmasi;
+        tutupAlert();
+        callback();
+    }
 }
 
 async function prosesKirimJawaban() {
-    sudahKirim = true; // Set di awal agar tidak dobel klik
+    if (sudahKirim && arguments.length > 0) return; // Proteksi dobel kirim dari manual click
+    sudahKirim = true; 
+
     document.getElementById("loading").style.display = "flex";
     document.getElementById("loadingText").innerText = "Menyimpan & Menghitung Skor...";
 
@@ -412,13 +395,23 @@ async function prosesKirimJawaban() {
     };
 
     try {
-        await fetch(API_SOAL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+        // Kirim data ke GAS
+        await fetch(API_SOAL, { 
+            method: "POST", 
+            mode: "no-cors", 
+            body: JSON.stringify(payload) 
+        });
         
+        // Hitung skor untuk tampilan siswa
         let skorLokal = 0;
         listSoal.forEach(s => { 
-            if(jawabanSiswa[s.no] === s.kunci) skorLokal += Number(s.skor); 
+            if(jawabanSiswa[s.no] === s.kunci) {
+                let poinPerSoal = s.skor ? Number(s.skor) : (100 / listSoal.length);
+                skorLokal += poinPerSoal;
+            }
         });
 
+        // Hapus data lokal agar tidak bisa ujian ulang
         localStorage.removeItem("endTime");
         localStorage.removeItem("jawabanSiswa");
 
@@ -426,11 +419,26 @@ async function prosesKirimJawaban() {
             document.getElementById("loading").style.display = "none";
             document.getElementById("app-content").style.display = "none";
             document.getElementById("layarHasil").style.display = "flex";
-            document.getElementById("nilaiFinal").innerText = skorLokal;
+            document.getElementById("nilaiFinal").innerText = Math.round(skorLokal);
         }, 2000);
 
     } catch (error) {
+        console.error(error);
+        alert("Terjadi kesalahan koneksi. Tenang, data Anda tetap aman. Silakan klik OK untuk melihat hasil.");
         document.getElementById("layarHasil").style.display = "flex";
+    }
+}
+
+async function logOutSiswa() {
+    const idLogin = userSession ? userSession.idLogin : "";
+    try {
+        await fetch(`${API_LOGOUT}?mode=logout&idLogin=${idLogin}`, {
+            method: "GET",
+            mode: "no-cors"
+        });
+    } catch (e) {} finally {
+        localStorage.clear();
+        window.location.href = "index.html"; 
     }
 }
 </script>
