@@ -88,9 +88,7 @@
 </head>
 <body class="min-h-screen text-slate-800 flex items-center justify-center p-4 antialiased selection:bg-sky-500 selection:text-white">
 
-    <!-- Variasi Line Art SVG Keren Tersebar di Latar Belakang -->
     <svg class="line-art-bg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" preserveAspectRatio="none">
-        <!-- Grid Pola Titik -->
         <defs>
             <pattern id="dotGrid" width="40" height="40" patternUnits="userSpaceOnUse">
                 <circle cx="2" cy="2" r="1.5" fill="#0284c7" opacity="0.08"/>
@@ -98,7 +96,6 @@
         </defs>
         <rect width="100%" height="100%" fill="url(#dotGrid)" />
         
-        <!-- Garis Abstrak / Line Art Modern -->
         <g stroke="#0284c7" stroke-width="1.5" fill="none" opacity="0.12">
             <circle cx="150" cy="150" r="120" />
             <circle cx="150" cy="150" r="80" stroke-dasharray="5 5" />
@@ -117,16 +114,12 @@
 
     <div class="w-full max-w-md glass-card rounded-3xl p-6 md:p-8 relative overflow-hidden bg-white/90">
         
-        <!-- Ornamen Gradasi Sudut Lembut -->
         <div class="absolute -top-16 -right-16 w-44 h-44 bg-gradient-to-br from-sky-400/20 to-yellow-400/10 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute -bottom-16 -left-16 w-44 h-44 bg-gradient-to-tr from-sky-300/20 to-white/40 rounded-full blur-3xl pointer-events-none"></div>
 
         <div class="text-center mb-6 relative z-10">
-            <!-- Badge Logo / Icon dengan warna Biru SMP & Kuning OSIS -->
-            <div class="inline-flex p-3 bg-gradient-to-tr from-sky-100 via-white to-amber-500/10 rounded-2xl mb-3 border border-sky-200 shadow-md">
-                <svg class="w-8 h-8 text-sky-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-4-9 4 9 5zm0 0l9-5-9-4-9 4 9 5zm0 0v6m0 0l3-3m-3 3l-3-3M3.5 12v4.5A1.5 1.5 0 005 18h14a1.5 1.5 0 001.5-1.5V12"></path>
-                </svg>
+            <div class="inline-flex p-1.5 bg-white rounded-full mb-3 border border-sky-200 shadow-md">
+                <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" alt="Logo SMPN 1 Moga" class="w-16 h-16 object-contain rounded-full">
             </div>
             <h1 class="text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-800 to-sky-600">SPENSAMO BERMAKNA</h1>
             <p class="text-[10px] tracking-widest text-amber-500 font-extrabold uppercase mt-1">Hasil Nilai ASAT Informatika Kelas 7</p>
@@ -162,9 +155,8 @@
                     <label for="showPassword" class="text-xs text-slate-600 select-none cursor-pointer hover:text-slate-800">Tampilkan Kata Sandi</label>
                 </div>
 
-                <!-- Tombol Biru SMP Utama -->
                 <button type="submit" id="btnSubmit" class="w-full bg-gradient-to-r from-sky-600 via-sky-700 to-sky-800 hover:opacity-95 text-white font-extrabold py-3.5 px-4 rounded-xl text-sm transition duration-300 tracking-wide shadow-md shadow-sky-600/20 active:scale-[0.99]">
-                    Buka Lembar Hasil
+                    Buka Lembar Hasil &rarr;
                 </button>
             </form>
 
@@ -174,7 +166,6 @@
 
         <div id="dashboardBox" class="hidden space-y-5 relative z-10 fade-in">
             
-            <!-- Segel Kuning Emas OSIS -->
             <div id="stikerNilai" onclick="bukaSegelStiker()">
                 <svg class="w-full h-full drop-shadow-xl filter hover:scale-105 transition" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="50" cy="50" r="45" fill="url(#gradSticker)" stroke="#d97706" stroke-width="2"/>
@@ -243,7 +234,7 @@
             </div>
             
             <button onclick="keluarSesi()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs py-3 rounded-xl font-semibold transition tracking-wide border border-slate-200 shadow-sm">
-                Keluar
+                &larr; Tutup Lembar Nilai
             </button>
         </div>
 
