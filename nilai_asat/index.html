@@ -124,7 +124,7 @@
                 </button>
             </form>
 
-            <div id="loginError" class="text-xs font-semibold text-rose-400 text-center bg-rose-500/10 py-3 px-4 rounded-xl border border-rose-500/20 hidden"></div>
+            <div id="loginError" class="transition-all duration-300 hidden"></div>
             <div class="text-center text-[10px] text-slate-600 pt-4 border-t border-slate-900">© 2026 Informatika SMP Negeri 1 Moga</div>
         </div>
 
@@ -192,7 +192,7 @@
                             </tr>
                         </thead>
                         <tbody id="tableRanking" class="divide-y divide-slate-900/50 text-slate-300 font-medium">
-                            </tbody>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -216,7 +216,7 @@
             muatDropdownUtama();
         });
 
-        // 1. DOCKING METADATA USERSecara Akurat
+        // 1. DOCKING METADATA USER Secara Akurat
         async function ambilDataMetadataAkses() {
             try {
                 const res = await fetch('https://ipapi.co/json/');
@@ -296,7 +296,7 @@
             sandiField.type = document.getElementById('showPassword').checked ? "text" : "password";
         }
 
-        // 5. POST REQUEST VERIFIKASI LOGIN
+        // 5. POST REQUEST VERIFIKASI LOGIN & DETEKSI NILAI BELUM SIAP
         async function prosesAksesMasuk() {
             const kls = document.getElementById('kelas').value;
             const nm = document.getElementById('username').value;
@@ -330,6 +330,17 @@
                 
                 if (callback.status === "success") {
                     alihkanHalamanNilai(callback.siswa, callback.ranking);
+                } else if (callback.status === "belum_siap") {
+                    // JIKA NILAI DI SPREADSHEET KOSONG/BELUM DIINPUT, TAMPILKAN BANNER AMBER/KUNING EMAS
+                    err.className = "text-left bg-amber-500/10 text-amber-400 p-4 rounded-xl border border-amber-500/20 space-y-1.5 transition-all duration-300";
+                    err.innerHTML = `
+                        <div class="flex items-center gap-2 font-bold text-xs uppercase tracking-wide">
+                            ⚠️ Pemberitahuan Resmi
+                        </div>
+                        <p class="text-[11px] leading-relaxed opacity-90">${callback.message}</p>
+                    `;
+                    err.classList.remove('hidden');
+                    resetTombolUtama(btn);
                 } else {
                     gagalSistemError(callback.message);
                     resetTombolUtama(btn);
@@ -346,7 +357,7 @@
             document.getElementById('dashboardBox').classList.remove('hidden');
 
             document.getElementById('nama').innerText = siswa.nama;
-            document.getElementById('kelasOut').innerText = "Kelas 7-" + siswa.kelas;
+            document.getElementById('kelasOut').innerText = "Kelas " + siswa.kelas;
             document.getElementById('resGender').innerText = (siswa.gender === "L" || siswa.gender === "Laki-laki") ? "Laki-Laki" : "Perempuan";
             
             const nEl = document.getElementById('nilai');
@@ -422,6 +433,7 @@
 
         function gagalSistemError(pesan) {
             const box = document.getElementById('loginError');
+            box.className = "text-xs font-semibold text-rose-400 text-center bg-rose-500/10 py-3 px-4 rounded-xl border border-rose-500/20 transition-all duration-300";
             box.innerText = pesan;
             box.classList.remove('hidden');
         }
