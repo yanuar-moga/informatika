@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>CBT Asesmen Informatika - SPENSAMO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #0284c7;       /* Sky 600 */
+            --primary-dark: #0369a1;  /* Sky 700 */
+            --accent: #eab308;        /* Yellow 500 */
+            --success: #10b981;       /* Emerald 500 */
+            --danger: #ef4444;        /* Red 500 */
+            --bg: #f1f5f9;            /* Slate 100 */
+            --text: #1e293b;          /* Slate 800 */
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at top right, #e0f2fe 0%, #f1f5f9 50%, #ffffff 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            user-select: none; /* Mencegah copy-paste soal */
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Line Art Pattern Terintegrasi di Background */
+        .line-art-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        /* Glassmorphism Mewah */
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(2, 132, 199, 0.15); 
+            box-shadow: 0 20px 40px -15px rgba(2, 132, 199, 0.08), inset 0 1px 0px rgba(255, 255, 255, 0.6);
+        }
+
+        /* Custom Style Ujian */
+        .opsi-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .opsi-item:hover { 
+            background: rgba(2, 132, 199, 0.05); 
+            border-color: rgba(2, 132, 199, 0.3);
+        }
+        .opsi-item input { margin-right: 15px; transform: scale(1.2); }
+        .opsi-item.selected {
+            background: rgba(2, 132, 199, 0.1);
+            border-color: var(--primary);
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.05);
+        }
+
+        .num {
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 700;
+            transition: all 0.15s ease;
+        }
+        .num:hover { background: #fff; border-color: var(--primary); }
+        .num.active { border: 2px solid var(--primary); color: var(--primary); background: #fff; }
+        .num.done { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+        /* Animasi Fade In Lembut */
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;" class="antialiased selection:bg-sky-500 selection:text-white">
+
+    <svg class="line-art-bg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" preserveAspectRatio="none">
+        <defs>
+            <pattern id="dotGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <circle cx="2" cy="2" r="1.5" fill="#0284c7" opacity="0.06"/>
+            </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#dotGrid)" />
+        <g stroke="#0284c7" stroke-width="1.5" fill="none" opacity="0.08">
+            <circle cx="150" cy="150" r="120" />
+            <line x1="0" y1="150" x2="300" y2="150" />
+            <line x1="150" y1="0" x2="150" y2="300" />
+        </g>
+        <g stroke="#eab308" stroke-width="2" fill="none" opacity="0.1">
+            <path d="M1200,700 Q1250,550 1400,600 T1600,450" stroke-dasharray="4 4" />
+        </g>
+    </svg>
+
+    <header class="glass-card sticky top-0 z-30 px-4 md:px-8 py-3 flex justify-between items-center border-b border-sky-100 hidden shadow-sm" id="mainHeader">
+        <div>
+            <strong id="namaDisp" class="text-slate-800 text-sm md:text-base font-bold tracking-tight"></strong>
+            <div id="kelasDisp" class="text-[11px] font-extrabold text-amber-500 uppercase tracking-wider mt-0.5"></div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="timer-box font-mono bg-slate-900/5 text-slate-800 px-4 py-1.5 rounded-xl font-extrabold text-base border border-slate-900/10" id="timer">00:00</div>
+            <button onclick="keluar()" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-3 py-1.5 rounded-lg text-xs tracking-wider transition">KELUAR</button>
+        </div>
+    </header>
+
+    <main id="app" class="flex-1 w-full max-w-7xl mx-auto flex flex-col justify-center items-center p-4 z-10"></main>
+
+    <footer class="w-full text-center text-[11px] font-medium text-slate-400 py-4 mt-auto border-t border-slate-200/50 bg-white/40 backdrop-blur-sm">
+        CBT Asesmen Informatika Ver 1.1 | Dev by MB &copy; 2026 SMP Negeri 1 Moga
+    </footer>
+
+    <div id="modalBox" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white/95 backdrop-blur-md rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl border border-sky-100 fade-in">
+            <h3 id="mTitle" class="text-base font-extrabold text-sky-800 tracking-tight mb-2"></h3>
+            <div id="mMsg" class="text-xs text-slate-600 leading-relaxed mb-5"></div>
+            <div id="mAct" class="flex justify-center gap-3"></div>
+        </div>
+    </div>
+
+<script>
+// URL WEB APP GAS
+const API = "https://script.google.com/macros/s/AKfycbwJhsKy_JrQKBMB-_A5rfewVE1an2nnY3o5KwYq7ZnQ9zLpP58G9M-1h5D8N744xNEB/exec"; 
+
+let dataSiswa = [];
+let state = { soal: [], index: 0, jawaban: [] };
+
+function modal(t, m, btns) {
+    const mAct = document.getElementById("mAct");
+    mAct.innerHTML = "";
+    document.getElementById("mTitle").innerText = t;
+    document.getElementById("mMsg").innerHTML = m;
+    btns.forEach(b => {
+        let x = document.createElement("button");
+        // Kelas CSS dinamis berbasis skema warna baru
+        let btnCls = "px-4 py-2 rounded-xl text-xs font-bold transition ";
+        if(b.cls.includes("blue")) btnCls += "bg-sky-600 hover:bg-sky-700 text-white shadow-sm shadow-sky-600/20";
+        else if(b.cls.includes("green")) btnCls += "bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-600/20";
+        else if(b.cls.includes("red")) btnCls += "bg-red-50 text-red-600 hover:bg-red-100";
+        
+        x.className = btnCls;
+        x.innerText = b.text;
+        x.onclick = () => { document.getElementById("modalBox").style.display = "none"; if (b.cb) b.cb(); };
+        mAct.appendChild(x);
+    });
+    document.getElementById("modalBox").style.display = "flex";
+}
+
+function loginUI() {
+    document.getElementById("mainHeader").style.display = "none";
+    const app = document.getElementById("app");
+    app.innerHTML = `
+    <div class="w-full max-w-md glass-card rounded-3xl p-6 md:p-8 relative overflow-hidden bg-white/90 my-8 fade-in">
+        <div class="absolute -top-16 -right-16 w-44 h-44 bg-gradient-to-br from-sky-400/20 to-yellow-400/10 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div class="text-center mb-6">
+            <div class="inline-flex p-1.5 bg-white rounded-full mb-3 border border-sky-200 shadow-md">
+                <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" alt="Logo" class="w-16 h-16 object-contain rounded-full">
+            </div>
+            <h1 class="text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-800 to-sky-600">SPENSAMO BERMAKNA</h1>
+            <p class="text-[10px] tracking-widest text-amber-500 font-extrabold uppercase mt-1">REMIDIAL ASAT INFORMATIKA KELAS 7</p>
+        </div>
+
+        <div class="space-y-4">
+            <div class="bg-sky-50 border border-sky-100 rounded-2xl p-4 text-center mb-2">
+                <p class="text-xs text-sky-800 font-medium leading-relaxed">Silakan lengkapi pilihan kelas, nama, beserta token ujian yang diberikan oleh guru pengampu.</p>
+            </div>
+            
+            <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">1. Pilih Kelas</label>
+                <select id="kelasSelect" class="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition duration-200 cursor-pointer shadow-sm"><option>Memuat kelas...</option></select>
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">2. Nama Siswa</label>
+                <select id="username" class="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition duration-200 cursor-pointer shadow-sm"><option value="">-- Pilih Nama --</option></select>
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">3. Token Ujian</label>
+                <input id="token" style="text-transform: uppercase;" class="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-800 font-bold tracking-widest text-center focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition duration-200 placeholder-slate-400 shadow-sm" placeholder="KETIK TOKEN">
+            </div>
+            
+            <button id="btnLogin" class="w-full bg-gradient-to-r from-sky-600 via-sky-700 to-sky-800 hover:opacity-95 text-white font-extrabold py-3.5 px-4 rounded-xl text-sm transition duration-300 tracking-wide shadow-md shadow-sky-600/20 mt-2" onclick="login()">
+                KERJAKAN REMIDIAL
+            </button>
+        </div>
+    </div>`;
+
+    fetch(API).then(r => r.json()).then(d => {
+        dataSiswa = d;
+        let k = [...new Set(d.map(x => x.kelas))];
+        let sel = document.getElementById('kelasSelect');
+        sel.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+        k.forEach(x => sel.innerHTML += `<option>${x}</option>`);
+        sel.onchange = () => {
+            let kVal = sel.value;
+            let un = document.getElementById('username');
+            un.innerHTML = '<option value="">-- Pilih Nama --</option>';
+            dataSiswa.filter(x => x.kelas == kVal).forEach(s => {
+                un.innerHTML += `<option value="${s.username}" data-nama="${s.nama}">${s.nama}</option>`;
+            });
+        };
+    }).catch(() => {
+        modal("Koneksi Gagal", "Gagal terhubung ke server. Periksa jaringan Anda.", [{text:"OK", cls:"blue"}]);
+    });
+}
+
+async function login() {
+    let selName = document.getElementById('username');
+    let user = selName.value;
+    let namaReal = selName.options[selName.selectedIndex]?.getAttribute('data-nama');
+    let kls = document.getElementById('kelasSelect').value;
+    let token = document.getElementById('token').value;
+
+    if (!user || !token) {
+        return modal("Peringatan", "Silakan Pilih Nama & Isi Token terlebih dahulu!", [{text:"OK", cls:"blue"}]);
+    }
+
+    document.getElementById('btnLogin').innerText = "Verifikasi...";
+    
+    let device = navigator.userAgent;
+    let ip = "-";
+
+    try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        ip = data.ip;
+    } catch (e) {
+        console.error("Gagal mendapatkan IP:", e);
+    }
+    
+    fetch(API, {
+        method: "POST",
+        body: JSON.stringify({ 
+            mode: "login", 
+            username: user, 
+            nama: namaReal, 
+            kelas: kls, 
+            token: token,
+            ip: ip,      
+            device: device 
+        })
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.status === "success") {
+            localStorage.setItem("user", JSON.stringify(res));
+            localStorage.setItem("layer", "konfirmasi");
+            init();
+        } else {
+            modal("Gagal Masuk", res.msg, [{text:"COBA LAGI", cls:"red"}]);
+            document.getElementById('btnLogin').innerText = "KERJAKAN REMIDIAL";
+        }
+    })
+    .catch(err => {
+        modal("Error", "Terjadi kesalahan koneksi ke server.", [{text:"OK", cls:"red"}]);
+        document.getElementById('btnLogin').innerText = "KERJAKAN REMIDIAL";
+    });
+}
+
+function showKonfirmasi() {
+    let u = JSON.parse(localStorage.getItem("user"));
+    document.getElementById("mainHeader").style.display = "none";
+    document.getElementById("app").innerHTML = `
+    <div class="w-full max-w-xl glass-card rounded-3xl p-6 md:p-8 relative overflow-hidden bg-white/90 my-8 fade-in shadow-xl">
+        <h2 class="text-xl font-extrabold text-sky-800 tracking-tight border-b border-slate-200/60 pb-3 mb-4">Konfirmasi Lembar Konfirmasi</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-700 leading-relaxed">
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Nama Peserta</span>
+                <span class="font-bold text-slate-800">${u.nama}</span>
+            </div>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Kelas</span>
+                <span class="font-bold text-sky-600">${u.kelas}</span>
+            </div>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Mata Pelajaran</span>
+                <span class="font-bold text-slate-800">Informatika (Semester Genap)</span>
+            </div>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Tahun Pelajaran</span>
+                <span class="font-bold text-slate-800">2026 - 2027</span>
+            </div>
+        </div>
+
+        <div class="mt-4 bg-amber-50 border border-amber-100 rounded-2xl p-4 text-xs text-amber-800 leading-relaxed">
+            <p class="font-bold mb-1">Informasi Aturan Ujian:</p>
+            <ul class="list-disc pl-4 space-y-0.5">
+                <li>Durasi pengerjaan otomatis dibatasi maksimal <b>90 menit</b>.</li>
+                <li>Sistem dilarang menyalin (copy-paste) soal demi integritas asesmen.</li>
+            </ul>
+        </div>
+
+        <button class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:opacity-95 text-white font-extrabold py-3.5 px-4 rounded-xl text-sm transition duration-300 tracking-wide shadow-md shadow-amber-500/20 mt-6" onclick="startExam()">
+            MULAI KERJAKAN SEKARANG
+        </button>
+    </div>`;
+}
+
+function startExam() {
+    localStorage.setItem("layer", "soal");
+    fetch(API + "?mode=soal").then(r => r.json()).then(d => {
+        let saved = localStorage.getItem("cbt_state");
+        if (saved) {
+            state = JSON.parse(saved);
+        } else {
+            state.soal = d;
+            state.jawaban = new Array(d.length).fill("");
+            state.index = 0;
+            localStorage.setItem("cbt_state", JSON.stringify(state));
+        }
+        render();
+        startTimer();
+    });
+}
+
+function startTimer() {
+    let end = localStorage.getItem("endTime");
+    if (!end) {
+        end = Date.now() + (90 * 60 * 1000); 
+        localStorage.setItem("endTime", end);
+    }
+    const timerInt = setInterval(() => {
+        let sisa = Math.floor((end - Date.now()) / 1000);
+        if (sisa <= 0) { 
+            clearInterval(timerInt); 
+            submitAction(); 
+            return; 
+        }
+        let m = Math.floor(sisa / 60);
+        let s = sisa % 60;
+        document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+    }, 1000);
+}
+
+function render() {
+    document.getElementById("mainHeader").style.display = "flex";
+    let u = JSON.parse(localStorage.getItem("user"));
+    document.getElementById("namaDisp").innerText = u.nama;
+    document.getElementById("kelasDisp").innerText = u.kelas;
+
+    let s = state.soal[state.index];
+    let sideGrid = '';
+    state.soal.forEach((_, i) => {
+        let cls = "num" + (i === state.index ? " active" : "") + (state.jawaban[i] ? " done" : "");
+        sideGrid += `<div class="${cls}" onclick="state.index=${i};render()">${i+1}</div>`;
+    });
+
+    let opsHtml = '';
+    ["A","B","C","D","E"].forEach(o => {
+        if(s.pilihan[o]) {
+            let isSel = state.jawaban[state.index] === o;
+            opsHtml += `<div class="opsi-item ${isSel?'selected':''}" onclick="jawab('${o}')">
+                <input type="radio" name="q" ${isSel?'checked':''}> <span class="text-sm"><b class="text-sky-700 mr-1">${o}.</b> ${s.pilihan[o]}</span>
+            </div>`;
+        }
+    });
+
+    document.getElementById("app").innerHTML = `
+    <div class="w-full flex flex-col lg:flex-row gap-6 my-6 items-start fade-in">
+        <div class="flex-1 w-full glass-card rounded-2xl p-5 md:p-6 shadow-sm">
+            <div class="text-xs font-bold text-sky-800 uppercase tracking-widest border-b border-slate-200/60 pb-3 mb-4">
+                NOMOR SOAL: <span class="text-sm font-extrabold">${state.index + 1}</span> / ${state.soal.length}
+            </div>
+            
+            ${s.gambar ? `<img src="${s.gambar}" class="max-w-full md:max-w-md h-auto block mx-auto mb-5 rounded-xl border border-slate-200 shadow-sm">` : ''}
+            
+            <div class="text-slate-800 font-medium text-base leading-relaxed mb-6">${s.soal}</div>
+            
+            <div class="opsi-container space-y-3">${opsHtml}</div>
+            
+            <div class="flex justify-between items-center pt-5 border-t border-slate-200/60 mt-6 gap-3">
+                <button class="px-4 py-2 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-bold rounded-xl text-xs tracking-wider transition" onclick="state.index--;render()" ${state.index==0?'disabled':''}>KEMBALI</button>
+                
+                ${state.index == state.soal.length-1 
+                    ? `<button class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-xs tracking-wider transition shadow-md shadow-emerald-600/10" onclick="popupSubmit()">SELESAI & KIRIM</button>` 
+                    : `<button class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-extrabold rounded-xl text-xs tracking-wider transition shadow-md shadow-sky-600/10" onclick="state.index++;render()">SELANJUTNYA</button>`}
+            </div>
+        </div>
+        
+        <div class="w-full lg:w-72 glass-card rounded-2xl p-5 shadow-sm">
+            <h3 class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-3">Peta Navigasi Soal</h3>
+            <div class="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-5 gap-2" id="gridNomorContainer">${sideGrid}</div>
+        </div>
+    </div>`;
+}
+
+function jawab(v) {
+    state.jawaban[state.index] = v;
+    localStorage.setItem("cbt_state", JSON.stringify(state));
+    render();
+}
+
+function popupSubmit() {
+    modal("Selesai Ujian?", "Apakah Anda yakin ingin mengirim semua lembar jawaban sekarang ke server?", [{text:"BATAL",cls:"red"}, {text:"YA, KIRIM",cls:"green",cb:submitAction}]);
+}
+
+function submitAction() {
+    document.getElementById("app").innerHTML = `
+    <div class="text-center p-8 max-w-sm glass-card rounded-2xl shadow-xl my-12 text-slate-800">
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-sky-600 mx-auto mb-4"></div>
+        <h2 class="font-extrabold text-base mb-1">Mengirim Jawaban...</h2>
+        <p class="text-xs text-slate-500">Mohon tunggu sebentar, enkripsi data sedang diproses ke sistem server.</p>
+    </div>`;
+    
+    let u = JSON.parse(localStorage.getItem("user"));
+    fetch(API, {
+        method: "POST",
+        body: JSON.stringify({
+            mode: "submit",
+            idLogin: u.idLogin,
+            nama: u.nama,
+            kelas: u.kelas,
+            jawaban: state.jawaban
+        })
+    }).then(r => r.json()).then(res => {
+        localStorage.clear();
+        document.getElementById("mainHeader").style.display = "none";
+        document.getElementById("app").innerHTML = `
+        <div class="w-full max-w-md glass-card rounded-3xl p-6 md:p-8 text-center shadow-2xl relative overflow-hidden fade-in my-8 bg-white/95">
+            <div class="w-16 h-16 bg-emerald-50 text-emerald-500 border border-emerald-200 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm text-2xl">✓</div>
+            <h2 class="text-xl font-extrabold text-emerald-600 tracking-tight">ASESMEN SELESAI</h2>
+            <p class="text-xs text-slate-500 mt-1">Jawaban Anda berhasil diamankan dan tersimpan di basis data cloud.</p>
+            
+            <div class="my-6 py-4 bg-slate-50 border border-slate-200/60 rounded-2xl shadow-inner">
+                <span class="text-[10px] uppercase tracking-widest font-extrabold text-slate-400 block mb-0.5">NILAI CAPAIAN ANDA</span>
+                <div class="text-5xl font-extrabold text-slate-800 font-mono tracking-tight">${res.nilai}</div>
+            </div>
+            
+            <button class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl text-xs transition tracking-wide shadow-md" onclick="location.reload()">KELUAR AKUN / LOGOUT</button>
+        </div>`;
+    }).catch(err => {
+        modal("Pengiriman Gagal", "Gagal mengirim jawaban karena gangguan sinyal internet. Silakan coba klik Selesai lagi.", [{text:"OK", cls:"blue"}]);
+        render();
+    });
+}
+
+function keluar() { 
+    modal("Keluar Ujian?", "Data progres yang belum terkirim permanen mungkin akan terhapus. Anda yakin ingin log-out?", [
+        {text: "BATAL", cls: "blue"},
+        {
+            text: "LOGOUT KELUAR", 
+            cls: "red", 
+            cb: () => {
+                localStorage.clear(); 
+                location.reload(); 
+            }
+        }
+    ]);
+}
+
+function init() {
+    let layer = localStorage.getItem("layer");
+    if (!localStorage.getItem("user")) loginUI();
+    else if (layer === "konfirmasi") showKonfirmasi();
+    else if (layer === "soal") startExam();
+}
+
+init();
+</script>
+</body>
+</html>
