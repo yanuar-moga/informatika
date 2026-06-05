@@ -10,21 +10,19 @@
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
+            /* Background dibuat polos bersih dan netral */
             background-color: #f8fafc;
-            /* Pola Batik Parang menggunakan SVG Data URI yang ringan dan elegan */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='120' viewBox='0 0 60 120'%3E%3Cg fill='none' stroke-width='2'%3E%3Cpath stroke='%23e2e8f0' d='M-30 120 L30 60 M0 120 L60 60 M30 120 L90 60 M-30 60 L30 0 M0 60 L60 0 M30 60 L90 0'/%3E%3Cpath stroke='%23bae6fd' stroke-width='1.5' d='M-30 110 L30 50 M0 110 L60 50 M30 110 L90 50 M-30 50 L30 -10 M0 50 L60 -10 M30 50 L90 -10'/%3E%3Cpath stroke='%23fef08a' opacity='0.7' stroke-width='1' d='M-30 100 L30 40 M0 100 L60 40 M30 100 L90 40 M-30 40 L30 -20 M0 40 L60 -20 M30 40 L90 -20'/%3E%3Ccircle cx='15' cy='45' r='2' fill='%230284c7' opacity='0.15'/%3E%3Ccircle cx='45' cy='105' r='2' fill='%230284c7' opacity='0.15'/%3E%3Ccircle cx='45' cy='15' r='1.5' fill='%23eab308' opacity='0.2'/%3E%3Ccircle cx='15' cy='75' r='1.5' fill='%23eab308' opacity='0.2'/%3E%3C/g%3E%3C/svg%3E");
-            background-attachment: fixed;
             position: relative;
         }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
         
         /* Glassmorphism Terang Mewah dengan Accent Border */
         .glass-card { 
-            background: rgba(255, 255, 255, 0.88); 
+            background: rgba(255, 255, 255, 0.9); 
             backdrop-filter: blur(20px); 
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(2, 132, 199, 0.25); 
-            box-shadow: 0 25px 50px -12px rgba(2, 132, 199, 0.15), inset 0 1px 0px rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(2, 132, 199, 0.2); 
+            box-shadow: 0 25px 50px -12px rgba(2, 132, 199, 0.1), inset 0 1px 0px rgba(255, 255, 255, 0.7);
         }
         
         /* Paksa Output Teks tidak Kapital Otomatis */
@@ -78,6 +76,7 @@
 </head>
 <body class="min-h-screen text-slate-800 flex items-center justify-center p-4 antialiased selection:bg-sky-500 selection:text-white">
 
+    <!-- Kontainer Kartu Utama -->
     <div class="w-full max-w-md glass-card rounded-3xl p-6 md:p-8 relative overflow-hidden my-6">
         
         <div class="absolute -top-16 -right-16 w-44 h-44 bg-gradient-to-br from-sky-400/20 to-yellow-400/10 rounded-full blur-3xl pointer-events-none"></div>
