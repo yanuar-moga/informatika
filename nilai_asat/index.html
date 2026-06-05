@@ -76,7 +76,6 @@
 </head>
 <body class="min-h-screen text-slate-800 flex items-center justify-center p-4 antialiased selection:bg-sky-500 selection:text-white">
 
-    <!-- Kontainer Kartu Utama -->
     <div class="w-full max-w-md glass-card rounded-3xl p-6 md:p-8 relative overflow-hidden my-6">
         
         <div class="absolute -top-16 -right-16 w-44 h-44 bg-gradient-to-br from-sky-400/20 to-yellow-400/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -361,7 +360,9 @@
 
             document.getElementById('nama').innerText = siswa.nama;
             document.getElementById('kelasOut').innerText = "Kelas " + siswa.kelas;
-            document.getElementById('resGender').innerText = (siswa.gender === "L" || siswa.gender === "Laki-laki") ? "Laki-Laki" : "Perempuan";
+            
+            // PERBAIKAN DI SINI: Data Jenis Kelamin diambil langsung secara dinamis dari Sheets
+            document.getElementById('resGender').innerText = siswa.gender || "-";
             
             const nEl = document.getElementById('nilai');
             nEl.innerText = siswa.nilai;
