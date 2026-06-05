@@ -132,7 +132,7 @@
     <main id="app" class="flex-1 w-full max-w-7xl mx-auto flex flex-col justify-center items-center p-4 z-10"></main>
 
     <footer class="w-full text-center text-[11px] font-medium text-slate-400 py-4 mt-auto border-t border-slate-200/50 bg-white/40 backdrop-blur-sm">
-        CBT Asesmen Informatika Ver 1.1 | Dev by MB &copy; 2026 SMP Negeri 1 Moga
+        CBT Asesmen Informatika Ver 1.2 | Dev by MB &copy; 2026 SMP Negeri 1 Moga
     </footer>
 
     <div id="modalBox" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
@@ -149,6 +149,8 @@ const API = "https://script.google.com/macros/s/AKfycbwJhsKy_JrQKBMB-_A5rfewVE1a
 
 let dataSiswa = [];
 let state = { soal: [], index: 0, jawaban: [] };
+let intervalTimer = null;
+let intervalHeartbeat = null;
 
 function modal(t, m, btns) {
     const mAct = document.getElementById("mAct");
@@ -157,7 +159,6 @@ function modal(t, m, btns) {
     document.getElementById("mMsg").innerHTML = m;
     btns.forEach(b => {
         let x = document.createElement("button");
-        // Kelas CSS dinamis berbasis skema warna baru
         let btnCls = "px-4 py-2 rounded-xl text-xs font-bold transition ";
         if(b.cls.includes("blue")) btnCls += "bg-sky-600 hover:bg-sky-700 text-white shadow-sm shadow-sky-600/20";
         else if(b.cls.includes("green")) btnCls += "bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-600/20";
@@ -173,6 +174,8 @@ function modal(t, m, btns) {
 
 function loginUI() {
     document.getElementById("mainHeader").style.display = "none";
+    clearInterval(intervalTimer);
+    clearInterval(intervalHeartbeat);
     const app = document.getElementById("app");
     app.innerHTML = `
     <div class="w-full max-w-md glass-card rounded-3xl p-6 md:p-8 relative overflow-hidden bg-white/90 my-8 fade-in">
@@ -311,8 +314,9 @@ function showKonfirmasi() {
         <div class="mt-4 bg-amber-50 border border-amber-100 rounded-2xl p-4 text-xs text-amber-800 leading-relaxed">
             <p class="font-bold mb-1">Informasi Aturan Ujian:</p>
             <ul class="list-disc pl-4 space-y-0.5">
-                <li>Durasi pengerjaan otomatis dibatasi maksimal <b>90 menit</b>.</li>
+                <li>Durasi pengerjaan otomatis dihitung berdasarkan jumlah soal (${u.totalSoal} soal × 2 menit): <b>${u.durasiMenit} Menit</b>.</li>
                 <li>Sistem dilarang menyalin (copy-paste) soal demi integritas asesmen.</li>
+                <li>Jika tidak ada aktivitas selama <b>2 Jam</b>, sesi akan ditutup otomatis demi keamanan.</li>
             </ul>
         </div>
 
@@ -336,19 +340,24 @@ function startExam() {
         }
         render();
         startTimer();
+        startHeartbeat(); // Jalankan proteksi auto-logout
     });
 }
 
 function startTimer() {
+    let u = JSON.parse(localStorage.getItem("user"));
     let end = localStorage.getItem("endTime");
     if (!end) {
-        end = Date.now() + (90 * 60 * 1000); 
+        // Fitur 2: Menghitung target sisa waktu pengerjaan dinamis dari server
+        end = Date.now() + (u.durasiMenit * 60 * 1000); 
         localStorage.setItem("endTime", end);
     }
-    const timerInt = setInterval(() => {
+    
+    clearInterval(intervalTimer);
+    intervalTimer = setInterval(() => {
         let sisa = Math.floor((end - Date.now()) / 1000);
         if (sisa <= 0) { 
-            clearInterval(timerInt); 
+            clearInterval(intervalTimer); 
             submitAction(); 
             return; 
         }
@@ -356,6 +365,40 @@ function startTimer() {
         let s = sisa % 60;
         document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
     }, 1000);
+}
+
+// Fitur 1: Memeriksa deteksi aktivitas ke backend setiap 3 menit secara berkala
+function startHeartbeat() {
+    let u = JSON.parse(localStorage.getItem("user"));
+    if (!u || !u.idLogin) return;
+
+    clearInterval(intervalHeartbeat);
+    intervalHeartbeat = setInterval(() => {
+        cekStatusSesi();
+    }, 180000); // 3 menit sekali mengetuk pintu server
+}
+
+function cekStatusSesi() {
+    let u = JSON.parse(localStorage.getItem("user"));
+    if (!u) return;
+
+    fetch(API, {
+        method: "POST",
+        body: JSON.stringify({
+            mode: "cek_sesi",
+            idLogin: u.idLogin
+        })
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.status === "logout") {
+            clearInterval(intervalTimer);
+            clearInterval(intervalHeartbeat);
+            localStorage.clear();
+            modal("Sesi Berakhir", res.msg, [{text: "OK", cls: "red", cb: () => { location.reload(); }}]);
+        }
+    })
+    .catch(e => console.log("Gagal ping server:", e));
 }
 
 function render() {
@@ -368,7 +411,7 @@ function render() {
     let sideGrid = '';
     state.soal.forEach((_, i) => {
         let cls = "num" + (i === state.index ? " active" : "") + (state.jawaban[i] ? " done" : "");
-        sideGrid += `<div class="${cls}" onclick="state.index=${i};render()">${i+1}</div>`;
+        sideGrid += `<div class="${cls}" onclick="state.index=${i};render();cekStatusSesi();">${i+1}</div>`;
     });
 
     let opsHtml = '';
@@ -395,11 +438,11 @@ function render() {
             <div class="opsi-container space-y-3">${opsHtml}</div>
             
             <div class="flex justify-between items-center pt-5 border-t border-slate-200/60 mt-6 gap-3">
-                <button class="px-4 py-2 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-bold rounded-xl text-xs tracking-wider transition" onclick="state.index--;render()" ${state.index==0?'disabled':''}>KEMBALI</button>
+                <button class="px-4 py-2 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-bold rounded-xl text-xs tracking-wider transition" onclick="state.index--;render();cekStatusSesi();" ${state.index==0?'disabled':''}>KEMBALI</button>
                 
                 ${state.index == state.soal.length-1 
                     ? `<button class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-xs tracking-wider transition shadow-md shadow-emerald-600/10" onclick="popupSubmit()">SELESAI & KIRIM</button>` 
-                    : `<button class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-extrabold rounded-xl text-xs tracking-wider transition shadow-md shadow-sky-600/10" onclick="state.index++;render()">SELANJUTNYA</button>`}
+                    : `<button class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-extrabold rounded-xl text-xs tracking-wider transition shadow-md shadow-sky-600/10" onclick="state.index++;render();cekStatusSesi();">SELANJUTNYA</button>`}
             </div>
         </div>
         
@@ -421,6 +464,8 @@ function popupSubmit() {
 }
 
 function submitAction() {
+    clearInterval(intervalTimer);
+    clearInterval(intervalHeartbeat);
     document.getElementById("app").innerHTML = `
     <div class="text-center p-8 max-w-sm glass-card rounded-2xl shadow-xl my-12 text-slate-800">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-sky-600 mx-auto mb-4"></div>
@@ -455,8 +500,7 @@ function submitAction() {
             <button class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl text-xs transition tracking-wide shadow-md" onclick="location.reload()">KELUAR AKUN / LOGOUT</button>
         </div>`;
     }).catch(err => {
-        modal("Pengiriman Gagal", "Gagal mengirim jawaban karena gangguan sinyal internet. Silakan coba klik Selesai lagi.", [{text:"OK", cls:"blue"}]);
-        render();
+        modal("Pengiriman Gagal", "Gagal mengirim jawaban karena gangguan sinyal internet. Silakan coba klik Selesai lagi.", [{text:"OK", cls:"blue", cb: () => { startTimer(); startHeartbeat(); render(); }}]);
     });
 }
 
@@ -478,7 +522,16 @@ function init() {
     let layer = localStorage.getItem("layer");
     if (!localStorage.getItem("user")) loginUI();
     else if (layer === "konfirmasi") showKonfirmasi();
-    else if (layer === "soal") startExam();
+    else if (layer === "soal") {
+        // Jika browser tidak sengaja ter-refresh oleh siswa, kembalikan data dan jalankan timer & heartbeat lagi
+        fetch(API + "?mode=soal").then(r => r.json()).then(d => {
+            let saved = localStorage.getItem("cbt_state");
+            if (saved) state = JSON.parse(saved);
+            render();
+            startTimer();
+            startHeartbeat();
+        });
+    }
 }
 
 init();
