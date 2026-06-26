@@ -19,6 +19,8 @@
             --text-light: #64748b;
             --bg-input: #f8fafc;
             --border-color: #e2e8f0;
+            --tuntas: #007bff;
+            --belum-tuntas: #ff8c00;
         }
 
         * { 
@@ -50,6 +52,10 @@
         .info-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; background: var(--bg-input); border-radius: 12px; overflow: hidden; }
         .info-table td { padding: 14px 16px; font-size: 15px; border-bottom: 1px solid var(--border-color); color: var(--text-dark); }
         .info-table td:first-child { font-weight: 600; color: var(--text-light); width: 35%; }
+        
+        /* Container khusus tombol indikator TP */
+        .tp-container { display: flex; gap: 15px; margin-bottom: 25px; }
+        .btn-tp { flex: 1; padding: 12px; border: none; border-radius: 12px; color: white; font-weight: 600; font-size: 14px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         
         /* Box Soal & Media Gambar */
         .box-soal { background: var(--bg-input); padding: 20px; border-radius: 14px; border: 1px solid var(--border-color); margin-bottom: 20px; font-size: 16px; color: var(--text-dark); line-height: 1.6; }
@@ -83,6 +89,11 @@
         .btn-success { background: var(--success); }
         .btn-success:hover { background: #16a34a; }
         
+        /* Komponen Footer */
+        .app-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--border-color); font-size: 13px; color: var(--text-light); }
+        .btn-logout-footer { background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s; font-size: 12px; }
+        .btn-logout-footer:hover { background: #ef4444; color: white; }
+
         .spinner { display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 0.8s linear infinite; }
         .thankyou-wrapper { text-align: center; padding: 15px 0; }
         .thankyou-icon { font-size: 65px; color: var(--success); margin-bottom: 20px; animation: scaleUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -106,7 +117,18 @@
                 <tr><td>Kelas</td><td id="conf-kelas">Memuat...</td></tr>
                 <tr><td>Mata Pelajaran</td><td>Informatika </td></tr>
             </table>
+
+            <div class="tp-container">
+                <button id="btn-tp1" class="btn-tp" style="background-color: var(--text-light);">TP 1: Memuat...</button>
+                <button id="btn-tp2" class="btn-tp" style="background-color: var(--text-light);">TP 2: Memuat...</button>
+            </div>
+
             <button class="btn btn-block" id="btnMulaiUjian" onclick="mulaiUjian()" disabled>MENGUNDUH SOAL...</button>
+
+            <div class="app-footer">
+                <span>SIMPATIK &copy; 2026</span>
+                <button class="btn-logout-footer" onclick="logoutFinal()"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
+            </div>
         </div>
 
         <div id="sec-soal" class="wizard-section">
@@ -131,6 +153,11 @@
                 Nilai Anda sudah otomatis dikalkulasi berdasarkan bobot skor soal. Silakan isi lembar evaluasi berikut untuk keluar aplikasi.
             </p>
             <button class="btn btn-block" onclick="pindahKe('sec-kuesioner')">ISI EVALUASI & KUESIONER &nbsp;<i class="fa-solid fa-pen-to-square"></i></button>
+
+            <div class="app-footer">
+                <span>SIMPATIK &copy; 2026</span>
+                <button class="btn-logout-footer" onclick="logoutFinal()"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
+            </div>
         </div>
 
         <div id="sec-kuesioner" class="wizard-section">
@@ -199,8 +226,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
     dataSiswa = JSON.parse(session);
     
-    // UPDATE PROTEKSI JALUR CADANGAN: 
-    // Apabila dataSiswa.username belum terbuat atau undefined, ambil potongannya dari id_login
     if (!dataSiswa.username && dataSiswa.id_login) {
         dataSiswa.username = dataSiswa.id_login.split("_")[1];
     }
@@ -209,9 +234,38 @@ window.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("conf-user").innerText = dataSiswa.username || "Tidak Ditemukan";
     document.getElementById("conf-kelas").innerText = dataSiswa.kelas || "-";
 
-    // Otomatis mengunduh kumpulan bank soal sesuai hak akses pengerjaan
+    // Set Status Warna Tombol Indikator TP dari objek status_tp hasil login
+    aturTombolIndikatorTP();
+
+    // Otomatis mengunduh kumpulan bank soal
     await muatDataSoal();
 });
+
+function aturTombolIndikatorTP() {
+    const btnTP1 = document.getElementById("btn-tp1");
+    const btnTP2 = document.getElementById("btn-tp2");
+    
+    // Default fallback jika data tidak tersedia
+    const statusTP = dataSiswa.status_tp || { tp1: "BELUM TUNTAS", tp2: "BELUM TUNTAS" };
+
+    // Atur Visual TP 1
+    if (statusTP.tp1 === "TUNTAS") {
+        btnTP1.style.backgroundColor = "var(--tuntas)";
+        btnTP1.innerHTML = `<i class="fa-solid fa-circle-check"></i> TP 1 (Tuntas)`;
+    } else {
+        btnTP1.style.backgroundColor = "var(--belum-tuntas)";
+        btnTP1.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> TP 1 (Belum)`;
+    }
+
+    // Atur Visual TP 2
+    if (statusTP.tp2 === "TUNTAS") {
+        btnTP2.style.backgroundColor = "var(--tuntas)";
+        btnTP2.innerHTML = `<i class="fa-solid fa-circle-check"></i> TP 2 (Tuntas)`;
+    } else {
+        btnTP2.style.backgroundColor = "var(--belum-tuntas)";
+        btnTP2.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> Sukses TP 2 (Belum)`;
+    }
+}
 
 async function muatDataSoal() {
     try {
@@ -230,7 +284,7 @@ async function muatDataSoal() {
             
             if(result.is_remidi_mode) {
                 document.querySelector("#sec-konfirmasi .section-desc").innerHTML = 
-                    `<span style="color:#ef4444; font-weight:700;"><i class="fa-solid fa-triangle-exclamation"></i> MODE REMIDIAL: Anda hanya akan mengerjakan soal dari TP yang belum tuntas.</span>`;
+                    `<span style="color:#ef4444; font-weight:700;"><i class="fa-solid fa-triangle-exclamation"></i> MODE REMIDIAL: Mengerjakan soal TP yang belum tuntas.</span>`;
                 btnMulai.innerText = "MULAI REMIDI TP";
             } else {
                 btnMulai.innerText = "MULAI UJIAN";
@@ -256,7 +310,6 @@ function tampilkanSoal() {
     document.getElementById("info-progres").innerText = `Soal ${indeksSekarang + 1} dari ${masterSoal.length}`;
     document.getElementById("konten-soal").innerHTML = `<strong>Soal No. ${soal.no}:</strong><br>${soal.pertanyaan}`;
     
-    // Penanganan Gambar
     const imgEl = document.getElementById("gambar-soal");
     if(soal.gambar && soal.gambar.trim() !== "") {
         imgEl.src = soal.gambar.trim();
@@ -269,7 +322,6 @@ function tampilkanSoal() {
     const opsiContainer = document.getElementById("konten-opsi");
     opsiContainer.innerHTML = "";
     
-    // Iterasi opsi jawaban dari A sampai E
     const hurufOpsi = ['A', 'B', 'C', 'D', 'E'];
     hurufOpsi.forEach(h => {
         const teksOpsi = soal[h.toLowerCase()];
@@ -320,8 +372,6 @@ async function hitungDanSelesaiUjian() {
     let totalSkorMaksimal = 0;
     let daftarLingkup = new Set();
     let daftarTp = new Set();
-    
-    // Penampung pemetaan capaian kriteria nilai per kode TP
     let strukturTp = {};
 
     masterSoal.forEach((soal, indeks) => {
@@ -344,7 +394,6 @@ async function hitungDanSelesaiUjian() {
     
     const skorAkhir = totalSkorMaksimal > 0 ? Math.round((totalSkorSiswa / totalSkorMaksimal) * 100) : 0;
     
-    // Rumus memetakan akurasi persentase pemahaman materi per unit TP
     let analisisTpSiswa = {};
     for (const tp in strukturTp) {
         const maks = strukturTp[tp].skorMaks;
@@ -433,7 +482,7 @@ async function kirimKuesioner() {
             nama: dataSiswa.nama,
             kelas: dataSiswa.kelas,
             rate_aplikasi: selectedRating,
-            merem_soal: kesulitanInput.value, // Menyesuaikan dengan parameter properti GAS kemudahan_soal
+            merem_soal: kesulitanInput.value,
             kemudahan_soal: kesulitanInput.value,
             saran: saran
         };
@@ -464,6 +513,7 @@ function resetBtnKuesioner() {
 
 function logoutFinal() {
     localStorage.clear();
+    sessionStorage.clear();
     window.location.href = "index.html";
 }
 </script>
