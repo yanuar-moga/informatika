@@ -53,13 +53,11 @@
         .info-table td { padding: 14px 16px; font-size: 15px; border-bottom: 1px solid var(--border-color); color: var(--text-dark); }
         .info-table td:first-child { font-weight: 600; color: var(--text-light); width: 35%; }
         
-        /* Container khusus tombol indikator TP */
         .tp-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; justify-content: center; }
         .btn-tp { flex: 1; min-width: 120px; padding: 12px; border: none; border-radius: 12px; color: white; font-weight: 600; font-size: 13px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s; }
         .btn-tp.remedi-clickable { cursor: pointer; }
         .btn-tp.remedi-clickable:hover { transform: scale(1.03); opacity: 0.9; }
         
-        /* Box Soal & Media Gambar */
         .box-soal { background: var(--bg-input); padding: 20px; border-radius: 14px; border: 1px solid var(--border-color); margin-bottom: 20px; font-size: 16px; color: var(--text-dark); line-height: 1.6; }
         .img-soal { width: 100%; max-height: 250px; object-fit: contain; border-radius: 8px; margin-top: 12px; border: 1px solid var(--border-color); display: none; }
         
@@ -72,7 +70,6 @@
 
         .nilai-circle { width: 120px; height: 120px; background: #f0fdf4; border: 4px solid var(--success); color: var(--success); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 42px; font-weight: 800; margin: 0 auto 20px; }
         
-        /* Star Rating */
         .star-rating { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; font-size: 32px; flex-direction: row-reverse; }
         .star-rating i { color: #cbd5e1; cursor: pointer; transition: color 0.2s; }
         .star-rating i:hover, .star-rating i:hover ~ i, .star-rating i.active, .star-rating i.active ~ i { color: #fbbf24; }
@@ -91,7 +88,6 @@
         .btn-success { background: var(--success); }
         .btn-success:hover { background: #16a34a; }
         
-        /* Komponen Footer */
         .app-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--border-color); font-size: 13px; color: var(--text-light); }
         .btn-logout-footer { background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s; font-size: 12px; }
         .btn-logout-footer:hover { background: #ef4444; color: white; }
@@ -155,7 +151,7 @@
             <div class="tp-container" id="analisis-tp-container"></div>
 
             <p style="text-align: center; color: var(--text-light); font-size: 13px; margin-bottom: 25px; line-height: 1.5;">
-                <span style="color: var(--belum-tuntas); font-weight: bold;">*Catatan:</span> Tombol berwarna orange menandakan nilai di bawah KKM. Klik tombol tersebut untuk langsung mengulang remedial pada materi terkait.
+                <span style="color: var(--belum-tuntas); font-weight: bold;">*Catatan:</span> Tombol berwarna orange menandakan nilai di bawah KKM. Anda dapat mengekliknya jika ingin langsung mengulang materi tersebut.
             </p>
             <button class="btn btn-block" onclick="pindahKe('sec-kuesioner')">ISI EVALUASI & KUESIONER &nbsp;<i class="fa-solid fa-pen-to-square"></i></button>
 
@@ -223,7 +219,7 @@ let masterSoal = [];
 let jawabanSiswa = {}; 
 let indeksSekarang = 0;
 let selectedRating = 0;
-let kkmServer = {};        
+let kkmServer = 78; // Default fallback nilai KKM dari Config B8
 
 window.addEventListener("DOMContentLoaded", async () => {
     const session = localStorage.getItem("sesi_siswa");
@@ -241,9 +237,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("conf-user").innerText = dataSiswa.username || "Tidak Ditemukan";
     document.getElementById("conf-kelas").innerText = dataSiswa.kelas || "-";
 
-    // Muat visual tombol status TP di awal konfirmasi data diri
     aturTombolIndikatorTP();
-
     await muatDataSoal();
 });
 
@@ -253,21 +247,19 @@ function aturTombolIndikatorTP() {
     
     const statusTP = dataSiswa.status_tp || { tp1: "BELUM TUNTAS", tp2: "BELUM TUNTAS" };
 
-    // Atur Visual TP 1 awal (Berdasarkan database login lama)
     if (statusTP.tp1 === "TUNTAS") {
-        btnTP1.style.backgroundColor = "#22c55e"; // Warna sukses hijau default
+        btnTP1.style.backgroundColor = "var(--tuntas)";
         btnTP1.innerHTML = `<i class="fa-solid fa-circle-check"></i> TP 1 (Tuntas)`;
     } else {
-        btnTP1.style.backgroundColor = "#ff8c00"; // Warna orange belum tuntas
+        btnTP1.style.backgroundColor = "var(--belum-tuntas)";
         btnTP1.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> TP 1 (Belum)`;
     }
 
-    // Atur Visual TP 2 awal (Berdasarkan database login lama)
     if (statusTP.tp2 === "TUNTAS") {
-        btnTP2.style.backgroundColor = "#22c55e";
+        btnTP2.style.backgroundColor = "var(--tuntas)";
         btnTP2.innerHTML = `<i class="fa-solid fa-circle-check"></i> TP 2 (Tuntas)`;
     } else {
-        btnTP2.style.backgroundColor = "#ff8c00";
+        btnTP2.style.backgroundColor = "var(--belum-tuntas)";
         btnTP2.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> TP 2 (Belum)`;
     }
 }
@@ -284,24 +276,29 @@ async function muatDataSoal() {
         });
         const result = await response.json();
         if(result.status && result.data.length > 0) {
+            // Urutkan soal berdasarkan nomor objek asli untuk akurasi pemetaan TP
+            result.data.sort((a, b) => parseInt(a.no) - parseInt(b.no));
+            
             backupMasterSoal = JSON.parse(JSON.stringify(result.data));
             masterSoal = result.data;
             
-            // Mengunci KKM Dinamis yang didapatkan real-time dari cell B8 & B9 Config
-            kkmServer = result.kkm_tp || { "TP-01": 78, "TP-02": 78 }; 
+            // Ambil KKM dinamis dari server config cell B8
+            if (result.kkm_config) {
+                kkmServer = parseInt(result.kkm_config);
+            }
             
             const btnMulai = document.getElementById("btnMulaiUjian");
             
             if(result.is_remidi_mode) {
                 document.querySelector("#sec-konfirmasi .section-desc").innerHTML = 
-                    `<span style="color:#ef4444; font-weight:700;"><i class="fa-solid fa-triangle-exclamation"></i> MODE REMIDIAL: Anda hanya akan mengerjakan soal dari TP yang belum tuntas.</span>`;
+                    `<span style="color:#ef4444; font-weight:700;"><i class="fa-solid fa-triangle-exclamation"></i> MODE REMIDIAL: Mengerjakan materi kelompok TP yang belum tuntas.</span>`;
                 btnMulai.innerText = "MULAI REMIDI TP";
             } else {
                 btnMulai.innerText = "MULAI UJIAN";
             }
             btnMulai.disabled = false;
         } else {
-            alert("Gagal memuat bank soal atau semua komponen Tujuan Pembelajaran (TP) Anda sudah tuntas!");
+            alert("Gagal memuat bank soal atau seluruh Tujuan Pembelajaran (TP) Anda sudah tuntas!");
         }
     } catch(e) {
         alert("Terjadi kendala jaringan saat mengunduh bank soal.");
@@ -316,19 +313,20 @@ function mulaiUjian() {
 }
 
 function mulaiRemidiPerTP(kodeTP) {
-    // Normalisasi string pencarian kode materi ("TP-01" / "TP1")
+    // Logika Pemisahan Remidi Instan Berdasarkan Klaster Nomor Soal Asli
     const soalRemidi = backupMasterSoal.filter(s => {
-        const formatSoal = s.tp ? s.tp.replace("-", "").toUpperCase() : "";
-        const formatTarget = kodeTP.replace("-", "").toUpperCase();
-        return formatSoal === formatTarget;
+        const noSoal = parseInt(s.no);
+        if (kodeTP === "TP1") return (noSoal >= 1 && noSoal <= 10);
+        if (kodeTP === "TP2") return (noSoal >= 11 && noSoal <= 20);
+        return false;
     });
 
     if(soalRemidi.length === 0) {
-        alert("Tidak ada data soal untuk komponen materi " + kodeTP);
+        alert("Tidak ada kumpulan data soal remedial untuk " + kodeTP);
         return;
     }
     
-    if(confirm(`Apakah Anda siap memulai pengerjaan remedial instan untuk ${kodeTP}?`)) {
+    if(confirm(`Apakah Anda ingin memulai pengerjaan remedial instan untuk kelompok materi ${kodeTP}?`)) {
         masterSoal = soalRemidi;
         mulaiUjian();
     }
@@ -349,7 +347,6 @@ function tampilkanSoal() {
     }
 
     const opsiContainer = document.getElementById("konten-opsi");
-    ops Container = document.getElementById("konten-opsi");
     opsiContainer.innerHTML = "";
     
     const hurufOpsi = ['A', 'B', 'C', 'D', 'E'];
@@ -398,67 +395,77 @@ async function hitungDanSelesaiUjian() {
     btnNext.disabled = true;
     btnNext.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...`;
 
-    let totalSkorSiswa = 0;
-    let totalSkorMaksimal = 0;
+    let skorMaksTP1 = 0, skorSiswaTP1 = 0;
+    let skorMaksTP2 = 0, skorSiswaTP2 = 0;
+    let totalSkorSiswa = 0, totalSkorMaksimal = 0;
+    
     let daftarLingkup = new Set();
-    let daftarTp = new Set();
-    let strukturTp = {};
 
     masterSoal.forEach((soal, indeks) => {
-        totalSkorMaksimal += soal.skor;
-        
-        if (!strukturTp[soal.tp]) {
-            strukturTp[soal.tp] = { skorMaks: 0, skorSiswa: 0, lingkup: soal.lingkup };
+        const noSoal = parseInt(soal.no);
+        const bobotSkor = parseInt(soal.skor) || 10;
+        const isBenar = (jawabanSiswa[indeks] === soal.kunci);
+
+        totalSkorMaksimal += bobotSkor;
+        if (isBenar) totalSkorSiswa += bobotSkor;
+        if (soal.lingkup) daftarLingkup.add(soal.lingkup);
+
+        // Pengelompokan Berdasarkan Nomor Urut Soal (Logika Baru)
+        if (noSoal >= 1 && noSoal <= 10) {
+            skorMaksTP1 += bobotSkor;
+            if (isBenar) skorSiswaTP1 += bobotSkor;
+        } else if (noSoal >= 11 && noSoal <= 20) {
+            skorMaksTP2 += bobotSkor;
+            if (isBenar) skorSiswaTP2 += bobotSkor;
         }
-        
-        strukturTp[soal.tp].skorMaks += soal.skor;
-        
-        if(jawabanSiswa[indeks] === soal.kunci) {
-            totalSkorSiswa += soal.skor;
-            strukturTp[soal.tp].skorSiswa += soal.skor;
-        }
-        
-        if(soal.lingkup) daftarLingkup.add(soal.lingkup);
-        if(soal.tp) daftarTp.add(soal.tp);
     });
     
     const skorAkhir = totalSkorMaksimal > 0 ? Math.round((totalSkorSiswa / totalSkorMaksimal) * 100) : 0;
     
-    let analisisTpSiswa = {};
+    // Kalkulasi Persentase Masing-masing TP
+    const persenTP1 = skorMaksTP1 > 0 ? Math.round((skorSiswaTP1 / skorMaksTP1) * 100) : 0;
+    const persenTP2 = skorMaksTP2 > 0 ? Math.round((skorSiswaTP2 / skorMaksTP2) * 100) : 0;
+    
+    // Siapkan struktur analisis data kirim objek JSON ke server backend GAS
+    let analisisTpSiswa = {
+        "TP1": { lingkup: "Materi Kelompok 1", persentase: persenTP1 },
+        "TP2": { lingkup: "Materi Kelompok 2", persentase: persenTP2 }
+    };
+
+    // Render Ulang komponen Tombol Hasil Analisis Evaluasi TP
     const containerTP = document.getElementById("analisis-tp-container");
     containerTP.innerHTML = ""; 
 
-    for (const tp in strukturTp) {
-        const maks = strukturTp[tp].skorMaks;
-        const perolehan = strukturTp[tp].skorSiswa;
-        const persenTp = maks > 0 ? Math.round((perolehan / maks) * 100) : 0;
-        
-        analisisTpSiswa[tp] = {
-            lingkup: strukturTp[tp].lingkup,
-            persentase: persenTp
-        };
-
-        // Normalisasi format pencarian nama kunci parameter KKM di server
-        let nomorTpClean = tp.replace(/\D/g, ""); 
-        let keyMappingServer = "TP-" + (nomorTpClean.length === 1 ? "0" + nomorTpClean : nomorTpClean);
-        
-        // Membandingkan persentase nilai dengan target batas KKM dinamis dari spreadsheet
-        const batasKkmTpIni = kkmServer[keyMappingServer] || kkmServer[tp] || 78;
-
-        const btnTP = document.createElement("button");
-        btnTP.className = "btn-tp";
-        
-        if (persenTp >= batasKkmTpIni) {
-            btnTP.style.backgroundColor = "var(--tuntas)"; // Hijau jika di atas KKM
-            btnTP.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${tp}: ${persenTp} (Tuntas)`;
+    // Render Visualisasi Dinamis TP 1
+    if (skorMaksTP1 > 0) {
+        const btn1 = document.createElement("button");
+        btn1.className = "btn-tp";
+        if (persenTP1 >= kkmServer) {
+            btn1.style.backgroundColor = "var(--tuntas)";
+            btn1.innerHTML = `<i class="fa-solid fa-circle-check"></i> TP 1: ${persenTP1} (Tuntas)`;
         } else {
-            btnTP.style.backgroundColor = "var(--belum-tuntas)"; // Orange jika di bawah KKM
-            btnTP.classList.add("remedi-clickable");
-            btnTP.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${tp}: ${persenTp} (Remidi)`;
-            // Trigger pengerjaan remedial instan ketika di-klik
-            btnTP.onclick = () => mulaiRemidiPerTP(tp);
+            btn1.style.backgroundColor = "var(--belum-tuntas)";
+            btn1.classList.add("remedi-clickable");
+            btn1.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> TP 1: ${persenTP1} (Remidi)`;
+            btn1.onclick = () => mulaiRemidiPerTP("TP1");
         }
-        containerTP.appendChild(btnTP);
+        containerTP.appendChild(btn1);
+    }
+
+    // Render Visualisasi Dinamis TP 2
+    if (skorMaksTP2 > 0) {
+        const btn2 = document.createElement("button");
+        btn2.className = "btn-tp";
+        if (persenTP2 >= kkmServer) {
+            btn2.style.backgroundColor = "var(--tuntas)";
+            btn2.innerHTML = `<i class="fa-solid fa-circle-check"></i> TP 2: ${persenTP2} (Tuntas)`;
+        } else {
+            btn2.style.backgroundColor = "var(--belum-tuntas)";
+            btn2.classList.add("remedi-clickable");
+            btn2.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> TP 2: ${persenTP2} (Remidi)`;
+            btn2.onclick = () => mulaiRemidiPerTP("TP2");
+        }
+        containerTP.appendChild(btn2);
     }
     
     try {
@@ -469,8 +476,8 @@ async function hitungDanSelesaiUjian() {
             nama: dataSiswa.nama,
             kelas: dataSiswa.kelas,
             nilai_akhir: skorAkhir,
-            lingkup_materi: Array.from(daftarLingkup).join(", "),
-            tp: Array.from(daftarTp).join(", "),
+            lingkup_materi: Array.from(daftarLingkup).join(", ") || "Informatika",
+            tp: (skorMaksTP1 > 0 ? "TP1" : "") + (skorMaksTP2 > 0 ? ", TP2" : ""),
             analisis_tp: analisisTpSiswa
         };
 
@@ -486,11 +493,11 @@ async function hitungDanSelesaiUjian() {
             document.getElementById("txtSkor").innerText = skorAkhir;
             pindahKe('sec-nilai');
         } else {
-            alert("Gagal mengamankan nilai ke database: " + result.message);
+            alert("Gagal menyimpan nilai ke database: " + result.message);
             resetBtnSelesai();
         }
     } catch (e) {
-        alert("Gangguan jaringan! Silakan klik Selesai kembali untuk mengirim ulang.");
+        alert("Gangguan jaringan! Silakan tekan selesai kembali.");
         resetBtnSelesai();
     }
 }
@@ -507,6 +514,7 @@ function pindahKe(sectionId) {
     window.scrollTo(0,0);
 }
 
+// Fitur Kuesioner Interaktif Evaluasi 
 function setStar(rating) {
     selectedRating = rating;
     document.querySelectorAll('.star-rating i').forEach(star => {
