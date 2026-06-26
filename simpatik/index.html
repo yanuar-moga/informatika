@@ -1,349 +1,444 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMPATIK v1.0 - SMPN 1 Moga</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<title>SIMPATIK v1.0</title>
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --bg-input: #f8fafc;
+            --border-color: #e2e8f0;
+        }
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
 
-<style>
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Segoe UI',sans-serif;
-}
+        .container {
+            width: 100%;
+            max-width: 440px;
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
-body{
-    min-height:100vh;
-    background:linear-gradient(135deg,#1565c0,#1976d2,#42a5f5);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    padding:20px;
-}
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 24px;
+            padding: 40px 35px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
 
-.container{
-    width:100%;
-    max-width:420px;
-}
+        .header-app {
+            text-align: center;
+            margin-bottom: 30px;
+        }
 
-.card{
-    background:white;
-    border-radius:25px;
-    padding:35px;
-    box-shadow:0 10px 40px rgba(0,0,0,.2);
-    animation:fadeIn .7s ease;
-}
+        .logo-wrapper {
+            width: 85px;
+            height: 85px;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 16px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+            border: 1px solid #f1f5f9;
+        }
 
-.logo{
-    text-align:center;
-    margin-bottom:20px;
-}
+        .logo-wrapper img {
+            width: 65px;
+            height: auto;
+            object-fit: contain;
+        }
 
-.logo img{
-    width:90px;
-}
+        .title {
+            color: var(--text-dark);
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
 
-.title{
-    text-align:center;
-    color:#1565c0;
-    font-size:28px;
-    font-weight:bold;
-}
+        .subtitle {
+            color: var(--text-light);
+            margin-top: 6px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
 
-.subtitle{
-    text-align:center;
-    color:#777;
-    margin-bottom:25px;
-}
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
 
-.input-group{
-    margin-bottom:18px;
-}
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 14px;
+        }
 
-.input-group label{
-    display:block;
-    margin-bottom:6px;
-    font-weight:600;
-    color:#444;
-}
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
 
-.input-group input{
-    width:100%;
-    padding:14px;
-    border:none;
-    background:#f2f5f8;
-    border-radius:12px;
-    outline:none;
-    font-size:15px;
-}
+        .input-wrapper i.input-icon {
+            position: absolute;
+            left: 16px;
+            color: var(--text-light);
+            font-size: 16px;
+        }
 
-.input-group input:focus{
-    border:2px solid #1565c0;
-}
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 16px 14px 46px;
+            border: 1.5px solid var(--border-color);
+            background: var(--bg-input);
+            border-radius: 12px;
+            outline: none;
+            font-size: 15px;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
 
-.btn{
-    width:100%;
-    padding:15px;
-    border:none;
-    border-radius:12px;
-    background:#1565c0;
-    color:white;
-    font-size:16px;
-    cursor:pointer;
-    transition:.3s;
-}
+        .input-wrapper input:focus {
+            border-color: var(--primary-light);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
 
-.btn:hover{
-    transform:translateY(-2px);
-}
+        .toggle-password {
+            position: absolute;
+            right: 16px;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: color 0.2s;
+        }
 
-.loading{
-    display:none;
-    text-align:center;
-    margin-top:15px;
-    color:#1565c0;
-}
+        .toggle-password:hover {
+            color: var(--primary);
+        }
 
-.popup{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,.5);
-    display:none;
-    justify-content:center;
-    align-items:center;
-    z-index:999;
-}
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: var(--primary);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
 
-.popup-content{
-    background:white;
-    padding:30px;
-    border-radius:20px;
-    width:90%;
-    max-width:350px;
-    text-align:center;
-    animation:zoomIn .3s ease;
-}
+        .btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(30, 64, 175, 0.3);
+        }
 
-.popup-content h2{
-    color:#1565c0;
-    margin-bottom:10px;
-}
+        .btn:active {
+            transform: translateY(1px);
+        }
 
-.popup-content button{
-    margin-top:20px;
-    padding:10px 20px;
-    border:none;
-    background:#1565c0;
-    color:white;
-    border-radius:10px;
-    cursor:pointer;
-}
+        .btn:disabled {
+            background: #94a3b8;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
 
-.footer{
-    text-align:center;
-    margin-top:15px;
-    color:white;
-    font-size:13px;
-}
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
 
-@keyframes fadeIn{
-    from{
-        opacity:0;
-        transform:translateY(30px);
-    }
-    to{
-        opacity:1;
-        transform:translateY(0);
-    }
-}
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            line-height: 1.6;
+        }
 
-@keyframes zoomIn{
-    from{
-        transform:scale(.7);
-        opacity:0;
-    }
-    to{
-        transform:scale(1);
-        opacity:1;
-    }
-}
+        /* Modal / Popup */
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            padding: 20px;
+        }
 
-</style>
+        .popup-content {
+            background: white;
+            padding: 32px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
 
+        .popup-icon {
+            font-size: 45px;
+            margin-bottom: 16px;
+            color: var(--primary);
+        }
+
+        .popup-content h2 {
+            color: var(--text-dark);
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .popup-content p {
+            color: var(--text-light);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .popup-content button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background: var(--text-dark);
+            color: white;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .popup-content button:hover {
+            background: #0f172a;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleUp {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
-
 <body>
 
 <div class="container">
-
     <div class="card">
-
-        <div class="logo">
-            <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png">
-        </div>
-
-        <div class="title">SIMPATIK</div>
-        <div class="subtitle">
-            Sistem Monitoring Pemahaman dan Asesmen Tingkat Kompetensi
-        </div>
-
-        <div class="input-group">
-            <label>Username</label>
-            <input type="text" id="username" placeholder="Masukkan username">
+        <div class="header-app">
+            <div class="logo-wrapper">
+                <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" alt="Logo SMPN 1 Moga">
+            </div>
+            <div class="title">SIMPATIK</div>
+            <div class="subtitle">Sistem Monitoring Pemahaman & Asesmen Tingkat Kompetensi</div>
         </div>
 
         <div class="input-group">
-            <label>Password</label>
-            <input type="password" id="password" placeholder="Masukkan password">
+            <label for="username">Username</label>
+            <div class="input-wrapper">
+                <i class="fa-solid fa-user input-icon"></i>
+                <input type="text" id="username" placeholder="Masukkan username" autocomplete="off">
+            </div>
         </div>
 
         <div class="input-group">
-            <label>Token</label>
-            <input type="text" id="token" placeholder="Masukkan token ujian">
+            <label for="password">Password</label>
+            <div class="input-wrapper">
+                <i class="fa-solid fa-lock input-icon"></i>
+                <input type="password" id="password" placeholder="Masukkan password">
+                <i class="fa-solid fa-eye toggle-password" onclick="togglePasswordVisibility()"></i>
+            </div>
         </div>
 
-        <button class="btn" onclick="login()">
-            MASUK
+        <div class="input-group">
+            <label for="token">Token Ujian</label>
+            <div class="input-wrapper">
+                <i class="fa-solid fa-key input-icon"></i>
+                <input type="text" id="token" placeholder="Masukkan token">
+            </div>
+        </div>
+
+        <button class="btn" id="btnLogin" onclick="login()">
+            <div class="spinner" id="spinner"></div>
+            <span id="btnText">MASUK</span>
         </button>
-
-        <div class="loading" id="loading">
-            Memproses login...
-        </div>
-
     </div>
 
     <div class="footer">
-        SIMPATIK v1.0<br>
-        SMPN 1 MOGA
+        <strong>SIMPATIK v1.0</strong><br>
+        SMP Negeri 1 Moga
     </div>
-
 </div>
-
 
 <div class="popup" id="popup">
     <div class="popup-content">
+        <div id="popupIcon" class="popup-icon"><i class="fa-solid fa-circle-info"></i></div>
         <h2 id="popupTitle">Informasi</h2>
         <p id="popupMessage"></p>
-        <button onclick="closePopup()">Tutup</button>
+        <button onclick="closePopup()">Mengerti</button>
     </div>
 </div>
 
 <script>
+// GANTI DENGAN URL WEB APP GAS ANDA YANG SEBENARNYA
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBJYaxWNHsfjwhLk6cEIbDuPwpnFo0wWlCIxIhvaTrbyOAMxUc9X8jgL9vvw16_DlUmA/exec";
 
-const SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbxBJYaxWNHsfjwhLk6cEIbDuPwpnFo0wWlCIxIhvaTrbyOAMxUc9X8jgL9vvw16_DlUmA/exec";
-
-function showPopup(title,message){
-    document.getElementById("popupTitle").innerText=title;
-    document.getElementById("popupMessage").innerText=message;
-    document.getElementById("popup").style.display="flex";
+function togglePasswordVisibility() {
+    const passwordInput = document.getElementById("password");
+    const toggleIcon = document.querySelector(".toggle-password");
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        toggleIcon.classList.replace("fa-eye", "fa-eye-slash");
+    } else {
+        passwordInput.type = "password";
+        toggleIcon.classList.replace("fa-eye-slash", "fa-eye");
+    }
 }
 
-function closePopup(){
-    document.getElementById("popup").style.display="none";
+function showPopup(title, message, iconType = "info") {
+    document.getElementById("popupTitle").innerText = title;
+    document.getElementById("popupMessage").innerText = message;
+    
+    const iconContainer = document.getElementById("popupIcon");
+    if(iconType === "error") {
+        iconContainer.innerHTML = '<i class="fa-solid fa-circle-xmark" style="color: #ef4444;"></i>';
+    } else if(iconType === "success") {
+        iconContainer.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #22c55e;"></i>';
+    } else {
+        iconContainer.innerHTML = '<i class="fa-solid fa-circle-info" style="color: #3b82f6;"></i>';
+    }
+    
+    document.getElementById("popup").style.display = "flex";
 }
 
-async function login(){
+function closePopup() {
+    document.getElementById("popup").style.display = "none";
+}
 
-    const username=document.getElementById("username").value.trim();
-    const password=document.getElementById("password").value.trim();
-    const token=document.getElementById("token").value.trim();
+async function login() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const token = document.getElementById("token").value.trim();
 
-    if(username==="" || password==="" || token===""){
-        showPopup(
-            "Peringatan",
-            "Username, Password dan Token wajib diisi."
-        );
+    if (!username || !password || !token) {
+        showPopup("Peringatan", "Username, Password, dan Token wajib diisi.", "info");
         return;
     }
 
-    document.getElementById("loading").style.display="block";
+    // Mengaktifkan status Loading UI
+    document.getElementById("spinner").style.display = "block";
+    document.getElementById("btnText").innerText = "Memproses...";
+    document.getElementById("btnLogin").disabled = true;
 
-    try{
+    try {
+        const device = navigator.userAgent;
 
-        const device=navigator.userAgent;
+        // payload data dikemas ke objek JSON sesuai tangkapan doPost() di GAS
+        const payload = {
+            action: "login",
+            username: username,
+            password: password,
+            token: token,
+            device: device,
+            provider: "",
+            ip: "",
+            gps: ""
+        };
 
-        let gps="";
-
-        if(navigator.geolocation){
-            navigator.geolocation.getCurrentPosition(
-                function(position){
-                    gps=
-                    position.coords.latitude+
-                    ","+
-                    position.coords.longitude;
-                }
-            );
-        }
-
-        const response = await fetch(SCRIPT_URL,{
-            method:"POST",
-            headers:{
-                "Content-Type":"text/plain;charset=utf-8"
+        // PERBAIKAN UTAMA: Menggunakan metode POST agar sinkron dengan doPost di GAS
+        const response = await fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8" 
             },
-            body:JSON.stringify({
-                action:"login",
-                username:username,
-                password:password,
-                token:token,
-                device:device,
-                gps:gps,
-                provider:"",
-                ip:""
-            })
+            body: JSON.stringify(payload)
         });
+
+        if (!response.ok) {
+            throw new Error("Gagal terhubung ke server internal.");
+        }
 
         const result = await response.json();
 
-        document.getElementById("loading").style.display="none";
+        if (result.status) {
+            localStorage.setItem("sesi_siswa", JSON.stringify(result));
+            showPopup("Login Berhasil", "Selamat datang, " + result.nama, "success");
 
-        if(result.status){
-
-            localStorage.setItem(
-                "sesi_siswa",
-                JSON.stringify(result)
-            );
-
-            showPopup(
-                "Login Berhasil",
-                "Selamat datang "+result.nama
-            );
-
-            setTimeout(function(){
-                window.location.href="dashboard.html";
-            },2000);
-
-        }else{
-
-            showPopup(
-                "Login Gagal",
-                result.message
-            );
-
+            setTimeout(() => {
+                window.location.href = "dashboard.html";
+            }, 1500);
+        } else {
+            showPopup("Login Gagal", result.message || "Kombinasi akun salah.", "error");
+            resetButton();
         }
 
-    }catch(err){
-
-        document.getElementById("loading").style.display="none";
-
-        showPopup(
-            "Kesalahan",
-            err.toString()
-        );
-
+    } catch (error) {
+        showPopup("Kesalahan Sistem", error.message, "error");
+        console.error(error);
+        resetButton();
     }
-
 }
 
+function resetButton() {
+    document.getElementById("spinner").style.display = "none";
+    document.getElementById("btnText").innerText = "MASUK";
+    document.getElementById("btnLogin").disabled = false;
+}
 </script>
 
 </body>
