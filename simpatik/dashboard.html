@@ -116,8 +116,7 @@
                 <div id="konten-soal"></div>
                 <img id="gambar-soal" class="img-soal" src="" alt="Gambar Soal">
             </div>
-            <div class="opsi-jawaban" id="konten-opsi">
-                </div>
+            <div class="opsi-jawaban" id="konten-opsi"></div>
             <div class="nav-soal">
                 <button class="btn" id="btnPrev" onclick="soalSebelumnya()"><i class="fa-solid fa-chevron-left"></i> Kembali</button>
                 <button class="btn btn-success" id="btnNext" onclick="soalBerikutnya()">Selanjutnya <i class="fa-solid fa-chevron-right"></i></button>
@@ -204,7 +203,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("conf-user").innerText = dataSiswa.username;
     document.getElementById("conf-kelas").innerText = dataSiswa.kelas;
 
-    // Otomatis mengunduh kumpulan bank soal
+    // Otomatis mengunduh kumpulan bank soal sesuai hak akses pengerjaan
     await muatDataSoal();
 });
 
@@ -213,16 +212,26 @@ async function muatDataSoal() {
         const response = await fetch(SCRIPT_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "get_soal" })
+            body: JSON.stringify({ 
+                action: "get_soal",
+                username: dataSiswa.username
+            })
         });
         const result = await response.json();
         if(result.status && result.data.length > 0) {
             masterSoal = result.data;
             const btnMulai = document.getElementById("btnMulaiUjian");
-            btnMulai.innerText = "MULAI UJIAN";
+            
+            if(result.is_remidi_mode) {
+                document.querySelector("#sec-konfirmasi .section-desc").innerHTML = 
+                    `<span style="color:#ef4444; font-weight:700;"><i class="fa-solid fa-triangle-exclamation"></i> MODE REMIDIAL: Anda hanya akan mengerjakan soal dari TP yang belum tuntas.</span>`;
+                btnMulai.innerText = "MULAI REMIDI TP";
+            } else {
+                btnMulai.innerText = "MULAI UJIAN";
+            }
             btnMulai.disabled = false;
         } else {
-            alert("Gagal memuat bank soal. Periksa baris data pada sheet 'Soal'.");
+            alert("Gagal memuat bank soal atau semua komponen Tujuan Pembelajaran (TP) Anda sudah tuntas!");
         }
     } catch(e) {
         alert("Terjadi kendala jaringan saat mengunduh bank soal.");
@@ -296,20 +305,86 @@ function soalBerikutnya() {
     }
 }
 
-function hitungDanSelesaiUjian() {
+async function hitungDanSelesaiUjian() {
+    const btnNext = document.getElementById("btnNext");
+    btnNext.disabled = true;
+    btnNext.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...`;
+
     let totalSkorSiswa = 0;
     let totalSkorMaksimal = 0;
+    let daftarLingkup = new Set();
+    let daftarTp = new Set();
+    
+    // Penampung pemetaan capaian kriteria nilai per kode TP
+    let strukturTp = {};
 
     masterSoal.forEach((soal, indeks) => {
         totalSkorMaksimal += soal.skor;
+        
+        if (!strukturTp[soal.tp]) {
+            strukturTp[soal.tp] = { skorMaks: 0, skorSiswa: 0, lingkup: soal.lingkup };
+        }
+        
+        strukturTp[soal.tp].skorMaks += soal.skor;
+        
         if(jawabanSiswa[indeks] === soal.kunci) {
             totalSkorSiswa += soal.skor;
+            strukturTp[soal.tp].skorSiswa += soal.skor;
         }
+        
+        if(soal.lingkup) daftarLingkup.add(soal.lingkup);
+        if(soal.tp) daftarTp.add(soal.tp);
     });
     
     const skorAkhir = totalSkorMaksimal > 0 ? Math.round((totalSkorSiswa / totalSkorMaksimal) * 100) : 0;
-    document.getElementById("txtSkor").innerText = skorAkhir;
-    pindahKe('sec-nilai');
+    
+    // Rumus memetakan akurasi persentase pemahaman materi per unit TP
+    let analisisTpSiswa = {};
+    for (const tp in strukturTp) {
+        const maks = strukturTp[tp].skorMaks;
+        const perolehan = strukturTp[tp].skorSiswa;
+        const persenTp = maks > 0 ? Math.round((perolehan / maks) * 100) : 0;
+        
+        analisisTpSiswa[tp] = {
+            lingkup: strukturTp[tp].lingkup,
+            persentase: persenTp
+        };
+    }
+    
+    try {
+        const payloadJawaban = {
+            action: "submit_jawaban",
+            id_login: dataSiswa.id_login || localStorage.getItem("id_login") || "",
+            username: dataSiswa.username,
+            nama: dataSiswa.nama,
+            kelas: dataSiswa.kelas,
+            nilai_akhir: skorAkhir,
+            lingkup_materi: Array.from(daftarLingkup).join(", "),
+            tp: Array.from(daftarTp).join(", "),
+            analisis_tp: analisisTpSiswa
+        };
+
+        const response = await fetch(SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payloadJawaban)
+        });
+        
+        const result = await response.json();
+        
+        if(result.status) {
+            document.getElementById("txtSkor").innerText = skorAkhir;
+            pindahKe('sec-nilai');
+        } else {
+            alert("Gagal mengamankan nilai ke database: " + result.message);
+            btnNext.disabled = false;
+            btnNext.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> SELESAI`;
+        }
+    } catch (e) {
+        alert("Gangguan jaringan! Silakan tekan klik Selesai kembali untuk mengirim ulang.");
+        btnNext.disabled = false;
+        btnNext.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> SELESAI`;
+    }
 }
 
 function pindahKe(sectionId) {
