@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Ujian - SIMPATIK v1.0</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --success: #22c55e;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --bg-input: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%);
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+
+        .container { width: 100%; max-width: 600px; }
+
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 24px; padding: 35px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Navigasi Seksi Konten */
+        .wizard-section { display: none; animation: fadeIn 0.4s ease-in-out forwards; }
+        .wizard-section.active { display: block; }
+
+        h2 { color: var(--text-dark); font-size: 22px; font-weight: 700; margin-bottom: 8px; text-align: center; }
+        .section-desc { color: var(--text-light); font-size: 14px; text-align: center; margin-bottom: 25px; }
+
+        /* Style Tabel Konfirmasi */
+        .info-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; background: var(--bg-input); border-radius: 12px; overflow: hidden; }
+        .info-table td { padding: 14px 16px; font-size: 15px; border-bottom: 1px solid var(--border-color); color: var(--text-dark); }
+        .info-table td:first-child { font-weight: 600; color: var(--text-light); width: 35%; }
+
+        /* Simulasi Soal CBT */
+        .box-soal { background: var(--bg-input); padding: 20px; border-radius: 14px; border: 1px solid var(--border-color); margin-bottom: 20px; font-size: 16px; color: var(--text-dark); line-height: 1.6; }
+        .opsi-jawaban { display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; }
+        .opsi { padding: 14px 16px; border: 1.5px solid var(--border-color); border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 15px; background: white; transition: all 0.2s; }
+        .opsi:hover { border-color: var(--primary-light); background: #f0f7ff; }
+        .opsi input { display: none; }
+
+        /* Nilai Sederhana */
+        .nilai-circle { width: 120px; height: 120px; background: #f0fdf4; border: 4px solid var(--success); color: var(--success); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 42px; font-weight: 800; margin: 0 auto 20px; }
+
+        /* Kuesioner Star Rating */
+        .star-rating { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; font-size: 32px; flex-direction: row-reverse; }
+        .star-rating i { color: #cbd5e1; cursor: pointer; transition: color 0.2s; }
+        .star-rating i:hover, .star-rating i:hover ~ i, .star-rating i.active, .star-rating i.active ~ i { color: #fbbf24; }
+        
+        .radio-group { display: flex; justify-content: space-around; gap: 10px; margin-bottom: 20px; }
+        .radio-btn { flex: 1; text-align: center; padding: 12px; border: 1.5px solid var(--border-color); border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-dark); background: white; }
+        .radio-btn input { display: none; }
+        .radio-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
+
+        textarea { width: 100%; padding: 12px; border: 1.5px solid var(--border-color); border-radius: 12px; resize: none; min-height: 80px; font-size: 14px; outline: none; margin-bottom: 25px; background: var(--bg-input); }
+        textarea:focus { border-color: var(--primary-light); background: white; }
+
+        /* Tombol & Spinner */
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; background: var(--primary); color: white; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: background 0.2s; }
+        .btn:hover { background: #1d4ed8; }
+        .btn-success { background: var(--success); }
+        .btn-success:hover { background: #16a34a; }
+        .spinner { display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 0.8s linear infinite; }
+
+        /* Sukses Thank You */
+        .thankyou-wrapper { text-align: center; padding: 15px 0; }
+        .thankyou-icon { font-size: 65px; color: var(--success); margin-bottom: 20px; animation: scaleUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        
+        <div id="sec-konfirmasi" class="wizard-section active">
+            <h2>Konfirmasi Data Peserta</h2>
+            <p class="section-desc">Pastikan identitas Anda sudah sesuai sebelum memulai ujian</p>
+            <table class="info-table">
+                <tr><td>Nama Siswa</td><td id="conf-nama">-</td></tr>
+                <tr><td>Username / NISN</td><td id="conf-user">-</td></tr>
+                <tr><td>Kelas</td><td id="conf-kelas">-</td></tr>
+                <tr><td>Mata Ujian</td><td>Informatika Terintegrasi</td></tr>
+            </table>
+            <button class="btn" onclick="pindahKe('sec-soal')">MULAI UJIAN &nbsp;<i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+
+        <div id="sec-soal" class="wizard-section">
+            <h2>Lembar Soal Ujian</h2>
+            <p class="section-desc">Pilihlah salah satu jawaban yang paling tepat</p>
+            <div class="box-soal">
+                <strong>Soal No. 1:</strong><br>
+                Manakah di bawah ini yang merupakan komponen utama dari Sistem Perangkat Lunak (Software) komputer?
+            </div>
+            <div class="opsi-jawaban">
+                <label class="opsi"><input type="radio" name="jwb" value="A"><span>A. Operating System (OS)</span></label>
+                <label class="opsi"><input type="radio" name="jwb" value="B"><span>B. Harddisk Drive</span></label>
+                <label class="opsi"><input type="radio" name="jwb" value="C"><span>C. Central Processing Unit</span></label>
+                <label class="opsi"><input type="radio" name="jwb" value="D"><span>D. Keyboard dan Mouse</span></label>
+            </div>
+            <button class="btn btn-success" onclick="pindahKe('sec-nilai')"><i class="fa-solid fa-floppy-disk"></i>&nbsp; SELESAI UJIAN</button>
+        </div>
+
+        <div id="sec-nilai" class="wizard-section">
+            <h2>Hasil Nilai Ujian</h2>
+            <p class="section-desc">Ujian selesai. Nilai Anda telah direkam oleh sistem</p>
+            <div class="nilai-circle">85</div>
+            <p style="text-align: center; color: var(--text-light); font-size: 14px; margin-bottom: 25px; line-height: 1.5;">
+                Nilai Anda sudah otomatis terkirim ke server guru mata pelajaran. Silakan isi lembar evaluasi berikut untuk keluar aplikasi.
+            </p>
+            <button class="btn" onclick="pindahKe('sec-kuesioner')">ISI EVALUASI & KUESIONER &nbsp;<i class="fa-solid fa-pen-to-square"></i></button>
+        </div>
+
+        <div id="sec-kuesioner" class="wizard-section">
+            <h2>Penilaian Aplikasi</h2>
+            <p class="section-desc">Bantu kami meningkatkan kualitas sistem ujian ini</p>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display:block; font-size:14px; font-weight:600; color:var(--text-dark); margin-bottom:10px; text-align:center;">
+                    Berikan Rating Aplikasi:
+                </label>
+                <div class="star-rating">
+                    <i class="fa-solid fa-star" data-rating="5" onclick="setStar(5)"></i>
+                    <i class="fa-solid fa-star" data-rating="4" onclick="setStar(4)"></i>
+                    <i class="fa-solid fa-star" data-rating="3" onclick="setStar(3)"></i>
+                    <i class="fa-solid fa-star" data-rating="2" onclick="setStar(2)"></i>
+                    <i class="fa-solid fa-star" data-rating="1" onclick="setStar(1)"></i>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display:block; font-size:14px; font-weight:600; color:var(--text-dark); margin-bottom:10px; text-align:center;">
+                    Tingkat Kemudahan Soal Ujian:
+                </label>
+                <div class="radio-group">
+                    <label class="radio-btn" onclick="setRadio(this)"> Mudah <input type="radio" name="mudah_soal" value="Mudah"></label>
+                    <label class="radio-btn" onclick="setRadio(this)"> Sedang <input type="radio" name="mudah_soal" value="Sedang"></label>
+                    <label class="radio-btn" onclick="setRadio(this)"> Sulit <input type="radio" name="mudah_soal" value="Sulit"></label>
+                </div>
+            </div>
+
+            <div>
+                <label style="display:block; font-size:14px; font-weight:600; color:var(--text-dark); margin-bottom:8px;">Kritik & Saran:</label>
+                <textarea id="saranText" placeholder="Tuliskan masukan atau kendala teknis Anda di sini..."></textarea>
+            </div>
+
+            <button class="btn" id="btnKuesioner" onclick="kirimKuesioner()">
+                <div class="spinner" id="spinKuesioner"></div>
+                <span id="txtKuesioner">KIRIM EVALUASI</span>
+            </button>
+        </div>
+
+        <div id="sec-thanks" class="wizard-section">
+            <div class="thankyou-wrapper">
+                <div class="thankyou-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <h2>Terima Kasih!</h2>
+                <p style="color: var(--text-light); font-size: 14px; line-height: 1.6; margin-bottom: 30px;">
+                    Seluruh rangkaian evaluasi dan hasil ujian Anda telah berhasil terekam dengan aman ke sistem database sekolah.
+                </p>
+                <button class="btn" style="background: #ef4444;" onclick="logoutFinal()"><i class="fa-solid fa-right-from-bracket"></i> &nbsp; KELUAR APLIKASI (LOGOUT)</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+// Pastikan URL GAS ini menggunakan URL Web App Anda yang sudah diperbarui
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzfKAOWhG3qylc275iEyPG1K_9R6aF1VPgJLdagHDeAUN-Bz_6by_bZXPpMPhh12JcVbw/exec";
+
+let dataSiswa = {};
+let selectedRating = 0;
+
+// Ambil data dari login awal ketika dashboard dibuka
+window.addEventListener("DOMContentLoaded", () => {
+    const session = localStorage.getItem("sesi_siswa");
+    if (!session) {
+        // Jika siswa belum login, paksa balik ke index.html
+        window.location.href = "index.html";
+        return;
+    }
+    
+    dataSiswa = JSON.parse(session);
+    
+    // Taruh data login awal ke tabel konfirmasi
+    document.getElementById("conf-nama").innerText = dataSiswa.nama;
+    document.getElementById("conf-user").innerText = dataSiswa.username;
+    document.getElementById("conf-kelas").innerText = dataSiswa.kelas;
+});
+
+function pindahKe(sectionId) {
+    document.querySelectorAll('.wizard-section').forEach(sec => sec.classList.remove('active'));
+    document.getElementById(sectionId).classList.add('active');
+    window.scrollTo(0,0);
+}
+
+// Handler rating bintang
+function setStar(rating) {
+    selectedRating = rating;
+    const stars = document.querySelectorAll('.star-rating i');
+    stars.forEach(star => {
+        const val = parseInt(star.getAttribute('data-rating'));
+        if(val <= rating) {
+            star.classList.add('active');
+        } else {
+            star.classList.remove('active');
+        }
+    });
+}
+
+// Handler pilihan opsi tingkat kesulitan soal
+function setRadio(element) {
+    document.querySelectorAll('.radio-btn').forEach(btn => btn.classList.remove('selected'));
+    element.classList.add('selected');
+    element.querySelector('input').checked = true;
+}
+
+// Pengiriman kuesioner ke GAS
+async function kirimKuesioner() {
+    const kesulitanInput = document.querySelector('input[name="mudah_soal"]:checked');
+    const saran = document.getElementById("saranText").value.trim();
+
+    if (selectedRating === 0 || !kesulitanInput) {
+        alert("Mohon berikan rating bintang dan pilih tingkat kemudahan soal terlebih dahulu.");
+        return;
+    }
+
+    document.getElementById("spinKuesioner").style.display = "block";
+    document.getElementById("txtKuesioner").innerText = "Mengirim...";
+    document.getElementById("btnKuesioner").disabled = true;
+
+    try {
+        const payload = {
+            action: "submit_kuisioner",
+            username: dataSiswa.username, // Data bawaan dari login awal
+            nama: dataSiswa.nama,         // Data bawaan dari login awal
+            kelas: dataSiswa.kelas,       // Data bawaan dari login awal
+            rate_aplikasi: selectedRating,
+            kemudahan_soal: kesulitanInput.value,
+            saran: saran
+        };
+
+        const response = await fetch(SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (result.status) {
+            // Berhasil, lanjut ke halaman Terima Kasih
+            pindahKe('sec-thanks');
+        } else {
+            alert("Gagal mengirim kuesioner: " + result.message);
+            resetBtnKuesioner();
+        }
+    } catch (e) {
+        alert("Terjadi kesalahan jaringan saat mengirim kuesioner.");
+        resetBtnKuesioner();
+    }
+}
+
+function resetBtnKuesioner() {
+    document.getElementById("spinKuesioner").style.display = "none";
+    document.getElementById("txtKuesioner").innerText = "KIRIM EVALUASI";
+    document.getElementById("btnKuesioner").disabled = false;
+}
+
+// Tombol Keluar Utama
+function logoutFinal() {
+    localStorage.clear(); // Bersihkan sesi agar tidak bisa bypass masuk lagi
+    window.location.href = "index.html"; // Mengembalikan siswa ke halaman form login awal
+}
+</script>
+</body>
+</html>
