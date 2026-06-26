@@ -199,9 +199,15 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
     dataSiswa = JSON.parse(session);
     
-    document.getElementById("conf-nama").innerText = dataSiswa.nama;
-    document.getElementById("conf-user").innerText = dataSiswa.username;
-    document.getElementById("conf-kelas").innerText = dataSiswa.kelas;
+    // UPDATE PROTEKSI JALUR CADANGAN: 
+    // Apabila dataSiswa.username belum terbuat atau undefined, ambil potongannya dari id_login
+    if (!dataSiswa.username && dataSiswa.id_login) {
+        dataSiswa.username = dataSiswa.id_login.split("_")[1];
+    }
+    
+    document.getElementById("conf-nama").innerText = dataSiswa.nama || "-";
+    document.getElementById("conf-user").innerText = dataSiswa.username || "Tidak Ditemukan";
+    document.getElementById("conf-kelas").innerText = dataSiswa.kelas || "-";
 
     // Otomatis mengunduh kumpulan bank soal sesuai hak akses pengerjaan
     await muatDataSoal();
@@ -427,6 +433,7 @@ async function kirimKuesioner() {
             nama: dataSiswa.nama,
             kelas: dataSiswa.kelas,
             rate_aplikasi: selectedRating,
+            merem_soal: kesulitanInput.value, // Menyesuaikan dengan parameter properti GAS kemudahan_soal
             kemudahan_soal: kesulitanInput.value,
             saran: saran
         };
