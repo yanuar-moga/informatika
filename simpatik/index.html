@@ -379,6 +379,9 @@ async function loadInitialData() {
             masterSiswa = result.siswa;
             const kelasSelect = document.getElementById("kelas");
             
+            // Mengosongkan data lama sebelum render baru
+            kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+            
             result.kelas.forEach(kls => {
                 let opt = document.createElement("option");
                 opt.value = kls;
@@ -402,10 +405,11 @@ function filterSiswa() {
         return;
     }
     
-    constfiltered = masterSiswa.filter(s => s.kelas === kelasTerpilih);
+    // PERBAIKAN: Spasi ditambahkan pada 'const filtered' agar tidak error syntax
+    const filtered = masterSiswa.filter(s => s.kelas === kelasTerpilih);
     filtered.forEach(s => {
         let opt = document.createElement("option");
-        opt.value = s.username; // Username dijadikan value rahasia untuk memproses login
+        opt.value = s.username; 
         opt.innerText = s.nama;
         siswaSelect.appendChild(opt);
     });
