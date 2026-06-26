@@ -219,7 +219,7 @@ let masterSoal = [];
 let jawabanSiswa = {}; 
 let indeksSekarang = 0;
 let selectedRating = 0;
-let kkmServer = 78; // Default fallback nilai KKM dari Config B8
+let kkmServer = 78;
 
 window.addEventListener("DOMContentLoaded", async () => {
     const session = localStorage.getItem("sesi_siswa");
@@ -276,29 +276,44 @@ async function muatDataSoal() {
         });
         const result = await response.json();
         if(result.status && result.data.length > 0) {
-            // Urutkan soal berdasarkan nomor objek asli untuk akurasi pemetaan TP
             result.data.sort((a, b) => parseInt(a.no) - parseInt(b.no));
-            
             backupMasterSoal = JSON.parse(JSON.stringify(result.data));
-            masterSoal = result.data;
             
-            // Ambil KKM dinamis dari server config cell B8
             if (result.kkm_config) {
                 kkmServer = parseInt(result.kkm_config);
             }
             
-            const btnMulai = document.getElementById("btnMulaiUjian");
+            // --- LOGIKA FILTER UTAMA SANGAT SELEKTIF ---
+            // Hanya mengambil soal dari TP yang statusnya BELUM TUNTAS di server
+            const statusTP = dataSiswa.status_tp || { tp1: "BELUM TUNTAS", tp2: "BELUM TUNTAS" };
             
-            if(result.is_remidi_mode) {
+            let soalTersaring = result.data.filter(s => {
+                const noSoal = parseInt(s.no);
+                if (noSoal >= 1 && noSoal <= 10 && statusTP.tp1 === "BELUM TUNTAS") return true;
+                if (noSoal >= 11 && noSoal <= 20 && statusTP.tp2 === "BELUM TUNTAS") return true;
+                return false;
+            });
+
+            const btnMulai = document.getElementById("btnMulaiUjian");
+
+            if (soalTersaring.length === 0) {
+                // Skenario pengaman jika di status_tp tuntas semua tapi terlanjur masuk kemari
+                masterSoal = result.data; 
+                btnMulai.innerText = "SEMUA TP TUNTAS (LIHAT SOAL)";
+                btnMulai.style.backgroundColor = "var(--tuntas)";
+            } else if (statusTP.tp1 === "TUNTAS" || statusTP.tp2 === "TUNTAS") {
+                masterSoal = soalTersaring;
                 document.querySelector("#sec-konfirmasi .section-desc").innerHTML = 
-                    `<span style="color:#ef4444; font-weight:700;"><i class="fa-solid fa-triangle-exclamation"></i> MODE REMIDIAL: Mengerjakan materi kelompok TP yang belum tuntas.</span>`;
-                btnMulai.innerText = "MULAI REMIDI TP";
+                    `<span style="color:var(--belum-tuntas); font-weight:700;"><i class="fa-solid fa-bolt"></i> MODE ADAPTIF: Anda hanya perlu mengerjakan ${masterSoal.length} soal dari TP yang belum tuntas!</span>`;
+                btnMulai.innerText = "MULAI REMIDIAL TP";
             } else {
-                btnMulai.innerText = "MULAI UJIAN";
+                masterSoal = result.data;
+                btnMulai.innerText = "MULAI UJIAN UTAMA";
             }
+            
             btnMulai.disabled = false;
         } else {
-            alert("Gagal memuat bank soal atau seluruh Tujuan Pembelajaran (TP) Anda sudah tuntas!");
+            alert("Gagal memuat bank soal.");
         }
     } catch(e) {
         alert("Terjadi kendala jaringan saat mengunduh bank soal.");
@@ -313,7 +328,6 @@ function mulaiUjian() {
 }
 
 function mulaiRemidiPerTP(kodeTP) {
-    // Logika Pemisahan Remidi Instan Berdasarkan Klaster Nomor Soal Asli
     const soalRemidi = backupMasterSoal.filter(s => {
         const noSoal = parseInt(s.no);
         if (kodeTP === "TP1") return (noSoal >= 1 && noSoal <= 10);
@@ -398,7 +412,6 @@ async function hitungDanSelesaiUjian() {
     let skorMaksTP1 = 0, skorSiswaTP1 = 0;
     let skorMaksTP2 = 0, skorSiswaTP2 = 0;
     let totalSkorSiswa = 0, totalSkorMaksimal = 0;
-    
     let daftarLingkup = new Set();
 
     masterSoal.forEach((soal, indeks) => {
@@ -410,7 +423,6 @@ async function hitungDanSelesaiUjian() {
         if (isBenar) totalSkorSiswa += bobotSkor;
         if (soal.lingkup) daftarLingkup.add(soal.lingkup);
 
-        // Pengelompokan Berdasarkan Nomor Urut Soal (Logika Baru)
         if (noSoal >= 1 && noSoal <= 10) {
             skorMaksTP1 += bobotSkor;
             if (isBenar) skorSiswaTP1 += bobotSkor;
@@ -421,22 +433,17 @@ async function hitungDanSelesaiUjian() {
     });
     
     const skorAkhir = totalSkorMaksimal > 0 ? Math.round((totalSkorSiswa / totalSkorMaksimal) * 100) : 0;
-    
-    // Kalkulasi Persentase Masing-masing TP
     const persenTP1 = skorMaksTP1 > 0 ? Math.round((skorSiswaTP1 / skorMaksTP1) * 100) : 0;
     const persenTP2 = skorMaksTP2 > 0 ? Math.round((skorSiswaTP2 / skorMaksTP2) * 100) : 0;
     
-    // Siapkan struktur analisis data kirim objek JSON ke server backend GAS
     let analisisTpSiswa = {
-        "TP1": { lingkup: "Materi Kelompok 1", persentase: persenTP1 },
-        "TP2": { lingkup: "Materi Kelompok 2", persentase: persenTP2 }
+        "TP1": { lingkup: "Materi Kelompok 1", persentase: persenTP1, aktif: skorMaksTP1 > 0 },
+        "TP2": { lingkup: "Materi Kelompok 2", persentase: persenTP2, aktif: skorMaksTP2 > 0 }
     };
 
-    // Render Ulang komponen Tombol Hasil Analisis Evaluasi TP
     const containerTP = document.getElementById("analisis-tp-container");
     containerTP.innerHTML = ""; 
 
-    // Render Visualisasi Dinamis TP 1
     if (skorMaksTP1 > 0) {
         const btn1 = document.createElement("button");
         btn1.className = "btn-tp";
@@ -452,7 +459,6 @@ async function hitungDanSelesaiUjian() {
         containerTP.appendChild(btn1);
     }
 
-    // Render Visualisasi Dinamis TP 2
     if (skorMaksTP2 > 0) {
         const btn2 = document.createElement("button");
         btn2.className = "btn-tp";
@@ -514,7 +520,6 @@ function pindahKe(sectionId) {
     window.scrollTo(0,0);
 }
 
-// Fitur Kuesioner Interaktif Evaluasi 
 function setStar(rating) {
     selectedRating = rating;
     document.querySelectorAll('.star-rating i').forEach(star => {
