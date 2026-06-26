@@ -34,7 +34,6 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            overflow-x: hidden;
         }
 
         .container {
@@ -54,12 +53,12 @@
 
         .header-app {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .logo-wrapper {
-            width: 85px;
-            height: 85px;
+            width: 80px;
+            height: 80px;
             background: white;
             border-radius: 20px;
             display: flex;
@@ -71,16 +70,14 @@
         }
 
         .logo-wrapper img {
-            width: 65px;
+            width: 60px;
             height: auto;
-            object-fit: contain;
         }
 
         .title {
             color: var(--text-dark);
             font-size: 26px;
             font-weight: 700;
-            letter-spacing: -0.5px;
         }
 
         .subtitle {
@@ -91,8 +88,7 @@
         }
 
         .input-group {
-            margin-bottom: 20px;
-            position: relative;
+            margin-bottom: 18px;
         }
 
         .input-group label {
@@ -114,9 +110,10 @@
             left: 16px;
             color: var(--text-light);
             font-size: 16px;
+            z-index: 2;
         }
 
-        .input-wrapper input {
+        .input-wrapper input, .input-wrapper select {
             width: 100%;
             padding: 14px 16px 14px 46px;
             border: 1.5px solid var(--border-color);
@@ -126,9 +123,31 @@
             font-size: 15px;
             color: var(--text-dark);
             transition: all 0.3s ease;
+            appearance: none;
+            -webkit-appearance: none;
         }
 
-        .input-wrapper input:focus {
+        .input-wrapper select {
+            cursor: pointer;
+        }
+
+        /* Panah kustom untuk dropdown select */
+        .input-wrapper::after {
+            content: '\f107';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 16px;
+            color: var(--text-light);
+            pointer-events: none;
+        }
+        
+        /* Hilangkan panah kustom pada input teks biasa */
+        .input-wrapper.no-arrow::after {
+            display: none;
+        }
+
+        .input-wrapper input:focus, .input-wrapper select:focus {
             border-color: var(--primary-light);
             background: white;
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
@@ -139,11 +158,7 @@
             right: 16px;
             cursor: pointer;
             color: var(--text-light);
-            transition: color 0.2s;
-        }
-
-        .toggle-password:hover {
-            color: var(--primary);
+            z-index: 2;
         }
 
         .btn {
@@ -162,23 +177,11 @@
             justify-content: center;
             align-items: center;
             gap: 10px;
+            margin-top: 5px;
         }
 
-        .btn:hover {
-            background: #1d4ed8;
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(30, 64, 175, 0.3);
-        }
-
-        .btn:active {
-            transform: translateY(1px);
-        }
-
-        .btn:disabled {
-            background: #94a3b8;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
+        .btn:hover { background: #1d4ed8; transform: translateY(-1px); }
+        .btn:disabled { background: #94a3b8; cursor: not-allowed; }
 
         .spinner {
             display: none;
@@ -190,21 +193,31 @@
             animation: spin 0.8s linear infinite;
         }
 
+        /* Footer Kustom Profesional */
         .footer {
             text-align: center;
             margin-top: 25px;
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.7);
             font-size: 13px;
-            line-height: 1.6;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 14px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
         }
 
-        /* Modal / Popup */
+        .footer:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        /* Modals & Popups */
         .popup {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.6);
             backdrop-filter: blur(4px);
             display: none;
@@ -217,7 +230,7 @@
         .popup-content {
             background: white;
             padding: 32px;
-            border-radius: 20px;
+            border-radius: 24px;
             width: 100%;
             max-width: 380px;
             text-align: center;
@@ -225,54 +238,40 @@
             animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .popup-icon {
-            font-size: 45px;
+        .popup-dev-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
             margin-bottom: 16px;
-            color: var(--primary);
+            border: 3px solid var(--border-color);
         }
 
-        .popup-content h2 {
+        .popup-icon { font-size: 45px; margin-bottom: 16px; }
+        .popup-content h2 { color: var(--text-dark); font-size: 20px; margin-bottom: 10px; }
+        .popup-content p { color: var(--text-light); font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+        
+        .dev-info-list {
+            text-align: left;
+            background: var(--bg-input);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 13.5px;
             color: var(--text-dark);
-            font-size: 20px;
-            margin-bottom: 8px;
         }
-
-        .popup-content p {
-            color: var(--text-light);
-            font-size: 14px;
-            line-height: 1.5;
-            margin-bottom: 24px;
-        }
+        .dev-info-list div { margin-bottom: 6px; }
+        .dev-info-list div:last-child { margin-bottom: 0; }
 
         .popup-content button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            background: var(--text-dark);
-            color: white;
-            font-weight: 600;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background 0.2s;
+            width: 100%; padding: 12px; border: none;
+            background: var(--primary); color: white;
+            font-weight: 600; border-radius: 10px; cursor: pointer;
         }
 
-        .popup-content button:hover {
-            background: #0f172a;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes scaleUp {
-            from { transform: scale(0.9); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -281,23 +280,35 @@
     <div class="card">
         <div class="header-app">
             <div class="logo-wrapper">
-                <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" alt="Logo SMPN 1 Moga">
+                <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" alt="Logo">
             </div>
             <div class="title">SIMPATIK</div>
             <div class="subtitle">Sistem Monitoring Pemahaman & Asesmen Tingkat Kompetensi</div>
         </div>
 
         <div class="input-group">
-            <label for="username">Username</label>
+            <label for="kelas">Kelas</label>
+            <div class="input-wrapper">
+                <i class="fa-solid fa-graduation-cap input-icon"></i>
+                <select id="kelas" onchange="filterSiswa()">
+                    <option value="">-- Pilih Kelas --</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="namaSiswa">Nama Siswa</label>
             <div class="input-wrapper">
                 <i class="fa-solid fa-user input-icon"></i>
-                <input type="text" id="username" placeholder="Masukkan username" autocomplete="off">
+                <select id="namaSiswa" disabled>
+                    <option value="">-- Pilih Nama --</option>
+                </select>
             </div>
         </div>
 
         <div class="input-group">
             <label for="password">Password</label>
-            <div class="input-wrapper">
+            <div class="input-wrapper no-arrow">
                 <i class="fa-solid fa-lock input-icon"></i>
                 <input type="password" id="password" placeholder="Masukkan password">
                 <i class="fa-solid fa-eye toggle-password" onclick="togglePasswordVisibility()"></i>
@@ -306,7 +317,7 @@
 
         <div class="input-group">
             <label for="token">Token Ujian</label>
-            <div class="input-wrapper">
+            <div class="input-wrapper no-arrow">
                 <i class="fa-solid fa-key input-icon"></i>
                 <input type="text" id="token" placeholder="Masukkan token">
             </div>
@@ -318,24 +329,89 @@
         </button>
     </div>
 
-    <div class="footer">
-        <strong>SIMPATIK v1.0</strong><br>
-        SMP Negeri 1 Moga
+    <div class="footer" onclick="openDevPopup()">
+        <i class="fa-solid fa-circle-info"></i> &nbsp;<strong>SIMPATIK v1.0</strong> - SMPN 1 MOGA
     </div>
 </div>
 
 <div class="popup" id="popup">
     <div class="popup-content">
-        <div id="popupIcon" class="popup-icon"><i class="fa-solid fa-circle-info"></i></div>
-        <h2 id="popupTitle">Informasi</h2>
+        <div id="popupIcon" class="popup-icon"></div>
+        <h2 id="popupTitle"></h2>
         <p id="popupMessage"></p>
         <button onclick="closePopup()">Mengerti</button>
     </div>
 </div>
 
+<div class="popup" id="devPopup">
+    <div class="popup-content">
+        <img src="https://yanuar-moga.github.io/assets/logo.jpg" class="popup-dev-logo" alt="Dev Logo">
+        <h2>Informasi Aplikasi</h2>
+        <p>Sistem Asesmen Dan Ujian Terintegrasi</p>
+        <div class="dev-info-list">
+            <div><strong>Developer:</strong> MB</div>
+            <div><strong>Versi Aplikasi:</strong> 1.0</div>
+            <div><strong>Build:</strong> 16 Juni 2026</div>
+            <div><strong>Contact:</strong> yanuar.b@gmail.com</div>
+        </div>
+        <button onclick="closeDevPopup()" style="background: #1e293b;">Tutup</button>
+    </div>
+</div>
+
 <script>
-// GANTI DENGAN URL WEB APP GAS ANDA YANG SEBENARNYA
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBJYaxWNHsfjwhLk6cEIbDuPwpnFo0wWlCIxIhvaTrbyOAMxUc9X8jgL9vvw16_DlUmA/exec";
+
+let masterSiswa = [];
+
+// Muat data kelas dan siswa saat halaman selesai dimuat
+window.addEventListener("DOMContentLoaded", loadInitialData);
+
+async function loadInitialData() {
+    try {
+        const response = await fetch(SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: "get_initial_data" })
+        });
+        const result = await response.json();
+        
+        if(result.status) {
+            masterSiswa = result.siswa;
+            const kelasSelect = document.getElementById("kelas");
+            
+            result.kelas.forEach(kls => {
+                let opt = document.createElement("option");
+                opt.value = kls;
+                opt.innerText = kls;
+                kelasSelect.appendChild(opt);
+            });
+        }
+    } catch (e) {
+        showPopup("Gagal sinkronisasi", "Gagal memuat data kelas dari server.", "error");
+    }
+}
+
+function filterSiswa() {
+    const kelasTerpilih = document.getElementById("kelas").value;
+    const siswaSelect = document.getElementById("namaSiswa");
+    
+    siswaSelect.innerHTML = '<option value="">-- Pilih Nama --</option>';
+    
+    if(!kelasTerpilih) {
+        siswaSelect.disabled = true;
+        return;
+    }
+    
+    constfiltered = masterSiswa.filter(s => s.kelas === kelasTerpilih);
+    filtered.forEach(s => {
+        let opt = document.createElement("option");
+        opt.value = s.username; // Username dijadikan value rahasia untuk memproses login
+        opt.innerText = s.nama;
+        siswaSelect.appendChild(opt);
+    });
+    
+    siswaSelect.disabled = false;
+}
 
 function togglePasswordVisibility() {
     const passwordInput = document.getElementById("password");
@@ -352,84 +428,61 @@ function togglePasswordVisibility() {
 function showPopup(title, message, iconType = "info") {
     document.getElementById("popupTitle").innerText = title;
     document.getElementById("popupMessage").innerText = message;
-    
     const iconContainer = document.getElementById("popupIcon");
-    if(iconType === "error") {
-        iconContainer.innerHTML = '<i class="fa-solid fa-circle-xmark" style="color: #ef4444;"></i>';
-    } else if(iconType === "success") {
-        iconContainer.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #22c55e;"></i>';
-    } else {
-        iconContainer.innerHTML = '<i class="fa-solid fa-circle-info" style="color: #3b82f6;"></i>';
-    }
+    
+    if(iconType === "error") iconContainer.innerHTML = '<i class="fa-solid fa-circle-xmark" style="color: #ef4444;"></i>';
+    else if(iconType === "success") iconContainer.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #22c55e;"></i>';
+    else iconContainer.innerHTML = '<i class="fa-solid fa-circle-info" style="color: #3b82f6;"></i>';
     
     document.getElementById("popup").style.display = "flex";
 }
 
-function closePopup() {
-    document.getElementById("popup").style.display = "none";
-}
+function closePopup() { document.getElementById("popup").style.display = "none"; }
+function openDevPopup() { document.getElementById("devPopup").style.display = "flex"; }
+function closeDevPopup() { document.getElementById("devPopup").style.display = "none"; }
 
 async function login() {
-    const username = document.getElementById("username").value.trim();
+    const kelas = document.getElementById("kelas").value;
+    const username = document.getElementById("namaSiswa").value;
     const password = document.getElementById("password").value.trim();
     const token = document.getElementById("token").value.trim();
 
-    if (!username || !password || !token) {
-        showPopup("Peringatan", "Username, Password, dan Token wajib diisi.", "info");
+    if (!kelas || !username || !password || !token) {
+        showPopup("Peringatan", "Semua kolom form wajib dipilih dan diisi.", "info");
         return;
     }
 
-    // Mengaktifkan status Loading UI
     document.getElementById("spinner").style.display = "block";
     document.getElementById("btnText").innerText = "Memproses...";
     document.getElementById("btnLogin").disabled = true;
 
     try {
-        const device = navigator.userAgent;
-
-        // payload data dikemas ke objek JSON sesuai tangkapan doPost() di GAS
         const payload = {
             action: "login",
             username: username,
             password: password,
             token: token,
-            device: device,
-            provider: "",
-            ip: "",
-            gps: ""
+            device: navigator.userAgent
         };
 
-        // PERBAIKAN UTAMA: Menggunakan metode POST agar sinkron dengan doPost di GAS
         const response = await fetch(SCRIPT_URL, {
             method: "POST",
-            mode: "cors",
-            headers: {
-                "Content-Type": "text/plain;charset=utf-8" 
-            },
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify(payload)
         });
-
-        if (!response.ok) {
-            throw new Error("Gagal terhubung ke server internal.");
-        }
 
         const result = await response.json();
 
         if (result.status) {
             localStorage.setItem("sesi_siswa", JSON.stringify(result));
             showPopup("Login Berhasil", "Selamat datang, " + result.nama, "success");
-
-            setTimeout(() => {
-                window.location.href = "dashboard.html";
-            }, 1500);
+            setTimeout(() => { window.location.href = "dashboard.html"; }, 1500);
         } else {
-            showPopup("Login Gagal", result.message || "Kombinasi akun salah.", "error");
+            showPopup("Login Gagal", result.message, "error");
             resetButton();
         }
-
     } catch (error) {
-        showPopup("Kesalahan Sistem", error.message, "error");
-        console.error(error);
+        showPopup("Kesalahan Sistem", "Gagal terhubung ke server.", "error");
         resetButton();
     }
 }
@@ -440,6 +493,5 @@ function resetButton() {
     document.getElementById("btnLogin").disabled = false;
 }
 </script>
-
 </body>
 </html>
