@@ -78,7 +78,6 @@
         .opsi.selected { border-color: var(--primary-light); background: #e0f2fe; font-weight: 600; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15); }
         .opsi input { display: none; }
         
-        /* PERBAIKAN TOMBOL NAVIGASI RESPONSIVE & SAMA BESAR */
         .nav-soal { 
             display: flex; 
             justify-content: space-between; 
@@ -637,14 +636,10 @@ async function hitungDanSelesaiUjian() {
     try {
         const payloadJawaban = {
             action: "submit_jawaban",
-            id_login: dataSiswa.id_login || localStorage.getItem("id_login") || "",
+            id_login: dataSiswa.id_login,
             username: dataSiswa.username,
-            nama: dataSiswa.nama,
-            kelas: dataSiswa.kelas,
-            nilai_akhir: skorAkhir,
-            lingkup_materi: Array.from(daftarLingkup).join(", "),
-            tp_terkait: Object.keys(analisisTpSiswa).filter(k => analisisTpSiswa[k].aktif).join(", "),
-            detail_tp: analisisTpSiswa
+            skor: skorAkhir,
+            analisis_tp: JSON.stringify(analisisTpSiswa)
         };
 
         const response = await fetch(SCRIPT_URL, {
@@ -652,91 +647,110 @@ async function hitungDanSelesaiUjian() {
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify(payloadJawaban)
         });
-        
         const result = await response.json();
+        
         if (result.status) {
             document.getElementById("txtSkor").innerText = skorAkhir;
             
-            let statusSiswaTerbaru = JSON.parse(localStorage.getItem("sesi_siswa")) || dataSiswa;
-            if(!statusSiswaTerbaru.status_tp) statusSiswaTerbaru.status_tp = {};
-            
-            if(skorMaksTP1 > 0) statusSiswaTerbaru.status_tp.tp1 = (persenTP1 >= kkmServer) ? "TUNTAS" : "BELUM TUNTAS";
-            if(skorMaksTP2 > 0) statusSiswaTerbaru.status_tp.tp2 = (persenTP2 >= kkmServer) ? "TUNTAS" : "BELUM TUNTAS";
-            
-            localStorage.setItem("sesi_siswa", JSON.stringify(statusSiswaTerbaru));
-            dataSiswa = statusSiswaTerbaru;
-            
-            aturTombolIndikatorTP();
+            if (dataSiswa.status_tp) {
+                if (skorMaksTP1 > 0) dataSiswa.status_tp.tp1 = (persenTP1 >= kkmServer) ? "TUNTAS" : "BELUM TUNTAS";
+                if (skorMaksTP2 > 0) dataSiswa.status_tp.tp2 = (persenTP2 >= kkmServer) ? "TUNTAS" : "BELUM TUNTAS";
+                localStorage.setItem("sesi_siswa", JSON.stringify(dataSiswa));
+            }
+
             pindahKe('sec-nilai');
         } else {
-            showModal({ type: "error", title: "Gagal Menyimpan", text: result.message || "Gagal mengirim lembar jawaban ke server cloud." });
+            showModal({ type: "error", title: "Gagal Menyimpan", text: result.message || "Gagal mengirim jawaban ke server." });
             btnNext.disabled = false;
-            tampilkanSoal();
+            btnNext.innerHTML = `Selanjutnya <i class="fa-solid fa-chevron-right"></i>`;
         }
-    } catch(e) {
-        showModal({ type: "error", title: "Rentan Putus Koneksi", text: "Gagal terhubung ke database. Silakan klik ulang Selesai." });
+    } catch (e) {
+        showModal({ type: "error", title: "Koneksi Terputus", text: "Terjadi kesalahan jaringan saat mencoba mengirim jawaban ujian." });
         btnNext.disabled = false;
-        tampilkanSoal();
+        btnNext.innerHTML = `Selanjutnya <i class="fa-solid fa-chevron-right"></i>`;
     }
+}
+
+function pindahKe(sectionId) {
+    document.querySelectorAll('.wizard-section').forEach(sec => sec.classList.remove('active'));
+    const targetSection = document.getElementById(sectionId);
+    if(targetSection) targetSection.classList.add('active');
+    
+    const container = document.getElementById("mainContainer");
+    if (sectionId === "sec-soal") {
+        container.classList.remove("max-normal");
+    } else {
+        container.classList.add("max-normal");
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function setStar(rating) {
     selectedRating = rating;
-    document.querySelectorAll(".star-rating i").forEach(star => {
-        const r = parseInt(star.getAttribute("data-rating"));
-        star.classList.toggle("active", r <= rating);
+    document.querySelectorAll('.star-rating i').forEach(star => {
+        const r = parseInt(star.getAttribute('data-rating'));
+        star.classList.toggle('active', r <= rating);
     });
 }
 
 function setRadio(element) {
-    document.querySelectorAll(".radio-btn").forEach(btn => btn.classList.remove("selected"));
-    element.classList.add("selected");
-    const radioInput = element.querySelector("input[type='radio']");
-    if(radioInput) radioInput.checked = true;
+    const parent = element.parentElement;
+    parent.querySelectorAll('.radio-btn').forEach(btn => btn.classList.remove('selected'));
+    element.classList.add('selected');
+    const input = element.querySelector('input');
+    if(input) input.checked = true;
 }
 
 async function kirimKuesioner() {
-    const rdoChecked = document.querySelector("input[name='mudah_soal']:checked");
-    if (selectedRating === 0 || !rdoChecked) {
-        showModal({ type: "warning", title: "Belum Lengkap", text: "Mohon berikan Bintang Rating dan pilih Tingkat Kemudahan Soal terlebih dahulu." });
+    const radioSelected = document.querySelector('input[name="mudah_soal"]:checked');
+    const saranText = document.getElementById("saranText").value.trim();
+
+    if (selectedRating === 0) {
+        showModal({ type: "warning", title: "Rating Kosong", text: "Mohon berikan bintang penilaian aplikasi terlebih dahulu." });
+        return;
+    }
+    if (!radioSelected) {
+        showModal({ type: "warning", title: "Belum Lengkap", text: "Mohon pilih salah satu opsi tingkat kemudahan soal ujian." });
         return;
     }
 
-    const btn = document.getElementById("btnKuesioner");
     const spin = document.getElementById("spinKuesioner");
     const txt = document.getElementById("txtKuesioner");
+    const btn = document.getElementById("btnKuesioner");
 
     btn.disabled = true;
     spin.style.display = "inline-block";
     txt.innerText = "MENGIRIM...";
 
     try {
-        const payloadKuesioner = {
-            action: "submit_kuesioner",
-            username: dataSiswa.username,
-            nama: dataSiswa.nama,
-            kelas: dataSiswa.kelas,
-            rating: selectedRating,
-            kemudahan: rdoChecked.value,
-            saran: document.getElementById("saranText").value || ""
-        };
-
         const response = await fetch(SCRIPT_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify(payloadKuesioner)
+            body: JSON.stringify({
+                action: "submit_kuesioner",
+                id_login: dataSiswa.id_login,
+                username: dataSiswa.username,
+                rating: selectedRating,
+                kemudahan: radioSelected.value,
+                saran: saranText
+            })
         });
-
         const result = await response.json();
-        if(result.status) {
+        if (result.status) {
             pindahKe('sec-thanks');
         } else {
-            showModal({ type: "error", title: "Gagal Kirim", text: "Database menolak data evaluasi kuesioner Anda." });
-            btn.disabled = false; spin.style.display = "none"; txt.innerText = "KIRIM EVALUASI";
+            showModal({ type: "error", title: "Gagal", text: "Gagal menyimpan kuesioner ke cloud server database." });
+             normalState();
         }
-    } catch(e) {
-        showModal({ type: "error", title: "Koneksi Bermasalah", text: "Gagal terhubung ke cloud server SIMPATIK." });
-        btn.disabled = false; spin.style.display = "none"; txt.innerText = "KIRIM EVALUASI";
+    } catch (e) {
+        showModal({ type: "error", title: "Koneksi Bermasalah", text: "Data gagal terkirim. Periksa koneksi internet Anda." });
+        normalState();
+    }
+
+    function normalState() {
+        btn.disabled = false;
+        spin.style.display = "none";
+        txt.innerText = "KIRIM EVALUASI";
     }
 }
 
@@ -744,38 +758,26 @@ async function logoutFinal() {
     showModal({
         type: "warning",
         title: "Konfirmasi Logout",
-        text: "Apakah Anda ingin keluar dari akun dan menutup sesi ujian di perangkat ini?",
+        text: "Apakah Anda yakin ingin keluar dari sistem ujian ini?",
         confirmText: "Ya, Keluar",
         cancelText: "Batal",
         onConfirm: async () => {
             try {
-                await fetch(SCRIPT_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({
-                        action: "logout",
-                        id_login: dataSiswa.id_login || ""
-                    })
-                });
+                if(dataSiswa && dataSiswa.id_login) {
+                    await fetch(SCRIPT_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify({
+                            action: "logout",
+                            id_login: dataSiswa.id_login
+                        })
+                    });
+                }
             } catch(e) {}
             localStorage.clear();
             window.location.href = "index.html";
         }
     });
-}
-
-function pindahKe(sectionId) {
-    document.querySelectorAll(".wizard-section").forEach(sec => sec.classList.remove("active"));
-    const target = document.getElementById(sectionId);
-    if(target) {
-        target.classList.add("active");
-        const container = document.getElementById("mainContainer");
-        if(sectionId === "sec-soal") {
-            container.classList.remove("max-normal");
-        } else {
-            container.classList.add("max-normal");
-        }
-    }
 }
 </script>
 </body>
