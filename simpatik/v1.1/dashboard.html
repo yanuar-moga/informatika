@@ -96,12 +96,39 @@
         .thankyou-wrapper { text-align: center; padding: 15px 0; }
         .thankyou-icon { font-size: 65px; color: var(--success); margin-bottom: 20px; animation: scaleUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
+        /* KUSTOM POP-UP MODAL STYLE */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 9999; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
+        .modal-box { background: white; width: 90%; max-width: 420px; border-radius: 20px; padding: 25px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .modal-overlay.show .modal-box { transform: scale(1); }
+        .modal-icon { font-size: 50px; margin-bottom: 15px; display: inline-block; }
+        .modal-icon.error { color: #ef4444; }
+        .modal-icon.warning { color: var(--belum-tuntas); }
+        .modal-icon.success { color: var(--success); }
+        .modal-title { font-size: 18px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+        .modal-text { font-size: 14px; color: var(--text-light); line-height: 1.5; margin-bottom: 20px; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: center; }
+        .modal-btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .modal-btn-primary { background: var(--primary); color: white; }
+        .modal-btn-primary:hover { background: #1d4ed8; }
+        .modal-btn-secondary { background: #e2e8f0; color: var(--text-dark); }
+        .modal-btn-secondary:hover { background: #cbd5e1; }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes scaleUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
+
+<div id="customModal" class="modal-overlay">
+    <div class="modal-box">
+        <div id="modalIcon" class="modal-icon"></div>
+        <div id="modalTitle" class="modal-title"></div>
+        <div id="modalText" class="modal-text"></div>
+        <div id="modalButtons" class="modal-buttons"></div>
+    </div>
+</div>
 
 <div class="container">
     <div class="card">
@@ -221,6 +248,50 @@ let indeksSekarang = 0;
 let selectedRating = 0;
 let kkmServer = 78;
 
+// ENGINE MODAL POP-UP INTERNAL (PENGGANTI ALERT & CONFIRM)
+function showModal({ type, title, text, confirmText = "OK", cancelText = "", onConfirm, onCancel }) {
+    const modal = document.getElementById("customModal");
+    const iconContainer = document.getElementById("modalIcon");
+    const titleContainer = document.getElementById("modalTitle");
+    const textContainer = document.getElementById("modalText");
+    const buttonsContainer = document.getElementById("modalButtons");
+
+    // Pemetaan ikon berdasarkan tipe respons
+    let iconHtml = "";
+    if (type === "success") iconHtml = `<i class="fa-solid fa-circle-check modal-icon success"></i>`;
+    else if (type === "warning") iconHtml = `<i class="fa-solid fa-triangle-exclamation modal-icon warning"></i>`;
+    else iconHtml = `<i class="fa-solid fa-circle-xmark modal-icon error"></i>`;
+
+    iconContainer.innerHTML = iconHtml;
+    titleContainer.innerText = title;
+    textContainer.innerText = text;
+    buttonsContainer.innerHTML = "";
+
+    // Membuat tombol konfirmasi (OK / Ya)
+    const btnConfirm = document.createElement("button");
+    btnConfirm.className = "modal-btn modal-btn-primary";
+    btnConfirm.innerText = confirmText;
+    btnConfirm.onclick = () => {
+        modal.classList.remove("show");
+        if (onConfirm) onConfirm();
+    };
+    buttonsContainer.appendChild(btnConfirm);
+
+    // Membuat tombol pembatalan (jika dibutuhkan)
+    if (cancelText) {
+        const btnCancel = document.createElement("button");
+        btnCancel.className = "modal-btn modal-btn-secondary";
+        btnCancel.innerText = cancelText;
+        btnCancel.onclick = () => {
+            modal.classList.remove("show");
+            if (onCancel) onCancel();
+        };
+        buttonsContainer.appendChild(btnCancel);
+    }
+
+    modal.classList.add("show");
+}
+
 window.addEventListener("DOMContentLoaded", async () => {
     const session = localStorage.getItem("sesi_siswa");
     if (!session) {
@@ -283,8 +354,6 @@ async function muatDataSoal() {
                 kkmServer = parseInt(result.kkm_config);
             }
             
-            // --- LOGIKA FILTER UTAMA SANGAT SELEKTIF ---
-            // Hanya mengambil soal dari TP yang statusnya BELUM TUNTAS di server
             const statusTP = dataSiswa.status_tp || { tp1: "BELUM TUNTAS", tp2: "BELUM TUNTAS" };
             
             let soalTersaring = result.data.filter(s => {
@@ -297,7 +366,6 @@ async function muatDataSoal() {
             const btnMulai = document.getElementById("btnMulaiUjian");
 
             if (soalTersaring.length === 0) {
-                // Skenario pengaman jika di status_tp tuntas semua tapi terlanjur masuk kemari
                 masterSoal = result.data; 
                 btnMulai.innerText = "SEMUA TP TUNTAS (LIHAT SOAL)";
                 btnMulai.style.backgroundColor = "var(--tuntas)";
@@ -313,10 +381,10 @@ async function muatDataSoal() {
             
             btnMulai.disabled = false;
         } else {
-            alert("Gagal memuat bank soal.");
+            showModal({ type: "error", title: "Gagal", text: "Gagal memuat bank soal dari server database." });
         }
     } catch(e) {
-        alert("Terjadi kendala jaringan saat mengunduh bank soal.");
+        showModal({ type: "error", title: "Koneksi Bermasalah", text: "Terjadi kendala jaringan saat mengunduh bank soal." });
     }
 }
 
@@ -336,14 +404,21 @@ function mulaiRemidiPerTP(kodeTP) {
     });
 
     if(soalRemidi.length === 0) {
-        alert("Tidak ada kumpulan data soal remedial untuk " + kodeTP);
+        showModal({ type: "warning", title: "Kosong", text: "Tidak ada kumpulan data soal remedial untuk kelompok materi ini." });
         return;
     }
     
-    if(confirm(`Apakah Anda ingin memulai pengerjaan remedial instan untuk kelompok materi ${kodeTP}?`)) {
-        masterSoal = soalRemidi;
-        mulaiUjian();
-    }
+    showModal({
+        type: "warning",
+        title: "Konfirmasi Ulang",
+        text: `Apakah Anda ingin memulai pengerjaan remedial instan untuk kelompok materi ${kodeTP}?`,
+        confirmText: "Ya, Mulai",
+        cancelText: "Batal",
+        onConfirm: () => {
+            masterSoal = soalRemidi;
+            mulaiUjian();
+        }
+    });
 }
 
 function tampilkanSoal() {
@@ -400,7 +475,14 @@ function soalBerikutnya() {
         indeksSekarang++;
         tampilkanSoal();
     } else {
-        hitungDanSelesaiUjian();
+        showModal({
+            type: "warning",
+            title: "Selesai Ujian?",
+            text: "Apakah Anda yakin seluruh lembar jawaban sudah terisi dan ingin mengirimkannya?",
+            confirmText: "Ya, Kirim",
+            cancelText: "Periksa Lagi",
+            onConfirm: () => hitungDanSelesaiUjian()
+        });
     }
 }
 
@@ -499,11 +581,11 @@ async function hitungDanSelesaiUjian() {
             document.getElementById("txtSkor").innerText = skorAkhir;
             pindahKe('sec-nilai');
         } else {
-            alert("Gagal menyimpan nilai ke database: " + result.message);
+            showModal({ type: "error", title: "Gagal Menyimpan", text: "Gagal mengamankan nilai ke database: " + result.message });
             resetBtnSelesai();
         }
     } catch (e) {
-        alert("Gangguan jaringan! Silakan tekan selesai kembali.");
+        showModal({ type: "error", title: "Koneksi Terputus", text: "Gangguan jaringan! Silakan tekan tombol SELESAI kembali." });
         resetBtnSelesai();
     }
 }
@@ -539,7 +621,7 @@ async function kirimKuesioner() {
     const saran = document.getElementById("saranText").value.trim();
 
     if (selectedRating === 0 || !kesulitanInput) {
-        alert("Mohon berikan rating bintang dan pilih tingkat kemudahan soal terlebih dahulu.");
+        showModal({ type: "warning", title: "Data Belum Lengkap", text: "Mohon berikan rating bintang dan tingkat kemudahan soal terlebih dahulu." });
         return;
     }
 
@@ -567,11 +649,11 @@ async function kirimKuesioner() {
         if (result.status) { 
             pindahKe('sec-thanks'); 
         } else { 
-            alert("Gagal: " + result.message); 
+            showModal({ type: "error", title: "Pengiriman Gagal", text: "Gagal menyimpan kuesioner: " + result.message });
             resetBtnKuesioner(); 
         }
     } catch (e) {
-        alert("Terjadi kesalahan jaringan.");
+        showModal({ type: "error", title: "Kesalahan Jaringan", text: "Gagal menghubungi server untuk mengirim evaluasi." });
         resetBtnKuesioner();
     }
 }
