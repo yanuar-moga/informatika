@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Ujian - SIMPATIK v1.0</title>
+    <title>Dashboard Ujian - SIMPATIK v1.1</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
     <style>
         :root {
@@ -34,16 +35,18 @@
             display: flex; justify-content: center; align-items: center; padding: 20px; 
         }
         
-        .container { width: 100%; max-width: 600px; }
+        .container { width: 100%; max-width: 850px; transition: all 0.3s ease; }
+        .max-normal { max-width: 600px; } /* Untuk halaman non-ujian agar tetap compact */
         
         .card { 
             background: rgba(255, 255, 255, 0.98); 
             border-radius: 24px; padding: 35px; 
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); 
-            backdrop-filter: blur(10px); 
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
         
-        .wizard-section { display: none; animation: fadeIn 0.4s ease-in-out forwards; }
+        .wizard-section { display: none; }
         .wizard-section.active { display: block; }
         
         h2 { color: var(--text-dark); font-size: 22px; font-weight: 700; margin-bottom: 8px; text-align: center; }
@@ -54,39 +57,61 @@
         .info-table td:first-child { font-weight: 600; color: var(--text-light); width: 35%; }
         
         .tp-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; justify-content: center; }
-        .btn-tp { flex: 1; min-width: 120px; padding: 12px; border: none; border-radius: 12px; color: white; font-weight: 600; font-size: 13px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        .btn-tp { flex: 1; min-width: 120px; padding: 12px; border: none; border-radius: 12px; color: white; font-weight: 600; font-size: 13px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s, cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .btn-tp.remedi-clickable { cursor: pointer; }
-        .btn-tp.remedi-clickable:hover { transform: scale(1.03); opacity: 0.9; }
+        .btn-tp.remedi-clickable:hover { transform: scale(1.05); opacity: 0.9; }
         
+        /* Layout Ujian & Navigasi CBT */
+        .cbt-layout { display: grid; grid-template-columns: 1fr; gap: 25px; }
+        @media(min-width: 768px) {
+            .cbt-layout { grid-template-columns: 2.8fr 1.2fr; }
+        }
+
         .box-soal { background: var(--bg-input); padding: 20px; border-radius: 14px; border: 1px solid var(--border-color); margin-bottom: 20px; font-size: 16px; color: var(--text-dark); line-height: 1.6; }
         .img-soal { width: 100%; max-height: 250px; object-fit: contain; border-radius: 8px; margin-top: 12px; border: 1px solid var(--border-color); display: none; }
         
         .opsi-jawaban { display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; }
-        .opsi { padding: 14px 16px; border: 1.5px solid var(--border-color); border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 15px; background: white; transition: all 0.2s; }
-        .opsi:hover { border-color: var(--primary-light); background: #f0f7ff; }
-        .opsi.selected { border-color: var(--primary-light); background: #e0f2fe; font-weight: 600; }
+        .opsi { padding: 14px 16px; border: 1.5px solid var(--border-color); border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 15px; background: white; transition: all 0.2s ease; }
+        .opsi:hover { border-color: var(--primary-light); background: #f0f7ff; transform: translateX(4px); }
+        .opsi.selected { border-color: var(--primary-light); background: #e0f2fe; font-weight: 600; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15); }
         .opsi input { display: none; }
         .nav-soal { display: flex; justify-content: space-between; gap: 10px; }
 
-        .nilai-circle { width: 120px; height: 120px; background: #f0fdf4; border: 4px solid var(--success); color: var(--success); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 42px; font-weight: 800; margin: 0 auto 20px; }
+        /* Panel Grid Navigasi Nomor Soal CBT */
+        .cbt-nav-panel { border-left: 0px solid var(--border-color); padding-left: 0; }
+        @media(min-width: 768px) {
+            .cbt-nav-panel { border-left: 1px solid var(--border-color); padding-left: 20px; }
+        }
+        .nav-panel-title { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .grid-nomor { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .btn-nomor { width: 100%; aspect-ratio: 1; border: 1.5px solid var(--border-color); background: white; color: var(--text-dark); font-weight: 600; font-size: 14px; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; }
+        .btn-nomor:hover { border-color: var(--primary-light); background: #f0f7ff; }
+        .btn-nomor.answered { background: var(--primary-light); color: white; border-color: var(--primary-light); }
+        .btn-nomor.active { border: 3px solid #0f172a; box-shadow: 0 0 0 2px var(--primary-light); font-weight: 800; transform: scale(1.05); }
+
+        .nilai-circle { width: 120px; height: 120px; background: #f0fdf4; border: 4px solid var(--success); color: var(--success); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 42px; font-weight: 800; margin: 0 auto 20px; transition: all 0.3s ease; }
+        .nilai-circle:hover { transform: scale(1.1) rotate(5deg); }
         
         .star-rating { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; font-size: 32px; flex-direction: row-reverse; }
-        .star-rating i { color: #cbd5e1; cursor: pointer; transition: color 0.2s; }
+        .star-rating i { color: #cbd5e1; cursor: pointer; transition: color 0.2s, transform 0.1s; }
+        .star-rating i:hover { transform: scale(1.2); }
         .star-rating i:hover, .star-rating i:hover ~ i, .star-rating i.active, .star-rating i.active ~ i { color: #fbbf24; }
         
         .radio-group { display: flex; justify-content: space-around; gap: 10px; margin-bottom: 20px; }
-        .radio-btn { flex: 1; text-align: center; padding: 12px; border: 1.5px solid var(--border-color); border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-dark); background: white; }
+        .radio-btn { flex: 1; text-align: center; padding: 12px; border: 1.5px solid var(--border-color); border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-dark); background: white; transition: all 0.2s; }
         .radio-btn input { display: none; }
-        .radio-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
+        .radio-btn:hover { border-color: var(--primary-light); }
+        .radio-btn.selected { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(30, 64, 175, 0.2); }
         
-        textarea { width: 100%; padding: 12px; border: 1.5px solid var(--border-color); border-radius: 12px; resize: none; min-height: 80px; font-size: 14px; outline: none; margin-bottom: 25px; background: var(--bg-input); }
-        textarea:focus { border-color: var(--primary-light); background: white; }
+        textarea { width: 100%; padding: 12px; border: 1.5px solid var(--border-color); border-radius: 12px; resize: none; min-height: 80px; font-size: 14px; outline: none; margin-bottom: 25px; background: var(--bg-input); transition: all 0.2s; }
+        textarea:focus { border-color: var(--primary-light); background: white; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
         
-        .btn { padding: 15px; border: none; border-radius: 12px; background: var(--primary); color: white; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: background 0.2s; }
+        .btn { padding: 15px; border: none; border-radius: 12px; background: var(--primary); color: white; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: all 0.2s; position: relative; overflow: hidden; }
         .btn-block { width: 100%; }
-        .btn:hover { background: #1d4ed8; }
+        .btn:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(29, 78, 216, 0.2); }
+        .btn:active { transform: translateY(1px); }
         .btn-success { background: var(--success); }
-        .btn-success:hover { background: #16a34a; }
+        .btn-success:hover { background: #16a34a; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2); }
         
         .app-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--border-color); font-size: 13px; color: var(--text-light); }
         .btn-logout-footer { background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s; font-size: 12px; }
@@ -94,9 +119,9 @@
 
         .spinner { display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 0.8s linear infinite; }
         .thankyou-wrapper { text-align: center; padding: 15px 0; }
-        .thankyou-icon { font-size: 65px; color: var(--success); margin-bottom: 20px; animation: scaleUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .thankyou-icon { font-size: 65px; color: var(--success); margin-bottom: 20px; animation: bounceIn 1s; }
 
-        /* KUSTOM POP-UP MODAL STYLE */
+        /* MODAL STYLE */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 9999; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .modal-overlay.show { opacity: 1; pointer-events: auto; }
         .modal-box { background: white; width: 90%; max-width: 420px; border-radius: 20px; padding: 25px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -114,8 +139,6 @@
         .modal-btn-secondary { background: #e2e8f0; color: var(--text-dark); }
         .modal-btn-secondary:hover { background: #cbd5e1; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes scaleUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -130,17 +153,17 @@
     </div>
 </div>
 
-<div class="container">
+<div class="container max-normal" id="mainContainer">
     <div class="card">
         
-        <div id="sec-konfirmasi" class="wizard-section active">
+        <div id="sec-konfirmasi" class="wizard-section active animate__animated animate__fadeIn">
             <h2>Konfirmasi Data Peserta</h2>
             <p class="section-desc">Pastikan identitas Anda sudah sesuai sebelum memulai ujian</p>
             <table class="info-table">
                 <tr><td>Nama Siswa</td><td id="conf-nama">Memuat...</td></tr>
                 <tr><td>Username / NISN</td><td id="conf-user">Memuat...</td></tr>
                 <tr><td>Kelas</td><td id="conf-kelas">Memuat...</td></tr>
-                <tr><td>Mata Pelajaran</td><td>Informatika </td></tr>
+                <tr><td>Mata Pelajaran</td><td>Informatika</td></tr>
             </table>
 
             <div class="tp-container">
@@ -156,21 +179,35 @@
             </div>
         </div>
 
-        <div id="sec-soal" class="wizard-section">
+        <div id="sec-soal" class="wizard-section animate__animated animate__fadeIn">
             <h2>Lembar Soal Ujian</h2>
             <p class="section-desc" id="info-progres">Soal n dari n</p>
-            <div class="box-soal">
-                <div id="konten-soal"></div>
-                <img id="gambar-soal" class="img-soal" src="" alt="Gambar Soal">
-            </div>
-            <div class="opsi-jawaban" id="konten-opsi"></div>
-            <div class="nav-soal">
-                <button class="btn" id="btnPrev" onclick="soalSebelumnya()"><i class="fa-solid fa-chevron-left"></i> Kembali</button>
-                <button class="btn btn-success" id="btnNext" onclick="soalBerikutnya()">Selanjutnya <i class="fa-solid fa-chevron-right"></i></button>
+            
+            <div class="cbt-layout">
+                <div>
+                    <div class="box-soal">
+                        <div id="konten-soal"></div>
+                        <img id="gambar-soal" class="img-soal" src="" alt="Gambar Soal">
+                    </div>
+                    <div class="opsi-jawaban" id="konten-opsi"></div>
+                    <div class="nav-soal">
+                        <button class="btn" id="btnPrev" onclick="soalSebelumnya()"><i class="fa-solid fa-chevron-left"></i> Kembali</button>
+                        <button class="btn btn-success" id="btnNext" onclick="soalBerikutnya()">Selanjutnya <i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="cbt-nav-panel">
+                    <div class="nav-panel-title">
+                        <i class="fa-solid fa-th"></i>
+                        <span>Nomor Soal</span>
+                    </div>
+                    <div class="grid-nomor" id="gridNomorCbt">
+                        </div>
+                </div>
             </div>
         </div>
 
-        <div id="sec-nilai" class="wizard-section">
+        <div id="sec-nilai" class="wizard-section animate__animated animate__fadeIn">
             <h2>Hasil Nilai Ujian</h2>
             <p class="section-desc">Ujian selesai. Nilai Anda telah direkam oleh sistem</p>
             <div class="nilai-circle" id="txtSkor">0</div>
@@ -188,7 +225,7 @@
             </div>
         </div>
 
-        <div id="sec-kuesioner" class="wizard-section">
+        <div id="sec-kuesioner" class="wizard-section animate__animated animate__fadeIn">
             <h2>Penilaian Aplikasi</h2>
             <p class="section-desc">Bantu kami meningkatkan kualitas sistem ujian ini</p>
             
@@ -223,7 +260,7 @@
             </button>
         </div>
 
-        <div id="sec-thanks" class="wizard-section">
+        <div id="sec-thanks" class="wizard-section animate__animated animate__zoomIn">
             <div class="thankyou-wrapper">
                 <div class="thankyou-icon"><i class="fa-solid fa-circle-check"></i></div>
                 <h2>Terima Kasih!</h2>
@@ -248,7 +285,7 @@ let indeksSekarang = 0;
 let selectedRating = 0;
 let kkmServer = 78;
 
-// ENGINE MODAL POP-UP INTERNAL (PENGGANTI ALERT & CONFIRM)
+// MODAL POP-UP INTERNAL ENGINE
 function showModal({ type, title, text, confirmText = "OK", cancelText = "", onConfirm, onCancel }) {
     const modal = document.getElementById("customModal");
     const iconContainer = document.getElementById("modalIcon");
@@ -256,18 +293,16 @@ function showModal({ type, title, text, confirmText = "OK", cancelText = "", onC
     const textContainer = document.getElementById("modalText");
     const buttonsContainer = document.getElementById("modalButtons");
 
-    // Pemetaan ikon berdasarkan tipe respons
     let iconHtml = "";
-    if (type === "success") iconHtml = `<i class="fa-solid fa-circle-check modal-icon success"></i>`;
-    else if (type === "warning") iconHtml = `<i class="fa-solid fa-triangle-exclamation modal-icon warning"></i>`;
-    else iconHtml = `<i class="fa-solid fa-circle-xmark modal-icon error"></i>`;
+    if (type === "success") iconHtml = `<i class="fa-solid fa-circle-check modal-icon success animate__animated animate__bounceIn"></i>`;
+    else if (type === "warning") iconHtml = `<i class="fa-solid fa-triangle-exclamation modal-icon warning animate__animated animate__shakeX"></i>`;
+    else iconHtml = `<i class="fa-solid fa-circle-xmark modal-icon error animate__animated animate__headShake"></i>`;
 
     iconContainer.innerHTML = iconHtml;
     titleContainer.innerText = title;
     textContainer.innerText = text;
     buttonsContainer.innerHTML = "";
 
-    // Membuat tombol konfirmasi (OK / Ya)
     const btnConfirm = document.createElement("button");
     btnConfirm.className = "modal-btn modal-btn-primary";
     btnConfirm.innerText = confirmText;
@@ -277,7 +312,6 @@ function showModal({ type, title, text, confirmText = "OK", cancelText = "", onC
     };
     buttonsContainer.appendChild(btnConfirm);
 
-    // Membuat tombol pembatalan (jika dibutuhkan)
     if (cancelText) {
         const btnCancel = document.createElement("button");
         btnCancel.className = "modal-btn modal-btn-secondary";
@@ -315,7 +349,6 @@ window.addEventListener("DOMContentLoaded", async () => {
 function aturTombolIndikatorTP() {
     const btnTP1 = document.getElementById("btn-tp1");
     const btnTP2 = document.getElementById("btn-tp2");
-    
     const statusTP = dataSiswa.status_tp || { tp1: "BELUM TUNTAS", tp2: "BELUM TUNTAS" };
 
     if (statusTP.tp1 === "TUNTAS") {
@@ -391,8 +424,37 @@ async function muatDataSoal() {
 function mulaiUjian() {
     indeksSekarang = 0;
     jawabanSiswa = {};
+    buatNavigasiNomorCbt();
     tampilkanSoal();
     pindahKe('sec-soal');
+}
+
+// MEMBUAT GRID NOMOR CBT SECARA DINAMIS
+function buatNavigasiNomorCbt() {
+    const gridContainer = document.getElementById("gridNomorCbt");
+    gridContainer.innerHTML = "";
+    
+    masterSoal.forEach((soal, idx) => {
+        const btn = document.createElement("button");
+        btn.id = `btn-nav-no-${idx}`;
+        btn.className = "btn-nomor";
+        btn.innerText = idx + 1;
+        btn.onclick = () => {
+            indeksSekarang = idx;
+            tampilkanSoal();
+        };
+        gridContainer.appendChild(btn);
+    });
+}
+
+function perbaruiStatusNavigasiNomor() {
+    masterSoal.forEach((soal, idx) => {
+        const btn = document.getElementById(`btn-nav-no-${idx}`);
+        if(btn) {
+            btn.classList.toggle("answered", jawabanSiswa[idx] !== undefined);
+            btn.classList.toggle("active", idx === indeksSekarang);
+        }
+    });
 }
 
 function mulaiRemidiPerTP(kodeTP) {
@@ -424,7 +486,7 @@ function mulaiRemidiPerTP(kodeTP) {
 function tampilkanSoal() {
     const soal = masterSoal[indeksSekarang];
     document.getElementById("info-progres").innerText = `Soal ${indeksSekarang + 1} dari ${masterSoal.length}`;
-    document.getElementById("konten-soal").innerHTML = `<strong>Soal No. ${soal.no}:</strong><br>${soal.pertanyaan}`;
+    document.getElementById("konten-soal").innerHTML = `<strong>Soal No. ${indeksSekarang + 1} (Asli No. ${soal.no}):</strong><br>${soal.pertanyaan}`;
     
     const imgEl = document.getElementById("gambar-soal");
     if(soal.gambar && soal.gambar.trim() !== "") {
@@ -450,6 +512,7 @@ function tampilkanSoal() {
                 document.querySelectorAll('.opsi').forEach(o => o.classList.remove('selected'));
                 label.classList.add('selected');
                 jawabanSiswa[indeksSekarang] = h;
+                perbaruiStatusNavigasiNomor();
             });
             opsiContainer.appendChild(label);
         }
@@ -464,6 +527,8 @@ function tampilkanSoal() {
         btnNext.innerHTML = `Selanjutnya <i class="fa-solid fa-chevron-right"></i>`;
         btnNext.className = "btn";
     }
+
+    perbaruiStatusNavigasiNomor();
 }
 
 function soalSebelumnya() {
@@ -597,6 +662,15 @@ function resetBtnSelesai() {
 }
 
 function pindahKe(sectionId) {
+    const container = document.getElementById("mainContainer");
+    
+    // Sesuaikan lebar pembungkus jika berpindah ke lembar soal CBT agar lebih lapang
+    if(sectionId === 'sec-soal') {
+        container.classList.remove("max-normal");
+    } else {
+        container.classList.add("max-normal");
+    }
+
     document.querySelectorAll('.wizard-section').forEach(sec => sec.classList.remove('active'));
     document.getElementById(sectionId).classList.add('active');
     window.scrollTo(0,0);
@@ -664,10 +738,28 @@ function resetBtnKuesioner() {
     document.getElementById("btnKuesioner").disabled = false;
 }
 
-function logoutFinal() {
-    localStorage.clear();
-    sessionStorage.clear();
-    window.location.href = "index.html";
+async function logoutFinal() {
+    showModal({
+        type: "warning",
+        title: "Keluar Sistem?",
+        text: "Apakah Anda ingin menutup sesi pengerjaan dan keluar dari aplikasi?",
+        confirmText: "Ya, Keluar",
+        cancelText: "Batal",
+        onConfirm: async () => {
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({
+                        action: "logout",
+                        id_login: dataSiswa.id_login || localStorage.getItem("id_login") || ""
+                    })
+                });
+            } catch(e) {}
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+    });
 }
 </script>
 </body>
