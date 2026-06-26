@@ -32,18 +32,21 @@
         body { 
             min-height: 100vh; 
             background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%); 
-            display: flex; justify-content: center; align-items: center; padding: 20px; 
+            display: flex; justify-content: center; align-items: center; padding: 15px; 
         }
         
         .container { width: 100%; max-width: 850px; transition: all 0.3s ease; }
-        .max-normal { max-width: 600px; } /* Untuk halaman non-ujian agar tetap compact */
+        .max-normal { max-width: 600px; }
         
         .card { 
             background: rgba(255, 255, 255, 0.98); 
-            border-radius: 24px; padding: 35px; 
+            border-radius: 24px; padding: 25px; 
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); 
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
+        }
+        @media(min-width: 768px) {
+            .card { padding: 35px; }
         }
         
         .wizard-section { display: none; }
@@ -61,7 +64,6 @@
         .btn-tp.remedi-clickable { cursor: pointer; }
         .btn-tp.remedi-clickable:hover { transform: scale(1.05); opacity: 0.9; }
         
-        /* Layout Ujian & Navigasi CBT */
         .cbt-layout { display: grid; grid-template-columns: 1fr; gap: 25px; }
         @media(min-width: 768px) {
             .cbt-layout { grid-template-columns: 2.8fr 1.2fr; }
@@ -75,9 +77,24 @@
         .opsi:hover { border-color: var(--primary-light); background: #f0f7ff; transform: translateX(4px); }
         .opsi.selected { border-color: var(--primary-light); background: #e0f2fe; font-weight: 600; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15); }
         .opsi input { display: none; }
-        .nav-soal { display: flex; justify-content: space-between; gap: 10px; }
+        
+        /* PERBAIKAN TOMBOL NAVIGASI RESPONSIVE & SAMA BESAR */
+        .nav-soal { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            gap: 12px; 
+            width: 100%;
+        }
+        .nav-soal .btn {
+            flex: 1;
+            width: 50%;
+            padding: 14px 10px;
+            font-size: 15px;
+            justify-content: center;
+            white-space: nowrap;
+        }
 
-        /* Panel Grid Navigasi Nomor Soal CBT */
         .cbt-nav-panel { border-left: 0px solid var(--border-color); padding-left: 0; }
         @media(min-width: 768px) {
             .cbt-nav-panel { border-left: 1px solid var(--border-color); padding-left: 20px; }
@@ -121,7 +138,6 @@
         .thankyou-wrapper { text-align: center; padding: 15px 0; }
         .thankyou-icon { font-size: 65px; color: var(--success); margin-bottom: 20px; animation: bounceIn 1s; }
 
-        /* MODAL STYLE */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 9999; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .modal-overlay.show { opacity: 1; pointer-events: auto; }
         .modal-box { background: white; width: 90%; max-width: 420px; border-radius: 20px; padding: 25px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -201,8 +217,7 @@
                         <i class="fa-solid fa-th"></i>
                         <span>Nomor Soal</span>
                     </div>
-                    <div class="grid-nomor" id="gridNomorCbt">
-                        </div>
+                    <div class="grid-nomor" id="gridNomorCbt"></div>
                 </div>
             </div>
         </div>
@@ -285,7 +300,6 @@ let indeksSekarang = 0;
 let selectedRating = 0;
 let kkmServer = 78;
 
-// MODAL POP-UP INTERNAL ENGINE
 function showModal({ type, title, text, confirmText = "OK", cancelText = "", onConfirm, onCancel }) {
     const modal = document.getElementById("customModal");
     const iconContainer = document.getElementById("modalIcon");
@@ -429,7 +443,6 @@ function mulaiUjian() {
     pindahKe('sec-soal');
 }
 
-// MEMBUAT GRID NOMOR CBT SECARA DINAMIS
 function buatNavigasiNomorCbt() {
     const gridContainer = document.getElementById("gridNomorCbt");
     gridContainer.innerHTML = "";
@@ -629,9 +642,9 @@ async function hitungDanSelesaiUjian() {
             nama: dataSiswa.nama,
             kelas: dataSiswa.kelas,
             nilai_akhir: skorAkhir,
-            lingkup_materi: Array.from(daftarLingkup).join(", ") || "Informatika",
-            tp: (skorMaksTP1 > 0 ? "TP1" : "") + (skorMaksTP2 > 0 ? ", TP2" : ""),
-            analisis_tp: analisisTpSiswa
+            lingkup_materi: Array.from(daftarLingkup).join(", "),
+            tp_terkait: Object.keys(analisisTpSiswa).filter(k => analisisTpSiswa[k].aktif).join(", "),
+            detail_tp: analisisTpSiswa
         };
 
         const response = await fetch(SCRIPT_URL, {
@@ -641,108 +654,97 @@ async function hitungDanSelesaiUjian() {
         });
         
         const result = await response.json();
-        
-        if(result.status) {
+        if (result.status) {
             document.getElementById("txtSkor").innerText = skorAkhir;
+            
+            let statusSiswaTerbaru = JSON.parse(localStorage.getItem("sesi_siswa")) || dataSiswa;
+            if(!statusSiswaTerbaru.status_tp) statusSiswaTerbaru.status_tp = {};
+            
+            if(skorMaksTP1 > 0) statusSiswaTerbaru.status_tp.tp1 = (persenTP1 >= kkmServer) ? "TUNTAS" : "BELUM TUNTAS";
+            if(skorMaksTP2 > 0) statusSiswaTerbaru.status_tp.tp2 = (persenTP2 >= kkmServer) ? "TUNTAS" : "BELUM TUNTAS";
+            
+            localStorage.setItem("sesi_siswa", JSON.stringify(statusSiswaTerbaru));
+            dataSiswa = statusSiswaTerbaru;
+            
+            aturTombolIndikatorTP();
             pindahKe('sec-nilai');
         } else {
-            showModal({ type: "error", title: "Gagal Menyimpan", text: "Gagal mengamankan nilai ke database: " + result.message });
-            resetBtnSelesai();
+            showModal({ type: "error", title: "Gagal Menyimpan", text: result.message || "Gagal mengirim lembar jawaban ke server cloud." });
+            btnNext.disabled = false;
+            tampilkanSoal();
         }
-    } catch (e) {
-        showModal({ type: "error", title: "Koneksi Terputus", text: "Gangguan jaringan! Silakan tekan tombol SELESAI kembali." });
-        resetBtnSelesai();
+    } catch(e) {
+        showModal({ type: "error", title: "Rentan Putus Koneksi", text: "Gagal terhubung ke database. Silakan klik ulang Selesai." });
+        btnNext.disabled = false;
+        tampilkanSoal();
     }
-}
-
-function resetBtnSelesai() {
-    const btnNext = document.getElementById("btnNext");
-    btnNext.disabled = false;
-    btnNext.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> SELESAI`;
-}
-
-function pindahKe(sectionId) {
-    const container = document.getElementById("mainContainer");
-    
-    // Sesuaikan lebar pembungkus jika berpindah ke lembar soal CBT agar lebih lapang
-    if(sectionId === 'sec-soal') {
-        container.classList.remove("max-normal");
-    } else {
-        container.classList.add("max-normal");
-    }
-
-    document.querySelectorAll('.wizard-section').forEach(sec => sec.classList.remove('active'));
-    document.getElementById(sectionId).classList.add('active');
-    window.scrollTo(0,0);
 }
 
 function setStar(rating) {
     selectedRating = rating;
-    document.querySelectorAll('.star-rating i').forEach(star => {
-        const val = parseInt(star.getAttribute('data-rating'));
-        star.classList.toggle('active', val <= rating);
+    document.querySelectorAll(".star-rating i").forEach(star => {
+        const r = parseInt(star.getAttribute("data-rating"));
+        star.classList.toggle("active", r <= rating);
     });
 }
 
 function setRadio(element) {
-    document.querySelectorAll('.radio-btn').forEach(btn => btn.classList.remove('selected'));
-    element.classList.add('selected');
-    element.querySelector('input').checked = true;
+    document.querySelectorAll(".radio-btn").forEach(btn => btn.classList.remove("selected"));
+    element.classList.add("selected");
+    const radioInput = element.querySelector("input[type='radio']");
+    if(radioInput) radioInput.checked = true;
 }
 
 async function kirimKuesioner() {
-    const kesulitanInput = document.querySelector('input[name="mudah_soal"]:checked');
-    const saran = document.getElementById("saranText").value.trim();
-
-    if (selectedRating === 0 || !kesulitanInput) {
-        showModal({ type: "warning", title: "Data Belum Lengkap", text: "Mohon berikan rating bintang dan tingkat kemudahan soal terlebih dahulu." });
+    const rdoChecked = document.querySelector("input[name='mudah_soal']:checked");
+    if (selectedRating === 0 || !rdoChecked) {
+        showModal({ type: "warning", title: "Belum Lengkap", text: "Mohon berikan Bintang Rating dan pilih Tingkat Kemudahan Soal terlebih dahulu." });
         return;
     }
 
-    document.getElementById("spinKuesioner").style.display = "block";
-    document.getElementById("txtKuesioner").innerText = "Mengirim...";
-    document.getElementById("btnKuesioner").disabled = true;
+    const btn = document.getElementById("btnKuesioner");
+    const spin = document.getElementById("spinKuesioner");
+    const txt = document.getElementById("txtKuesioner");
+
+    btn.disabled = true;
+    spin.style.display = "inline-block";
+    txt.innerText = "MENGIRIM...";
 
     try {
-        const payload = {
-            action: "submit_kuisioner",
+        const payloadKuesioner = {
+            action: "submit_kuesioner",
             username: dataSiswa.username,
             nama: dataSiswa.nama,
             kelas: dataSiswa.kelas,
-            rate_aplikasi: selectedRating,
-            kemudahan_soal: kesulitanInput.value,
-            saran: saran
+            rating: selectedRating,
+            kemudahan: rdoChecked.value,
+            saran: document.getElementById("saranText").value || ""
         };
 
         const response = await fetch(SCRIPT_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(payloadKuesioner)
         });
-        const result = await response.json();
-        if (result.status) { 
-            pindahKe('sec-thanks'); 
-        } else { 
-            showModal({ type: "error", title: "Pengiriman Gagal", text: "Gagal menyimpan kuesioner: " + result.message });
-            resetBtnKuesioner(); 
-        }
-    } catch (e) {
-        showModal({ type: "error", title: "Kesalahan Jaringan", text: "Gagal menghubungi server untuk mengirim evaluasi." });
-        resetBtnKuesioner();
-    }
-}
 
-function resetBtnKuesioner() {
-    document.getElementById("spinKuesioner").style.display = "none";
-    document.getElementById("txtKuesioner").innerText = "KIRIM EVALUASI";
-    document.getElementById("btnKuesioner").disabled = false;
+        const result = await response.json();
+        if(result.status) {
+            pindahKe('sec-thanks');
+        } else {
+            showModal({ type: "error", title: "Gagal Kirim", text: "Database menolak data evaluasi kuesioner Anda." });
+            btn.disabled = false; spin.style.display = "none"; txt.innerText = "KIRIM EVALUASI";
+        }
+    } catch(e) {
+        showModal({ type: "error", title: "Koneksi Bermasalah", text: "Gagal terhubung ke cloud server SIMPATIK." });
+        btn.disabled = false; spin.style.display = "none"; txt.innerText = "KIRIM EVALUASI";
+    }
 }
 
 async function logoutFinal() {
     showModal({
         type: "warning",
-        title: "Keluar Sistem?",
-        text: "Apakah Anda ingin menutup sesi pengerjaan dan keluar dari aplikasi?",
+        title: "Konfirmasi Logout",
+        text: "Apakah Anda ingin keluar dari akun dan menutup sesi ujian di perangkat ini?",
         confirmText: "Ya, Keluar",
         cancelText: "Batal",
         onConfirm: async () => {
@@ -752,7 +754,7 @@ async function logoutFinal() {
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify({
                         action: "logout",
-                        id_login: dataSiswa.id_login || localStorage.getItem("id_login") || ""
+                        id_login: dataSiswa.id_login || ""
                     })
                 });
             } catch(e) {}
@@ -760,6 +762,20 @@ async function logoutFinal() {
             window.location.href = "index.html";
         }
     });
+}
+
+function pindahKe(sectionId) {
+    document.querySelectorAll(".wizard-section").forEach(sec => sec.classList.remove("active"));
+    const target = document.getElementById(sectionId);
+    if(target) {
+        target.classList.add("active");
+        const container = document.getElementById("mainContainer");
+        if(sectionId === "sec-soal") {
+            container.classList.remove("max-normal");
+        } else {
+            container.classList.add("max-normal");
+        }
+    }
 }
 </script>
 </body>
