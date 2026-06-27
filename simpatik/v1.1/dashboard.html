@@ -32,7 +32,7 @@
         body { 
             min-height: 100vh; 
             background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%); 
-            display: flex; justify-content: center; align-items: center; padding: 15px; 
+            display: flex; justify-content: center; align-items: center; padding: 12px; 
         }
         
         .container { width: 100%; max-width: 850px; transition: all 0.3s ease; }
@@ -40,81 +40,87 @@
         
         .card { 
             background: rgba(255, 255, 255, 0.98); 
-            border-radius: 24px; padding: 25px; 
+            border-radius: 20px; padding: 20px; 
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); 
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
         }
         @media(min-width: 768px) {
-            .card { padding: 35px; }
+            .card { padding: 35px; border-radius: 24px; }
         }
         
         .wizard-section { display: none; }
         .wizard-section.active { display: block; }
         
-        h2 { color: var(--text-dark); font-size: 22px; font-weight: 700; margin-bottom: 8px; text-align: center; }
-        .section-desc { color: var(--text-light); font-size: 14px; text-align: center; margin-bottom: 25px; }
+        h2 { color: var(--text-dark); font-size: 20px; font-weight: 700; margin-bottom: 8px; text-align: center; }
+        @media(min-width: 768px) { h2 { font-size: 24px; } }
+
+        .section-desc { color: var(--text-light); font-size: 13px; text-align: center; margin-bottom: 25px; line-height: 1.4; }
         
         .info-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; background: var(--bg-input); border-radius: 12px; overflow: hidden; }
-        .info-table td { padding: 14px 16px; font-size: 15px; border-bottom: 1px solid var(--border-color); color: var(--text-dark); }
-        .info-table td:first-child { font-weight: 600; color: var(--text-light); width: 35%; }
-        
-        .tp-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; justify-content: center; }
-        .btn-tp { flex: 1; min-width: 120px; padding: 12px; border: none; border-radius: 12px; color: white; font-weight: 600; font-size: 13px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s, cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .btn-tp.remedi-clickable { cursor: pointer; }
-        .btn-tp.remedi-clickable:hover { transform: scale(1.05); opacity: 0.9; }
-        
-        .cbt-layout { display: grid; grid-template-columns: 1fr; gap: 25px; }
+        .info-table td { padding: 12px 14px; font-size: 14px; border-bottom: 1px solid var(--border-color); color: var(--text-dark); }
+        .info-table td:first-child { font-weight: 600; color: var(--text-light); width: 40%; }
         @media(min-width: 768px) {
-            .cbt-layout { grid-template-columns: 2.8fr 1.2fr; }
+            .info-table td { padding: 14px 16px; font-size: 15px; }
+            .info-table td:first-child { width: 35%; }
+        }
+        
+        .tp-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; justify-content: center; }
+        @media(min-width: 480px) { .tp-container { flex-direction: row; flex-wrap: wrap; } }
+        
+        .btn-tp { width: 100%; padding: 12px; border: none; border-radius: 12px; color: white; font-weight: 600; font-size: 13px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s, cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @media(min-width: 480px) { .btn-tp { flex: 1; min-width: 140px; } }
+        .btn-tp.remedi-clickable { cursor: pointer; }
+        .btn-tp.remedi-clickable:hover { transform: scale(1.03); opacity: 0.9; }
+        
+        .cbt-layout { display: flex; flex-direction: column; gap: 25px; }
+        @media(min-width: 768px) {
+            .cbt-layout { display: grid; grid-template-columns: 2.8fr 1.2fr; }
         }
 
-        .box-soal { background: var(--bg-input); padding: 20px; border-radius: 14px; border: 1px solid var(--border-color); margin-bottom: 20px; font-size: 16px; color: var(--text-dark); line-height: 1.6; }
-        .img-soal { width: 100%; max-height: 250px; object-fit: contain; border-radius: 8px; margin-top: 12px; border: 1px solid var(--border-color); display: none; }
+        .box-soal { background: var(--bg-input); padding: 16px; border-radius: 14px; border: 1px solid var(--border-color); margin-bottom: 20px; font-size: 15px; color: var(--text-dark); line-height: 1.6; word-break: break-word; }
+        @media(min-width: 768px) { .box-soal { padding: 20px; font-size: 16px; } }
+        .img-soal { width: 100%; max-height: 220px; object-fit: contain; border-radius: 8px; margin-top: 12px; border: 1px solid var(--border-color); display: none; }
         
-        .opsi-jawaban { display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; }
-        .opsi { padding: 14px 16px; border: 1.5px solid var(--border-color); border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 15px; background: white; transition: all 0.2s ease; }
-        .opsi:hover { border-color: var(--primary-light); background: #f0f7ff; transform: translateX(4px); }
+        .opsi-jawaban { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
+        .opsi { padding: 12px 14px; border: 1.5px solid var(--border-color); border-radius: 12px; cursor: pointer; display: flex; align-items: flex-start; gap: 10px; font-size: 14px; background: white; transition: all 0.2s ease; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .opsi:hover { border-color: var(--primary-light); background: #f0f7ff; }
         .opsi.selected { border-color: var(--primary-light); background: #e0f2fe; font-weight: 600; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15); }
         .opsi input { display: none; }
-        
-        .nav-soal { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            gap: 12px; 
-            width: 100%;
-        }
-        .nav-soal .btn {
-            flex: 1;
-            width: 50%;
-            padding: 14px 10px;
-            font-size: 15px;
-            justify-content: center;
-            white-space: nowrap;
-        }
-
-        .cbt-nav-panel { border-left: 0px solid var(--border-color); padding-left: 0; }
+        .opsi span { line-height: 1.4; }
         @media(min-width: 768px) {
-            .cbt-nav-panel { border-left: 1px solid var(--border-color); padding-left: 20px; }
+            .opsi { padding: 14px 16px; font-size: 15px; gap: 12px; }
+            .opsi:hover { transform: translateX(4px); }
+        }
+        
+        .nav-soal { display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%; }
+        .nav-soal .btn { flex: 1; padding: 12px 10px; font-size: 14px; justify-content: center; white-space: nowrap; }
+        @media(min-width: 768px) { .nav-soal .btn { padding: 14px 10px; font-size: 15px; } }
+
+        .cbt-nav-panel { border-top: 1px solid var(--border-color); padding-top: 20px; }
+        @media(min-width: 768px) {
+            .cbt-nav-panel { border-top: none; border-left: 1px solid var(--border-color); padding-top: 0; padding-left: 20px; }
         }
         .nav-panel-title { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-        .grid-nomor { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-        .btn-nomor { width: 100%; aspect-ratio: 1; border: 1.5px solid var(--border-color); background: white; color: var(--text-dark); font-weight: 600; font-size: 14px; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; }
+        .grid-nomor { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+        @media(min-width: 768px) { .grid-nomor { gap: 8px; } }
+        .btn-nomor { width: 100%; aspect-ratio: 1; border: 1.5px solid var(--border-color); background: white; color: var(--text-dark); font-weight: 600; font-size: 13px; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; }
         .btn-nomor:hover { border-color: var(--primary-light); background: #f0f7ff; }
         .btn-nomor.answered { background: var(--primary-light); color: white; border-color: var(--primary-light); }
-        .btn-nomor.active { border: 3px solid #0f172a; box-shadow: 0 0 0 2px var(--primary-light); font-weight: 800; transform: scale(1.05); }
+        .btn-nomor.active { border: 2.5px solid #0f172a; box-shadow: 0 0 0 2px var(--primary-light); font-weight: 800; transform: scale(1.03); }
 
-        .nilai-circle { width: 120px; height: 120px; background: #f0fdf4; border: 4px solid var(--success); color: var(--success); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 42px; font-weight: 800; margin: 0 auto 20px; transition: all 0.3s ease; }
-        .nilai-circle:hover { transform: scale(1.1) rotate(5deg); }
+        .nilai-circle { width: 110px; height: 110px; background: #f0fdf4; border: 4px solid var(--success); color: var(--success); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 38px; font-weight: 800; margin: 0 auto 20px; transition: all 0.3s ease; }
+        @media(min-width: 768px) { .nilai-circle { width: 120px; height: 120px; font-size: 42px; } .nilai-circle:hover { transform: scale(1.1) rotate(5deg); } }
         
-        .star-rating { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; font-size: 32px; flex-direction: row-reverse; }
-        .star-rating i { color: #cbd5e1; cursor: pointer; transition: color 0.2s, transform 0.1s; }
+        .star-rating { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; font-size: 28px; flex-direction: row-reverse; }
+        @media(min-width: 768px) { .star-rating { font-size: 32px; } }
+        .star-rating i { color: #cbd5e1; cursor: pointer; transition: color 0.2s, transform 0.1s; -webkit-tap-highlight-color: transparent; }
         .star-rating i:hover { transform: scale(1.2); }
         .star-rating i:hover, .star-rating i:hover ~ i, .star-rating i.active, .star-rating i.active ~ i { color: #fbbf24; }
         
-        .radio-group { display: flex; justify-content: space-around; gap: 10px; margin-bottom: 20px; }
-        .radio-btn { flex: 1; text-align: center; padding: 12px; border: 1.5px solid var(--border-color); border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-dark); background: white; transition: all 0.2s; }
+        .radio-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+        @media(min-width: 480px) { .radio-group { flex-direction: row; justify-content: space-around; gap: 10px; } }
+        .radio-btn { flex: 1; text-align: center; padding: 12px; border: 1.5px solid var(--border-color); border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-dark); background: white; transition: all 0.2s; -webkit-tap-highlight-color: transparent; }
         .radio-btn input { display: none; }
         .radio-btn:hover { border-color: var(--primary-light); }
         .radio-btn.selected { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(30, 64, 175, 0.2); }
@@ -122,33 +128,40 @@
         textarea { width: 100%; padding: 12px; border: 1.5px solid var(--border-color); border-radius: 12px; resize: none; min-height: 80px; font-size: 14px; outline: none; margin-bottom: 25px; background: var(--bg-input); transition: all 0.2s; }
         textarea:focus { border-color: var(--primary-light); background: white; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
         
-        .btn { padding: 15px; border: none; border-radius: 12px; background: var(--primary); color: white; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: all 0.2s; position: relative; overflow: hidden; }
+        .btn { padding: 14px; border: none; border-radius: 12px; background: var(--primary); color: white; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: all 0.2s; position: relative; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+        @media(min-width: 768px) { .btn { padding: 15px; font-size: 15px; } }
         .btn-block { width: 100%; }
-        .btn:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(29, 78, 216, 0.2); }
+        .btn:hover { background: #1d4ed8; }
+        @media(min-width: 768px) { .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(29, 78, 216, 0.2); } }
         .btn:active { transform: translateY(1px); }
         .btn-success { background: var(--success); }
-        .btn-success:hover { background: #16a34a; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2); }
+        .btn-success:hover { background: #16a34a; }
+        @media(min-width: 768px) { .btn-success:hover { box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2); } }
         
-        .app-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--border-color); font-size: 13px; color: var(--text-light); }
-        .btn-logout-footer { background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s; font-size: 12px; }
+        .app-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--border-color); font-size: 12px; color: var(--text-light); }
+        .btn-logout-footer { background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s; font-size: 11px; -webkit-tap-highlight-color: transparent; }
         .btn-logout-footer:hover { background: #ef4444; color: white; }
 
         .spinner { display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 0.8s linear infinite; }
         .thankyou-wrapper { text-align: center; padding: 15px 0; }
-        .thankyou-icon { font-size: 65px; color: var(--success); margin-bottom: 20px; animation: bounceIn 1s; }
+        .thankyou-icon { font-size: 55px; color: var(--success); margin-bottom: 20px; animation: bounceIn 1s; }
+        @media(min-width: 768px) { .thankyou-icon { font-size: 65px; } }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 9999; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 9999; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 15px; }
         .modal-overlay.show { opacity: 1; pointer-events: auto; }
-        .modal-box { background: white; width: 90%; max-width: 420px; border-radius: 20px; padding: 25px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .modal-box { background: white; width: 100%; max-width: 400px; border-radius: 20px; padding: 25px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .modal-overlay.show .modal-box { transform: scale(1); }
-        .modal-icon { font-size: 50px; margin-bottom: 15px; display: inline-block; }
+        .modal-icon { font-size: 45px; margin-bottom: 12px; display: inline-block; }
+        @media(min-width: 768px) { .modal-icon { font-size: 50px; margin-bottom: 15px; } }
         .modal-icon.error { color: #ef4444; }
         .modal-icon.warning { color: var(--belum-tuntas); }
         .modal-icon.success { color: var(--success); }
         .modal-title { font-size: 18px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
         .modal-text { font-size: 14px; color: var(--text-light); line-height: 1.5; margin-bottom: 20px; }
-        .modal-buttons { display: flex; gap: 10px; justify-content: center; }
-        .modal-btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: center; flex-direction: column-reverse; }
+        @media(min-width: 400px) { .modal-buttons { flex-direction: row; } }
+        .modal-btn { width: 100%; padding: 11px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; -webkit-tap-highlight-color: transparent; }
+        @media(min-width: 400px) { .modal-btn { width: auto; } }
         .modal-btn-primary { background: var(--primary); color: white; }
         .modal-btn-primary:hover { background: #1d4ed8; }
         .modal-btn-secondary { background: #e2e8f0; color: var(--text-dark); }
@@ -182,8 +195,8 @@
             </table>
 
             <div class="tp-container">
-                <button id="btn-tp1" class="btn-tp" style="background-color: var(--text-light); max-width: 250px;">TP 1: Memuat...</button>
-                <button id="btn-tp2" class="btn-tp" style="background-color: var(--text-light); max-width: 250px;">TP 2: Memuat...</button>
+                <button id="btn-tp1" class="btn-tp" style="background-color: var(--text-light);">TP 1: Memuat...</button>
+                <button id="btn-tp2" class="btn-tp" style="background-color: var(--text-light);">TP 2: Memuat...</button>
             </div>
 
             <button class="btn btn-block" id="btnMulaiUjian" onclick="mulaiUjian()" disabled>MENGUNDUH SOAL...</button>
@@ -231,7 +244,7 @@
             <p style="text-align: center; color: var(--text-light); font-size: 13px; margin-bottom: 25px; line-height: 1.5;">
                 <span style="color: var(--belum-tuntas); font-weight: bold;">*Catatan:</span> Tombol berwarna orange menandakan nilai di bawah KKM. Anda dapat mengekliknya jika ingin langsung mengulang materi tersebut.
             </p>
-            <button class="btn btn-block" onclick="pindahKe('sec-kuesioner')">ISI EVALUASI & KUESIONER &nbsp;<i class="fa-solid fa-pen-to-square"></i></button>
+            <button class="btn btn-block" id="btnPindahKuesioner" onclick="pindahKe('sec-kuesioner')" style="display: none;">ISI EVALUASI & KUESIONER &nbsp;<i class="fa-solid fa-pen-to-square"></i></button>
 
             <div class="app-footer">
                 <span>SIMPATIK &copy; 2026</span>
@@ -498,7 +511,7 @@ function mulaiRemidiPerTP(kodeTP) {
 function tampilkanSoal() {
     const soal = masterSoal[indeksSekarang];
     document.getElementById("info-progres").innerText = `Soal ${indeksSekarang + 1} dari ${masterSoal.length}`;
-    document.getElementById("konten-soal").innerHTML = `<strong>Soal No. ${indeksSekarang + 1} (Asli No. ${soal.no}):</strong><br>${soal.pertanyaan}`;
+    document.getElementById("konten-soal").innerHTML = `<strong>Soal No. ${indeksSekarang + 1}:</strong><br>${soal.pertanyaan}`;
     
     const imgEl = document.getElementById("gambar-soal");
     if(soal.gambar && soal.gambar.trim() !== "") {
@@ -571,7 +584,6 @@ async function hitungDanSelesaiUjian() {
     let skorMaksTP1 = 0, skorSiswaTP1 = 0;
     let skorMaksTP2 = 0, skorSiswaTP2 = 0;
     let totalSkorSiswa = 0, totalSkorMaksimal = 0;
-    let daftarLingkup = new Set();
 
     masterSoal.forEach((soal, indeks) => {
         const noSoal = parseInt(soal.no);
@@ -580,7 +592,6 @@ async function hitungDanSelesaiUjian() {
 
         totalSkorMaksimal += bobotSkor;
         if (isBenar) totalSkorSiswa += bobotSkor;
-        if (soal.lingkup) daftarLingkup.add(soal.lingkup);
 
         if (noSoal >= 1 && noSoal <= 10) {
             skorMaksTP1 += bobotSkor;
@@ -594,14 +605,14 @@ async function hitungDanSelesaiUjian() {
     const skorAkhir = totalSkorMaksimal > 0 ? Math.round((totalSkorSiswa / totalSkorMaksimal) * 100) : 0;
     const persenTP1 = skorMaksTP1 > 0 ? Math.round((skorSiswaTP1 / skorMaksTP1) * 100) : 0;
     const persenTP2 = skorMaksTP2 > 0 ? Math.round((skorSiswaTP2 / skorMaksTP2) * 100) : 0;
-    
-    let analisisTpSiswa = {
-        "TP1": { lingkup: "Materi Kelompok 1", persentase: persenTP1, aktif: skorMaksTP1 > 0 },
-        "TP2": { lingkup: "Materi Kelompok 2", persentase: persenTP2, aktif: skorMaksTP2 > 0 }
-    };
+
+    document.getElementById("txtSkor").innerText = skorAkhir;
 
     const containerTP = document.getElementById("analisis-tp-container");
     containerTP.innerHTML = ""; 
+
+    let tp1Tuntas = true;
+    let tp2Tuntas = true;
 
     if (skorMaksTP1 > 0) {
         const btn1 = document.createElement("button");
@@ -614,8 +625,12 @@ async function hitungDanSelesaiUjian() {
             btn1.classList.add("remedi-clickable");
             btn1.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> TP 1: ${persenTP1} (Remidi)`;
             btn1.onclick = () => mulaiRemidiPerTP("TP1");
+            tp1Tuntas = false;
         }
         containerTP.appendChild(btn1);
+    } else {
+        const statusTP = dataSiswa.status_tp || { tp1: "BELUM TUNTAS", tp2: "BELUM TUNTAS" };
+        if (statusTP.tp1 !== "TUNTAS") tp1Tuntas = false;
     }
 
     if (skorMaksTP2 > 0) {
@@ -629,67 +644,57 @@ async function hitungDanSelesaiUjian() {
             btn2.classList.add("remedi-clickable");
             btn2.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> TP 2: ${persenTP2} (Remidi)`;
             btn2.onclick = () => mulaiRemidiPerTP("TP2");
+            tp2Tuntas = false;
         }
         containerTP.appendChild(btn2);
+    } else {
+        const statusTP = dataSiswa.status_tp || { tp1: "BELUM TUNTAS", tp2: "BELUM TUNTAS" };
+        if (statusTP.tp2 !== "TUNTAS") tp2Tuntas = false;
     }
-    
-    try {
-        const payloadJawaban = {
-            action: "submit_jawaban",
-            id_login: dataSiswa.id_login,
-            username: dataSiswa.username,
-            skor: skorAkhir,
-            analisis_tp: JSON.stringify(analisisTpSiswa)
-        };
 
-        const response = await fetch(SCRIPT_URL, {
+    const btnPindahKuesioner = document.getElementById("btnPindahKuesioner");
+    if (tp1Tuntas && tp2Tuntas) {
+        btnPindahKuesioner.style.display = "flex";
+    } else {
+        btnPindahKuesioner.style.display = "none";
+    }
+
+    try {
+        await fetch(SCRIPT_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify(payloadJawaban)
+            body: JSON.stringify({
+                action: "submit_ujian",
+                username: dataSiswa.username,
+                skor: skorAkhir,
+                detail_tp: { tp1: persenTP1, tp2: persenTP2 }
+            })
         });
-        const result = await response.json();
-        
-        if (result.status) {
-            document.getElementById("txtSkor").innerText = skorAkhir;
-            
-            if (dataSiswa.status_tp) {
-                if (skorMaksTP1 > 0) dataSiswa.status_tp.tp1 = (persenTP1 >= kkmServer) ? "TUNTAS" : "BELUM TUNTAS";
-                if (skorMaksTP2 > 0) dataSiswa.status_tp.tp2 = (persenTP2 >= kkmServer) ? "TUNTAS" : "BELUM TUNTAS";
-                localStorage.setItem("sesi_siswa", JSON.stringify(dataSiswa));
-            }
-
-            pindahKe('sec-nilai');
-        } else {
-            showModal({ type: "error", title: "Gagal Menyimpan", text: result.message || "Gagal mengirim jawaban ke server." });
-            btnNext.disabled = false;
-            btnNext.innerHTML = `Selanjutnya <i class="fa-solid fa-chevron-right"></i>`;
-        }
-    } catch (e) {
-        showModal({ type: "error", title: "Koneksi Terputus", text: "Terjadi kesalahan jaringan saat mencoba mengirim jawaban ujian." });
         btnNext.disabled = false;
-        btnNext.innerHTML = `Selanjutnya <i class="fa-solid fa-chevron-right"></i>`;
+        pindahKe('sec-nilai');
+    } catch (e) {
+        btnNext.disabled = false;
+        tampilkanSoal();
+        showModal({ type: "error", title: "Gagal Kirim", text: "Gagal mengirim lembar jawaban ke server. Silakan coba klik selesai kembali." });
     }
 }
 
-function pindahKe(sectionId) {
+function pindahKe(idSection) {
     document.querySelectorAll('.wizard-section').forEach(sec => sec.classList.remove('active'));
-    const targetSection = document.getElementById(sectionId);
-    if(targetSection) targetSection.classList.add('active');
+    document.getElementById(idSection).classList.add('active');
     
-    const container = document.getElementById("mainContainer");
-    if (sectionId === "sec-soal") {
-        container.classList.remove("max-normal");
+    if(idSection === 'sec-soal' || idSection === 'sec-nilai') {
+        document.getElementById("mainContainer").classList.remove("max-normal");
     } else {
-        container.classList.add("max-normal");
+        document.getElementById("mainContainer").classList.add("max-normal");
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function setStar(rating) {
     selectedRating = rating;
     document.querySelectorAll('.star-rating i').forEach(star => {
-        const r = parseInt(star.getAttribute('data-rating'));
-        star.classList.toggle('active', r <= rating);
+        const val = parseInt(star.getAttribute('data-rating'));
+        star.classList.toggle('active', val <= rating);
     });
 }
 
@@ -702,78 +707,52 @@ function setRadio(element) {
 }
 
 async function kirimKuesioner() {
-    const radioSelected = document.querySelector('input[name="mudah_soal"]:checked');
+    const mudahSoalEl = document.querySelector('input[name="mudah_soal"]:checked');
     const saranText = document.getElementById("saranText").value.trim();
 
-    if (selectedRating === 0) {
-        showModal({ type: "warning", title: "Rating Kosong", text: "Mohon berikan bintang penilaian aplikasi terlebih dahulu." });
-        return;
-    }
-    if (!radioSelected) {
-        showModal({ type: "warning", title: "Belum Lengkap", text: "Mohon pilih salah satu opsi tingkat kemudahan soal ujian." });
+    if(selectedRating === 0 || !mudahSoalEl) {
+        showModal({ type: "warning", title: "Data Belum Lengkap", text: "Mohon berikan rating bintang dan pilih tingkat kemudahan soal terlebih dahulu." });
         return;
     }
 
+    const btn = document.getElementById("btnKuesioner");
     const spin = document.getElementById("spinKuesioner");
     const txt = document.getElementById("txtKuesioner");
-    const btn = document.getElementById("btnKuesioner");
 
     btn.disabled = true;
-    spin.style.display = "inline-block";
+    spin.style.display = "block";
     txt.innerText = "MENGIRIM...";
 
     try {
-        const response = await fetch(SCRIPT_URL, {
+        await fetch(SCRIPT_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify({
                 action: "submit_kuesioner",
-                id_login: dataSiswa.id_login,
                 username: dataSiswa.username,
                 rating: selectedRating,
-                kemudahan: radioSelected.value,
+                kemudahan: mudahSoalEl.value,
                 saran: saranText
             })
         });
-        const result = await response.json();
-        if (result.status) {
-            pindahKe('sec-thanks');
-        } else {
-            showModal({ type: "error", title: "Gagal", text: "Gagal menyimpan kuesioner ke cloud server database." });
-             normalState();
-        }
-    } catch (e) {
-        showModal({ type: "error", title: "Koneksi Bermasalah", text: "Data gagal terkirim. Periksa koneksi internet Anda." });
-        normalState();
-    }
-
-    function normalState() {
+        pindahKe('sec-thanks');
+    } catch(e) {
+        showModal({ type: "error", title: "Gagal Mengirim", text: "Terjadi kesalahan koneksi saat mencoba menyimpan data evaluasi." });
+    } finally {
         btn.disabled = false;
         spin.style.display = "none";
         txt.innerText = "KIRIM EVALUASI";
     }
 }
 
-async function logoutFinal() {
+function logoutFinal() {
     showModal({
         type: "warning",
-        title: "Konfirmasi Logout",
-        text: "Apakah Anda yakin ingin keluar dari sistem ujian ini?",
+        title: "Keluar Sistem?",
+        text: "Apakah Anda yakin ingin menutup sesi dashboard halaman ini dan keluar?",
         confirmText: "Ya, Keluar",
         cancelText: "Batal",
-        onConfirm: async () => {
-            try {
-                if(dataSiswa && dataSiswa.id_login) {
-                    await fetch(SCRIPT_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "text/plain;charset=utf-8" },
-                        body: JSON.stringify({
-                            action: "logout",
-                            id_login: dataSiswa.id_login
-                        })
-                    });
-                }
-            } catch(e) {}
+        onConfirm: () => {
             localStorage.clear();
             window.location.href = "index.html";
         }
