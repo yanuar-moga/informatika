@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Ujian - SIMPATIK v1.1</title>
+    <title>Dashboard Ujian - SIMPATIK v1.2</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -659,6 +659,14 @@ async function hitungDanSelesaiUjian() {
         btnPindahKuesioner.style.display = "none";
     }
 
+    // --- BAGIAN REVISI UTAMA: Mengemas objek pilihan jawaban asli siswa ---
+    let listJawabanReal = {};
+    masterSoal.forEach((soal, indeks) => {
+        if (jawabanSiswa[indeks] !== undefined) {
+            listJawabanReal[soal.no] = jawabanSiswa[indeks];
+        }
+    });
+
     try {
         await fetch(SCRIPT_URL, {
             method: "POST",
@@ -667,7 +675,8 @@ async function hitungDanSelesaiUjian() {
                 action: "submit_ujian",
                 username: dataSiswa.username,
                 skor: skorAkhir,
-                detail_tp: { tp1: persenTP1, tp2: persenTP2 }
+                detail_tp: { tp1: persenTP1, tp2: persenTP2 },
+                list_jawaban: listJawabanReal // <-- Data Jawaban Asli terkirim sekarang!
             })
         });
         btnNext.disabled = false;
