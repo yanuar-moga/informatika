@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Ujian - SIMPATIK v1.2</title>
+    <title>Dashboard Ujian - SIMPATIK v1.1</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -202,7 +202,7 @@
             <button class="btn btn-block" id="btnMulaiUjian" onclick="mulaiUjian()" disabled>MENGUNDUH SOAL...</button>
 
             <div class="app-footer">
-                <span>SIMPATIK &copy; 2026</span>
+                <span>SIMPATIK V 1.0 Dev by MB &copy; 2026</span>
                 <button class="btn-logout-footer" onclick="logoutFinal()"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
             </div>
         </div>
@@ -659,14 +659,6 @@ async function hitungDanSelesaiUjian() {
         btnPindahKuesioner.style.display = "none";
     }
 
-    // --- BAGIAN REVISI UTAMA: Mengemas objek pilihan jawaban asli siswa ---
-    let listJawabanReal = {};
-    masterSoal.forEach((soal, indeks) => {
-        if (jawabanSiswa[indeks] !== undefined) {
-            listJawabanReal[soal.no] = jawabanSiswa[indeks];
-        }
-    });
-
     try {
         await fetch(SCRIPT_URL, {
             method: "POST",
@@ -675,8 +667,7 @@ async function hitungDanSelesaiUjian() {
                 action: "submit_ujian",
                 username: dataSiswa.username,
                 skor: skorAkhir,
-                detail_tp: { tp1: persenTP1, tp2: persenTP2 },
-                list_jawaban: listJawabanReal // <-- Data Jawaban Asli terkirim sekarang!
+                detail_tp: { tp1: persenTP1, tp2: persenTP2 }
             })
         });
         btnNext.disabled = false;
