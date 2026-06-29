@@ -247,7 +247,7 @@
             <button class="btn btn-block" id="btnPindahKuesioner" onclick="pindahKe('sec-kuesioner')" style="display: none;">ISI EVALUASI & KUESIONER &nbsp;<i class="fa-solid fa-pen-to-square"></i></button>
 
             <div class="app-footer">
-                <span>SIMPATIK V 1.0 Dev by MB &copy; 2026</span>
+                <span>SIMPATIK &copy; 2026</span>
                 <button class="btn-logout-footer" onclick="logoutFinal()"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
             </div>
         </div>
@@ -468,7 +468,7 @@ function buatNavigasiNomorCbt() {
             indeksSekarang = idx;
             tampilkanSoal();
         };
-        gridContainer.appendChild(btn);
+        gridContainer.appendChild(gridContainer.appendChild(btn));
     });
 }
 
@@ -659,6 +659,15 @@ async function hitungDanSelesaiUjian() {
         btnPindahKuesioner.style.display = "none";
     }
 
+    // --- PROSES PAIRING CONVERT & FIX JAWABAN KOLOM O-AH UNTUK GAS ---
+    let jawabanFormatGAS = {};
+    masterSoal.forEach((soal, indeks) => {
+        if (jawabanSiswa[indeks] !== undefined) {
+            // soal.no menyimpan string/angka nomor soal asli (1, 2, 3, dst)
+            jawabanFormatGAS[soal.no] = jawabanSiswa[indeks]; 
+        }
+    });
+
     try {
         await fetch(SCRIPT_URL, {
             method: "POST",
@@ -667,7 +676,8 @@ async function hitungDanSelesaiUjian() {
                 action: "submit_ujian",
                 username: dataSiswa.username,
                 skor: skorAkhir,
-                detail_tp: { tp1: persenTP1, tp2: persenTP2 }
+                detail_tp: { tp1: persenTP1, tp2: persenTP2 },
+                list_jawaban: jawabanFormatGAS // Mengirimkan payload objek yang cocok dengan backend GAS
             })
         });
         btnNext.disabled = false;
