@@ -3,21 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>SIMPATIK v1.0 - SMPN 1 Moga</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
-            --primary: #1e40af;
+            --primary: #1d4ed8;
+            --primary-dark: #0f2f78;
             --primary-light: #3b82f6;
-            --text-dark: #1e293b;
+            --secondary: #60a5fa;
+            --text-dark: #172033;
             --text-light: #64748b;
             --bg-input: #f8fafc;
             --border-color: #e2e8f0;
+            --success: #22c55e;
+            --danger: #ef4444;
         }
 
         * {
@@ -29,74 +37,229 @@
 
         body {
             min-height: 100vh;
-            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%);
+            overflow-x: hidden;
+            background:
+                radial-gradient(circle at 10% 10%, rgba(96,165,250,.28), transparent 30%),
+                radial-gradient(circle at 90% 85%, rgba(59,130,246,.25), transparent 35%),
+                linear-gradient(135deg, #07162f 0%, #0f2f78 48%, #1d4ed8 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 28px 20px;
+            position: relative;
+        }
+
+        /* ORNAMEN BACKGROUND */
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(1px);
+        }
+
+        body::before {
+            width: 420px;
+            height: 420px;
+            top: -180px;
+            left: -150px;
+            background: rgba(255,255,255,.05);
+            border: 1px solid rgba(255,255,255,.08);
+        }
+
+        body::after {
+            width: 500px;
+            height: 500px;
+            bottom: -260px;
+            right: -180px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.08);
+        }
+
+        .background-grid {
+            position: fixed;
+            inset: 0;
+            opacity: .05;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px);
+            background-size: 45px 45px;
+            mask-image: linear-gradient(
+                to bottom,
+                transparent,
+                black 30%,
+                black 70%,
+                transparent
+            );
         }
 
         .container {
             width: 100%;
-            max-width: 440px;
-            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            max-width: 470px;
+            position: relative;
+            z-index: 2;
+            animation: pageEnter .7s cubic-bezier(.16,1,.3,1);
         }
 
+        /* STATUS ATAS */
+        .system-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: rgba(255,255,255,.88);
+            font-size: 12px;
+            margin-bottom: 14px;
+            letter-spacing: .2px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 0 5px rgba(74,222,128,.12);
+            animation: pulseStatus 2s infinite;
+        }
+
+        /* CARD */
         .card {
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 24px;
-            padding: 40px 35px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,.98);
+            border-radius: 30px;
+            padding: 34px 34px 32px;
+            box-shadow:
+                0 30px 70px rgba(0,0,0,.28),
+                inset 0 1px 0 rgba(255,255,255,.7);
+            border: 1px solid rgba(255,255,255,.45);
+            position: relative;
+            overflow: hidden;
         }
 
+        .card::before {
+            content: "";
+            position: absolute;
+            height: 5px;
+            left: 0;
+            right: 0;
+            top: 0;
+            background: linear-gradient(
+                90deg,
+                #1d4ed8,
+                #60a5fa,
+                #1d4ed8
+            );
+        }
+
+        /* HEADER */
         .header-app {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
         }
 
         .logo-wrapper {
-            width: 80px;
-            height: 80px;
-            background: white;
-            border-radius: 20px;
+            width: 88px;
+            height: 88px;
+            background:
+                linear-gradient(
+                    145deg,
+                    #ffffff,
+                    #eef5ff
+                );
+            border-radius: 26px;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 0 auto 16px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.06);
-            border: 1px solid #f1f5f9;
+            margin: 0 auto 17px;
+            box-shadow:
+                0 12px 25px rgba(30,64,175,.15),
+                inset 0 1px 0 white;
+            border: 1px solid #e5edf9;
+            transform: rotate(-2deg);
         }
 
         .logo-wrapper img {
-            width: 60px;
-            height: auto;
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            transform: rotate(2deg);
+        }
+
+        .app-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: #eff6ff;
+            color: var(--primary);
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .7px;
+            margin-bottom: 10px;
+        }
+
+        .app-badge i {
+            font-size: 11px;
         }
 
         .title {
             color: var(--text-dark);
-            font-size: 26px;
-            font-weight: 700;
+            font-size: 32px;
+            line-height: 1;
+            font-weight: 800;
+            letter-spacing: -.8px;
         }
 
         .subtitle {
             color: var(--text-light);
-            margin-top: 6px;
-            font-size: 13px;
-            line-height: 1.5;
+            margin: 10px auto 0;
+            font-size: 12px;
+            line-height: 1.7;
+            max-width: 340px;
         }
 
+        /* DIVIDER */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            height: 1px;
+            flex: 1;
+            background: #e2e8f0;
+        }
+
+        /* FORM */
         .input-group {
             margin-bottom: 18px;
         }
 
         .input-group label {
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 7px;
             margin-bottom: 8px;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-dark);
-            font-size: 14px;
+            font-size: 13px;
+        }
+
+        .input-group label i {
+            color: var(--primary);
+            font-size: 12px;
         }
 
         .input-wrapper {
@@ -108,21 +271,25 @@
         .input-wrapper i.input-icon {
             position: absolute;
             left: 16px;
-            color: var(--text-light);
+            color: #94a3b8;
             font-size: 16px;
             z-index: 2;
+            transition: .25s ease;
         }
 
-        .input-wrapper input, .input-wrapper select {
+        .input-wrapper input,
+        .input-wrapper select {
             width: 100%;
-            padding: 14px 16px 14px 46px;
+            height: 54px;
+            padding: 0 44px 0 47px;
             border: 1.5px solid var(--border-color);
             background: var(--bg-input);
-            border-radius: 12px;
+            border-radius: 15px;
             outline: none;
-            font-size: 15px;
+            font-size: 14px;
             color: var(--text-dark);
-            transition: all 0.3s ease;
+            font-weight: 500;
+            transition: all .25s ease;
             appearance: none;
             -webkit-appearance: none;
         }
@@ -131,95 +298,191 @@
             cursor: pointer;
         }
 
-        /* Panah kustom untuk dropdown select */
+        .input-wrapper select:disabled {
+            cursor: not-allowed;
+            opacity: .65;
+            background: #f1f5f9;
+        }
+
         .input-wrapper::after {
             content: '\f107';
             font-family: 'Font Awesome 6 Free';
             font-weight: 900;
             position: absolute;
-            right: 16px;
-            color: var(--text-light);
+            right: 17px;
+            color: #94a3b8;
             pointer-events: none;
+            transition: .25s ease;
         }
-        
-        /* Hilangkan panah kustom pada input teks biasa */
+
         .input-wrapper.no-arrow::after {
             display: none;
         }
 
-        .input-wrapper input:focus, .input-wrapper select:focus {
+        .input-wrapper:focus-within i.input-icon {
+            color: var(--primary);
+        }
+
+        .input-wrapper:focus-within::after {
+            color: var(--primary);
+        }
+
+        .input-wrapper input:focus,
+        .input-wrapper select:focus {
             border-color: var(--primary-light);
-            background: white;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            background: #ffffff;
+            box-shadow:
+                0 0 0 4px rgba(59,130,246,.10),
+                0 6px 14px rgba(30,64,175,.05);
+        }
+
+        .input-wrapper input::placeholder {
+            color: #a0aec0;
         }
 
         .toggle-password {
             position: absolute;
-            right: 16px;
+            right: 17px;
             cursor: pointer;
-            color: var(--text-light);
-            z-index: 2;
+            color: #94a3b8;
+            z-index: 5;
+            transition: .2s ease;
+            padding: 5px;
         }
 
+        .toggle-password:hover {
+            color: var(--primary);
+        }
+
+        /* INFO TOKEN */
+        .token-info {
+            display: flex;
+            gap: 9px;
+            align-items: flex-start;
+            background: #f8fbff;
+            border: 1px solid #e6eefb;
+            border-radius: 13px;
+            padding: 11px 13px;
+            margin-top: -5px;
+            margin-bottom: 21px;
+            color: #64748b;
+            font-size: 11px;
+            line-height: 1.55;
+        }
+
+        .token-info i {
+            color: var(--primary-light);
+            margin-top: 2px;
+        }
+
+        /* BUTTON */
         .btn {
             width: 100%;
-            padding: 15px;
+            min-height: 56px;
             border: none;
-            border-radius: 12px;
-            background: var(--primary);
+            border-radius: 16px;
+            background:
+                linear-gradient(
+                    135deg,
+                    #1d4ed8,
+                    #2563eb 55%,
+                    #3b82f6
+                );
             color: white;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: .6px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+            transition: all .25s ease;
+            box-shadow:
+                0 12px 24px rgba(29,78,216,.25);
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 10px;
-            margin-top: 5px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .btn:hover { background: #1d4ed8; transform: translateY(-1px); }
-        .btn:disabled { background: #94a3b8; cursor: not-allowed; }
+        .btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -110%;
+            width: 70%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255,255,255,.2),
+                transparent
+            );
+            transform: skewX(-25deg);
+            transition: .6s ease;
+        }
+
+        .btn:hover::before {
+            left: 150%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 16px 30px rgba(29,78,216,.35);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
 
         .spinner {
             display: none;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
+            width: 19px;
+            height: 19px;
+            border: 3px solid rgba(255,255,255,.28);
             border-radius: 50%;
             border-top-color: white;
-            animation: spin 0.8s linear infinite;
+            animation: spin .8s linear infinite;
         }
 
-        /* Footer Kustom Profesional */
+        /* FOOTER */
         .footer {
             text-align: center;
-            margin-top: 25px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 13px;
+            margin-top: 16px;
+            color: rgba(255,255,255,.78);
+            font-size: 11px;
             cursor: pointer;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 12px;
-            border-radius: 14px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            transition: all 0.3s ease;
+            background: rgba(255,255,255,.08);
+            padding: 13px 15px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,.13);
+            transition: all .25s ease;
         }
 
         .footer:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: #ffffff;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            background: rgba(255,255,255,.15);
+            color: white;
+            transform: translateY(-1px);
         }
 
-        /* Modals & Popups */
+        .footer strong {
+            color: white;
+        }
+
+        /* POPUP */
         .popup {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(4px);
+            inset: 0;
+            background: rgba(7,22,47,.70);
+            backdrop-filter: blur(6px);
             display: none;
             justify-content: center;
             align-items: center;
@@ -229,273 +492,954 @@
 
         .popup-content {
             background: white;
-            padding: 32px;
-            border-radius: 24px;
+            padding: 32px 28px;
+            border-radius: 26px;
             width: 100%;
-            max-width: 380px;
+            max-width: 390px;
             text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 30px 70px rgba(0,0,0,.3);
+            animation: scaleUp .3s cubic-bezier(.34,1.56,.64,1);
         }
 
         .popup-dev-logo {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
+            width: 82px;
+            height: 82px;
+            border-radius: 24px;
             object-fit: cover;
-            margin-bottom: 16px;
-            border: 3px solid var(--border-color);
+            margin-bottom: 17px;
+            border: 3px solid #eef4ff;
+            box-shadow: 0 8px 20px rgba(30,64,175,.12);
         }
 
-        .popup-icon { font-size: 45px; margin-bottom: 16px; }
-        .popup-content h2 { color: var(--text-dark); font-size: 20px; margin-bottom: 10px; }
-        .popup-content p { color: var(--text-light); font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
-        
+        .popup-icon {
+            font-size: 50px;
+            margin-bottom: 14px;
+        }
+
+        .popup-content h2 {
+            color: var(--text-dark);
+            font-size: 21px;
+            margin-bottom: 9px;
+        }
+
+        .popup-content p {
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.65;
+            margin-bottom: 20px;
+        }
+
         .dev-info-list {
             text-align: left;
-            background: var(--bg-input);
+            background: #f8fafc;
+            border: 1px solid #edf1f6;
             padding: 15px;
-            border-radius: 12px;
+            border-radius: 15px;
             margin-bottom: 20px;
-            font-size: 13.5px;
+            font-size: 12px;
             color: var(--text-dark);
+            line-height: 1.7;
         }
-        .dev-info-list div { margin-bottom: 6px; }
-        .dev-info-list div:last-child { margin-bottom: 0; }
 
         .popup-content button {
-            width: 100%; padding: 12px; border: none;
-            background: var(--primary); color: white;
-            font-weight: 600; border-radius: 10px; cursor: pointer;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+            border-radius: 13px;
+            cursor: pointer;
+            transition: .2s ease;
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes scaleUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .popup-content button:hover {
+            background: var(--primary-dark);
+        }
+
+        /* ANIMATION */
+        @keyframes pageEnter {
+            from {
+                opacity: 0;
+                transform: translateY(25px) scale(.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes scaleUp {
+            from {
+                transform: scale(.88);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulseStatus {
+            0%, 100% {
+                box-shadow: 0 0 0 5px rgba(74,222,128,.10);
+            }
+
+            50% {
+                box-shadow: 0 0 0 9px rgba(74,222,128,0);
+            }
+        }
+
+        /* MOBILE */
+        @media (max-width: 520px) {
+
+            body {
+                padding: 18px 14px;
+                align-items: flex-start;
+            }
+
+            .container {
+                margin-top: 10px;
+            }
+
+            .card {
+                border-radius: 25px;
+                padding: 28px 21px 25px;
+            }
+
+            .logo-wrapper {
+                width: 78px;
+                height: 78px;
+                border-radius: 23px;
+            }
+
+            .logo-wrapper img {
+                width: 56px;
+                height: 56px;
+            }
+
+            .title {
+                font-size: 29px;
+            }
+
+            .subtitle {
+                font-size: 11px;
+            }
+        }
     </style>
 </head>
+
 <body>
 
+<div class="background-grid"></div>
+
 <div class="container">
+
+    <div class="system-status">
+        <span class="status-dot"></span>
+        <span>Sistem siap digunakan</span>
+    </div>
+
     <div class="card">
+
         <div class="header-app">
+
             <div class="logo-wrapper">
-                <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" alt="Logo">
+                <img
+                    src="https://yanuar-moga.github.io/guruwali/assets/logo.png"
+                    alt="Logo SIMPATIK"
+                >
             </div>
-            <div class="title">SIMPATIK</div>
-            <div class="subtitle">Sistem Monitoring Pemahaman & Asesmen Tingkat Kompetensi</div>
+
+            <div class="app-badge">
+                <i class="fa-solid fa-shield-halved"></i>
+                Sistem Asesmen Digital
+            </div>
+
+            <div class="title">
+                SIMPATIK
+            </div>
+
+            <div class="subtitle">
+                Sistem Monitoring Pemahaman dan Asesmen Tingkat Kompetensi
+            </div>
+
         </div>
 
+        <div class="divider">
+            <span>Login Peserta</span>
+        </div>
+
+
+        <!-- KELAS -->
         <div class="input-group">
-            <label for="kelas">Kelas</label>
+
+            <label for="kelas">
+                <i class="fa-solid fa-school"></i>
+                Pilih Kelas
+            </label>
+
             <div class="input-wrapper">
+
                 <i class="fa-solid fa-graduation-cap input-icon"></i>
+
                 <select id="kelas" onchange="filterSiswa()">
-                    <option value="">-- Pilih Kelas --</option>
+
+                    <option value="">
+                        -- Pilih Kelas --
+                    </option>
+
                 </select>
+
             </div>
+
         </div>
 
+
+        <!-- NAMA SISWA -->
         <div class="input-group">
-            <label for="namaSiswa">Nama Siswa</label>
+
+            <label for="namaSiswa">
+                <i class="fa-solid fa-user"></i>
+                Nama Siswa
+            </label>
+
             <div class="input-wrapper">
+
                 <i class="fa-solid fa-user input-icon"></i>
+
                 <select id="namaSiswa" disabled>
-                    <option value="">-- Pilih Nama --</option>
+
+                    <option value="">
+                        -- Pilih Nama --
+                    </option>
+
                 </select>
+
             </div>
+
         </div>
 
+
+        <!-- PASSWORD -->
         <div class="input-group">
-            <label for="password">Password</label>
+
+            <label for="password">
+                <i class="fa-solid fa-lock"></i>
+                Password
+            </label>
+
             <div class="input-wrapper no-arrow">
+
                 <i class="fa-solid fa-lock input-icon"></i>
-                <input type="password" id="password" placeholder="Masukkan password">
-                <i class="fa-solid fa-eye toggle-password" onclick="togglePasswordVisibility()"></i>
+
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Masukkan password"
+                    autocomplete="current-password"
+                >
+
+                <i
+                    class="fa-solid fa-eye toggle-password"
+                    onclick="togglePasswordVisibility()"
+                ></i>
+
             </div>
+
         </div>
 
+
+        <!-- TOKEN -->
         <div class="input-group">
-            <label for="token">Token Ujian</label>
+
+            <label for="token">
+                <i class="fa-solid fa-key"></i>
+                Token Ujian
+            </label>
+
             <div class="input-wrapper no-arrow">
+
                 <i class="fa-solid fa-key input-icon"></i>
-                <input type="text" id="token" placeholder="Masukkan token">
+
+                <input
+                    type="text"
+                    id="token"
+                    placeholder="Masukkan token dari pengawas"
+                    autocomplete="off"
+                >
+
             </div>
+
         </div>
 
-        <button class="btn" id="btnLogin" onclick="login()">
-            <div class="spinner" id="spinner"></div>
-            <span id="btnText">MASUK</span>
+
+        <div class="token-info">
+
+            <i class="fa-solid fa-circle-info"></i>
+
+            <span>
+                Pastikan kelas, nama, password, dan token telah diisi dengan benar sebelum masuk.
+            </span>
+
+        </div>
+
+
+        <!-- BUTTON LOGIN -->
+        <button
+            class="btn"
+            id="btnLogin"
+            onclick="login()"
+        >
+
+            <div
+                class="spinner"
+                id="spinner"
+            ></div>
+
+            <i
+                class="fa-solid fa-right-to-bracket"
+                id="loginIcon"
+            ></i>
+
+            <span id="btnText">
+                MASUK KE SIMPATIK
+            </span>
+
         </button>
+
     </div>
 
-    <div class="footer" onclick="openDevPopup()">
-        <i class="fa-solid fa-circle-info"></i> &nbsp;<strong>SIMPATIK v1.0</strong> - SMPN 1 MOGA
+
+    <!-- FOOTER -->
+    <div
+        class="footer"
+        onclick="openDevPopup()"
+    >
+
+        <i class="fa-solid fa-circle-info"></i>
+
+        &nbsp;
+
+        <strong>SIMPATIK v1.0</strong>
+
+        &nbsp;•&nbsp;
+
+        SMPN 1 MOGA
+
     </div>
+
 </div>
 
+
+<!-- POPUP UTAMA -->
 <div class="popup" id="popup">
+
     <div class="popup-content">
-        <div id="popupIcon" class="popup-icon"></div>
+
+        <div
+            id="popupIcon"
+            class="popup-icon"
+        ></div>
+
         <h2 id="popupTitle"></h2>
+
         <p id="popupMessage"></p>
-        <button onclick="closePopup()">Mengerti</button>
+
+        <button onclick="closePopup()">
+            Mengerti
+        </button>
+
     </div>
+
 </div>
 
+
+<!-- POPUP DEVELOPER -->
 <div class="popup" id="devPopup">
+
     <div class="popup-content">
-        <img src="https://yanuar-moga.github.io/assets/logo.jpg" class="popup-dev-logo" alt="Dev Logo">
+
+        <img
+            src="https://yanuar-moga.github.io/assets/logo.jpg"
+            class="popup-dev-logo"
+            alt="Developer Logo"
+        >
+
         <h2>SIMPATIK</h2>
-        <p>Sistem Monitoring Pemahaman dan Asesmen Tingkat Kompetensi</p>
+
+        <p>
+            Sistem Monitoring Pemahaman dan Asesmen Tingkat Kompetensi
+        </p>
+
         <div class="dev-info-list">
-            <div><strong>Developer:</strong> MB</div>
-            <div><strong>Versi Aplikasi:</strong> 1.0</div>
-            <div><strong>Build:</strong> 16 Juni 2026</div>
-            <div><strong>Contact:</strong> yanuar.b@gmail.com</div>
+
+            <div>
+                <strong>Developer:</strong> MB
+            </div>
+
+            <div>
+                <strong>Versi Aplikasi:</strong> 1.0
+            </div>
+
+            <div>
+                <strong>Build:</strong> 16 Juni 2026
+            </div>
+
+            <div>
+                <strong>Contact:</strong> yanuar.b@gmail.com
+            </div>
+
         </div>
-        <button onclick="closeDevPopup()" style="background: #1e293b;">Tutup</button>
+
+        <button
+            onclick="closeDevPopup()"
+            style="background:#172033;"
+        >
+            Tutup
+        </button>
+
     </div>
+
 </div>
+
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhXAfR_qJd_SJFZe1bsax-tRjhbMzDxxvYaPQHG1C3NaJHi9-_ZGo7OfYWAMnRzAhm7A/exec";
+
+const SCRIPT_URL =
+    "https://script.google.com/macros/s/AKfycbyhXAfR_qJd_SJFZe1bsax-tRjhbMzDxxvYaPQHG1C3NaJHi9-_ZGo7OfYWAMnRzAhm7A/exec";
+
 
 let masterSiswa = [];
 
-// Muat data kelas dan siswa saat halaman selesai dimuat
-window.addEventListener("DOMContentLoaded", loadInitialData);
+
+/* ============================================================
+   MUAT DATA AWAL
+============================================================ */
+
+window.addEventListener(
+    "DOMContentLoaded",
+    loadInitialData
+);
+
 
 async function loadInitialData() {
-    try {
-        const response = await fetch(SCRIPT_URL, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "get_initial_data" })
-        });
-        const result = await response.json();
-        
-        if(result.status) {
-            masterSiswa = result.siswa;
-            const kelasSelect = document.getElementById("kelas");
-            
-            // Mengosongkan data lama sebelum render baru
-            kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
-            
-            result.kelas.forEach(kls => {
-                let opt = document.createElement("option");
-                opt.value = kls;
-                opt.innerText = kls;
-                kelasSelect.appendChild(opt);
-            });
-        }
-    } catch (e) {
-        showPopup("Gagal sinkronisasi", "Gagal memuat data kelas dari server.", "error");
-    }
-}
-
-function filterSiswa() {
-    const kelasTerpilih = document.getElementById("kelas").value;
-    const siswaSelect = document.getElementById("namaSiswa");
-    
-    siswaSelect.innerHTML = '<option value="">-- Pilih Nama --</option>';
-    
-    if(!kelasTerpilih) {
-        siswaSelect.disabled = true;
-        return;
-    }
-    
-    // PERBAIKAN: Spasi ditambahkan pada 'const filtered' agar tidak error syntax
-    const filtered = masterSiswa.filter(s => s.kelas === kelasTerpilih);
-    filtered.forEach(s => {
-        let opt = document.createElement("option");
-        opt.value = s.username; 
-        opt.innerText = s.nama;
-        siswaSelect.appendChild(opt);
-    });
-    
-    siswaSelect.disabled = false;
-}
-
-function togglePasswordVisibility() {
-    const passwordInput = document.getElementById("password");
-    const toggleIcon = document.querySelector(".toggle-password");
-    if (passwordInput.type === "password") {
-        passwordInput.type = "text";
-        toggleIcon.classList.replace("fa-eye", "fa-eye-slash");
-    } else {
-        passwordInput.type = "password";
-        toggleIcon.classList.replace("fa-eye-slash", "fa-eye");
-    }
-}
-
-function showPopup(title, message, iconType = "info") {
-    document.getElementById("popupTitle").innerText = title;
-    document.getElementById("popupMessage").innerText = message;
-    const iconContainer = document.getElementById("popupIcon");
-    
-    if(iconType === "error") iconContainer.innerHTML = '<i class="fa-solid fa-circle-xmark" style="color: #ef4444;"></i>';
-    else if(iconType === "success") iconContainer.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #22c55e;"></i>';
-    else iconContainer.innerHTML = '<i class="fa-solid fa-circle-info" style="color: #3b82f6;"></i>';
-    
-    document.getElementById("popup").style.display = "flex";
-}
-
-function closePopup() { document.getElementById("popup").style.display = "none"; }
-function openDevPopup() { document.getElementById("devPopup").style.display = "flex"; }
-function closeDevPopup() { document.getElementById("devPopup").style.display = "none"; }
-
-async function login() {
-    const kelas = document.getElementById("kelas").value;
-    const username = document.getElementById("namaSiswa").value;
-    const password = document.getElementById("password").value.trim();
-    const token = document.getElementById("token").value.trim();
-
-    if (!kelas || !username || !password || !token) {
-        showPopup("Peringatan", "Semua kolom form wajib dipilih dan diisi.", "info");
-        return;
-    }
-
-    document.getElementById("spinner").style.display = "block";
-    document.getElementById("btnText").innerText = "Memproses...";
-    document.getElementById("btnLogin").disabled = true;
 
     try {
-        const payload = {
-            action: "login",
-            username: username,
-            password: password,
-            token: token,
-            device: navigator.userAgent
-        };
 
-        const response = await fetch(SCRIPT_URL, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify(payload)
-        });
+        const response = await fetch(
+            SCRIPT_URL,
+            {
+                method: "POST",
 
-        const result = await response.json();
+                headers: {
+                    "Content-Type":
+                        "text/plain;charset=utf-8"
+                },
+
+                body: JSON.stringify({
+                    action: "get_initial_data"
+                })
+            }
+        );
+
+
+        const result =
+            await response.json();
+
 
         if (result.status) {
-            localStorage.setItem("sesi_siswa", JSON.stringify(result));
-            showPopup("Login Berhasil", "Selamat datang, " + result.nama, "success");
-            setTimeout(() => { window.location.href = "dashboard.html"; }, 1500);
-        } else {
-            showPopup("Login Gagal", result.message, "error");
-            resetButton();
+
+            masterSiswa =
+                result.siswa;
+
+
+            const kelasSelect =
+                document.getElementById(
+                    "kelas"
+                );
+
+
+            kelasSelect.innerHTML =
+                '<option value="">-- Pilih Kelas --</option>';
+
+
+            result.kelas.forEach(
+                kls => {
+
+                    let opt =
+                        document.createElement(
+                            "option"
+                        );
+
+
+                    opt.value =
+                        kls;
+
+
+                    opt.innerText =
+                        kls;
+
+
+                    kelasSelect.appendChild(
+                        opt
+                    );
+
+                }
+            );
+
         }
-    } catch (error) {
-        showPopup("Kesalahan Sistem", "Gagal terhubung ke server.", "error");
-        resetButton();
+
+    } catch (e) {
+
+        showPopup(
+            "Gagal Sinkronisasi",
+            "Gagal memuat data kelas dari server. Silakan periksa koneksi internet dan coba kembali.",
+            "error"
+        );
+
     }
+
 }
 
-function resetButton() {
-    document.getElementById("spinner").style.display = "none";
-    document.getElementById("btnText").innerText = "MASUK";
-    document.getElementById("btnLogin").disabled = false;
+
+/* ============================================================
+   FILTER SISWA BERDASARKAN KELAS
+============================================================ */
+
+function filterSiswa() {
+
+    const kelasTerpilih =
+        document.getElementById(
+            "kelas"
+        ).value;
+
+
+    const siswaSelect =
+        document.getElementById(
+            "namaSiswa"
+        );
+
+
+    siswaSelect.innerHTML =
+        '<option value="">-- Pilih Nama --</option>';
+
+
+    if (!kelasTerpilih) {
+
+        siswaSelect.disabled =
+            true;
+
+        return;
+
+    }
+
+
+    const filtered =
+        masterSiswa.filter(
+            s =>
+                s.kelas ===
+                kelasTerpilih
+        );
+
+
+    filtered.forEach(
+        s => {
+
+            let opt =
+                document.createElement(
+                    "option"
+                );
+
+
+            opt.value =
+                s.username;
+
+
+            opt.innerText =
+                s.nama;
+
+
+            siswaSelect.appendChild(
+                opt
+            );
+
+        }
+    );
+
+
+    siswaSelect.disabled =
+        false;
+
 }
+
+
+/* ============================================================
+   TOGGLE PASSWORD
+============================================================ */
+
+function togglePasswordVisibility() {
+
+    const passwordInput =
+        document.getElementById(
+            "password"
+        );
+
+
+    const toggleIcon =
+        document.querySelector(
+            ".toggle-password"
+        );
+
+
+    if (
+        passwordInput.type ===
+        "password"
+    ) {
+
+        passwordInput.type =
+            "text";
+
+
+        toggleIcon.classList.replace(
+            "fa-eye",
+            "fa-eye-slash"
+        );
+
+    } else {
+
+        passwordInput.type =
+            "password";
+
+
+        toggleIcon.classList.replace(
+            "fa-eye-slash",
+            "fa-eye"
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   POPUP
+============================================================ */
+
+function showPopup(
+    title,
+    message,
+    iconType = "info"
+) {
+
+    document.getElementById(
+        "popupTitle"
+    ).innerText =
+        title;
+
+
+    document.getElementById(
+        "popupMessage"
+    ).innerText =
+        message;
+
+
+    const iconContainer =
+        document.getElementById(
+            "popupIcon"
+        );
+
+
+    if (
+        iconType ===
+        "error"
+    ) {
+
+        iconContainer.innerHTML =
+            '<i class="fa-solid fa-circle-xmark" style="color:#ef4444;"></i>';
+
+    }
+
+    else if (
+        iconType ===
+        "success"
+    ) {
+
+        iconContainer.innerHTML =
+            '<i class="fa-solid fa-circle-check" style="color:#22c55e;"></i>';
+
+    }
+
+    else {
+
+        iconContainer.innerHTML =
+            '<i class="fa-solid fa-circle-info" style="color:#3b82f6;"></i>';
+
+    }
+
+
+    document.getElementById(
+        "popup"
+    ).style.display =
+        "flex";
+
+}
+
+
+function closePopup() {
+
+    document.getElementById(
+        "popup"
+    ).style.display =
+        "none";
+
+}
+
+
+function openDevPopup() {
+
+    document.getElementById(
+        "devPopup"
+    ).style.display =
+        "flex";
+
+}
+
+
+function closeDevPopup() {
+
+    document.getElementById(
+        "devPopup"
+    ).style.display =
+        "none";
+
+}
+
+
+/* ============================================================
+   LOGIN
+============================================================ */
+
+async function login() {
+
+    const kelas =
+        document.getElementById(
+            "kelas"
+        ).value;
+
+
+    const username =
+        document.getElementById(
+            "namaSiswa"
+        ).value;
+
+
+    const password =
+        document.getElementById(
+            "password"
+        ).value
+        .trim();
+
+
+    const token =
+        document.getElementById(
+            "token"
+        ).value
+        .trim();
+
+
+    if (
+        !kelas ||
+        !username ||
+        !password ||
+        !token
+    ) {
+
+        showPopup(
+            "Data Belum Lengkap",
+            "Silakan pilih kelas, nama siswa, kemudian isi password dan token ujian.",
+            "info"
+        );
+
+        return;
+
+    }
+
+
+    document.getElementById(
+        "spinner"
+    ).style.display =
+        "block";
+
+
+    document.getElementById(
+        "loginIcon"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "btnText"
+    ).innerText =
+        "MEMPROSES...";
+
+
+    document.getElementById(
+        "btnLogin"
+    ).disabled =
+        true;
+
+
+    try {
+
+        const payload = {
+
+            action:
+                "login",
+
+            username:
+                username,
+
+            password:
+                password,
+
+            token:
+                token,
+
+            device:
+                navigator.userAgent
+
+        };
+
+
+        const response =
+            await fetch(
+                SCRIPT_URL,
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "text/plain;charset=utf-8"
+                    },
+
+                    body:
+                        JSON.stringify(
+                            payload
+                        )
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (
+            result.status
+        ) {
+
+            localStorage.setItem(
+                "sesi_siswa",
+                JSON.stringify(
+                    result
+                )
+            );
+
+
+            showPopup(
+                "Login Berhasil",
+                "Selamat datang, " +
+                result.nama +
+                ". Sistem sedang menyiapkan dashboard Anda.",
+                "success"
+            );
+
+
+            setTimeout(
+                () => {
+
+                    window.location.href =
+                        "dashboard.html";
+
+                },
+                1500
+            );
+
+        }
+
+        else {
+
+            showPopup(
+                "Login Gagal",
+                result.message,
+                "error"
+            );
+
+
+            resetButton();
+
+        }
+
+    }
+
+    catch (error) {
+
+        showPopup(
+            "Kesalahan Sistem",
+            "Gagal terhubung ke server. Silakan periksa koneksi internet Anda dan coba kembali.",
+            "error"
+        );
+
+
+        resetButton();
+
+    }
+
+}
+
+
+/* ============================================================
+   RESET BUTTON
+============================================================ */
+
+function resetButton() {
+
+    document.getElementById(
+        "spinner"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "loginIcon"
+    ).style.display =
+        "inline-block";
+
+
+    document.getElementById(
+        "btnText"
+    ).innerText =
+        "MASUK KE SIMPATIK";
+
+
+    document.getElementById(
+        "btnLogin"
+    ).disabled =
+        false;
+
+}
+
 </script>
+
 </body>
 </html>
