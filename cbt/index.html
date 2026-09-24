@@ -1,201 +1,117 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-
 <meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0"
->
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CBT Asesmen Informatika</title>
 
-
 <style>
-
-/* =========================================================
-   RESET
-========================================================= */
-
-*{
-  box-sizing:border-box;
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to bottom right, #b3c7d6, #d9e2ec);
+  margin: 0;
 }
 
-html,
-body{
-  margin:0;
-  padding:0;
-  min-height:100%;
+/* LOGIN CONTAINER */
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-body{
-  font-family:Arial,sans-serif;
-  background:linear-gradient(
-    to bottom right,
-    #b3c7d6,
-    #d9e2ec
-  );
-  color:#222;
-
-  /* Cegah seleksi teks */
-  user-select:none;
-  -webkit-user-select:none;
-  -moz-user-select:none;
-  -ms-user-select:none;
+.card {
+  background: #f2f2f2;
+  padding: 30px;
+  border-radius: 15px;
+  width: 340px; 
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  box-sizing: border-box;
 }
 
-
-/* =========================================================
-   LOGIN CONTAINER
-========================================================= */
-
-.center{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
-  padding:15px;
+.logo {
+  width: 70px;
+  margin-bottom: 10px;
 }
 
-.card{
-  background:#f2f2f2;
-  padding:30px;
-  border-radius:15px;
-  width:340px;
-  max-width:100%;
-  text-align:center;
-  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+h2 {
+  color: #1f4e94;
+  margin-bottom: 20px;
 }
 
-.logo{
-  width:70px;
-  margin-bottom:10px;
+label {
+  display: block;
+  text-align: left;
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
 }
 
-h2{
-  color:#1f4e94;
-  margin-bottom:20px;
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-sizing: border-box; 
+  font-size: 14px;
 }
 
-
-/* =========================================================
-   FORM
-========================================================= */
-
-label{
-  display:block;
-  text-align:left;
-  margin-top:10px;
-  font-size:14px;
-  font-weight:bold;
-  color:#333;
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  cursor: pointer;
+  user-select: none;
 }
 
-input,
-select{
-  width:100%;
-  padding:10px;
-  margin-top:5px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  font-size:14px;
-  box-sizing:border-box;
-  user-select:text;
-  -webkit-user-select:text;
+.checkbox-container input {
+  width: auto;
+  margin-top: 0;
+  cursor: pointer;
 }
 
-input[type="password"],
-input[type="text"]{
-  user-select:text;
-  -webkit-user-select:text;
+.checkbox-container label {
+  margin-top: 0;
+  font-weight: normal;
+  font-size: 13px;
+  cursor: pointer;
 }
 
-.checkbox-container{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin-top:10px;
-  cursor:pointer;
-  user-select:none;
+/* BUTTONS */
+button {
+  width: 100%;
+  margin-top: 15px;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-.checkbox-container input{
-  width:auto;
-  margin-top:0;
-  cursor:pointer;
-}
+.btn-login { background:#1f4e94; color:white; }
+.btn-login:hover { background:#163c73; }
 
-.checkbox-container label{
-  margin-top:0;
-  font-weight:normal;
-  font-size:13px;
-  cursor:pointer;
-}
+.btn-jadwal { background:#d9534f; color:white; }
+.btn-jadwal:hover { background:#c9302c; }
 
+.btn-reset { background:#6c757d; color:white; margin-top: 8px; font-size: 12px; padding: 8px; }
+.btn-reset:hover { background:#5a6268; }
 
-/* =========================================================
-   BUTTONS
-========================================================= */
-
-button{
-  width:100%;
-  margin-top:15px;
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  font-weight:bold;
-  cursor:pointer;
-  transition:0.3s;
-}
-
-button:active{
-  transform:scale(.98);
-}
-
-.btn-login{
-  background:#1f4e94;
-  color:white;
-}
-
-.btn-login:hover{
-  background:#163c73;
-}
-
-.btn-jadwal{
-  background:#d9534f;
-  color:white;
-}
-
-.btn-jadwal:hover{
-  background:#c9302c;
-}
-
-.btn-reset{
-  background:#6c757d;
-  color:white;
-  margin-top:8px;
-  font-size:12px;
-  padding:8px;
-}
-
-.btn-reset:hover{
-  background:#5a6268;
-}
-
-.btn-start{
+.btn-start {
   background:#ff5722;
   color:white;
   padding:14px;
   font-size:16px;
   margin-top:20px;
 }
+.btn-start:hover { background:#e64a19; }
 
-.btn-start:hover{
-  background:#e64a19;
-}
-
-.logout-btn{
+.logout-btn {
   margin-top:5px;
   background:#ff5722;
   color:white;
@@ -204,16 +120,10 @@ button:active{
   border-radius:6px;
 }
 
+/* DASHBOARD */
+#dashboard { display:none; }
 
-/* =========================================================
-   DASHBOARD
-========================================================= */
-
-#dashboard{
-  display:none;
-}
-
-.header{
+.header {
   background:#1f4e94;
   color:white;
   padding:15px;
@@ -221,41 +131,33 @@ button:active{
   justify-content:flex-end;
 }
 
-.user-box{
-  text-align:right;
-}
+.user-box { text-align:right; }
 
-.content{
+.content {
   text-align:center;
   padding:20px;
 }
 
-.logo-center{
-  width:90px;
-}
+.logo-center { width:90px; }
 
-.title{
+.title {
   font-size:24px;
   color:#1f4e94;
   font-weight:bold;
 }
 
-.box{
+.box {
   background:white;
   padding:20px;
   border-radius:12px;
   max-width:700px;
   margin:20px auto;
   text-align:left;
-  box-shadow:0 2px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-
-/* =========================================================
-   MODAL GLOBAL
-========================================================= */
-
-.modal{
+/* MODAL GLOBAL */
+.modal {
   display:none;
   position:fixed;
   z-index:9999;
@@ -268,2642 +170,372 @@ button:active{
   align-items:center;
 }
 
-.modal-box{
+.modal-box {
   background:#fff;
   padding:25px;
   border-radius:12px;
   width:90%;
   max-width:350px;
   text-align:center;
-  animation:fadeIn .3s;
-  box-shadow:0 10px 25px rgba(0,0,0,.2);
+  animation: fadeIn 0.3s;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
 
-.modal-box h3{
-  color:#1f4e94;
-  margin-top:0;
+.modal-box h3 {
+  color: #1f4e94;
+  margin-top: 0;
 }
 
-.btn-group{
+.btn-group {
   display:flex;
   justify-content:center;
   gap:10px;
-  margin-top:20px;
+  margin-top: 20px;
 }
 
-.btn-blue{
+/* Warna Biru (Cancel/Info) */
+.btn-blue {
   background:#1f4e94;
   color:white;
   padding:10px 20px;
   border:none;
   border-radius:8px;
-  cursor:pointer;
+  cursor: pointer;
 }
 
-.btn-red{
+/* Warna Merah (Action/Danger) */
+.btn-red {
   background:#e53935;
   color:white;
   padding:10px 20px;
   border:none;
   border-radius:8px;
-  cursor:pointer;
+  cursor: pointer;
 }
 
-
-/* =========================================================
-   TABLE
-========================================================= */
-
-table{
+/* TABLE */
+table {
   width:100%;
   border-collapse:collapse;
-  margin-bottom:15px;
+  margin-bottom: 15px;
 }
-
-th,
-td{
+th, td {
   border:1px solid #ccc;
   padding:8px;
   text-align:center;
   font-size:13px;
 }
+th { background-color: #f9f9f9; }
 
-th{
-  background-color:#f9f9f9;
+@keyframes fadeIn {
+  from {opacity:0; transform:translateY(-20px);}
+  to {opacity:1; transform:translateY(0);}
 }
 
-
-/* =========================================================
-   FOOTER
-========================================================= */
-
-.footer{
-  margin-top:20px;
-  font-size:11px;
-  color:#777;
-  line-height:1.5;
+.footer {
+  margin-top: 20px;
+  font-size: 11px;
+  color: #777;
+  line-height: 1.5;
 }
 
-#msg{
-  color:#d9534f;
-  font-size:13px;
-  margin-top:10px;
+#msg {
+  color: #d9534f;
+  font-size: 13px;
+  margin-top: 10px;
 }
-
-
-/* =========================================================
-   STATUS KEAMANAN
-========================================================= */
-
-.security-notice{
-  display:none;
-  margin:15px 0;
-  padding:12px;
-  border-radius:8px;
-  background:#fff3cd;
-  border:1px solid #ffc107;
-  color:#664d03;
-  font-size:12px;
-  line-height:1.5;
-  text-align:left;
-}
-
-.security-notice strong{
-  display:block;
-  margin-bottom:4px;
-}
-
-
-/* =========================================================
-   PELANGGARAN
-========================================================= */
-
-.violation-badge{
-  display:none;
-  position:fixed;
-  left:10px;
-  bottom:10px;
-  z-index:8000;
-  background:#e53935;
-  color:#fff;
-  padding:7px 10px;
-  border-radius:20px;
-  font-size:11px;
-  font-weight:bold;
-  box-shadow:0 3px 10px rgba(0,0,0,.2);
-}
-
-
-/* =========================================================
-   ANIMASI
-========================================================= */
-
-@keyframes fadeIn{
-
-  from{
-    opacity:0;
-    transform:translateY(-20px);
-  }
-
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
-
-}
-
-
 </style>
-
 </head>
-
 
 <body>
 
-
-<!-- =======================================================
-     PAGE LOGIN
-======================================================== -->
-
+<!-- PAGE LOGIN -->
 <div id="loginPage" class="center">
-
   <div class="card">
-
-    <img
-      src="https://yanuar-moga.github.io/guruwali/assets/logo.png"
-      class="logo"
-      alt="Logo"
-    >
-
+    <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" class="logo" alt="Logo">
     <h2>CBT Informatika</h2>
 
-
     <label>Kelas</label>
-
     <select id="kelas">
-
-      <option value="">
-        -- Pilih Kelas --
-      </option>
-
+      <option value="">-- Pilih Kelas --</option>
     </select>
-
 
     <label>Username</label>
-
     <select id="username">
-
-      <option value="">
-        -- Pilih Siswa --
-      </option>
-
+      <option value="">-- Pilih Siswa --</option>
     </select>
 
-
     <label>Password</label>
-
-    <input
-      type="password"
-      id="password"
-      placeholder="Masukkan password"
-      autocomplete="off"
-    >
-
+    <input type="password" id="password" placeholder="Masukkan password">
 
     <div class="checkbox-container">
-
-      <input
-        type="checkbox"
-        id="showPass"
-        onclick="togglePassword()"
-      >
-
-      <label for="showPass">
-        Tampilkan Password
-      </label>
-
+      <input type="checkbox" id="showPass" onclick="togglePassword()">
+      <label for="showPass">Tampilkan Password</label>
     </div>
-
 
     <label>Token</label>
+    <input type="text" id="token" placeholder="Masukkan token">
 
-    <input
-      type="text"
-      id="token"
-      placeholder="Masukkan token"
-      autocomplete="off"
-    >
-
-
-    <button
-      class="btn-login"
-      onclick="login()"
-    >
-      Masuk
-    </button>
-
-
-    <button
-      class="btn-jadwal"
-      onclick="openModal()"
-    >
-      Lihat Jadwal Token
-    </button>
-
-
-    <button
-      class="btn-reset"
-      onclick="triggerReset()"
-    >
-      Reset Login / Sesi
-    </button>
-
+    <button class="btn-login" onclick="login()">Masuk</button>
+    <button class="btn-jadwal" onclick="openModal()">Lihat Jadwal Token</button>
+    <button class="btn-reset" onclick="triggerReset()">Reset Login / Sesi</button>
 
     <p id="msg"></p>
-
-
-    <div class="security-notice">
-
-      <strong>🔒 Sistem Keamanan CBT</strong>
-
-      Selama ujian berlangsung, siswa dilarang
-      berpindah tab, membuka aplikasi lain,
-      menggunakan klik kanan, menyalin soal,
-      atau menggunakan shortcut browser.
-
-    </div>
-
-
+    
     <div class="footer">
-
       CBT Browser Apps by MB<br>
-
       © 2026 MB All Rights Reserved
-
     </div>
-
   </div>
-
 </div>
 
-
-
-<!-- =======================================================
-     PAGE DASHBOARD
-======================================================== -->
-
+<!-- PAGE DASHBOARD -->
 <div id="dashboard">
-
   <div class="header">
-
     <div class="user-box">
-
-      <b id="namaHeader"></b>
-
-      <br>
-
+      <b id="namaHeader"></b><br>
       <span id="kelasHeader"></span>
-
-      <br>
-
-      <button
-        class="logout-btn"
-        onclick="logout()"
-      >
-        Keluar
-      </button>
-
+      <button class="logout-btn" onclick="logout()">Keluar</button>
     </div>
-
   </div>
-
 
   <div class="content">
-
-    <img
-      src="https://yanuar-moga.github.io/guruwali/assets/logo.png"
-      class="logo-center"
-      alt="Logo"
-    >
-
-
-    <div class="title">
-      Asesmen CBT Informatika
-    </div>
-
-
+    <img src="https://yanuar-moga.github.io/guruwali/assets/logo.png" class="logo-center" alt="Logo">
+    <div class="title">Asesmen CBT Informatika</div>
     <p id="tanggal"></p>
-
     <p id="jamServer"></p>
 
-
     <div class="box">
+  <p>Nama : <b id="nama"></b></p>
+  <p>Kelas : <b id="kelasUser"></b></p>
+  <p>Mata Pelajaran : Informatika</p>
+  <p>Semester : Genap</p>
+  <p>Tahun Pelajaran : 2026 - 2027</p>
+  <hr>
 
-      <p>
-        Nama :
-        <b id="nama"></b>
-      </p>
+  <p><b>Informasi Ujian:</b></p>
+  <ul style="margin-bottom: 15px;">
+    <li>Jumlah soal: 20 Pilihan Ganda</li>
+    <li>Durasi: 90 menit</li>
+  </ul>
 
-      <p>
-        Kelas :
-        <b id="kelasUser"></b>
-      </p>
+  <p><b>Penting:</b></p>
+  <ul style="color: #000000; font-weight: bold;">
+    <li>Dilarang keluar dari aplikasi selama ujian berlangsung</li>
+    <li>Kerjakan dengan jujur dan mandiri</li>
+    <li>Gunakan browser Google Chrome versi terbaru</li>
+    <li>Tutup semua aplikasi lain sebelum memulai</li>
+  </ul>
 
-      <p>
-        Mata Pelajaran : Informatika
-      </p>
-
-      <p>
-        Semester : Genap
-      </p>
-
-      <p>
-        Tahun Pelajaran : 2026 - 2027
-      </p>
-
-
-      <hr>
-
-
-      <p>
-        <b>Informasi Ujian:</b>
-      </p>
-
-
-      <ul style="margin-bottom:15px;">
-
-        <li>
-          Jumlah soal: 20 Pilihan Ganda
-        </li>
-
-        <li>
-          Durasi: 90 menit
-        </li>
-
-      </ul>
-
-
-      <p>
-        <b>Penting:</b>
-      </p>
-
-
-      <ul
-        style="
-          color:#000000;
-          font-weight:bold;
-        "
-      >
-
-        <li>
-          Dilarang keluar dari aplikasi selama ujian berlangsung
-        </li>
-
-        <li>
-          Kerjakan dengan jujur dan mandiri
-        </li>
-
-        <li>
-          Gunakan browser Google Chrome versi terbaru
-        </li>
-
-        <li>
-          Tutup semua aplikasi lain sebelum memulai
-        </li>
-
-        <li>
-          Jangan berpindah tab selama ujian
-        </li>
-
-      </ul>
-
-
-      <button
-        class="btn-start"
-        onclick="openConfirm()"
-      >
-        Kerjakan Ujian
-      </button>
-
-    </div>
-
+  <button class="btn-start" onclick="openConfirm()">Kerjakan Ujian</button>
+</div>
   </div>
-
 </div>
 
-
-
-<!-- =======================================================
-     BADGE PELANGGARAN
-======================================================== -->
-
-<div
-  id="violationBadge"
-  class="violation-badge"
->
-  ⚠️ Pelanggaran: <span id="violationCount">0</span>
-</div>
-
-
-
-<!-- =======================================================
-     MODAL ALERT
-======================================================== -->
-
-<div
-  id="customAlert"
-  class="modal"
->
-
+<!-- MODAL CUSTOM POP-UP (PENGGANTI ALERT & CONFIRM) -->
+<div id="customAlert" class="modal">
   <div class="modal-box">
-
-    <h3 id="alertTitle">
-      Notifikasi
-    </h3>
-
+    <h3 id="alertTitle">Notifikasi</h3>
     <p id="alertMsg"></p>
-
-    <div
-      class="btn-group"
-      id="alertBtns"
-    >
+    <div class="btn-group" id="alertBtns">
+      <!-- Tombol akan diisi dinamis via JS -->
     </div>
-
   </div>
-
 </div>
 
-
-
-<!-- =======================================================
-     MODAL KONFIRMASI DATA
-======================================================== -->
-
-<div
-  id="confirmModal"
-  class="modal"
->
-
+<!-- MODAL KONFIRMASI DATA (DASHBOARD) -->
+<div id="confirmModal" class="modal">
   <div class="modal-box">
-
-    <h3>
-      Konfirmasi Data
-    </h3>
-
-    <p>
-      Pastikan data Anda sudah benar
-    </p>
-
-
-    <div
-      class="checkbox-container"
-      style="
-        justify-content:center;
-        margin-bottom:15px;
-      "
-    >
-
-      <input
-        type="checkbox"
-        id="checkData"
-      >
-
-      <label for="checkData">
-        Saya yakin data sudah benar
-      </label>
-
+    <h3>Konfirmasi Data</h3>
+    <p>Pastikan data Anda sudah benar</p>
+    <div class="checkbox-container" style="justify-content: center; margin-bottom: 15px;">
+      <input type="checkbox" id="checkData">
+      <label for="checkData">Saya yakin data sudah benar</label>
     </div>
-
-
     <div class="btn-group">
-
-      <button
-        class="btn-blue"
-        onclick="closeConfirm()"
-      >
-        Batal
-      </button>
-
-      <button
-        class="btn-red"
-        onclick="lanjutUjian()"
-      >
-        Mulai Ujian
-      </button>
-
+      <button class="btn-blue" onclick="closeConfirm()">Batal</button>
+      <button class="btn-red" onclick="lanjutUjian()">Kirim</button>
     </div>
-
   </div>
-
 </div>
 
-
-
-<!-- =======================================================
-     MODAL JADWAL
-======================================================== -->
-
-<div
-  id="modalJadwal"
-  class="modal"
->
-
+<!-- MODAL JADWAL -->
+<div id="modalJadwal" class="modal">
   <div class="modal-box">
-
-    <h3>
-      Jadwal Token
-    </h3>
-
-
+    <h3>Jadwal Token</h3>
     <table>
-
-      <thead>
-
-        <tr>
-
-          <th>Kelas</th>
-
-          <th>Mulai</th>
-
-          <th>Selesai</th>
-
-        </tr>
-
-      </thead>
-
-
-      <tbody
-        id="jadwalBody"
-      >
-      </tbody>
-
+      <thead><tr><th>Kelas</th><th>Mulai</th><th>Selesai</th></tr></thead>
+      <tbody id="jadwalBody"></tbody>
     </table>
-
-
-    <button
-      class="btn-blue"
-      onclick="closeModal()"
-    >
-      Tutup
-    </button>
-
+    <button class="btn-blue" onclick="closeModal()">Tutup</button>
   </div>
-
 </div>
-
-
 
 <script>
-
-
-/* =========================================================
-   URL GAS
-========================================================= */
-
-/*
- * 🔐 GAS LOGIN SISWA
- */
-
-const API_LOGIN =
-  "https://script.google.com/macros/s/AKfycbzYS6vuKiXqdrJ4YT5AcNn4GhQoAttH0mCOQwvklRvJVx9ulbCxWQYh5j7dE5q-_SgIIQ/exec";
-
-
-/*
- * 📚 GAS SOAL
- */
-
-const API_SOAL =
-  "https://script.google.com/macros/s/AKfycbwK8tBw35mg__J69hc-L-HAf62Eq2CHltBRHDsPVlB0e9Tvv5jkF-LbpgYCVk_HtQ3B/exec";
-
-
-/* =========================================================
-   VARIABEL
-========================================================= */
+const API_URL = "https://script.google.com/macros/s/AKfycbwf_Hza9uzl9mdE-iiYZExPQ1Q7e2NsrVKhy48Bn15YtKzZGw_OLRTM3AYDu0d5mx2X/exec";
 
 let siswaData = [];
-
 let ip = "Unknown";
-
-let userAgent =
-  navigator.userAgent;
-
-let sessionChecker = null;
-
-let examStarted = false;
-
-let violationCount = 0;
-
-let lastViolationTime = 0;
-
-let isLeavingPage = false;
-
-
-/* =========================================================
-   🔐 SISTEM PROTEKSI BROWSER
-========================================================= */
-
-
-/*
- * Klik kanan dilarang
- */
-
-document.addEventListener(
-  "contextmenu",
-  function(e){
-
-    e.preventDefault();
-
-    showSecurityWarning(
-      "Klik kanan dinonaktifkan selama CBT."
-    );
-
-    return false;
-
-  },
-  true
-);
-
-
-/*
- * Copy
- */
-
-document.addEventListener(
-  "copy",
-  function(e){
-
-    e.preventDefault();
-
-    showSecurityWarning(
-      "Menyalin teks tidak diperbolehkan selama CBT."
-    );
-
-  },
-  true
-);
-
-
-/*
- * Cut
- */
-
-document.addEventListener(
-  "cut",
-  function(e){
-
-    e.preventDefault();
-
-    showSecurityWarning(
-      "Memotong teks tidak diperbolehkan selama CBT."
-    );
-
-  },
-  true
-);
-
-
-/*
- * Paste
- */
-
-document.addEventListener(
-  "paste",
-  function(e){
-
-    e.preventDefault();
-
-    showSecurityWarning(
-      "Menempelkan teks tidak diperbolehkan selama CBT."
-    );
-
-  },
-  true
-);
-
-
-/*
- * Drag
- */
-
-document.addEventListener(
-  "dragstart",
-  function(e){
-
-    e.preventDefault();
-
-  },
-  true
-);
-
-
-/*
- * Shortcut keyboard
- */
-
-document.addEventListener(
-  "keydown",
-  function(e){
-
-    const key =
-      String(e.key).toLowerCase();
-
-
-    const ctrl =
-      e.ctrlKey ||
-      e.metaKey;
-
-
-    /*
-     * F12
-     */
-
-    if(
-      e.key === "F12"
-    ){
-
-      e.preventDefault();
-
-      showSecurityWarning(
-        "Developer Tools tidak diperbolehkan."
-      );
-
-      return false;
-    }
-
-
-    /*
-     * Ctrl + C
-     * Ctrl + X
-     * Ctrl + V
-     * Ctrl + U
-     * Ctrl + S
-     * Ctrl + P
-     */
-
-    if(
-      ctrl &&
-      (
-        key === "c" ||
-        key === "x" ||
-        key === "v" ||
-        key === "u" ||
-        key === "s" ||
-        key === "p"
-      )
-    ){
-
-      e.preventDefault();
-
-      showSecurityWarning(
-        "Shortcut tersebut tidak diperbolehkan selama CBT."
-      );
-
-      return false;
-    }
-
-
-    /*
-     * Ctrl + Shift + I
-     * Ctrl + Shift + J
-     * Ctrl + Shift + C
-     */
-
-    if(
-      ctrl &&
-      e.shiftKey &&
-      (
-        key === "i" ||
-        key === "j" ||
-        key === "c"
-      )
-    ){
-
-      e.preventDefault();
-
-      showSecurityWarning(
-        "Developer Tools tidak diperbolehkan selama CBT."
-      );
-
-      return false;
-    }
-
-
-    /*
-     * Ctrl + Shift + S
-     */
-
-    if(
-      ctrl &&
-      e.shiftKey &&
-      key === "s"
-    ){
-
-      e.preventDefault();
-
-      showSecurityWarning(
-        "Shortcut browser dinonaktifkan selama CBT."
-      );
-
-      return false;
-    }
-
-
-    /*
-     * Ctrl + Tab
-     *
-     * Browser biasanya tetap mengontrol shortcut ini,
-     * tetapi kita tetap mencegah jika browser mengizinkannya.
-     */
-
-    if(
-      ctrl &&
-      key === "tab"
-    ){
-
-      e.preventDefault();
-
-      return false;
-    }
-
-  },
-  true
-);
-
-
-/* =========================================================
-   🚨 DETEKSI KELUAR TAB
-========================================================= */
-
-document.addEventListener(
-  "visibilitychange",
-  function(){
-
-    if(
-      document.hidden
-    ){
-
-      registerViolation(
-        "Anda terdeteksi meninggalkan halaman CBT / berpindah tab."
-      );
-
-    }
-
-  },
-  true
-);
-
-
-/* =========================================================
-   🚨 DETEKSI BROWSER KEHILANGAN FOKUS
-========================================================= */
-
-window.addEventListener(
-  "blur",
-  function(){
-
-    /*
-     * Jangan menghitung blur kecil yang terjadi
-     * ketika siswa masih berada di halaman.
-     */
-
-    if(
-      examStarted
-    ){
-
-      registerViolation(
-        "Fokus browser terdeteksi berpindah. Jangan meninggalkan CBT."
-      );
-
-    }
-
-  },
-  true
-);
-
-
-/* =========================================================
-   🚨 KEMBALI KE TAB
-========================================================= */
-
-window.addEventListener(
-  "focus",
-  function(){
-
-    if(
-      examStarted &&
-      document.visibilityState === "visible"
-    ){
-
-      /*
-       * Tidak menambah pelanggaran lagi.
-       * Hanya memberikan informasi jika sebelumnya
-       * siswa meninggalkan tab.
-       */
-
-    }
-
-  },
-  true
-);
-
-
-/* =========================================================
-   ⚠️ REGISTRASI PELANGGARAN
-========================================================= */
-
-function registerViolation(message){
-
-  /*
-   * Debounce.
-   *
-   * visibilitychange + blur dapat terjadi bersamaan.
-   * Jangan menghitung dua kali dalam waktu sangat dekat.
-   */
-
-  const now =
-    Date.now();
-
-
-  if(
-    now - lastViolationTime < 1500
-  ){
-
-    return;
-  }
-
-
-  lastViolationTime =
-    now;
-
-
-  violationCount++;
-
-
-  sessionStorage.setItem(
-    "cbtViolationCount",
-    String(violationCount)
-  );
-
-
-  updateViolationBadge();
-
-
-  /*
-   * Jika belum ujian, tidak perlu
-   * memberi peringatan sebagai pelanggaran ujian.
-   */
-
-  if(
-    !examStarted
-  ){
-
-    return;
-  }
-
-
-  showSecurityWarning(
-    message +
-    "\n\nPelanggaran ke-" +
-    violationCount +
-    "."
-  );
-
-}
-
-
-/* =========================================================
-   ⚠️ UPDATE BADGE
-========================================================= */
-
-function updateViolationBadge(){
-
-  const badge =
-    document.getElementById(
-      "violationBadge"
-    );
-
-
-  const count =
-    document.getElementById(
-      "violationCount"
-    );
-
-
-  if(
-    !badge ||
-    !count
-  ){
-
-    return;
-  }
-
-
-  count.innerText =
-    violationCount;
-
-
-  if(
-    violationCount > 0
-  ){
-
-    badge.style.display =
-      "block";
-
-  }
-
-}
-
-
-/* =========================================================
-   ⚠️ WARNING KEAMANAN
-========================================================= */
-
-function showSecurityWarning(
-  message
-){
-
-  /*
-   * Jika modal sedang tampil,
-   * jangan menumpuk modal baru.
-   */
-
-  const modal =
-    document.getElementById(
-      "customAlert"
-    );
-
-
-  if(
-    modal &&
-    modal.style.display === "flex"
-  ){
-
-    return;
-  }
-
-
-  showAlert(
-    "⚠️ PERINGATAN KEAMANAN",
-    message,
-    "alert"
-  );
-
-}
-
-
-/* =========================================================
-   🔐 AKTIFKAN MODE UJIAN
-========================================================= */
-
-function activateExamMode(){
-
-  examStarted =
-    true;
-
-
-  sessionStorage.setItem(
-    "cbtExamStarted",
-    "true"
-  );
-
-
-  sessionStorage.setItem(
-    "cbtExamUser",
-    JSON.stringify(
-      JSON.parse(
-        localStorage.getItem("user") || "{}"
-      )
-    )
-  );
-
-
-  /*
-   * Reset penghitung untuk sesi ujian baru.
-   */
-
-  violationCount = 0;
-
-
-  sessionStorage.setItem(
-    "cbtViolationCount",
-    "0"
-  );
-
-
-  updateViolationBadge();
-
-}
-
-
-/* =========================================================
-   🔐 CEK MODE UJIAN
-========================================================= */
-
-function loadExamSecurityState(){
-
-  const started =
-    sessionStorage.getItem(
-      "cbtExamStarted"
-    );
-
-
-  const count =
-    parseInt(
-      sessionStorage.getItem(
-        "cbtViolationCount"
-      ) || "0",
-      10
-    );
-
-
-  violationCount =
-    isNaN(count)
-      ? 0
-      : count;
-
-
-  if(
-    started === "true"
-  ){
-
-    examStarted =
-      true;
-
-  }
-
-
-  updateViolationBadge();
-
-}
-
-
-/* =========================================================
-   🚫 BEFORE UNLOAD
-========================================================= */
-
-window.addEventListener(
-  "beforeunload",
-  function(e){
-
-    if(
-      examStarted &&
-      !isLeavingPage
-    ){
-
-      e.preventDefault();
-
-      e.returnValue =
-        "Ujian sedang berlangsung. Jangan meninggalkan halaman CBT.";
-
-      return e.returnValue;
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   POPUP ALERT
-========================================================= */
-
-function showAlert(
-  title,
-  message,
-  type = "alert",
-  onConfirm = null
-){
-
-  document.getElementById(
-    "alertTitle"
-  ).innerText =
-    title;
-
-
-  document.getElementById(
-    "alertMsg"
-  ).innerText =
-    message;
-
-
-  const btnGroup =
-    document.getElementById(
-      "alertBtns"
-    );
-
-
-  btnGroup.innerHTML =
-    "";
-
-
-  if(
-    type === "confirm"
-  ){
-
+let userAgent = navigator.userAgent;
+let sessionChecker;
+
+// --- FUNGSI TAMPIL POP-UP KUSTOM ---
+function showAlert(title, message, type = "alert", onConfirm = null) {
+  document.getElementById('alertTitle').innerText = title;
+  document.getElementById('alertMsg').innerText = message;
+  const btnGroup = document.getElementById('alertBtns');
+  btnGroup.innerHTML = "";
+
+  if (type === "confirm") {
     btnGroup.innerHTML = `
-
-      <button
-        class="btn-blue"
-        onclick="closeAlert()"
-      >
-        Batal
-      </button>
-
-      <button
-        class="btn-red"
-        id="btnConfirmAction"
-      >
-        Ya, Lanjutkan
-      </button>
-
+      <button class="btn-blue" onclick="closeAlert()">Batal</button>
+      <button class="btn-red" id="btnConfirmAction">Ya, Lanjutkan</button>
     `;
-
-
-    document.getElementById(
-      "btnConfirmAction"
-    ).onclick =
-      function(){
-
-        closeAlert();
-
-        if(
-          onConfirm
-        ){
-
-          onConfirm();
-
-        }
-
-      };
-
-
-  }else{
-
-    btnGroup.innerHTML = `
-
-      <button
-        class="btn-blue"
-        onclick="closeAlert()"
-      >
-        OK
-      </button>
-
-    `;
-
+    document.getElementById('btnConfirmAction').onclick = () => {
+      closeAlert();
+      if (onConfirm) onConfirm();
+    };
+  } else {
+    btnGroup.innerHTML = `<button class="btn-blue" onclick="closeAlert()">OK</button>`;
   }
-
-
-  document.getElementById(
-    "customAlert"
-  ).style.display =
-    "flex";
-
+  document.getElementById('customAlert').style.display = "flex";
 }
 
-
-/* =========================================================
-   TUTUP ALERT
-========================================================= */
-
-function closeAlert(){
-
-  document.getElementById(
-    "customAlert"
-  ).style.display =
-    "none";
-
+function closeAlert() {
+  document.getElementById('customAlert').style.display = "none";
 }
 
+// --- LOGIKA UTAMA ---
 
-/* =========================================================
-   CEK SESI LOGIN
-========================================================= */
+function checkSessionStatus() {
+  const savedUser = JSON.parse(localStorage.getItem("user"));
+  if (!savedUser) return;
 
-function checkSessionStatus(){
-
-  const saved =
-    localStorage.getItem(
-      "user"
-    );
-
-
-  if(
-    !saved
-  ){
-
-    return;
-  }
-
-
-  let savedUser;
-
-
-  try{
-
-    savedUser =
-      JSON.parse(saved);
-
-  }catch(e){
-
-    localStorage.removeItem(
-      "user"
-    );
-
-    return;
-
-  }
-
-
-  if(
-    !savedUser.idLogin
-  ){
-
-    return;
-  }
-
-
-  fetch(
-    API_LOGIN +
-    "?mode=cek_sesi&idLogin=" +
-    encodeURIComponent(
-      savedUser.idLogin
-    )
-  )
-
-  .then(
-    res => res.json()
-  )
-
-  .then(
-    data => {
-
-      if(
-        data.status === "off"
-      ){
-
-        examStarted =
-          false;
-
-
-        showAlert(
-          "Sesi Berakhir",
-          "Sesi Anda telah dihentikan oleh Admin.",
-          "alert",
-          function(){
-
-            localStorage.removeItem(
-              "user"
-            );
-
-            sessionStorage.clear();
-
-            location.reload();
-
-          }
-        );
-
+  fetch(`${API_URL}?mode=cek_sesi&idLogin=${savedUser.idLogin}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === "off") {
+        showAlert("Sesi Berakhir", "Sesi Anda telah dihentikan oleh Admin.", "alert", () => {
+          localStorage.removeItem("user");
+          location.reload();
+        });
       }
-
-    }
-  )
-
-  .catch(
-    () => {
-      /*
-       * Tidak melakukan logout otomatis
-       * hanya karena koneksi sementara gagal.
-       */
-    }
-  );
-
+    });
 }
 
-
-/* =========================================================
-   AMBIL IP
-========================================================= */
-
-fetch(
-  "https://api.ipify.org?format=json"
-)
-
-.then(
-  r => r.json()
-)
-
-.then(
-  d => {
-
-    if(
-      d &&
-      d.ip
-    ){
-
-      ip =
-        d.ip;
-
-    }
-
-  }
-)
-
-.catch(
-  () => {
-
-    ip =
-      "Unknown";
-
-  }
-);
-
-
-/* =========================================================
-   LOAD DATA SISWA
-========================================================= */
-
-fetch(
-  API_LOGIN
-)
-
-.then(
-  r => {
-
-    if(
-      !r.ok
-    ){
-
-      throw new Error(
-        "Gagal menghubungi server login."
-      );
-
-    }
-
-    return r.json();
-
-  }
-)
-
-.then(
-  data => {
-
-    if(
-      !Array.isArray(data)
-    ){
-
-      throw new Error(
-        "Data siswa tidak valid."
-      );
-
-    }
-
-
-    siswaData =
-      data;
-
-
-    const kelasSelect =
-      document.getElementById(
-        "kelas"
-      );
-
-
-    const setKelas =
-      new Set();
-
-
-    data.forEach(
-      s => {
-
-        if(
-          s.kelas
-        ){
-
-          setKelas.add(
-            s.kelas
-          );
-
-        }
-
-      }
-    );
-
-
-    setKelas.forEach(
-      k => {
-
-        const option =
-          document.createElement(
-            "option"
-          );
-
-
-        option.value =
-          k;
-
-
-        option.textContent =
-          k;
-
-
-        kelasSelect.appendChild(
-          option
-        );
-
-      }
-    );
-
-  }
-)
-
-.catch(
-  err => {
-
-    document.getElementById(
-      "msg"
-    ).innerText =
-      "Server login tidak dapat dihubungi.";
-
-    console.error(
-      err
-    );
-
-  }
-);
-
-
-/* =========================================================
-   FILTER SISWA BERDASARKAN KELAS
-========================================================= */
-
-document.getElementById(
-  "kelas"
-).addEventListener(
-  "change",
-  function(){
-
-    const usernameSelect =
-      document.getElementById(
-        "username"
-      );
-
-
-    usernameSelect.innerHTML = `
-
-      <option value="">
-        -- Pilih Siswa --
-      </option>
-
-    `;
-
-
-    siswaData
-
-      .filter(
-        s =>
-          String(s.kelas) ===
-          String(this.value)
-      )
-
-      .forEach(
-        s => {
-
-          const option =
-            document.createElement(
-              "option"
-            );
-
-
-          option.value =
-            s.username;
-
-
-          option.textContent =
-            s.nama;
-
-
-          usernameSelect.appendChild(
-            option
-          );
-
-        }
-      );
-
-  }
-);
-
-
-/* =========================================================
-   TOGGLE PASSWORD
-========================================================= */
-
-function togglePassword(){
-
-  const password =
-    document.getElementById(
-      "password"
-    );
-
-
-  password.type =
-    password.type === "password"
-      ? "text"
-      : "password";
-
+// Ambil IP
+fetch("https://api.ipify.org?format=json").then(r => r.json()).then(d => ip = d.ip);
+
+// Load Data Awal
+fetch(API_URL).then(r => r.json()).then(data => {
+  siswaData = data;
+  const kS = document.getElementById('kelas');
+  let setK = new Set();
+  data.forEach(s => setK.add(s.kelas));
+  setK.forEach(k => kS.innerHTML += `<option value="${k}">${k}</option>`);
+});
+
+document.getElementById('kelas').onchange = function() {
+  const uS = document.getElementById('username');
+  uS.innerHTML = '<option value="">-- Pilih Siswa --</option>';
+  siswaData.filter(s => s.kelas === this.value).forEach(s => {
+    uS.innerHTML += `<option value="${s.username}">${s.nama}</option>`;
+  });
+};
+
+function togglePassword() {
+  const p = document.getElementById('password');
+  p.type = p.type === "password" ? "text" : "password";
 }
 
+function login() {
+  const u = document.getElementById('username').value;
+  const p = document.getElementById('password').value;
+  const t = document.getElementById('token').value;
+  if(!u || !p || !t) { showAlert("Peringatan", "Lengkapi semua data!"); return; }
 
-/* =========================================================
-   LOGIN
-========================================================= */
-
-function login(){
-
-  const username =
-    document.getElementById(
-      "username"
-    ).value;
-
-
-  const password =
-    document.getElementById(
-      "password"
-    ).value;
-
-
-  const token =
-    document.getElementById(
-      "token"
-    ).value;
-
-
-  if(
-    !username ||
-    !password ||
-    !token
-  ){
-
-    showAlert(
-      "Peringatan",
-      "Lengkapi semua data!"
-    );
-
-    return;
-  }
-
-
-  document.getElementById(
-    "msg"
-  ).innerText =
-    "Memverifikasi...";
-
-
-  fetch(
-    API_LOGIN,
-    {
-
-      method:"POST",
-
-      body:JSON.stringify({
-
-        username:
-          username,
-
-        password:
-          password,
-
-        token:
-          token,
-
-        ip:
-          ip,
-
-        userAgent:
-          userAgent
-
-      })
-
+  document.getElementById('msg').innerText = "Memverifikasi...";
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ username: u, password: p, token: t, ip: ip, userAgent: userAgent })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if(res.status === "success") {
+      localStorage.setItem("user", JSON.stringify(res));
+      showDashboard(res);
+    } else {
+      document.getElementById('msg').innerText = "";
+      showAlert("Login Gagal", res.msg);
     }
-  )
-
-  .then(
-    r => {
-
-      if(
-        !r.ok
-      ){
-
-        throw new Error(
-          "Server login bermasalah."
-        );
-
-      }
-
-      return r.json();
-
-    }
-  )
-
-  .then(
-    result => {
-
-      if(
-        result.status === "success"
-      ){
-
-        /*
-         * Simpan hasil login
-         */
-
-        localStorage.setItem(
-          "user",
-          JSON.stringify(
-            result
-          )
-        );
-
-
-        /*
-         * Reset status keamanan
-         */
-
-        sessionStorage.removeItem(
-          "cbtExamStarted"
-        );
-
-        sessionStorage.removeItem(
-          "cbtViolationCount"
-        );
-
-
-        examStarted =
-          false;
-
-        violationCount =
-          0;
-
-
-        updateViolationBadge();
-
-
-        showDashboard(
-          result
-        );
-
-
-      }else{
-
-        document.getElementById(
-          "msg"
-        ).innerText =
-          "";
-
-
-        showAlert(
-          "Login Gagal",
-          result.msg ||
-          "Username atau password salah."
-        );
-
-      }
-
-    }
-  )
-
-  .catch(
-    err => {
-
-      console.error(
-        err
-      );
-
-
-      document.getElementById(
-        "msg"
-      ).innerText =
-        "";
-
-
-      showAlert(
-        "Koneksi Gagal",
-        "Server login tidak dapat dihubungi. Periksa koneksi internet Anda."
-      );
-
-    }
-  );
-
+  });
 }
 
-
-/* =========================================================
-   DASHBOARD
-========================================================= */
-
-function showDashboard(
-  user
-){
-
-  document.getElementById(
-    "loginPage"
-  ).style.display =
-    "none";
-
-
-  document.getElementById(
-    "dashboard"
-  ).style.display =
-    "block";
-
-
-  document.getElementById(
-    "nama"
-  ).innerText =
-    user.nama || "-";
-
-
-  document.getElementById(
-    "kelasUser"
-  ).innerText =
-    user.kelas || "-";
-
-
-  document.getElementById(
-    "namaHeader"
-  ).innerText =
-    user.nama || "-";
-
-
-  document.getElementById(
-    "kelasHeader"
-  ).innerText =
-    "Kelas " +
-    (user.kelas || "-");
-
-
+function showDashboard(user) {
+  document.getElementById('loginPage').style.display = "none";
+  document.getElementById('dashboard').style.display = "block";
+  document.getElementById('nama').innerText = user.nama;
+  document.getElementById('kelasUser').innerText = user.kelas;
+  document.getElementById('namaHeader').innerText = user.nama;
+  document.getElementById('kelasHeader').innerText = "Kelas " + user.kelas;
+  
   setTanggal();
-
-
-  updateClock();
-
-
-  setInterval(
-    updateClock,
-    1000
-  );
-
-
-  if(
-    sessionChecker
-  ){
-
-    clearInterval(
-      sessionChecker
-    );
-
-  }
-
-
-  sessionChecker =
-    setInterval(
-      checkSessionStatus,
-      15000
-    );
-
+  setInterval(() => document.getElementById('jamServer').innerText = "⏰ " + new Date().toLocaleTimeString() + " WIB", 1000);
+  sessionChecker = setInterval(checkSessionStatus, 15000);
 }
 
-
-/* =========================================================
-   JAM
-========================================================= */
-
-function updateClock(){
-
-  const jam =
-    document.getElementById(
-      "jamServer"
-    );
-
-
-  if(
-    jam
-  ){
-
-    jam.innerText =
-      "⏰ " +
-      new Date().toLocaleTimeString(
-        "id-ID",
-        {
-          hour12:false
-        }
-      ) +
-      " WIB";
-
-  }
-
-}
-
-
-/* =========================================================
-   LOGOUT
-========================================================= */
-
-function logout(){
-
-  const saved =
-    localStorage.getItem(
-      "user"
-    );
-
-
-  showAlert(
-    "Keluar",
-    "Apakah Anda yakin ingin mengakhiri sesi ini?",
-    "confirm",
-    function(){
-
-      isLeavingPage =
-        true;
-
-
-      examStarted =
-        false;
-
-
-      let savedUser =
-        null;
-
-
-      try{
-
-        savedUser =
-          saved
-            ? JSON.parse(saved)
-            : null;
-
-      }catch(e){
-
-        savedUser =
-          null;
-
-      }
-
-
-      if(
-        savedUser &&
-        savedUser.idLogin
-      ){
-
-        fetch(
-          API_LOGIN +
-          "?mode=logout&idLogin=" +
-          encodeURIComponent(
-            savedUser.idLogin
-          )
-        )
-
-        .catch(
-          () => {}
-        )
-
-        .finally(
-          function(){
-
-            localStorage.removeItem(
-              "user"
-            );
-
-            sessionStorage.clear();
-
-            location.reload();
-
-          }
-        );
-
-
-      }else{
-
-        localStorage.removeItem(
-          "user"
-        );
-
-        sessionStorage.clear();
-
+function logout() {
+  const savedUser = JSON.parse(localStorage.getItem("user"));
+  showAlert("Keluar", "Apakah Anda yakin ingin mengakhiri sesi ini?", "confirm", () => {
+    if (savedUser) {
+      fetch(`${API_URL}?mode=logout&idLogin=${savedUser.idLogin}`).finally(() => {
+        localStorage.removeItem("user");
         location.reload();
-
-      }
-
+      });
+    } else {
+      location.reload();
     }
-  );
-
+  });
 }
 
-
-/* =========================================================
-   RESET LOGIN
-========================================================= */
-
-function triggerReset(){
-
-  const username =
-    document.getElementById(
-      "username"
-    ).value;
-
-
-  if(
-    !username
-  ){
-
-    showAlert(
-      "Peringatan",
-      "Pilih nama siswa yang akan direset!"
-    );
-
-    return;
-
-  }
-
-
-  showAlert(
-    "Reset Sesi",
-    "Reset login untuk " +
-    username +
-    "? Gunakan ini jika Anda terputus sebelumnya.",
-    "confirm",
-    function(){
-
-      fetch(
-        API_LOGIN +
-        "?mode=reset_manual&username=" +
-        encodeURIComponent(
-          username
-        )
-      )
-
-      .then(
-        r => r.json()
-      )
-
-      .then(
-        result => {
-
-          if(
-            result.status === "success"
-          ){
-
-            showAlert(
-              "Berhasil",
-              "Sesi telah direset. Silakan login kembali."
-            );
-
-          }else{
-
-            showAlert(
-              "Informasi",
-              result.msg ||
-              "Tidak ada sesi aktif."
-            );
-
-          }
-
-        }
-      )
-
-      .catch(
-        () => {
-
-          showAlert(
-            "Gagal",
-            "Tidak dapat menghubungi server."
-          );
-
-        }
-      );
-
-    }
-  );
-
+function triggerReset() {
+  const u = document.getElementById('username').value;
+  if (!u) { showAlert("Peringatan", "Pilih nama siswa yang akan direset!"); return; }
+  
+  showAlert("Reset Sesi", `Reset login untuk ${u}? Gunakan ini jika Anda terputus sebelumnya.`, "confirm", () => {
+    fetch(`${API_URL}?mode=reset_manual&username=${u}`)
+      .then(() => showAlert("Berhasil", "Sesi telah direset. Silakan login kembali."));
+  });
 }
 
-
-/* =========================================================
-   TANGGAL
-========================================================= */
-
-function setTanggal(){
-
-  const now =
-    new Date();
-
-
-  const hari = [
-
-    "Minggu",
-    "Senin",
-    "Selasa",
-    "Rabu",
-    "Kamis",
-    "Jumat",
-    "Sabtu"
-
-  ];
-
-
-  const bulan = [
-
-    "Januari",
-    "Februari",
-    "Maret",
-    "April",
-    "Mei",
-    "Juni",
-    "Juli",
-    "Agustus",
-    "September",
-    "Oktober",
-    "November",
-    "Desember"
-
-  ];
-
-
-  document.getElementById(
-    "tanggal"
-  ).innerText =
-
-    hari[now.getDay()] +
-    ", " +
-    now.getDate() +
-    " " +
-    bulan[now.getMonth()] +
-    " " +
-    now.getFullYear();
-
+function setTanggal() {
+  const now = new Date();
+  const hari = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+  const bulan = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+  document.getElementById('tanggal').innerText = hari[now.getDay()] + ", " + now.getDate() + " " + bulan[now.getMonth()] + " " + now.getFullYear();
 }
 
-
-/* =========================================================
-   MODAL KONFIRMASI
-========================================================= */
-
-function openConfirm(){
-
-  document.getElementById(
-    "checkData"
-  ).checked =
-    false;
-
-
-  document.getElementById(
-    "confirmModal"
-  ).style.display =
-    "flex";
-
+function openConfirm() { document.getElementById('confirmModal').style.display = "flex"; }
+function closeConfirm() { document.getElementById('confirmModal').style.display = "none"; }
+function lanjutUjian() {
+  if(!document.getElementById('checkData').checked) { showAlert("Peringatan", "Centang konfirmasi terlebih dahulu!"); return; }
+  window.location.href = "HALAMAN_SOAL_CBT.html";
 }
 
-
-function closeConfirm(){
-
-  document.getElementById(
-    "confirmModal"
-  ).style.display =
-    "none";
-
+function openModal() {
+  document.getElementById('modalJadwal').style.display = "flex";
+  fetch(API_URL + "?mode=token").then(r => r.json()).then(data => {
+    const b = document.getElementById('jadwalBody');
+    b.innerHTML = "";
+    data.forEach(d => b.innerHTML += `<tr><td>${d.kelas}</td><td>${d.mulai}</td><td>${d.selesai}</td></tr>`);
+  });
 }
-
-
-/* =========================================================
-   MULAI UJIAN
-========================================================= */
-
-function lanjutUjian(){
-
-  const check =
-    document.getElementById(
-      "checkData"
-    );
-
-
-  if(
-    !check.checked
-  ){
-
-    showAlert(
-      "Peringatan",
-      "Centang konfirmasi terlebih dahulu!"
-    );
-
-    return;
-
-  }
-
-
-  const saved =
-    localStorage.getItem(
-      "user"
-    );
-
-
-  if(
-    !saved
-  ){
-
-    showAlert(
-      "Sesi Tidak Ditemukan",
-      "Silakan login kembali."
-    );
-
-    return;
-
-  }
-
-
-  /*
-   * Aktifkan mode keamanan
-   * SEBELUM membuka halaman soal.
-   */
-
-  activateExamMode();
-
-
-  /*
-   * Penanda bahwa perpindahan ini
-   * merupakan perpindahan resmi
-   * dari dashboard menuju ujian.
-   */
-
-  isLeavingPage =
-    true;
-
-
-  sessionStorage.setItem(
-    "cbtReturnFromDashboard",
-    "true"
-  );
-
-
-  /*
-   * Simpan URL GAS Soal agar halaman
-   * soal dapat menggunakan konfigurasi
-   * yang sama.
-   */
-
-  sessionStorage.setItem(
-    "cbtSoalAPI",
-    API_SOAL
-  );
-
-
-  /*
-   * Buka halaman soal.
-   */
-
-  window.location.href =
-    "HALAMAN_SOAL_CBT.html";
-
-}
-
-
-/* =========================================================
-   JADWAL TOKEN
-========================================================= */
-
-function openModal(){
-
-  document.getElementById(
-    "modalJadwal"
-  ).style.display =
-    "flex";
-
-
-  const body =
-    document.getElementById(
-      "jadwalBody"
-    );
-
-
-  body.innerHTML = `
-
-    <tr>
-
-      <td colspan="3">
-        Memuat jadwal...
-      </td>
-
-    </tr>
-
-  `;
-
-
-  fetch(
-    API_LOGIN +
-    "?mode=token"
-  )
-
-  .then(
-    r => r.json()
-  )
-
-  .then(
-    data => {
-
-      body.innerHTML =
-        "";
-
-
-      if(
-        !Array.isArray(data) ||
-        data.length === 0
-      ){
-
-        body.innerHTML = `
-
-          <tr>
-
-            <td colspan="3">
-              Tidak ada jadwal token.
-            </td>
-
-          </tr>
-
-        `;
-
-        return;
-
-      }
-
-
-      data.forEach(
-        d => {
-
-          const tr =
-            document.createElement(
-              "tr"
-            );
-
-
-          const tdKelas =
-            document.createElement(
-              "td"
-            );
-
-
-          const tdMulai =
-            document.createElement(
-              "td"
-            );
-
-
-          const tdSelesai =
-            document.createElement(
-              "td"
-            );
-
-
-          tdKelas.textContent =
-            d.kelas || "-";
-
-
-          tdMulai.textContent =
-            d.mulai || "-";
-
-
-          tdSelesai.textContent =
-            d.selesai || "-";
-
-
-          tr.appendChild(
-            tdKelas
-          );
-
-
-          tr.appendChild(
-            tdMulai
-          );
-
-
-          tr.appendChild(
-            tdSelesai
-          );
-
-
-          body.appendChild(
-            tr
-          );
-
-        }
-      );
-
-    }
-  )
-
-  .catch(
-    () => {
-
-      body.innerHTML = `
-
-        <tr>
-
-          <td colspan="3">
-            Gagal memuat jadwal.
-          </td>
-
-        </tr>
-
-      `;
-
-    }
-  );
-
-}
-
-
-function closeModal(){
-
-  document.getElementById(
-    "modalJadwal"
-  ).style.display =
-    "none";
-
-}
-
-
-/* =========================================================
-   KLIK DI LUAR MODAL
-========================================================= */
-
-window.addEventListener(
-  "click",
-  function(e){
-
-    const jadwal =
-      document.getElementById(
-        "modalJadwal"
-      );
-
-
-    const alert =
-      document.getElementById(
-        "customAlert"
-      );
-
-
-    const confirm =
-      document.getElementById(
-        "confirmModal"
-      );
-
-
-    if(
-      e.target === jadwal
-    ){
-
-      closeModal();
-
-    }
-
-
-    /*
-     * Modal peringatan keamanan
-     * tidak ditutup dengan klik luar.
-     */
-
-  }
-);
-
-
-/* =========================================================
-   LOAD SESSION
-========================================================= */
-
-window.addEventListener(
-  "load",
-  function(){
-
-    loadExamSecurityState();
-
-
-    const saved =
-      localStorage.getItem(
-        "user"
-      );
-
-
-    if(
-      saved
-    ){
-
-      try{
-
-        const user =
-          JSON.parse(
-            saved
-          );
-
-
-        showDashboard(
-          user
-        );
-
-
-        /*
-         * Validasi session ke server
-         */
-
-        checkSessionStatus();
-
-
-      }catch(e){
-
-        localStorage.removeItem(
-          "user"
-        );
-
-      }
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   BLOKIR SELECTION
-========================================================= */
-
-document.addEventListener(
-  "selectstart",
-  function(e){
-
-    /*
-     * Input tetap boleh digunakan.
-     */
-
-    if(
-      e.target.tagName === "INPUT" ||
-      e.target.tagName === "TEXTAREA"
-    ){
-
-      return;
-
-    }
-
-
-    e.preventDefault();
-
-  },
-  true
-);
-
-
-/* =========================================================
-   BLOKIR DRAG IMAGE
-========================================================= */
-
-document.addEventListener(
-  "dragstart",
-  function(e){
-
-    if(
-      e.target.tagName === "IMG"
-    ){
-
-      e.preventDefault();
-
-    }
-
-  },
-  true
-);
-
-
-/* =========================================================
-   BLOKIR OPEN VIEW SOURCE
-========================================================= */
-
-document.addEventListener(
-  "keydown",
-  function(e){
-
-    if(
-      e.ctrlKey &&
-      e.key.toLowerCase() === "u"
-    ){
-
-      e.preventDefault();
-
-    }
-
-  },
-  true
-);
-
-
-/* =========================================================
-   END SECURITY
-========================================================= */
-
+function closeModal() { document.getElementById('modalJadwal').style.display = "none"; }
+
+window.onload = () => {
+  const saved = localStorage.getItem("user");
+  if(saved) showDashboard(JSON.parse(saved));
+};
 </script>
-
-
 </body>
 </html>
