@@ -1,421 +1,14 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI EMO — Widget Buku Tamu</title>
-<style>
-  /* AI EMO — semua style dibatasi ke widget agar tidak merusak style website utama */
-  #ai-emo-widget {
-    --emo-cyan: #00f2fe;
-    --emo-blue: #4facfe;
-    --emo-purple: #5c32a8;
-    --emo-dark: #0d1322;
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    z-index: 99999;
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    color: #f0f6ff;
-  }
-  #ai-emo-widget * { box-sizing: border-box; }
+<!-- FLOATING BUKU TAMU SMPN 1 MOGA (THEME: AI EMO ROBOT) -->
+<div id="guestbook-widget">
 
-  /* Speech Bubble (Balon Sapaan) */
-  #ai-emo-speech-bubble {
-    position: absolute;
-    bottom: 155px;
-    right: 10px;
-    background: linear-gradient(135deg, rgba(20, 30, 55, 0.95), rgba(10, 16, 32, 0.98));
-    border: 1px solid rgba(0, 242, 254, 0.4);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 242, 254, 0.2);
-    backdrop-filter: blur(12px);
-    border-radius: 16px;
-    padding: 10px 14px;
-    width: max-content;
-    max-width: 210px;
-    font-size: 12px;
-    line-height: 1.4;
-    color: #e2f1ff;
-    cursor: pointer;
-    pointer-events: auto;
-    opacity: 0;
-    transform: translateY(10px) scale(0.95);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    z-index: 10;
-  }
-  #ai-emo-speech-bubble::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    right: 35px;
-    width: 0;
-    height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-top: 8px solid rgba(10, 16, 32, 0.98);
-  }
-  #ai-emo-speech-bubble.show {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  #ai-emo-speech-bubble strong {
-    color: var(--emo-cyan);
-    display: block;
-    font-size: 11px;
-    letter-spacing: 0.5px;
-    margin-bottom: 2px;
-    text-transform: uppercase;
-  }
+  <!-- TOMBOL ROBOT AI EMO INTERAKTIF -->
+  <button id="gb-open" type="button" data-mood="idle" aria-label="Buka Buku Tamu SMPN 1 Moga" aria-expanded="false" aria-controls="gb-panel">
+    <span class="gb-logo-glow"></span>
+    <span class="gb-logo-spark gb-spark-one">✦</span>
+    <span class="gb-logo-spark gb-spark-two">✧</span>
 
-  /* Launcher Button & Avatar */
-  #ai-emo-launcher {
-    display: block;
-    width: 115px;
-    height: 145px;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    cursor: pointer;
-    position: relative;
-    filter: drop-shadow(0 12px 20px rgba(0,0,0,0.45));
-    -webkit-tap-highlight-color: transparent;
-    transition: transform 0.2s ease;
-  }
-  #ai-emo-launcher:hover {
-    transform: scale(1.05);
-  }
-  #ai-emo-launcher svg { display:block; width:100%; height:100%; overflow:visible; }
-  #ai-emo-launcher:focus-visible { outline: 2px solid var(--emo-cyan); outline-offset: 4px; border-radius: 20px; }
-  
-  /* Expressions & Mood Animations */
-  #ai-emo-launcher .eye { transition: transform .18s ease; transform-box: fill-box; transform-origin: center; }
-  #ai-emo-launcher .brow { transition: all .2s ease; }
-  
-  #ai-emo-launcher[data-mood="suspicious"] .brow.left { transform: rotate(-16deg) translateY(-2px); }
-  #ai-emo-launcher[data-mood="suspicious"] .brow.right { transform: rotate(12deg) translateY(2px); }
-  #ai-emo-launcher[data-mood="suspicious"] .eye.left { transform: scaleY(.72); }
-  #ai-emo-launcher[data-mood="suspicious"] .eye.right { transform: scaleY(.86); }
-  
-  #ai-emo-launcher[data-mood="sleepy"] .eye { transform: scaleY(.12); }
-  #ai-emo-launcher[data-mood="sleep"] .eye { transform: scaleY(.04); }
-  #ai-emo-launcher[data-mood="excited"] .eye { transform: scale(1.12); }
-  #ai-emo-launcher[data-mood="laugh"] .eye { transform: scaleY(.15); }
-  
-  /* Mood Baru: Berontak (Rebel) */
-  #ai-emo-launcher[data-mood="rebel"] .brow.left { transform: rotate(22deg) translateY(2px); }
-  #ai-emo-launcher[data-mood="rebel"] .brow.right { transform: rotate(-22deg) translateY(2px); }
-  #ai-emo-launcher[data-mood="rebel"] .eye { transform: scale(0.85); }
-
-  /* Mood Baru: Energy 1% (Battery Low) */
-  #ai-emo-launcher[data-mood="battery"] .eye { transform: scaleY(0.08); opacity: 0.5; }
-  #ai-emo-launcher[data-mood="battery"] .brow { transform: translateY(4deg); }
-
-  /* Visible Elements toggle based on mood */
-  #ai-emo-launcher .zzz { opacity:0; transition:opacity .2s; }
-  #ai-emo-launcher[data-mood="sleep"] .zzz, #ai-emo-launcher[data-mood="battery"] .zzz { opacity:1; }
-
-  #ai-emo-launcher .spark { opacity:0; }
-  #ai-emo-launcher[data-mood="excited"] .spark { opacity:1; }
-
-  #ai-emo-launcher .battery-icon { opacity: 0; transition: opacity .2s; }
-  #ai-emo-launcher[data-mood="battery"] .battery-icon { opacity: 1; animation: emo-blink 0.8s infinite; }
-
-  /* Body Floating & Movement Animations */
-  #ai-emo-launcher[data-mood="hello"] { animation: emo-wave .6s ease-in-out 2; transform-origin: 50% 85%; }
-  #ai-emo-launcher[data-mood="idle"] { animation: emo-float 3.5s ease-in-out infinite; }
-  #ai-emo-launcher[data-mood="laugh"], #ai-emo-launcher[data-mood="excited"] { animation: emo-bounce .4s ease-in-out 3; }
-  #ai-emo-launcher[data-mood="rebel"] { animation: emo-shake 0.25s ease-in-out infinite; }
-  #ai-emo-launcher[data-mood="run"] { animation: emo-run-tilt 0.3s ease-in-out infinite alternate; }
-  #ai-emo-launcher[data-mood="battery"] { animation: emo-faint 2s ease-in-out infinite; }
-
-  /* ANIMASI KAKI: Injak-Injak, Tendang, Lari, Berontak */
-  #emo-leg-left-group, #emo-leg-right-group {
-    transform-box: fill-box;
-    transform-origin: top center;
-  }
-
-  /* Saat Idle: Animasi Kaki Injak-Injak Bumi */
-  #ai-emo-launcher[data-mood="idle"] #emo-leg-left-group { animation: emo-foot-fidget-left 4s ease-in-out infinite; }
-  #ai-emo-launcher[data-mood="idle"] #emo-leg-right-group { animation: emo-foot-fidget-right 4s ease-in-out infinite; }
-
-  /* Saat Hello / Excited: Animasi Tendang Kaki */
-  #ai-emo-launcher[data-mood="hello"] #emo-leg-right-group,
-  #ai-emo-launcher[data-mood="excited"] #emo-leg-right-group {
-    animation: emo-leg-kick 0.6s ease-in-out infinite alternate;
-  }
-
-  /* Saat Mau Lari (Run): Animasi Langkah Kaki Cepat & Bergantian */
-  #ai-emo-launcher[data-mood="run"] #emo-leg-left-group {
-    animation: emo-run-left 0.2s ease-in-out infinite alternate;
-  }
-  #ai-emo-launcher[data-mood="run"] #emo-leg-right-group {
-    animation: emo-run-right 0.2s ease-in-out infinite alternate;
-  }
-
-  /* Form Window (Panel Buku Tamu) */
-  #ai-emo-chat {
-    position: absolute;
-    right: 0;
-    bottom: 155px;
-    width: min(360px, calc(100vw - 32px));
-    height: min(520px, calc(100dvh - 170px));
-    min-height: 380px;
-    display: none;
-    flex-direction: column;
-    overflow-hidden: hidden;
-    overflow-y: auto;
-    border: 1px solid rgba(0, 242, 254, 0.25);
-    border-radius: 24px;
-    background: linear-gradient(165deg, rgba(13, 19, 34, 0.96), rgba(8, 12, 22, 0.98));
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 242, 254, 0.15);
-    backdrop-filter: blur(16px);
-  }
-  #ai-emo-chat.open { display: flex; animation: emo-chat-in .25s cubic-bezier(0.16, 1, 0.3, 1); }
-  
-  .emo-chat-header {
-    display: flex; align-items: center; gap: 12px; padding: 14px 16px;
-    background: linear-gradient(90deg, rgba(24, 36, 62, 0.9), rgba(15, 23, 42, 0.9));
-    border-bottom: 1px solid rgba(0, 242, 254, 0.2);
-    position: sticky; top: 0; z-index: 5;
-  }
-  .emo-avatar-mini {
-    width: 38px; height: 38px; flex: 0 0 38px; border-radius: 12px;
-    display: grid; place-items: center; background: #070d19; border: 1px solid rgba(0, 242, 254, 0.5);
-    box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
-  }
-  .emo-avatar-mini svg { width: 30px; height: 30px; }
-  .emo-chat-title { flex: 1; min-width: 0; }
-  .emo-chat-title strong { display: block; font-size: 14px; font-weight: 700; color: #ffffff; }
-  .emo-chat-title small { color: var(--emo-cyan); font-size: 11px; display: flex; align-items: center; gap: 4px; }
-  .emo-chat-title small::before { content:''; display:inline-block; width:6px; height:6px; background:#00f2fe; border-radius:50%; box-shadow:0 0 6px #00f2fe; }
-
-  #ai-emo-close {
-    background: rgba(255, 255, 255, 0.05); border: 0; color: #a0aec0;
-    width: 28px; height: 28px; border-radius: 50%; font-size: 18px;
-    cursor: pointer; display: grid; place-items: center; transition: all 0.2s;
-  }
-  #ai-emo-close:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
-
-  /* Form Content Body */
-  #ai-emo-form-content {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  #ai-emo-form-content label {
-    color: var(--emo-cyan);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-  }
-  #ai-emo-form-content input,
-  #ai-emo-form-content textarea {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 10px 12px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.04);
-    color: #ffffff;
-    font: inherit;
-    font-size: 13px;
-    outline: none;
-    transition: border-color 0.2s, background 0.2s;
-  }
-  #ai-emo-form-content input:focus,
-  #ai-emo-form-content textarea:focus {
-    border-color: var(--emo-cyan);
-    background: rgba(255, 255, 255, 0.07);
-    box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
-  }
-  #ai-emo-form-content textarea {
-    resize: vertical;
-    min-height: 70px;
-  }
-
-  /* Buttons */
-  .emo-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    min-height: 40px;
-    margin-top: 4px;
-    border: 0;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform 0.1s, opacity 0.2s, filter 0.2s;
-  }
-  .emo-btn:active { transform: scale(0.97); }
-  .emo-btn:disabled { opacity: 0.5; cursor: wait; }
-
-  .emo-btn-primary {
-    background: linear-gradient(135deg, var(--emo-cyan), var(--emo-blue));
-    color: #040814;
-  }
-  .emo-btn-wa {
-    background: rgba(37, 211, 102, 0.15);
-    color: #25d366;
-    border: 1px solid rgba(37, 211, 102, 0.4);
-  }
-  .emo-btn-wa:hover { background: rgba(37, 211, 102, 0.25); }
-
-  #ai-emo-status {
-    font-size: 12px;
-    color: var(--emo-cyan);
-    margin-top: 6px;
-    text-align: center;
-    line-height: 1.4;
-  }
-  .emo-note {
-    font-size: 11px;
-    color: #8da2fb;
-    opacity: 0.8;
-    text-align: center;
-    margin-top: 2px;
-  }
-
-  /* Keyframe Animations */
-  @keyframes emo-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-  @keyframes emo-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
-  @keyframes emo-wave { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(6deg); } 70% { transform: rotate(-6deg); } }
-  @keyframes emo-chat-in { from { opacity: 0; transform: translateY(12px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
-
-  @keyframes emo-foot-fidget-left {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    12% { transform: translateY(-4px) rotate(-3deg); }
-    18% { transform: translateY(0) rotate(0deg); }
-    24% { transform: translateY(-3px) rotate(-2deg); }
-    30% { transform: translateY(0) rotate(0deg); }
-    70% { transform: translateY(0) rotate(0deg); }
-  }
-
-  @keyframes emo-foot-fidget-right {
-    0%, 40%, 100% { transform: translateY(0) rotate(0deg); }
-    52% { transform: translateY(-5px) rotate(4deg); }
-    58% { transform: translateY(0) rotate(0deg); }
-    64% { transform: translateY(-3px) rotate(2deg); }
-    70% { transform: translateY(0) rotate(0deg); }
-  }
-
-  @keyframes emo-leg-kick {
-    0% { transform: rotate(0deg) translateY(0); }
-    50% { transform: rotate(-18deg) translateY(-6px) translateX(3px); }
-    100% { transform: rotate(8deg) translateY(1px); }
-  }
-
-  @keyframes emo-shake {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    25% { transform: translate(-2px, 1px) rotate(-3deg); }
-    50% { transform: translate(2px, -1px) rotate(3deg); }
-    75% { transform: translate(-1px, -1px) rotate(-2deg); }
-    100% { transform: translate(0, 0) rotate(0deg); }
-  }
-
-  @keyframes emo-run-tilt {
-    0% { transform: translateY(2px) rotate(8deg); }
-    100% { transform: translateY(-4px) rotate(12deg); }
-  }
-
-  @keyframes emo-run-left {
-    0% { transform: rotate(-25deg) translateY(-3px); }
-    100% { transform: rotate(25deg) translateY(3px); }
-  }
-
-  @keyframes emo-run-right {
-    0% { transform: rotate(25deg) translateY(3px); }
-    100% { transform: rotate(-25deg) translateY(-3px); }
-  }
-
-  @keyframes emo-faint {
-    0%, 100% { transform: translateY(4px) rotate(-2deg); }
-    50% { transform: translateY(8px) rotate(2deg); }
-  }
-
-  @keyframes emo-blink {
-    0%, 100% { opacity: 0.2; }
-    50% { opacity: 1; }
-  }
-
-  @media(max-width: 480px) {
-    #ai-emo-widget { right: 12px; bottom: 12px; }
-    #ai-emo-launcher { width: 100px; height: 128px; }
-    #ai-emo-chat { bottom: 140px; }
-    #ai-emo-speech-bubble { bottom: 135px; }
-  }
-  @media(prefers-reduced-motion: reduce) {
-    #ai-emo-widget *, #ai-emo-widget *::before { animation: none !important; transition: none !important; }
-  }
-</style>
-</head>
-<body>
-
-<div id="ai-emo-widget">
-  <!-- Balon Sapaan Melayang (Speech Bubble) -->
-  <div id="ai-emo-speech-bubble" role="button" aria-label="Buka pesan AI EMO">
-    <strong>AI EMO</strong>
-    <span>Hai Kak! Isi buku tamu di sini yuk ✨</span>
-  </div>
-
-  <!-- Jendela Formulir Buku Tamu -->
-  <section id="ai-emo-chat" role="dialog" aria-label="Formulir Buku Tamu AI EMO" aria-hidden="true">
-    <header class="emo-chat-header">
-      <div class="emo-avatar-mini" aria-hidden="true">
-        <svg viewBox="0 0 50 50">
-          <rect x="8" y="12" width="34" height="29" rx="10" fill="#182232" stroke="#00f2fe" stroke-width="1.5"/>
-          <rect x="12" y="16" width="26" height="21" rx="7" fill="#060b14"/>
-          <rect x="18" y="22" width="5" height="6" rx="1.5" fill="#00f2fe"/>
-          <rect x="27" y="22" width="5" height="6" rx="1.5" fill="#00f2fe"/>
-        </svg>
-      </div>
-      <div class="emo-chat-title">
-        <strong>Buku Tamu</strong>
-        <small>AI EMO &amp; SMPN 1 Moga</small>
-      </div>
-      <button id="ai-emo-close" type="button" aria-label="Tutup formulir">✕</button>
-    </header>
-    
-    <form id="ai-emo-form" style="display: flex; flex-direction: column; flex: 1;">
-      <div id="ai-emo-form-content">
-        <label for="emo-nama">Nama</label>
-        <input id="emo-nama" name="nama" type="text" maxlength="150" placeholder="Masukkan nama lengkap" required>
-
-        <label for="emo-kontak">No. Kontak / HP</label>
-        <input id="emo-kontak" name="kontak" type="tel" maxlength="30" placeholder="Masukkan nomor HP" required>
-
-        <label for="emo-alamat">Alamat</label>
-        <input id="emo-alamat" name="alamat" type="text" maxlength="300" placeholder="Masukkan alamat" required>
-
-        <label for="emo-subjek">Subjek Pesan</label>
-        <input id="emo-subjek" name="subjek" type="text" maxlength="200" placeholder="Judul atau topik pesan" required>
-
-        <label for="emo-pesan">Pesan</label>
-        <textarea id="emo-pesan" name="pesan" rows="3" maxlength="3000" placeholder="Tuliskan pesan Anda..." required></textarea>
-
-        <button id="ai-emo-submit" class="emo-btn emo-btn-primary" type="submit">
-          ➤ Kirim Buku Tamu
-        </button>
-
-        <button id="ai-emo-whatsapp" class="emo-btn emo-btn-wa" type="button">
-          <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-            <path d="M20.52 3.48A11.8 11.8 0 0 0 12.12 0C5.56 0 .22 5.34.22 11.9c0 2.1.55 4.15 1.6 5.96L.12 24l6.3-1.65a11.9 11.9 0 0 0 5.7 1.45h.01c6.56 0 11.9-5.34 11.9-11.9 0-3.18-1.24-6.17-3.51-8.42ZM12.13 21.8h-.01a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.74.98 1-3.65-.24-.38a9.85 9.85 0 0 1-1.52-5.26c0-5.46 4.45-9.9 9.91-9.9 2.64 0 5.12 1.03 7 2.9a9.85 9.85 0 0 1 2.9 7c0 5.46-4.44 9.9-9.9 9.9Zm5.43-7.42c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.47-.89-.8-1.49-1.78-1.66-2.08-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.18.2-.3.3-.5.1-.2.05-.38-.02-.53-.08-.15-.67-1.61-.92-2.2-.24-.57-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.27.5 1.7.64.72.23 1.37.2 1.88.12.57-.08 1.76-.72 2.01-1.42.25-.7.25-1.29.17-1.42-.07-.12-.27-.2-.57-.35Z"></path>
-          </svg>
-          Kirim via WhatsApp Admin
-        </button>
-
-        <p id="ai-emo-status" role="status" aria-live="polite"></p>
-        <small class="emo-note">Pesan akan diperiksa admin sebelum ditampilkan.</small>
-      </div>
-    </form>
-  </section>
-
-  <!-- Launcher Character SVG -->
-  <button id="ai-emo-launcher" type="button" data-mood="idle" aria-label="Buka formulir buku tamu AI EMO" aria-expanded="false">
-    <svg viewBox="0 0 120 155" role="img" aria-label="Robot AI EMO">
+    <!-- SVG Character Robot AI EMO -->
+    <svg viewBox="0 0 120 155" role="img" aria-label="Robot AI EMO Buku Tamu">
       <defs>
         <linearGradient id="emo-hp-band-outer" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#3d3763"/>
@@ -465,10 +58,12 @@
         </filter>
       </defs>
 
+      <!-- Headphone Bando Ramping -->
       <path d="M 15 56 C 13 22, 28 15, 50 15 L 70 15 C 92 15, 107 22, 105 56" fill="none" stroke="url(#emo-hp-band-outer)" stroke-width="10" stroke-linecap="round"/>
       <path d="M 15 56 C 13 22, 28 15, 50 15 L 70 15 C 92 15, 107 22, 105 56" fill="none" stroke="url(#emo-hp-band-inner)" stroke-width="5" stroke-linecap="round"/>
       <path d="M 38 16 Q 60 12 82 16" fill="none" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" filter="url(#emo-glow)"/>
 
+      <!-- Kaki Robot -->
       <g id="emo-leg-left-group">
         <rect x="36" y="86" width="12" height="38" rx="6" fill="url(#emo-leg-grad)" stroke="#0d1017" stroke-width="1"/>
         <line x1="42" y1="113" x2="42" y2="117" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" filter="url(#emo-glow)"/>
@@ -489,10 +84,12 @@
         </g>
       </g>
 
+      <!-- Kepala & Layar Robot -->
       <rect x="21" y="26" width="78" height="70" rx="26" fill="url(#emo-body-grad)" stroke="#3e4759" stroke-width="1.8"/>
       <rect x="25" y="30" width="70" height="62" rx="22" fill="#2b3140" stroke="#717c96" stroke-width="1.5"/>
       <rect x="29" y="34" width="62" height="54" rx="17" fill="url(#emo-screen-bg)" stroke="#05070a" stroke-width="1.2"/>
 
+      <!-- Headphone Earcup Samping -->
       <g id="earcup-left">
         <rect x="5" y="36" width="20" height="38" rx="10" fill="url(#emo-hp-cup-grad)" stroke="#53468e" stroke-width="1.8"/>
         <rect x="18" y="41" width="5" height="28" rx="2.5" fill="#0b0917"/>
@@ -505,6 +102,7 @@
         <line x1="108" y1="43" x2="108" y2="67" stroke="#00f2fe" stroke-width="2.5" stroke-linecap="round" filter="url(#emo-glow)"/>
       </g>
 
+      <!-- Alis & Mata Cyan Glowing -->
       <path class="brow left" d="M39 44 Q45 42 51 44" fill="none" stroke="#00f2fe" stroke-width="2" stroke-linecap="round"/>
       <path class="brow right" d="M69 44 Q75 42 81 44" fill="none" stroke="#00f2fe" stroke-width="2" stroke-linecap="round"/>
 
@@ -513,6 +111,7 @@
 
       <rect x="54" y="83" width="12" height="3" rx="1.5" fill="#505a70"/>
 
+      <!-- Sparks, Zz, & Baterai Low -->
       <path class="spark" d="M22 14 L25 20 L31 23 L25 26 L22 32 L19 26 L13 23 L19 20Z" fill="#ffdd67"/>
       <text class="zzz" x="90" y="20" fill="#a4baff" font-size="12" font-weight="800">Zz</text>
       
@@ -523,90 +122,613 @@
       </g>
     </svg>
   </button>
+
+  <!-- PANEL FORMULIR (WARNA STYLE EMO ROBOT CHATBOX) -->
+  <section id="gb-panel" hidden="" aria-label="Formulir Buku Tamu">
+    <header class="gb-header">
+      <div class="gb-brand">
+        <div class="gb-avatar-mini" aria-hidden="true">
+          <svg viewBox="0 0 50 50">
+            <rect x="8" y="12" width="34" height="29" rx="10" fill="#182232" stroke="#00f2fe" stroke-width="1.5"/>
+            <rect x="12" y="16" width="26" height="21" rx="7" fill="#060b14"/>
+            <rect x="18" y="22" width="5" height="6" rx="1.5" fill="#00f2fe"/>
+            <rect x="27" y="22" width="5" height="6" rx="1.5" fill="#00f2fe"/>
+          </svg>
+        </div>
+        <div>
+          <strong>Buku Tamu</strong>
+          <small>SMPN 1 Moga</small>
+        </div>
+      </div>
+
+      <button id="gb-close" type="button" aria-label="Tutup formulir">
+        ×
+      </button>
+    </header>
+
+    <form id="gb-form">
+      <label for="gb-nama">Nama</label>
+      <input id="gb-nama" name="nama" type="text" maxlength="150" autocomplete="name" placeholder="Masukkan nama lengkap" required="">
+
+      <label for="gb-kontak">No. Kontak / HP</label>
+      <input id="gb-kontak" name="kontak" type="tel" maxlength="30" autocomplete="tel" placeholder="Masukkan nomor HP" required="">
+
+      <label for="gb-alamat">Alamat</label>
+      <input id="gb-alamat" name="alamat" type="text" maxlength="300" autocomplete="street-address" placeholder="Masukkan alamat" required="">
+
+      <label for="gb-subjek">Subjek Pesan</label>
+      <input id="gb-subjek" name="subjek" type="text" maxlength="200" placeholder="Judul atau topik pesan" required="">
+
+      <label for="gb-pesan">Pesan</label>
+      <textarea id="gb-pesan" name="pesan" rows="4" maxlength="3000" placeholder="Tuliskan pesan Anda..." required=""></textarea>
+
+      <button id="gb-submit" class="gb-button gb-primary" type="submit">
+        ➤ Kirim Buku Tamu
+      </button>
+
+      <button id="gb-whatsapp" class="gb-button gb-wa" type="button">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <path d="M20.52 3.48A11.8 11.8 0 0 0 12.12 0C5.56 0 .22 5.34.22 11.9c0 2.1.55 4.15 1.6 5.96L.12 24l6.3-1.65a11.9 11.9 0 0 0 5.7 1.45h.01c6.56 0 11.9-5.34 11.9-11.9 0-3.18-1.24-6.17-3.51-8.42ZM12.13 21.8h-.01a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.74.98 1-3.65-.24-.38a9.85 9.85 0 0 1-1.52-5.26c0-5.46 4.45-9.9 9.91-9.9 2.64 0 5.12 1.03 7 2.9a9.85 9.85 0 0 1 2.9 7c0 5.46-4.44 9.9-9.9 9.9Zm5.43-7.42c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.47-.89-.8-1.49-1.78-1.66-2.08-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.18.2-.3.3-.5.1-.2.05-.38-.02-.53-.08-.15-.67-1.61-.92-2.2-.24-.57-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.27.5 1.7.64.72.23 1.37.2 1.88.12.57-.08 1.76-.72 2.01-1.42.25-.7.25-1.29.17-1.42-.07-.12-.27-.2-.57-.35Z"></path>
+        </svg>
+        Kirim via WhatsApp Admin
+      </button>
+
+      <p id="gb-status" role="status" aria-live="polite"></p>
+
+      <small class="gb-note">
+        Pesan akan diperiksa admin sebelum ditampilkan di website.
+      </small>
+    </form>
+  </section>
 </div>
+
+<style>
+#guestbook-widget {
+  --emo-cyan: #00f2fe;
+  --emo-blue: #4facfe;
+  --emo-dark: #0d1322;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  position: relative;
+  z-index: 99999;
+}
+
+/* ROBOT MENGAMBANG: TRANSPARAN & TATA LETAK PRESISI */
+#guestbook-widget #gb-open {
+  position: fixed;
+  right: 8px;
+  bottom: 0px;
+  width: 95px;
+  height: 120px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 0;
+  outline-offset: 5px;
+  background: transparent;
+  box-shadow: none;
+
+  cursor: pointer;
+  isolation: isolate;
+  -webkit-tap-highlight-color: transparent;
+
+  animation: gb-float 3.5s ease-in-out infinite;
+  transition: transform 0.2s ease;
+}
+
+#guestbook-widget #gb-open svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,0.5));
+}
+
+/* CAHAYA NEON CYAN DI BELAKANG ROBOT */
+#guestbook-widget .gb-logo-glow {
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 55%;
+
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+
+  background: rgba(0, 242, 254, 0.22);
+  filter: blur(20px);
+  transform: translate(-50%, -50%);
+
+  animation: gb-glow 2.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* EFEK KILAU SPARKLE */
+#guestbook-widget .gb-logo-spark {
+  position: absolute;
+  z-index: 2;
+  color: #00f2fe;
+  line-height: 1;
+  pointer-events: none;
+  text-shadow: 0 1px 8px rgba(0, 242, 254, .6);
+}
+
+#guestbook-widget .gb-spark-one {
+  top: 6px;
+  right: 8px;
+  font-size: 20px;
+  animation: gb-sparkle 2s ease-in-out infinite;
+}
+
+#guestbook-widget .gb-spark-two {
+  top: 28px;
+  left: 6px;
+  font-size: 15px;
+  animation: gb-sparkle 2s ease-in-out infinite .8s;
+}
+
+/* INTERAKSI MOUSE ROBOT EMO */
+#guestbook-widget #gb-open:hover {
+  transform: scale(1.06);
+}
+
+/* EKSPRESI & ANIMASI SVG EMO ROBOT */
+#guestbook-widget #gb-open .eye { transition: transform .18s ease; transform-box: fill-box; transform-origin: center; }
+#guestbook-widget #gb-open .brow { transition: all .2s ease; }
+
+#guestbook-widget #gb-open[data-mood="suspicious"] .brow.left { transform: rotate(-16deg) translateY(-2px); }
+#guestbook-widget #gb-open[data-mood="suspicious"] .brow.right { transform: rotate(12deg) translateY(2px); }
+#guestbook-widget #gb-open[data-mood="suspicious"] .eye.left { transform: scaleY(.72); }
+#guestbook-widget #gb-open[data-mood="suspicious"] .eye.right { transform: scaleY(.86); }
+
+#guestbook-widget #gb-open[data-mood="sleepy"] .eye { transform: scaleY(.12); }
+#guestbook-widget #gb-open[data-mood="sleep"] .eye { transform: scaleY(.04); }
+#guestbook-widget #gb-open[data-mood="excited"] .eye { transform: scale(1.12); }
+#guestbook-widget #gb-open[data-mood="laugh"] .eye { transform: scaleY(.15); }
+
+#guestbook-widget #gb-open[data-mood="rebel"] .brow.left { transform: rotate(22deg) translateY(2px); }
+#guestbook-widget #gb-open[data-mood="rebel"] .brow.right { transform: rotate(-22deg) translateY(2px); }
+#guestbook-widget #gb-open[data-mood="rebel"] .eye { transform: scale(0.85); }
+
+#guestbook-widget #gb-open[data-mood="battery"] .eye { transform: scaleY(0.08); opacity: 0.5; }
+#guestbook-widget #gb-open[data-mood="battery"] .brow { transform: translateY(4deg); }
+
+#guestbook-widget #gb-open .zzz { opacity:0; transition:opacity .2s; }
+#guestbook-widget #gb-open[data-mood="sleep"] .zzz, #guestbook-widget #gb-open[data-mood="battery"] .zzz { opacity:1; }
+
+#guestbook-widget #gb-open .spark { opacity:0; }
+#guestbook-widget #gb-open[data-mood="excited"] .spark { opacity:1; }
+
+#guestbook-widget #gb-open .battery-icon { opacity: 0; transition: opacity .2s; }
+#guestbook-widget #gb-open[data-mood="battery"] .battery-icon { opacity: 1; animation: emo-blink 0.8s infinite; }
+
+#guestbook-widget #gb-open[data-mood="hello"] { animation: emo-wave .6s ease-in-out 2; transform-origin: 50% 85%; }
+#guestbook-widget #gb-open[data-mood="idle"] { animation: gb-float 3.5s ease-in-out infinite; }
+#guestbook-widget #gb-open[data-mood="laugh"], #guestbook-widget #gb-open[data-mood="excited"] { animation: emo-bounce .4s ease-in-out 3; }
+#guestbook-widget #gb-open[data-mood="rebel"] { animation: emo-shake 0.25s ease-in-out infinite; }
+#guestbook-widget #gb-open[data-mood="run"] { animation: emo-run-tilt 0.3s ease-in-out infinite alternate; }
+#guestbook-widget #gb-open[data-mood="battery"] { animation: emo-faint 2s ease-in-out infinite; }
+
+#emo-leg-left-group, #emo-leg-right-group { transform-box: fill-box; transform-origin: top center; }
+#guestbook-widget #gb-open[data-mood="idle"] #emo-leg-left-group { animation: emo-foot-fidget-left 4s ease-in-out infinite; }
+#guestbook-widget #gb-open[data-mood="idle"] #emo-leg-right-group { animation: emo-foot-fidget-right 4s ease-in-out infinite; }
+#guestbook-widget #gb-open[data-mood="hello"] #emo-leg-right-group,
+#guestbook-widget #gb-open[data-mood="excited"] #emo-leg-right-group { animation: emo-leg-kick 0.6s ease-in-out infinite alternate; }
+#guestbook-widget #gb-open[data-mood="run"] #emo-leg-left-group { animation: emo-run-left 0.2s ease-in-out infinite alternate; }
+#guestbook-widget #gb-open[data-mood="run"] #emo-leg-right-group { animation: emo-run-right 0.2s ease-in-out infinite alternate; }
+
+/* ANIMASI KEYFRAMES ROBOT */
+@keyframes gb-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes gb-glow { 0%, 100% { opacity: .45; transform: translate(-50%, -50%) scale(.85); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } }
+@keyframes gb-sparkle { 0%, 100% { opacity: .25; scale: .7; } 50% { opacity: 1; scale: 1.2; } }
+@keyframes emo-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+@keyframes emo-wave { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(6deg); } 70% { transform: rotate(-6deg); } }
+@keyframes emo-shake { 0% { transform: translate(0, 0) rotate(0deg); } 25% { transform: translate(-2px, 1px) rotate(-3deg); } 50% { transform: translate(2px, -1px) rotate(3deg); } 75% { transform: translate(-1px, -1px) rotate(-2deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
+@keyframes emo-run-tilt { 0% { transform: translateY(2px) rotate(8deg); } 100% { transform: translateY(-4px) rotate(12deg); } }
+@keyframes emo-run-left { 0% { transform: rotate(-25deg) translateY(-3px); } 100% { transform: rotate(25deg) translateY(3px); } }
+@keyframes emo-run-right { 0% { transform: rotate(25deg) translateY(3px); } 100% { transform: rotate(-25deg) translateY(-3px); } }
+@keyframes emo-faint { 0%, 100% { transform: translateY(4px) rotate(-2deg); } 50% { transform: translateY(8px) rotate(2deg); } }
+@keyframes emo-blink { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+@keyframes emo-foot-fidget-left { 0%, 100% { transform: translateY(0) rotate(0deg); } 12% { transform: translateY(-4px) rotate(-3deg); } 18% { transform: translateY(0) rotate(0deg); } 24% { transform: translateY(-3px) rotate(-2deg); } 30% { transform: translateY(0) rotate(0deg); } 70% { transform: translateY(0) rotate(0deg); } }
+@keyframes emo-foot-fidget-right { 0%, 40%, 100% { transform: translateY(0) rotate(0deg); } 52% { transform: translateY(-5px) rotate(4deg); } 58% { transform: translateY(0) rotate(0deg); } 64% { transform: translateY(-3px) rotate(2deg); } 70% { transform: translateY(0) rotate(0deg); } }
+@keyframes emo-leg-kick { 0% { transform: rotate(0deg) translateY(0); } 50% { transform: rotate(-18deg) translateY(-6px) translateX(3px); } 100% { transform: rotate(8deg) translateY(1px); } }
+
+/* PANEL FORMULIR CHATBOX BERSTYLE ROBOT EMO */
+#guestbook-widget #gb-panel {
+  position: fixed;
+  z-index: 100001;
+  right: 18px;
+  bottom: 18px;
+  width: min(370px, calc(100vw - 36px));
+  max-height: min(82vh, 720px);
+  overflow-y: auto;
+  box-sizing: border-box;
+
+  padding: 18px;
+  background: linear-gradient(165deg, rgba(13, 19, 34, 0.96), rgba(8, 12, 22, 0.98));
+  color: #e2f1ff;
+  border: 1px solid rgba(0, 242, 254, 0.3);
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 242, 254, 0.15);
+  backdrop-filter: blur(16px);
+
+  animation: gb-panel-in .25s ease-out;
+}
+
+#guestbook-widget #gb-panel[hidden] { display: none !important; }
+#guestbook-widget #gb-panel.gb-panel-opening { animation: gb-panel-slide-up .32s cubic-bezier(.2, .75, .25, 1) both; }
+#guestbook-widget #gb-panel.gb-panel-closing { animation: gb-panel-slide-down .28s cubic-bezier(.55, 0, .8, .35) both; pointer-events: none; }
+
+@keyframes gb-panel-slide-up { from { opacity: 0; transform: translateY(105%); } to { opacity: 1; transform: translateY(0); } }
+@keyframes gb-panel-slide-down { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(105%); } }
+
+/* HEADER PANEL CYBERPUNK CHATBOX */
+#guestbook-widget .gb-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+
+  margin: -18px -18px 16px;
+  padding: 14px 16px;
+
+  color: #fff;
+  background: linear-gradient(90deg, rgba(24, 36, 62, 0.9), rgba(15, 23, 42, 0.9));
+  border-bottom: 1px solid rgba(0, 242, 254, 0.2);
+  border-radius: 23px 23px 0 0;
+}
+
+#guestbook-widget .gb-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#guestbook-widget .gb-avatar-mini {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: #070d19;
+  border: 1px solid rgba(0, 242, 254, 0.5);
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+}
+#guestbook-widget .gb-avatar-mini svg { width: 30px; height: 30px; }
+
+#guestbook-widget .gb-brand strong,
+#guestbook-widget .gb-brand small { display: block; }
+#guestbook-widget .gb-brand strong { font-size: 15px; color: #ffffff; }
+#guestbook-widget .gb-brand small { font-size: 11px; color: var(--emo-cyan); margin-top: 2px; }
+
+#guestbook-widget #gb-close {
+  flex-shrink: 0;
+  border: 0;
+  color: #a0aec0;
+  background: rgba(255, 255, 255, 0.05);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.2s;
+}
+#guestbook-widget #gb-close:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
+
+/* INPUT & FORMULIR STYLE DARK NEON */
+#guestbook-widget #gb-form label {
+  display: block;
+  margin: 12px 0 5px;
+  color: var(--emo-cyan);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+#guestbook-widget #gb-form input,
+#guestbook-widget #gb-form textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 10px 12px;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+
+  font: inherit;
+  font-size: 13px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+#guestbook-widget #gb-form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+#guestbook-widget #gb-form input:focus,
+#guestbook-widget #gb-form textarea:focus {
+  outline: none;
+  border-color: var(--emo-cyan);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+}
+
+/* TOMBOL STYLE EMO ROBOT */
+#guestbook-widget .gb-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  width: 100%;
+  min-height: 42px;
+  box-sizing: border-box;
+  margin-top: 12px;
+  padding: 11px 14px;
+
+  border: 0;
+  border-radius: 12px;
+  color: #040814;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+
+  transition: transform 0.1s, opacity 0.2s, filter 0.2s;
+}
+
+#guestbook-widget .gb-button:hover { filter: brightness(1.1); }
+#guestbook-widget .gb-button:active { transform: scale(0.97); }
+#guestbook-widget .gb-button:disabled { opacity: .5; cursor: wait; }
+
+#guestbook-widget .gb-primary {
+  background: linear-gradient(135deg, var(--emo-cyan), var(--emo-blue));
+  color: #040814;
+}
+
+#guestbook-widget .gb-wa {
+  background: rgba(37, 211, 102, 0.15);
+  color: #25d366;
+  border: 1px solid rgba(37, 211, 102, 0.4);
+}
+#guestbook-widget .gb-wa:hover { background: rgba(37, 211, 102, 0.25); }
+
+#guestbook-widget .gb-note {
+  display: block;
+  margin-top: 10px;
+  color: #8da2fb;
+  font-size: 11px;
+  line-height: 1.5;
+  opacity: 0.8;
+}
+
+#guestbook-widget #gb-status {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--emo-cyan);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+#guestbook-widget button:focus-visible {
+  outline: 2px solid var(--emo-cyan);
+  outline-offset: 3px;
+}
+
+/* RESPONSIF HP */
+@media (max-width: 480px) {
+  #guestbook-widget #gb-open {
+    right: 4px;
+    bottom: 0px;
+    width: 80px;
+    height: 100px;
+  }
+
+  #guestbook-widget #gb-panel {
+    right: 10px;
+    bottom: 10px;
+    width: calc(100vw - 20px);
+    max-height: min(82vh, 720px);
+  }
+}
+
+/* RESET TEMPLATE WEBSITE BUILDER OVERRIDES */
+#guestbook-widget #gb-open::before,
+#guestbook-widget #gb-open::after {
+  content: none !important;
+  display: none !important;
+}
+
+#guestbook-widget #gb-open {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body #guestbook-widget button#gb-open,
+html body #guestbook-widget button#gb-open:hover,
+html body #guestbook-widget button#gb-open:focus,
+html body #guestbook-widget button#gb-open:active {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  text-decoration: none !important;
+}
+
+html body #guestbook-widget button#gb-open .gb-logo-glow,
+html body #guestbook-widget button#gb-open .gb-logo-spark {
+  pointer-events: none !important;
+}
+
+html body #guestbook-widget button#gb-open {
+  position: fixed !important;
+  z-index: 99999 !important;
+  right: 8px !important;
+  bottom: 0px !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+@media (max-width: 480px) {
+  html body #guestbook-widget button#gb-open {
+    right: 4px !important;
+    bottom: 0px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #guestbook-widget #gb-open,
+  #guestbook-widget .gb-logo-glow,
+  #guestbook-widget .gb-logo-spark,
+  #guestbook-widget #gb-panel {
+    animation: none !important;
+  }
+}
+</style>
 
 <script>
 (() => {
-  const root = document.getElementById('ai-emo-widget');
-  if (!root || root.dataset.initialized === 'true') return;
-  root.dataset.initialized = 'true';
+  /* KONFIGURASI SCRIPT BUKU TAMU */
+  const SCRIPT_URL =
+    'https://script.google.com/macros/s/AKfycbxd71ivnmGxMVnULaqIS85Ipw49xtJPVOOUKzXIuPID4MAglan2tBQW6ITFXEiXVlXQvA/exec';
 
-  const launcher = document.getElementById('ai-emo-launcher');
-  const chat = document.getElementById('ai-emo-chat');
-  const close = document.getElementById('ai-emo-close');
-  const form = document.getElementById('ai-emo-form');
-  const submitBtn = document.getElementById('ai-emo-submit');
-  const whatsappBtn = document.getElementById('ai-emo-whatsapp');
-  const statusEl = document.getElementById('ai-emo-status');
-  const speechBubble = document.getElementById('ai-emo-speech-bubble');
+  const ADMIN_WA = '6281234567890';
 
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxd71ivnmGxMVnULaqIS85Ipw49xtJPVOOUKzXIuPID4MAglan2tBQW6ITFXEiXVlXQvA/exec';
-  const ADMIN_WA = '6281234567890'; // Ganti dengan nomor WhatsApp admin yang sesuai
+  const panel = document.getElementById('gb-panel');
+  const openButton = document.getElementById('gb-open');
+  const closeButton = document.getElementById('gb-close');
+  const form = document.getElementById('gb-form');
+  const submitButton = document.getElementById('gb-submit');
+  const whatsappButton = document.getElementById('gb-whatsapp');
+  const status = document.getElementById('gb-status');
 
-  let isOpen = false;
+  let panelCloseTimer = null;
   let hoverTimer = null;
   let returnTimer = null;
   let cycleTimer = null;
 
-  setTimeout(() => {
-    if (!isOpen) speechBubble.classList.add('show');
-  }, 1500);
+  function setMood(mood) { openButton.dataset.mood = mood; }
 
-  function setMood(mood) { launcher.dataset.mood = mood; }
+  function setPanelOpen(isOpen) {
+    if (panelCloseTimer) {
+      clearTimeout(panelCloseTimer);
+      panelCloseTimer = null;
+    }
 
-  function openChat() {
-    isOpen = true;
-    chat.classList.add('open');
-    chat.setAttribute('aria-hidden', 'false');
-    launcher.setAttribute('aria-expanded', 'true');
-    speechBubble.classList.remove('show');
-    setMood('excited');
-    const firstInput = form.querySelector('input');
-    if (firstInput) setTimeout(() => firstInput.focus({preventScroll:true}), 100);
-  }
+    if (isOpen) {
+      panel.hidden = false;
+      panel.classList.remove('gb-panel-closing');
+      panel.classList.remove('gb-panel-opening');
+      void panel.offsetWidth;
+      panel.classList.add('gb-panel-opening');
 
-  function closeChat() {
-    isOpen = false;
-    chat.classList.remove('open');
-    chat.setAttribute('aria-hidden', 'true');
-    launcher.setAttribute('aria-expanded', 'false');
+      openButton.setAttribute('aria-expanded', 'true');
+      setMood('excited');
+
+      const firstInput = form.querySelector('input');
+      if (firstInput) {
+        window.setTimeout(() => firstInput.focus({ preventScroll: true }), 50);
+      }
+      return;
+    }
+
+    if (panel.hidden) return;
+
+    panel.classList.remove('gb-panel-opening');
+    panel.classList.add('gb-panel-closing');
+    openButton.setAttribute('aria-expanded', 'false');
     setMood('happy');
-    launcher.focus({preventScroll:true});
+
+    panelCloseTimer = window.setTimeout(finishPanelClose, 350);
   }
 
-  speechBubble.addEventListener('click', openChat);
+  function finishPanelClose() {
+    if (!panel.classList.contains('gb-panel-closing')) return;
 
-  launcher.addEventListener('pointerenter', () => {
-    if (isOpen) return;
+    panel.hidden = true;
+    panel.classList.remove('gb-panel-closing', 'gb-panel-opening');
+    panelCloseTimer = null;
+    openButton.focus({ preventScroll: true });
+    setMood('idle');
+  }
+
+  panel.addEventListener('animationend', event => {
+    if (
+      event.target === panel &&
+      event.animationName === 'gb-panel-slide-down'
+    ) {
+      if (panelCloseTimer) {
+        clearTimeout(panelCloseTimer);
+        panelCloseTimer = null;
+      }
+      finishPanelClose();
+    }
+
+    if (
+      event.target === panel &&
+      event.animationName === 'gb-panel-slide-up'
+    ) {
+      panel.classList.remove('gb-panel-opening');
+    }
+  });
+
+  openButton.addEventListener('pointerenter', () => {
+    if (!panel.hidden) return;
     clearTimeout(hoverTimer); clearTimeout(returnTimer);
     setMood('suspicious');
     hoverTimer = setTimeout(() => {
-      if (isOpen) return;
+      if (!panel.hidden) return;
       setMood('hello');
     }, 250);
   });
 
-  launcher.addEventListener('pointerleave', () => {
+  openButton.addEventListener('pointerleave', () => {
     clearTimeout(hoverTimer); clearTimeout(returnTimer);
-    if (!isOpen) {
+    if (panel.hidden) {
       setMood('happy');
-      returnTimer = setTimeout(() => { if (!isOpen) setMood('idle'); }, 1200);
+      returnTimer = setTimeout(() => { if (panel.hidden) setMood('idle'); }, 1200);
     }
   });
 
-  launcher.addEventListener('click', () => isOpen ? closeChat() : openChat());
-  close.addEventListener('click', closeChat);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen) closeChat(); });
+  openButton.addEventListener('click', () => {
+    setPanelOpen(panel.hidden || panel.classList.contains('gb-panel-closing'));
+  });
+
+  closeButton.addEventListener('click', () => {
+    setPanelOpen(false);
+  });
 
   function getFormValues() {
     return Object.fromEntries(new FormData(form).entries());
   }
 
   /* KIRIM KE WHATSAPP ADMIN */
-  whatsappBtn.addEventListener('click', () => {
+  whatsappButton.addEventListener('click', () => {
     if (!form.reportValidity()) return;
 
+    if (!/^\d{9,15}$/.test(ADMIN_WA)) {
+      status.textContent =
+        'Nomor WhatsApp admin belum dikonfigurasi dengan benar.';
+      return;
+    }
+
     const d = getFormValues();
+
     const text = [
       'BUKU TAMU SMPN 1 MOGA',
       '',
@@ -617,44 +739,61 @@
       'Pesan: ' + d.pesan
     ].join('\n');
 
-    const url = 'https://wa.me/' + ADMIN_WA + '?text=' + encodeURIComponent(text);
+    const url = 'https://wa.me/' + ADMIN_WA +
+      '?text=' + encodeURIComponent(text);
+
     window.open(url, '_blank', 'noopener,noreferrer');
-    statusEl.textContent = 'WhatsApp terbuka dengan pesan yang sudah disiapkan.';
+
+    status.textContent =
+      'WhatsApp terbuka dengan pesan yang sudah disiapkan. Tekan Kirim di WhatsApp untuk mengirimkannya ke admin.';
   });
 
-  /* KIRIM DATA KE GOOGLE APPS SCRIPT */
-  form.addEventListener('submit', async e => {
-    e.preventDefault();
+  /* SIMPAN KE GOOGLE SHEETS */
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+
     if (!form.reportValidity()) return;
 
-    submitBtn.disabled = true;
-    whatsappBtn.disabled = true;
-    statusEl.textContent = 'Mengirim data ke server...';
+    submitButton.disabled = true;
+    whatsappButton.disabled = true;
+    status.textContent = 'Mengirim permintaan buku tamu...';
     setMood('excited');
 
     try {
       const body = new URLSearchParams(getFormValues());
+
       await fetch(SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
         body
       });
 
-      statusEl.textContent = 'Data buku tamu berhasil dikirim! Terima kasih.';
+      status.textContent =
+        'Permintaan sudah dikirim. Periksa Google Sheets untuk memastikan data tercatat sebelum mencoba mengirim ulang.';
+
       form.reset();
       setMood('happy');
     } catch (error) {
-      statusEl.textContent = 'Gagal mengirim data. Periksa koneksi internet.';
+      status.textContent =
+        'Pengiriman belum dapat dipastikan. Periksa koneksi internet dan coba kembali.';
       setMood('rebel');
     } finally {
-      submitBtn.disabled = false;
-      whatsappBtn.disabled = false;
+      submitButton.disabled = false;
+      whatsappButton.disabled = false;
     }
   });
 
-  /* Siklus Mood Otomatis */
+  /* TUTUP PANEL DENGAN TOMBOL ESC */
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !panel.hidden &&
+        !panel.classList.contains('gb-panel-closing')) {
+      setPanelOpen(false);
+    }
+  });
+
+  /* SIKLUS EKSPRESI ROBOT SAAT IDLE */
   function runMoodCycle() {
-    if (isOpen || root.matches(':hover')) { cycleTimer = setTimeout(runMoodCycle, 2500); return; }
+    if (!panel.hidden || openButton.matches(':hover')) { cycleTimer = setTimeout(runMoodCycle, 2500); return; }
     const moods = [
       ['idle', 3500], ['happy', 2500], ['run', 2000],
       ['rebel', 2000], ['laugh', 1200], ['battery', 2500],
@@ -662,7 +801,7 @@
     ];
     let elapsed = 0;
     moods.forEach(([mood, duration]) => {
-      setTimeout(() => { if (!isOpen && !root.matches(':hover')) setMood(mood); }, elapsed);
+      setTimeout(() => { if (panel.hidden && !openButton.matches(':hover')) setMood(mood); }, elapsed);
       elapsed += duration;
     });
     cycleTimer = setTimeout(runMoodCycle, elapsed + 100);
@@ -670,5 +809,3 @@
   runMoodCycle();
 })();
 </script>
-</body>
-</html>
