@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI EMO — Widget Buku Tamu Chat Balon</title>
+<style>
+  /* AI EMO — Scope Widget */
+  #ai-emo-widget {
+    --emo-cyan: #00f2fe;
+    --emo-blue: #4facfe;
+    --emo-purple: #5c32a8;
+    --emo-dark: #0d1322;
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 99999;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #f0f6ff;
+  }
+  #ai-emo-widget * { box-sizing: border-box; }
+
+  /* Balon Chat Interaktif Melayang */
+  #ai-emo-chat-bubble {
+    position: absolute;
+    bottom: 165px;
+    right: 10px;
+    background: linear-gradient(135deg, rgba(20, 30, 55, 0.96), rgba(10, 16, 32, 0.98));
+    border: 1px solid rgba(0, 242, 254, 0.4);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 242, 254, 0.2);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 12px 16px;
+    width: 270px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #e2f1ff;
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 10;
+    pointer-events: auto;
+  }
+  #ai-emo-chat-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    right: 35px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid rgba(10, 16, 32, 0.98);
+  }
+  #ai-emo-chat-bubble.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .emo-bubble-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .emo-bubble-header strong {
+    color: var(--emo-cyan);
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .emo-close-btn {
+    background: transparent;
+    border: none;
+    color: #8da2fb;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+  }
+  .emo-close-btn:hover { color: #fff; }
+
+  #ai-emo-speech-text {
+    display: block;
+    word-break: break-word;
+    margin-bottom: 8px;
+  }
+
+  /* Input Form di Dalam Balon Chat */
+  #emo-chat-input-wrapper {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  #emo-chat-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(0, 242, 254, 0.3);
+    border-radius: 10px;
+    padding: 6px 10px;
+    color: #fff;
+    font-size: 12px;
+    outline: none;
+  }
+  #emo-chat-input:focus {
+    border-color: var(--emo-cyan);
+    box-shadow: 0 0 8px rgba(0, 242, 254, 0.3);
+  }
+  .emo-send-btn {
+    background: linear-gradient(135deg, var(--emo-cyan), var(--emo-blue));
+    border: none;
+    border-radius: 10px;
+    color: #040814;
+    font-weight: bold;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .emo-send-btn:active { transform: scale(0.95); }
+
+  /* Tombol Pilihan Konfirmasi (Ya / Tidak) */
+  .emo-options-wrapper {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .emo-opt-btn {
+    flex: 1;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.1s;
+  }
+  .emo-opt-yes { background: var(--emo-cyan); color: #040814; }
+  .emo-opt-no { background: rgba(255, 255, 255, 0.15); color: #e2f1ff; border: 1px solid rgba(255, 255, 255, 0.2); }
+  .emo-opt-btn:active { transform: scale(0.95); }
+
+  /* Launcher Button & Avatar */
+  #ai-emo-launcher {
+    display: block;
+    width: 115px;
+    height: 155px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    filter: drop-shadow(0 12px 20px rgba(0,0,0,0.45));
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s ease;
+  }
+  #ai-emo-launcher:hover { transform: scale(1.05); }
+  #ai-emo-launcher svg { display:block; width:100%; height:100%; overflow:visible; }
+
+  /* Ekpresi & Mood */
+  #ai-emo-launcher .eye { transition: transform .18s ease; transform-box: fill-box; transform-origin: center; }
+  #ai-emo-launcher .brow { transition: all .2s ease; }
+
+  #ai-emo-launcher[data-mood="suspicious"] .brow.left { transform: rotate(-16deg) translateY(-2px); }
+  #ai-emo-launcher[data-mood="suspicious"] .brow.right { transform: rotate(12deg) translateY(2px); }
+  #ai-emo-launcher[data-mood="suspicious"] .eye.left { transform: scaleY(.72); }
+  #ai-emo-launcher[data-mood="suspicious"] .eye.right { transform: scaleY(.86); }
+  #ai-emo-launcher[data-mood="sleepy"] .eye { transform: scaleY(.12); }
+  #ai-emo-launcher[data-mood="sleep"] .eye { transform: scaleY(.04); }
+  #ai-emo-launcher[data-mood="excited"] .eye { transform: scale(1.12); }
+  #ai-emo-launcher[data-mood="laugh"] .eye { transform: scaleY(.15); }
+  #ai-emo-launcher[data-mood="rebel"] .brow.left { transform: rotate(22deg) translateY(2px); }
+  #ai-emo-launcher[data-mood="rebel"] .brow.right { transform: rotate(-22deg) translateY(2px); }
+  #ai-emo-launcher[data-mood="battery"] .eye { transform: scaleY(0.08); opacity: 0.5; }
+  
+  /* Mood Baru Tambahan */
+  #ai-emo-launcher[data-mood="chatty"] .brow.left { transform: translateY(-3px) rotate(-8deg); }
+  #ai-emo-launcher[data-mood="chatty"] .brow.right { transform: translateY(-3px) rotate(8deg); }
+  #ai-emo-launcher[data-mood="chatty"] .eye { transform: scale(1.08); }
+  #ai-emo-launcher[data-mood="cold"] .brow.left { transform: translateY(3px) rotate(14deg); }
+  #ai-emo-launcher[data-mood="cold"] .brow.right { transform: translateY(3px) rotate(-14deg); }
+  #ai-emo-launcher[data-mood="cold"] .eye { transform: scaleY(0.5); }
+  #ai-emo-launcher[data-mood="annoying"] .brow.left { transform: translateY(-2px) rotate(-20deg); }
+  #ai-emo-launcher[data-mood="annoying"] .brow.right { transform: translateY(4deg) rotate(5deg); }
+
+  /* Animasi Gerak */
+  #ai-emo-launcher[data-mood="hello"] { animation: emo-wave .6s ease-in-out 2; transform-origin: 50% 85%; }
+  #ai-emo-launcher[data-mood="idle"] { animation: emo-float 3.5s ease-in-out infinite; }
+  #ai-emo-launcher[data-mood="laugh"], #ai-emo-launcher[data-mood="excited"] { animation: emo-bounce .4s ease-in-out 3; }
+  #ai-emo-launcher[data-mood="rebel"], #ai-emo-launcher[data-mood="annoying"] { animation: emo-shake 0.25s ease-in-out infinite; }
+  #ai-emo-launcher[data-mood="run"] { animation: emo-run-tilt 0.3s ease-in-out infinite alternate; }
+  #ai-emo-launcher[data-mood="chatty"] { animation: emo-bounce 0.3s ease-in-out infinite; }
+
+  #emo-leg-left-group, #emo-leg-right-group { transform-box: fill-box; transform-origin: top center; }
+  #ai-emo-launcher[data-mood="idle"] #emo-leg-left-group { animation: emo-foot-fidget-left 4s ease-in-out infinite; }
+  #ai-emo-launcher[data-mood="idle"] #emo-leg-right-group { animation: emo-foot-fidget-right 4s ease-in-out infinite; }
+
+  @keyframes emo-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  @keyframes emo-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+  @keyframes emo-wave { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(6deg); } 70% { transform: rotate(-6deg); } }
+  @keyframes emo-shake { 0% { transform: translate(0, 0); } 50% { transform: translate(2px, -1px); } 100% { transform: translate(0, 0); } }
+  @keyframes emo-foot-fidget-left { 0%, 100% { transform: translateY(0); } 15% { transform: translateY(-4px); } 30% { transform: translateY(0); } }
+  @keyframes emo-foot-fidget-right { 0%, 40%, 100% { transform: translateY(0); } 55% { transform: translateY(-5px); } 70% { transform: translateY(0); } }
+
+  @media(max-width: 480px) {
+    #ai-emo-widget { right: 12px; bottom: 12px; }
+    #ai-emo-launcher { width: 100px; height: 138px; }
+    #ai-emo-chat-bubble { bottom: 145px; width: calc(100vw - 40px); max-width: 280px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="ai-emo-widget">
+  <!-- Balon Percakapan Melayang Interaktif (Chat Bubble) -->
+  <div id="ai-emo-chat-bubble" class="show">
+    <div class="emo-bubble-header">
+      <strong>AI EMO</strong>
+      <button class="emo-close-btn" id="emo-bubble-close" title="Tutup">✕</button>
+    </div>
+    <span id="ai-emo-speech-text">Hai Kak! Ketik sesuatu di sini untuk isi buku tamu yuk ✨</span>
+    
+    <div id="emo-chat-input-wrapper">
+      <input type="text" id="emo-chat-input" placeholder="Tulis balasan..." autocomplete="off">
+      <button class="emo-send-btn" id="emo-chat-send">Kirim</button>
+    </div>
+
+    <div id="emo-chat-options" class="emo-options-wrapper" style="display: none;">
+      <button class="emo-opt-btn emo-opt-yes" id="emo-opt-yes">Ya, Kirim!</button>
+      <button class="emo-opt-btn emo-opt-no" id="emo-opt-no">🔄 Ulangi</button>
+    </div>
+  </div>
+
+  <!-- Launcher Karakter Robot AI EMO -->
+  <button id="ai-emo-launcher" type="button" data-mood="idle" aria-label="Karakter AI EMO">
+    <svg viewBox="0 0 120 165" role="img">
+      <defs>
+        <linearGradient id="emo-hp-band-outer" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#3d3763"/><stop offset="100%" stop-color="#110d29"/>
+        </linearGradient>
+        <linearGradient id="emo-hp-cup-grad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#483f7a"/><stop offset="100%" stop-color="#120e2b"/>
+        </linearGradient>
+        <linearGradient id="emo-body-grad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2f3442"/><stop offset="100%" stop-color="#12151c"/>
+        </linearGradient>
+        <linearGradient id="emo-screen-bg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#181c26"/><stop offset="100%" stop-color="#080a0e"/>
+        </linearGradient>
+        <linearGradient id="emo-leg-grad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#171b26"/><stop offset="100%" stop-color="#141824"/>
+        </linearGradient>
+        <filter id="emo-glow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="2.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- Headphone Tipis -->
+      <path d="M 16 54 C 14 24, 28 17, 50 17 L 70 17 C 92 17, 106 24, 104 54" fill="none" stroke="url(#emo-hp-band-outer)" stroke-width="6" stroke-linecap="round"/>
+      <path d="M 38 18 Q 60 14 82 18" fill="none" stroke="#00f2fe" stroke-width="1.5" stroke-linecap="round" filter="url(#emo-glow)"/>
+
+      <!-- Kaki Lebih Panjang -->
+      <g id="emo-leg-left-group">
+        <rect x="36" y="90" width="12" height="43" rx="6" fill="url(#emo-leg-grad)" stroke="#0d1017" stroke-width="1"/>
+        <g id="emo-left-foot">
+          <rect x="23" y="117" width="28" height="23" rx="7" fill="#181a24" stroke="#0d0f17"/>
+          <line x1="26" y1="138" x2="48" y2="138" stroke="#00f2fe" stroke-width="1.5" filter="url(#emo-glow)"/>
+        </g>
+      </g>
+      <g id="emo-leg-right-group">
+        <rect x="72" y="90" width="12" height="43" rx="6" fill="url(#emo-leg-grad)" stroke="#0d1017" stroke-width="1"/>
+        <g id="emo-right-foot">
+          <rect x="69" y="117" width="28" height="23" rx="7" fill="#181a24" stroke="#0d0f17"/>
+          <line x1="72" y1="138" x2="94" y2="138" stroke="#00f2fe" stroke-width="1.5" filter="url(#emo-glow)"/>
+        </g>
+      </g>
+
+      <!-- Badan Utama -->
+      <rect x="21" y="28" width="78" height="70" rx="26" fill="url(#emo-body-grad)" stroke="#3e4759" stroke-width="1.8"/>
+      <rect x="29" y="36" width="62" height="54" rx="17" fill="url(#emo-screen-bg)"/>
+
+      <!-- Speaker Menutupi Telinga Penuh -->
+      <g id="earcup-left">
+        <rect x="5" y="40" width="20" height="40" rx="10" fill="url(#emo-hp-cup-grad)" stroke="#53468e" stroke-width="1.8"/>
+        <line x1="12" y1="48" x2="12" y2="74" stroke="#00f2fe" stroke-width="2.5" filter="url(#emo-glow)"/>
+      </g>
+      <g id="earcup-right">
+        <rect x="95" y="40" width="20" height="40" rx="10" fill="url(#emo-hp-cup-grad)" stroke="#53468e" stroke-width="1.8"/>
+        <line x1="108" y1="48" x2="108" y2="74" stroke="#00f2fe" stroke-width="2.5" filter="url(#emo-glow)"/>
+      </g>
+
+      <!-- Muka / Mata -->
+      <path class="brow left" d="M39 46 Q45 44 51 46" fill="none" stroke="#00f2fe" stroke-width="2"/>
+      <path class="brow right" d="M69 46 Q75 44 81 46" fill="none" stroke="#00f2fe" stroke-width="2"/>
+      <rect class="eye left" x="38" y="51" width="17" height="17" rx="5" fill="#00f2fe" filter="url(#emo-glow)"/>
+      <rect class="eye right" x="65" y="51" width="17" height="17" rx="5" fill="#00f2fe" filter="url(#emo-glow)"/>
+    </svg>
+  </button>
+</div>
+
+<script>
+(() => {
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxd71ivnmGxMVnULaqIS85Ipw49xtJPVOOUKzXIuPID4MAglan2tBQW6ITFXEiXVlXQvA/exec';
+
+  const launcher = document.getElementById('ai-emo-launcher');
+  const bubble = document.getElementById('ai-emo-chat-bubble');
+  const speechText = document.getElementById('ai-emo-speech-text');
+  const chatInput = document.getElementById('emo-chat-input');
+  const sendBtn = document.getElementById('emo-chat-send');
+  const inputWrapper = document.getElementById('emo-chat-input-wrapper');
+  const optionsWrapper = document.getElementById('emo-chat-options');
+  const optYes = document.getElementById('emo-opt-yes');
+  const optNo = document.getElementById('emo-opt-no');
+  const closeBtn = document.getElementById('emo-bubble-close');
+
+  // State percakapan
+  let step = 0; // 0: Sapaan, 1: Nama, 2: Alamat, 3: Kontak, 4: Pesan, 5: Konfirmasi
+  let guestData = {
+    nama: localStorage.getItem('emo_guest_nama') || '',
+    alamat: '',
+    kontak: '',
+    subjek: 'Buku Tamu Web',
+    pesan: ''
+  };
+
+  function setMood(mood) { launcher.dataset.mood = mood; }
+
+  // Alur dialog bertahap
+  function askNextStep() {
+    optionsWrapper.style.display = 'none';
+    inputWrapper.style.display = 'flex';
+
+    if (step === 0) {
+      if (guestData.nama) {
+        speechText.innerHTML = `Halo Kak <b>${guestData.nama}</b>! Mau titip pesan di buku tamu? Ketik 'ya' atau langsung isi pesanmu! ✨`;
+        step = 2; // Langsung lompat ke alamat jika nama sudah ada di cache
+      } else {
+        speechText.innerHTML = "Hai Kak! Boleh tau nama lengkap Kakak siapa? 🤖";
+        step = 1;
+      }
+      setMood('chatty');
+    } else if (step === 2) {
+      speechText.innerHTML = `Salam kenal Kak <b>${guestData.nama}</b>! Boleh tau asal/alamat Kakak dari mana? 🏠`;
+      step = 2;
+      setMood('excited');
+    } else if (step === 3) {
+      speechText.innerHTML = "Oke! Boleh minta nomor WhatsApp / Kontak yang bisa dihubungi? 📱";
+      setMood('chatty');
+    } else if (step === 4) {
+      speechText.innerHTML = "Sip! Silakan tuliskan pesan/kesan Kakak di sini... 📝";
+      setMood('excited');
+    } else if (step === 5) {
+      inputWrapper.style.display = 'none';
+      optionsWrapper.style.display = 'flex';
+      speechText.innerHTML = `Apakah data ini sudah yakin benar?<br><b>Nama:</b> ${guestData.nama}<br><b>Alamat:</b> ${guestData.alamat}<br><b>HP:</b> ${guestData.kontak}<br><b>Pesan:</b> ${guestData.pesan}`;
+      setMood('suspicious');
+    }
+  }
+
+  function handleSend() {
+    const val = chatInput.value.trim();
+    if (!val && step !== 0) return;
+
+    chatInput.value = '';
+
+    if (step === 1) {
+      guestData.nama = val;
+      localStorage.setItem('emo_guest_nama', val); // Simpan Nama di Cache Browser
+      step = 2;
+      askNextStep();
+    } else if (step === 2) {
+      guestData.alamat = val;
+      step = 3;
+      askNextStep();
+    } else if (step === 3) {
+      guestData.kontak = val;
+      step = 4;
+      askNextStep();
+    } else if (step === 4) {
+      guestData.pesan = val;
+      step = 5;
+      askNextStep();
+    } else {
+      askNextStep();
+    }
+  }
+
+  // Klik Kirim / Tekan Enter
+  sendBtn.addEventListener('click', handleSend);
+  chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleSend();
+  });
+
+  // Tombol [Ya, Kirim!]
+  optYes.addEventListener('click', async () => {
+    optionsWrapper.style.display = 'none';
+    speechText.innerHTML = "Sedang mengirim data pesan Kakak... ⏳";
+    setMood('excited');
+
+    try {
+      const body = new URLSearchParams(guestData);
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body
+      });
+
+      speechText.innerHTML = "Yeay! Data buku tamu berhasil terkirim ke spreadsheet! Terima kasih Kak ✨🎉";
+      setMood('laugh');
+      setTimeout(() => {
+        step = 0;
+      }, 5000);
+    } catch (err) {
+      speechText.innerHTML = "Aduh, gagal mengirim data. Coba lagi nanti ya! 😢";
+      setMood('rebel');
+    }
+  });
+
+  // Tombol [🔄 Ulangi]
+  optNo.addEventListener('click', () => {
+    step = 1;
+    askNextStep();
+  });
+
+  // Tutup / Buka Balon Chat
+  closeBtn.addEventListener('click', () => {
+    bubble.classList.remove('show');
+    setMood('idle');
+  });
+
+  launcher.addEventListener('click', () => {
+    bubble.classList.toggle('show');
+    if (bubble.classList.contains('show')) {
+      if (step === 0) askNextStep();
+      chatInput.focus();
+    }
+  });
+
+  // Inisialisasi awal saat load
+  setTimeout(() => {
+    askNextStep();
+  }, 1000);
+})();
+</script>
+</body>
+</html>
