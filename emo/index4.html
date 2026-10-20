@@ -3,13 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI EMO — Widget Buku Tamu Chat Balon</title>
+<title>EMO — Widget Buku Tamu Chat Balon</title>
 <style>
-  /* AI EMO — Scope Widget */
+  /* EMO — Scope Widget */
   #ai-emo-widget {
     --emo-cyan: #00f2fe;
     --emo-blue: #4facfe;
-    --emo-purple: #5c32a8;
     --emo-dark: #0d1322;
     position: fixed;
     right: 20px;
@@ -25,9 +24,9 @@
     position: absolute;
     bottom: 165px;
     right: 10px;
-    background: linear-gradient(135deg, rgba(20, 30, 55, 0.96), rgba(10, 16, 32, 0.98));
+    background: linear-gradient(135deg, rgba(18, 26, 43, 0.96), rgba(8, 12, 22, 0.98));
     border: 1px solid rgba(0, 242, 254, 0.4);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 242, 254, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 242, 254, 0.25);
     backdrop-filter: blur(12px);
     border-radius: 20px;
     padding: 12px 16px;
@@ -50,7 +49,7 @@
     height: 0;
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
-    border-top: 8px solid rgba(10, 16, 32, 0.98);
+    border-top: 8px solid rgba(8, 12, 22, 0.98);
   }
   #ai-emo-chat-bubble.show {
     opacity: 1;
@@ -156,7 +155,7 @@
   #ai-emo-launcher:hover { transform: scale(1.05); }
   #ai-emo-launcher svg { display:block; width:100%; height:100%; overflow:visible; }
 
-  /* Ekpresi & Mood */
+  /* Ekspresi & Mood EMO */
   #ai-emo-launcher .eye { transition: transform .18s ease; transform-box: fill-box; transform-origin: center; }
   #ai-emo-launcher .brow { transition: all .2s ease; }
 
@@ -170,24 +169,15 @@
   #ai-emo-launcher[data-mood="laugh"] .eye { transform: scaleY(.15); }
   #ai-emo-launcher[data-mood="rebel"] .brow.left { transform: rotate(22deg) translateY(2px); }
   #ai-emo-launcher[data-mood="rebel"] .brow.right { transform: rotate(-22deg) translateY(2px); }
-  #ai-emo-launcher[data-mood="battery"] .eye { transform: scaleY(0.08); opacity: 0.5; }
   
-  /* Mood Baru Tambahan */
   #ai-emo-launcher[data-mood="chatty"] .brow.left { transform: translateY(-3px) rotate(-8deg); }
   #ai-emo-launcher[data-mood="chatty"] .brow.right { transform: translateY(-3px) rotate(8deg); }
   #ai-emo-launcher[data-mood="chatty"] .eye { transform: scale(1.08); }
-  #ai-emo-launcher[data-mood="cold"] .brow.left { transform: translateY(3px) rotate(14deg); }
-  #ai-emo-launcher[data-mood="cold"] .brow.right { transform: translateY(3px) rotate(-14deg); }
-  #ai-emo-launcher[data-mood="cold"] .eye { transform: scaleY(0.5); }
-  #ai-emo-launcher[data-mood="annoying"] .brow.left { transform: translateY(-2px) rotate(-20deg); }
-  #ai-emo-launcher[data-mood="annoying"] .brow.right { transform: translateY(4deg) rotate(5deg); }
 
   /* Animasi Gerak */
   #ai-emo-launcher[data-mood="hello"] { animation: emo-wave .6s ease-in-out 2; transform-origin: 50% 85%; }
   #ai-emo-launcher[data-mood="idle"] { animation: emo-float 3.5s ease-in-out infinite; }
   #ai-emo-launcher[data-mood="laugh"], #ai-emo-launcher[data-mood="excited"] { animation: emo-bounce .4s ease-in-out 3; }
-  #ai-emo-launcher[data-mood="rebel"], #ai-emo-launcher[data-mood="annoying"] { animation: emo-shake 0.25s ease-in-out infinite; }
-  #ai-emo-launcher[data-mood="run"] { animation: emo-run-tilt 0.3s ease-in-out infinite alternate; }
   #ai-emo-launcher[data-mood="chatty"] { animation: emo-bounce 0.3s ease-in-out infinite; }
 
   #emo-leg-left-group, #emo-leg-right-group { transform-box: fill-box; transform-origin: top center; }
@@ -197,7 +187,6 @@
   @keyframes emo-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
   @keyframes emo-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
   @keyframes emo-wave { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(6deg); } 70% { transform: rotate(-6deg); } }
-  @keyframes emo-shake { 0% { transform: translate(0, 0); } 50% { transform: translate(2px, -1px); } 100% { transform: translate(0, 0); } }
   @keyframes emo-foot-fidget-left { 0%, 100% { transform: translateY(0); } 15% { transform: translateY(-4px); } 30% { transform: translateY(0); } }
   @keyframes emo-foot-fidget-right { 0%, 40%, 100% { transform: translateY(0); } 55% { transform: translateY(-5px); } 70% { transform: translateY(0); } }
 
@@ -211,13 +200,13 @@
 <body>
 
 <div id="ai-emo-widget">
-  <!-- Balon Percakapan Melayang Interaktif (Chat Bubble) -->
+  <!-- Balon Percakapan Melayang Interaktif -->
   <div id="ai-emo-chat-bubble" class="show">
     <div class="emo-bubble-header">
-      <strong>AI EMO</strong>
+      <strong>EMO</strong>
       <button class="emo-close-btn" id="emo-bubble-close" title="Tutup">✕</button>
     </div>
-    <span id="ai-emo-speech-text">Hai Kak! Ketik sesuatu di sini untuk isi buku tamu yuk ✨</span>
+    <span id="ai-emo-speech-text">Hai Kak! Ketik atau sentuh aku untuk isi buku tamu ya ✨</span>
     
     <div id="emo-chat-input-wrapper">
       <input type="text" id="emo-chat-input" placeholder="Tulis balasan..." autocomplete="off">
@@ -230,46 +219,80 @@
     </div>
   </div>
 
-  <!-- Launcher Karakter Robot AI EMO -->
-  <button id="ai-emo-launcher" type="button" data-mood="idle" aria-label="Karakter AI EMO">
+  <!-- Launcher Karakter Robot EMO -->
+  <button id="ai-emo-launcher" type="button" data-mood="idle" aria-label="Karakter EMO">
     <svg viewBox="0 0 120 165" role="img">
       <defs>
+        <!-- Gradasi Headphone Bando -->
         <linearGradient id="emo-hp-band-outer" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#3d3763"/><stop offset="100%" stop-color="#110d29"/>
+          <stop offset="0%" stop-color="#2a303d"/>
+          <stop offset="50%" stop-color="#181d26"/>
+          <stop offset="100%" stop-color="#0a0d14"/>
         </linearGradient>
-        <linearGradient id="emo-hp-cup-grad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#483f7a"/><stop offset="100%" stop-color="#120e2b"/>
+
+        <!-- Gradasi Speaker Earcup (Warna Dasar Hitam-Abu) -->
+        <linearGradient id="emo-earcup-grad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#32394a"/>
+          <stop offset="45%" stop-color="#1a1f2c"/>
+          <stop offset="100%" stop-color="#0b0e17"/>
         </linearGradient>
+
         <linearGradient id="emo-body-grad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#2f3442"/><stop offset="100%" stop-color="#12151c"/>
+          <stop offset="0%" stop-color="#2f3442"/>
+          <stop offset="100%" stop-color="#12151c"/>
         </linearGradient>
+
         <linearGradient id="emo-screen-bg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#181c26"/><stop offset="100%" stop-color="#080a0e"/>
+          <stop offset="0%" stop-color="#181c26"/>
+          <stop offset="100%" stop-color="#080a0e"/>
         </linearGradient>
+
+        <!-- Gradasi Kaki Metallic Dark Grey -->
         <linearGradient id="emo-leg-grad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#171b26"/><stop offset="100%" stop-color="#141824"/>
+          <stop offset="0%" stop-color="#121621"/>
+          <stop offset="50%" stop-color="#343c52"/>
+          <stop offset="100%" stop-color="#181d2b"/>
         </linearGradient>
+
+        <!-- Gradasi Sepatu -->
+        <linearGradient id="emo-foot-grad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#252b3b"/>
+          <stop offset="100%" stop-color="#0f131c"/>
+        </linearGradient>
+
+        <!-- Glow Effect Cyber Light Blue -->
         <filter id="emo-glow" x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur stdDeviation="2.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          <feGaussianBlur stdDeviation="2" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
         </filter>
       </defs>
 
-      <!-- Headphone Tipis -->
-      <path d="M 16 54 C 14 24, 28 17, 50 17 L 70 17 C 92 17, 106 24, 104 54" fill="none" stroke="url(#emo-hp-band-outer)" stroke-width="6" stroke-linecap="round"/>
+      <!-- Bando Headphone Tipis -->
+      <path d="M 16 54 C 14 24, 28 17, 50 17 L 70 17 C 92 17, 106 24, 104 54" fill="none" stroke="url(#emo-hp-band-outer)" stroke-width="5" stroke-linecap="round"/>
       <path d="M 38 18 Q 60 14 82 18" fill="none" stroke="#00f2fe" stroke-width="1.5" stroke-linecap="round" filter="url(#emo-glow)"/>
 
-      <!-- Kaki Lebih Panjang -->
+      <!-- Kaki Gradasi + Lis Cyber Neon -->
       <g id="emo-leg-left-group">
-        <rect x="36" y="90" width="12" height="43" rx="6" fill="url(#emo-leg-grad)" stroke="#0d1017" stroke-width="1"/>
+        <rect x="36" y="90" width="12" height="43" rx="6" fill="url(#emo-leg-grad)" stroke="#00f2fe" stroke-width="0.8"/>
+        <!-- Lis Garis Sendi Lutut/Kaki -->
+        <line x1="38" y1="108" x2="46" y2="108" stroke="#00f2fe" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
         <g id="emo-left-foot">
-          <rect x="23" y="117" width="28" height="23" rx="7" fill="#181a24" stroke="#0d0f17"/>
+          <rect x="23" y="117" width="28" height="23" rx="7" fill="url(#emo-foot-grad)" stroke="#00f2fe" stroke-width="1"/>
+          <rect x="23" y="133" width="28" height="7" rx="3" fill="#111622" stroke="#2c354a" stroke-width="0.8"/>
           <line x1="26" y1="138" x2="48" y2="138" stroke="#00f2fe" stroke-width="1.5" filter="url(#emo-glow)"/>
         </g>
       </g>
+
       <g id="emo-leg-right-group">
-        <rect x="72" y="90" width="12" height="43" rx="6" fill="url(#emo-leg-grad)" stroke="#0d1017" stroke-width="1"/>
+        <rect x="72" y="90" width="12" height="43" rx="6" fill="url(#emo-leg-grad)" stroke="#00f2fe" stroke-width="0.8"/>
+        <!-- Lis Garis Sendi Lutut/Kaki -->
+        <line x1="74" y1="108" x2="82" y2="108" stroke="#00f2fe" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
         <g id="emo-right-foot">
-          <rect x="69" y="117" width="28" height="23" rx="7" fill="#181a24" stroke="#0d0f17"/>
+          <rect x="69" y="117" width="28" height="23" rx="7" fill="url(#emo-foot-grad)" stroke="#00f2fe" stroke-width="1"/>
+          <rect x="69" y="133" width="28" height="7" rx="3" fill="#111622" stroke="#2c354a" stroke-width="0.8"/>
           <line x1="72" y1="138" x2="94" y2="138" stroke="#00f2fe" stroke-width="1.5" filter="url(#emo-glow)"/>
         </g>
       </g>
@@ -278,17 +301,22 @@
       <rect x="21" y="28" width="78" height="70" rx="26" fill="url(#emo-body-grad)" stroke="#3e4759" stroke-width="1.8"/>
       <rect x="29" y="36" width="62" height="54" rx="17" fill="url(#emo-screen-bg)"/>
 
-      <!-- Speaker Menutupi Telinga Penuh -->
+      <!-- Speaker Earcup (Warna Dasar Hitam-Abu + Lis Biru Cyber Light) -->
       <g id="earcup-left">
-        <rect x="5" y="40" width="20" height="40" rx="10" fill="url(#emo-hp-cup-grad)" stroke="#53468e" stroke-width="1.8"/>
-        <line x1="12" y1="48" x2="12" y2="74" stroke="#00f2fe" stroke-width="2.5" filter="url(#emo-glow)"/>
-      </g>
-      <g id="earcup-right">
-        <rect x="95" y="40" width="20" height="40" rx="10" fill="url(#emo-hp-cup-grad)" stroke="#53468e" stroke-width="1.8"/>
-        <line x1="108" y1="48" x2="108" y2="74" stroke="#00f2fe" stroke-width="2.5" filter="url(#emo-glow)"/>
+        <rect x="5" y="40" width="20" height="40" rx="10" fill="url(#emo-earcup-grad)" stroke="#00f2fe" stroke-width="1.2" filter="url(#emo-glow)"/>
+        <rect x="18" y="46" width="5" height="30" rx="2.5" fill="#080b12"/>
+        <!-- Lis Lampu Strip Cyber Light -->
+        <line x1="11" y1="47" x2="11" y2="73" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" filter="url(#emo-glow)"/>
       </g>
 
-      <!-- Muka / Mata -->
+      <g id="earcup-right">
+        <rect x="95" y="40" width="20" height="40" rx="10" fill="url(#emo-earcup-grad)" stroke="#00f2fe" stroke-width="1.2" filter="url(#emo-glow)"/>
+        <rect x="97" y="46" width="5" height="30" rx="2.5" fill="#080b12"/>
+        <!-- Lis Lampu Strip Cyber Light -->
+        <line x1="109" y1="47" x2="109" y2="73" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" filter="url(#emo-glow)"/>
+      </g>
+
+      <!-- Muka / Mata EMO -->
       <path class="brow left" d="M39 46 Q45 44 51 46" fill="none" stroke="#00f2fe" stroke-width="2"/>
       <path class="brow right" d="M69 46 Q75 44 81 46" fill="none" stroke="#00f2fe" stroke-width="2"/>
       <rect class="eye left" x="38" y="51" width="17" height="17" rx="5" fill="#00f2fe" filter="url(#emo-glow)"/>
@@ -313,7 +341,8 @@
   const closeBtn = document.getElementById('emo-bubble-close');
 
   // State percakapan
-  let step = 0; // 0: Sapaan, 1: Nama, 2: Alamat, 3: Kontak, 4: Pesan, 5: Konfirmasi
+  let isInteracting = false; // Flag status apakah user sudah mengklik icon EMO
+  let step = 0; // 0: Sapaan Awal, 1: Nama, 2: Alamat, 3: Kontak, 4: Pesan, 5: Konfirmasi
   let guestData = {
     nama: localStorage.getItem('emo_guest_nama') || '',
     alamat: '',
@@ -329,18 +358,23 @@
     optionsWrapper.style.display = 'none';
     inputWrapper.style.display = 'flex';
 
-    if (step === 0) {
+    if (!isInteracting) {
+      // Balon Sapaan Pertama Sebelum Disentuh
+      speechText.innerHTML = "Hai Kak! Ketik atau sentuh aku untuk isi buku tamu ya ✨";
+      setMood('idle');
+      return;
+    }
+
+    if (step === 1) {
       if (guestData.nama) {
-        speechText.innerHTML = `Halo Kak <b>${guestData.nama}</b>! Mau titip pesan di buku tamu? Ketik 'ya' atau langsung isi pesanmu! ✨`;
-        step = 2; // Langsung lompat ke alamat jika nama sudah ada di cache
+        speechText.innerHTML = `Halo Kak <b>${guestData.nama}</b>! Mau titip pesan di buku tamu? Tulis alamat asal Kakak dulu yuk! 🏠`;
+        step = 2; // Langsung lompat ke alamat jika nama sudah ada di cache browser
       } else {
-        speechText.innerHTML = "Hai Kak! Boleh tau nama lengkap Kakak siapa? 🤖";
-        step = 1;
+        speechText.innerHTML = "Halo! Boleh tau nama lengkap Kakak siapa? 🤖";
       }
       setMood('chatty');
     } else if (step === 2) {
-      speechText.innerHTML = `Salam kenal Kak <b>${guestData.nama}</b>! Boleh tau asal/alamat Kakak dari mana? 🏠`;
-      step = 2;
+      speechText.innerHTML = `Salam kenal Kak <b>${guestData.nama}</b>! Boleh tau alamat/kota asal Kakak? 🏠`;
       setMood('excited');
     } else if (step === 3) {
       speechText.innerHTML = "Oke! Boleh minta nomor WhatsApp / Kontak yang bisa dihubungi? 📱";
@@ -358,13 +392,17 @@
 
   function handleSend() {
     const val = chatInput.value.trim();
-    if (!val && step !== 0) return;
+    if (!isInteracting) {
+      isInteracting = true;
+      step = 1;
+    }
 
+    if (!val && step !== 0) return;
     chatInput.value = '';
 
     if (step === 1) {
       guestData.nama = val;
-      localStorage.setItem('emo_guest_nama', val); // Simpan Nama di Cache Browser
+      localStorage.setItem('emo_guest_nama', val); // Simpan nama di cache
       step = 2;
       askNextStep();
     } else if (step === 2) {
@@ -378,8 +416,6 @@
     } else if (step === 4) {
       guestData.pesan = val;
       step = 5;
-      askNextStep();
-    } else {
       askNextStep();
     }
   }
@@ -407,7 +443,9 @@
       speechText.innerHTML = "Yeay! Data buku tamu berhasil terkirim ke spreadsheet! Terima kasih Kak ✨🎉";
       setMood('laugh');
       setTimeout(() => {
+        isInteracting = false;
         step = 0;
+        askNextStep();
       }, 5000);
     } catch (err) {
       speechText.innerHTML = "Aduh, gagal mengirim data. Coba lagi nanti ya! 😢";
@@ -427,18 +465,21 @@
     setMood('idle');
   });
 
+  // Ketika Icon EMO Disentuh / Diklik
   launcher.addEventListener('click', () => {
-    bubble.classList.toggle('show');
-    if (bubble.classList.contains('show')) {
-      if (step === 0) askNextStep();
-      chatInput.focus();
+    bubble.classList.add('show');
+    if (!isInteracting) {
+      isInteracting = true;
+      step = 1;
+      askNextStep();
     }
+    chatInput.focus();
   });
 
-  // Inisialisasi awal saat load
+  // Tampilkan balon sapaan awal saat dibuka
   setTimeout(() => {
     askNextStep();
-  }, 1000);
+  }, 800);
 })();
 </script>
 </body>
