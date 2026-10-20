@@ -90,42 +90,66 @@
   /* Expressions & Mood Animations */
   #ai-emo-launcher .eye { transition: transform .18s ease; transform-box: fill-box; transform-origin: center; }
   #ai-emo-launcher .brow { transition: all .2s ease; }
+  
   #ai-emo-launcher[data-mood="suspicious"] .brow.left { transform: rotate(-16deg) translateY(-2px); }
   #ai-emo-launcher[data-mood="suspicious"] .brow.right { transform: rotate(12deg) translateY(2px); }
   #ai-emo-launcher[data-mood="suspicious"] .eye.left { transform: scaleY(.72); }
   #ai-emo-launcher[data-mood="suspicious"] .eye.right { transform: scaleY(.86); }
+  
   #ai-emo-launcher[data-mood="sleepy"] .eye { transform: scaleY(.12); }
   #ai-emo-launcher[data-mood="sleep"] .eye { transform: scaleY(.04); }
   #ai-emo-launcher[data-mood="excited"] .eye { transform: scale(1.12); }
   #ai-emo-launcher[data-mood="laugh"] .eye { transform: scaleY(.15); }
-  #ai-emo-launcher[data-mood="sleep"] .zzz { opacity:1; }
-  #ai-emo-launcher .zzz { opacity:0; transition:opacity .2s; }
-  #ai-emo-launcher[data-mood="excited"] .spark { opacity:1; }
-  #ai-emo-launcher .spark { opacity:0; }
+  
+  /* Mood Baru: Berontak (Rebel) */
+  #ai-emo-launcher[data-mood="rebel"] .brow.left { transform: rotate(22deg) translateY(2px); }
+  #ai-emo-launcher[data-mood="rebel"] .brow.right { transform: rotate(-22deg) translateY(2px); }
+  #ai-emo-launcher[data-mood="rebel"] .eye { transform: scale(0.85); }
 
-  /* Body Floating & Wave Animations */
+  /* Mood Baru: Energy 1% (Battery Low) */
+  #ai-emo-launcher[data-mood="battery"] .eye { transform: scaleY(0.08); opacity: 0.5; }
+  #ai-emo-launcher[data-mood="battery"] .brow { transform: translateY(4deg); }
+
+  /* Visible Elements toggle based on mood */
+  #ai-emo-launcher .zzz { opacity:0; transition:opacity .2s; }
+  #ai-emo-launcher[data-mood="sleep"] .zzz, #ai-emo-launcher[data-mood="battery"] .zzz { opacity:1; }
+
+  #ai-emo-launcher .spark { opacity:0; }
+  #ai-emo-launcher[data-mood="excited"] .spark { opacity:1; }
+
+  #ai-emo-launcher .battery-icon { opacity: 0; transition: opacity .2s; }
+  #ai-emo-launcher[data-mood="battery"] .battery-icon { opacity: 1; animation: emo-blink 0.8s infinite; }
+
+  /* Body Floating & Movement Animations */
   #ai-emo-launcher[data-mood="hello"] { animation: emo-wave .6s ease-in-out 2; transform-origin: 50% 85%; }
   #ai-emo-launcher[data-mood="idle"] { animation: emo-float 3.5s ease-in-out infinite; }
   #ai-emo-launcher[data-mood="laugh"], #ai-emo-launcher[data-mood="excited"] { animation: emo-bounce .4s ease-in-out 3; }
+  #ai-emo-launcher[data-mood="rebel"] { animation: emo-shake 0.25s ease-in-out infinite; }
+  #ai-emo-launcher[data-mood="run"] { animation: emo-run-tilt 0.3s ease-in-out infinite alternate; }
+  #ai-emo-launcher[data-mood="battery"] { animation: emo-faint 2s ease-in-out infinite; }
 
-  /* ANIMASI KAKI PEGEL: Injak-Injak Bumi & Tendang-Tendang */
+  /* ANIMASI KAKI: Injak-Injak, Tendang, Lari, Berontak */
   #emo-leg-left-group, #emo-leg-right-group {
     transform-box: fill-box;
     transform-origin: top center;
   }
 
-  /* Saat Idle: Animasi Kaki Injak-Injak Bumi (Stepping/Stomping) */
-  #ai-emo-launcher[data-mood="idle"] #emo-leg-left-group {
-    animation: emo-foot-fidget-left 4s ease-in-out infinite;
-  }
-  #ai-emo-launcher[data-mood="idle"] #emo-leg-right-group {
-    animation: emo-foot-fidget-right 4s ease-in-out infinite;
-  }
+  /* Saat Idle: Animasi Kaki Injak-Injak Bumi */
+  #ai-emo-launcher[data-mood="idle"] #emo-leg-left-group { animation: emo-foot-fidget-left 4s ease-in-out infinite; }
+  #ai-emo-launcher[data-mood="idle"] #emo-leg-right-group { animation: emo-foot-fidget-right 4s ease-in-out infinite; }
 
-  /* Saat Mood Happy / Excited / Hello: Animasi Tendang Kaki */
+  /* Saat Hello / Excited: Animasi Tendang Kaki */
   #ai-emo-launcher[data-mood="hello"] #emo-leg-right-group,
   #ai-emo-launcher[data-mood="excited"] #emo-leg-right-group {
     animation: emo-leg-kick 0.6s ease-in-out infinite alternate;
+  }
+
+  /* Saat Mau Lari (Run): Animasi Langkah Kaki Cepat & Bergantian */
+  #ai-emo-launcher[data-mood="run"] #emo-leg-left-group {
+    animation: emo-run-left 0.2s ease-in-out infinite alternate;
+  }
+  #ai-emo-launcher[data-mood="run"] #emo-leg-right-group {
+    animation: emo-run-right 0.2s ease-in-out infinite alternate;
   }
 
   /* Chat Window */
@@ -213,7 +237,6 @@
   @keyframes emo-wave { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(6deg); } 70% { transform: rotate(-6deg); } }
   @keyframes emo-chat-in { from { opacity: 0; transform: translateY(12px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
-  /* Keyframes Animasi Kaki Pegel Injak-Injak Bumi (Stepping/Stomping) */
   @keyframes emo-foot-fidget-left {
     0%, 100% { transform: translateY(0) rotate(0deg); }
     12% { transform: translateY(-4px) rotate(-3deg); }
@@ -231,11 +254,44 @@
     70% { transform: translateY(0) rotate(0deg); }
   }
 
-  /* Keyframes Animasi Tendang Kaki */
   @keyframes emo-leg-kick {
     0% { transform: rotate(0deg) translateY(0); }
     50% { transform: rotate(-18deg) translateY(-6px) translateX(3px); }
     100% { transform: rotate(8deg) translateY(1px); }
+  }
+
+  /* Keyframes Animasi Baru: Berontak, Lari, Energy 1% */
+  @keyframes emo-shake {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(-2px, 1px) rotate(-3deg); }
+    50% { transform: translate(2px, -1px) rotate(3deg); }
+    75% { transform: translate(-1px, -1px) rotate(-2deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+  }
+
+  @keyframes emo-run-tilt {
+    0% { transform: translateY(2px) rotate(8deg); }
+    100% { transform: translateY(-4px) rotate(12deg); }
+  }
+
+  @keyframes emo-run-left {
+    0% { transform: rotate(-25deg) translateY(-3px); }
+    100% { transform: rotate(25deg) translateY(3px); }
+  }
+
+  @keyframes emo-run-right {
+    0% { transform: rotate(25deg) translateY(3px); }
+    100% { transform: rotate(-25deg) translateY(-3px); }
+  }
+
+  @keyframes emo-faint {
+    0%, 100% { transform: translateY(4px) rotate(-2deg); }
+    50% { transform: translateY(8px) rotate(2deg); }
+  }
+
+  @keyframes emo-blink {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 1; }
   }
 
   @media(max-width: 480px) {
@@ -293,11 +349,11 @@
     </form>
   </section>
 
-  <!-- Launcher Character SVG (EMO dengan Headphone Tebal & Animasi Kaki) -->
+  <!-- Launcher Character SVG (Bando Lebih Ramping + Animasi Baru: Run, Rebel, Battery) -->
   <button id="ai-emo-launcher" type="button" data-mood="idle" aria-label="Buka chat AI EMO" aria-expanded="false">
     <svg viewBox="0 0 120 155" role="img" aria-label="Robot AI EMO">
       <defs>
-        <!-- Gradient Headphone Tebal -->
+        <!-- Gradient Headphone Lebih Ramping / Tipis -->
         <linearGradient id="emo-hp-band-outer" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#3d3763"/>
           <stop offset="40%" stop-color="#231e42"/>
@@ -346,16 +402,15 @@
         </filter>
       </defs>
 
-      <!-- 1. HEADPHONE TEBAL DI ATAS KEPALA (BANDO MENYESUAIKAN BENTUK WAJAH & ADA SPACE KOSONG) -->
-      <!-- Bando Utama Headphone Mengikuti Kontur Wajah Robot dengan Gap di Atas Kepala -->
-      <path d="M 12 56 C 10 22, 26 12, 50 12 L 70 12 C 94 12, 110 22, 108 56" fill="none" stroke="url(#emo-hp-band-outer)" stroke-width="16" stroke-linecap="round"/>
-      <path d="M 12 56 C 10 22, 26 12, 50 12 L 70 12 C 94 12, 110 22, 108 56" fill="none" stroke="url(#emo-hp-band-inner)" stroke-width="9" stroke-linecap="round"/>
-      <!-- Aksen Neon Cyan/Hijau Menyala Mengikuti Bentuk Atas Bando -->
-      <path d="M 36 13 Q 60 7 84 13" fill="none" stroke="#00f2fe" stroke-width="3" stroke-linecap="round" filter="url(#emo-glow)"/>
-      <path d="M 46 13 Q 60 9 74 13" fill="none" stroke="#00ffcc" stroke-width="2" stroke-linecap="round"/>
+      <!-- 1. HEADPHONE LEBIH RAMPING DI ATAS KEPALA (DENGAN SPACE KOSONG YANG JELAS) -->
+      <!-- Ketebalan bando dikurangi dari 16/9px menjadi 10/5px agar proporsional dan elegan -->
+      <path d="M 15 56 C 13 22, 28 15, 50 15 L 70 15 C 92 15, 107 22, 105 56" fill="none" stroke="url(#emo-hp-band-outer)" stroke-width="10" stroke-linecap="round"/>
+      <path d="M 15 56 C 13 22, 28 15, 50 15 L 70 15 C 92 15, 107 22, 105 56" fill="none" stroke="url(#emo-hp-band-inner)" stroke-width="5" stroke-linecap="round"/>
+      <!-- Aksen Neon Tipis Mengikuti Atas Bando -->
+      <path d="M 38 16 Q 60 12 82 16" fill="none" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" filter="url(#emo-glow)"/>
 
-      <!-- 2. KAKINYA BISA GERAK (INJAK-INJAK BUMI & TENDANG-TENDANG) -->
-      <!-- Kaki Kiri Group (Tiang Vertikal + Platform Sepatu Ringkas) -->
+      <!-- 2. KAKI ROBOT -->
+      <!-- Kaki Kiri Group -->
       <g id="emo-leg-left-group">
         <rect x="36" y="86" width="12" height="38" rx="6" fill="url(#emo-leg-grad)" stroke="#0d1017" stroke-width="1"/>
         <line x1="42" y1="113" x2="42" y2="117" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" filter="url(#emo-glow)"/>
@@ -368,7 +423,7 @@
         </g>
       </g>
 
-      <!-- Kaki Kanan Group (Tiang Vertikal + Platform Sepatu Ringkas) -->
+      <!-- Kaki Kanan Group -->
       <g id="emo-leg-right-group">
         <rect x="72" y="86" width="12" height="38" rx="6" fill="url(#emo-leg-grad)" stroke="#0d1017" stroke-width="1"/>
         <line x1="78" y1="113" x2="78" y2="117" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" filter="url(#emo-glow)"/>
@@ -381,23 +436,18 @@
         </g>
       </g>
 
-      <!-- 3. KEPALA & LAYAR UTAMA (SQUIRCLE EM0) -->
-      <!-- Cangkang Luar Kepala -->
+      <!-- 3. KEPALA & LAYAR UTAMA (SQUIRCLE EMO) -->
       <rect x="21" y="26" width="78" height="70" rx="26" fill="url(#emo-body-grad)" stroke="#3e4759" stroke-width="1.8"/>
-      <!-- Bezel Lis Perak / Abu-abu Layar -->
       <rect x="25" y="30" width="70" height="62" rx="22" fill="#2b3140" stroke="#717c96" stroke-width="1.5"/>
-      <!-- Layar Hitam Utama -->
       <rect x="29" y="34" width="62" height="54" rx="17" fill="url(#emo-screen-bg)" stroke="#05070a" stroke-width="1.2"/>
 
-      <!-- 4. HEADPHONE EARCUP SAMPLING TEBAL (SAMPING KIRI & KANAN) -->
-      <!-- Headphone Earcup Kiri (Kapsul Tebal & Bulat) -->
+      <!-- 4. HEADPHONE EARCUP SAMPING -->
       <g id="earcup-left">
         <rect x="5" y="36" width="20" height="38" rx="10" fill="url(#emo-hp-cup-grad)" stroke="#53468e" stroke-width="1.8"/>
         <rect x="18" y="41" width="5" height="28" rx="2.5" fill="#0b0917"/>
         <line x1="12" y1="43" x2="12" y2="67" stroke="#00f2fe" stroke-width="2.5" stroke-linecap="round" filter="url(#emo-glow)"/>
       </g>
 
-      <!-- Headphone Earcup Kanan (Kapsul Tebal & Bulat) -->
       <g id="earcup-right">
         <rect x="95" y="36" width="20" height="38" rx="10" fill="url(#emo-hp-cup-grad)" stroke="#53468e" stroke-width="1.8"/>
         <rect x="97" y="41" width="5" height="28" rx="2.5" fill="#0b0917"/>
@@ -408,16 +458,23 @@
       <path class="brow left" d="M39 44 Q45 42 51 44" fill="none" stroke="#00f2fe" stroke-width="2" stroke-linecap="round"/>
       <path class="brow right" d="M69 44 Q75 42 81 44" fill="none" stroke="#00f2fe" stroke-width="2" stroke-linecap="round"/>
 
-      <!-- Glowing Cyan Eyes (Mata Square Rounded Presisi) -->
+      <!-- Glowing Cyan Eyes -->
       <rect class="eye left" x="38" y="49" width="17" height="17" rx="5" fill="#00f2fe" filter="url(#emo-glow)"/>
       <rect class="eye right" x="65" y="49" width="17" height="17" rx="5" fill="#00f2fe" filter="url(#emo-glow)"/>
 
-      <!-- Dagu Kecil / Aksen Garis Dagu -->
+      <!-- Dagu Kecil -->
       <rect x="54" y="83" width="12" height="3" rx="1.5" fill="#505a70"/>
 
-      <!-- Sparks & Sleep Effect -->
+      <!-- Efek Tambahan: Spark, Zz, & Ikon Baterai 1% -->
       <path class="spark" d="M22 14 L25 20 L31 23 L25 26 L22 32 L19 26 L13 23 L19 20Z" fill="#ffdd67"/>
       <text class="zzz" x="90" y="20" fill="#a4baff" font-size="12" font-weight="800">Zz</text>
+      
+      <!-- Indikator Baterai 1% -->
+      <g class="battery-icon" transform="translate(75, 14)">
+        <rect x="0" y="0" width="14" height="7" rx="1.5" fill="none" stroke="#ff4d4d" stroke-width="1.2"/>
+        <rect x="14" y="2" width="2" height="3" rx="0.5" fill="#ff4d4d"/>
+        <rect x="2" y="2" width="3" height="3" fill="#ff4d4d"/>
+      </g>
     </svg>
   </button>
 </div>
@@ -442,7 +499,6 @@
   let returnTimer = null;
   let cycleTimer = null;
 
-  // Tampilkan balon sapaan setelah 1.5 detik
   setTimeout(() => {
     if (!isOpen) speechBubble.classList.add('show');
   }, 1500);
@@ -500,7 +556,6 @@
   close.addEventListener('click', closeChat);
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen) closeChat(); });
 
-  // Respon Chat & Buku Tamu
   form.addEventListener('submit', e => {
     e.preventDefault();
     const text = input.value.trim();
@@ -530,12 +585,13 @@
     }, 700);
   });
 
-  // Siklus Mood / Ekspresi Otomatis
+  /* Siklus Mood Diperluas Mencakup Animasi Baru (Run, Rebel, Battery Low) */
   function runMoodCycle() {
     if (isOpen || root.matches(':hover')) { cycleTimer = setTimeout(runMoodCycle, 2500); return; }
     const moods = [
-      ['idle', 3500], ['happy', 2500], ['laugh', 1200],
-      ['sleepy', 2000], ['sleep', 3000], ['excited', 1500]
+      ['idle', 3500], ['happy', 2500], ['run', 2000],
+      ['rebel', 2000], ['laugh', 1200], ['battery', 2500],
+      ['sleepy', 2000], ['sleep', 2500], ['excited', 1500]
     ];
     let elapsed = 0;
     moods.forEach(([mood, duration]) => {
