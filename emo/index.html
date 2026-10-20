@@ -2,322 +2,294 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI EMO — Maskot Buku Tamu</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI EMO — Widget Buku Tamu</title>
 <style>
-  :root {
-    --emo-size: 104px;
-    --emo-bg: #101b35;
-    --emo-glow: #62e7ff;
-    --emo-accent: #8b7cff;
-    --emo-text: #eef8ff;
+  /* AI EMO — semua style dibatasi ke widget agar tidak mengubah website utama */
+  #ai-emo-widget {
+    --emo-cyan: #48f0f3;
+    --emo-blue: #8e9cff;
+    --emo-dark: #111827;
+    position: fixed;
+    right: 18px;
+    bottom: 16px;
+    z-index: 99999;
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f4f8ff;
   }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, Segoe UI, sans-serif;
-    color: #dbeafe; background: radial-gradient(ellipse at top, #1b2d52, #08111f 65%);
-  }
-  .demo-content { max-width: 760px; margin: 0 auto; padding: 64px 24px; line-height: 1.7; }
-  .demo-content h1 { color: white; }
-  .demo-content p { color: #b8c9e5; }
-  /* Widget maskot */
-  #emo-widget {
-    position: fixed; z-index: 9999; right: 22px; bottom: 20px;
-    display: flex; align-items: flex-end; flex-direction: column; gap: 10px;
-    font-family: system-ui, -apple-system, Segoe UI, sans-serif;
-  }
-  #emo-bubble {
-    max-width: min(260px, calc(100vw - 36px)); padding: 11px 14px;
-    color: var(--emo-text); background: rgba(12, 25, 48, .96);
-    border: 1px solid rgba(98,231,255,.45); border-radius: 16px 16px 4px 16px;
-    box-shadow: 0 8px 28px #0007, 0 0 18px #62e7ff18;
-    font-size: 13px; line-height: 1.45; opacity: 0; transform: translateY(8px) scale(.96);
-    pointer-events: none; transition: opacity .25s, transform .25s;
-  }
-  #emo-bubble.show { opacity: 1; transform: translateY(0) scale(1); }
-  #emo-bubble strong { color: var(--emo-glow); display: block; font-size: 12px; margin-bottom: 2px; }
-  #emo-trigger {
-    width: var(--emo-size); height: var(--emo-size); padding: 0; border: 0; background: transparent;
-    cursor: pointer; border-radius: 50%; position: relative; outline-offset: 5px;
-    filter: drop-shadow(0 10px 18px #0008);
+  #ai-emo-widget * { box-sizing: border-box; }
+  #ai-emo-launcher {
+    display: block;
+    width: 104px;
+    height: 142px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    filter: drop-shadow(0 7px 7px #0002);
     -webkit-tap-highlight-color: transparent;
   }
-  #emo-trigger::before {
-    content: ""; position: absolute; inset: 7px; border-radius: 50%;
-    background: radial-gradient(circle at 40% 28%, #263f67, #101b35 70%);
-    border: 1px solid #62e7ff9c; box-shadow: 0 0 0 4px #62e7ff10, 0 0 24px #62e7ff2b;
+  #ai-emo-launcher svg { display:block; width:100%; height:100%; overflow:visible; }
+  #ai-emo-launcher:focus-visible { outline: 2px solid var(--emo-cyan); outline-offset: 4px; border-radius: 18px; }
+  #ai-emo-launcher .eye { transition: transform .18s ease; transform-box: fill-box; transform-origin: center; }
+  #ai-emo-launcher .mouth { transition: all .2s ease; }
+  #ai-emo-launcher .brow { transition: all .2s ease; }
+  #ai-emo-launcher[data-mood="suspicious"] .brow.left { transform: rotate(-16deg) translateY(-2px); }
+  #ai-emo-launcher[data-mood="suspicious"] .brow.right { transform: rotate(12deg) translateY(2px); }
+  #ai-emo-launcher[data-mood="suspicious"] .eye.left { transform: scaleY(.72); }
+  #ai-emo-launcher[data-mood="suspicious"] .eye.right { transform: scaleY(.86); }
+  #ai-emo-launcher[data-mood="sleepy"] .eye { transform: scaleY(.12); }
+  #ai-emo-launcher[data-mood="sleep"] .eye { transform: scaleY(.04); }
+  #ai-emo-launcher[data-mood="excited"] .eye { transform: scale(1.13); }
+  #ai-emo-launcher[data-mood="laugh"] .eye { transform: scaleY(.12); }
+  #ai-emo-launcher[data-mood="laugh"] .mouth { fill:#ff91b7; }
+  #ai-emo-launcher[data-mood="sleep"] .zzz { opacity:1; }
+  #ai-emo-launcher .zzz { opacity:0; transition:opacity .2s; }
+  #ai-emo-launcher[data-mood="excited"] .spark { opacity:1; }
+  #ai-emo-launcher .spark { opacity:0; }
+  #ai-emo-launcher[data-mood="hello"] { animation: emo-wave .6s ease-in-out 2; transform-origin: 50% 85%; }
+  #ai-emo-launcher[data-mood="idle"] { animation: emo-float 3s ease-in-out infinite; }
+  #ai-emo-launcher[data-mood="laugh"], #ai-emo-launcher[data-mood="excited"] { animation: emo-bounce .4s ease-in-out 3; }
+  #ai-emo-chat {
+    position:absolute;
+    right:0;
+    bottom:154px;
+    width:min(330px, calc(100vw - 28px));
+    height: min(440px, calc(100dvh - 190px));
+    min-height:300px;
+    display:none;
+    flex-direction:column;
+    overflow:hidden;
+    border:1px solid #7bdaed70;
+    border-radius:18px;
+    background:#101a2cf5;
+    box-shadow:0 18px 55px #0004, 0 0 22px #4be8f21a;
+    backdrop-filter: blur(14px);
   }
-  #emo-trigger::after {
-    content: ""; position: absolute; inset: 0; border-radius: 50%;
-    border: 1px solid #8b7cff50; animation: orbit 8s linear infinite;
-    border-left-color: transparent; border-bottom-color: transparent;
+  #ai-emo-chat.open { display:flex; animation: emo-chat-in .18s ease-out; }
+  .emo-chat-header {
+    display:flex; align-items:center; gap:10px; padding:13px 14px;
+    background:linear-gradient(120deg,#1c2e49,#17213b);
+    border-bottom:1px solid #ffffff14;
   }
-  #emo-face { position: absolute; inset: 0; display: block; }
-  #emo-face svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  .eye { transform-box: fill-box; transform-origin: center; transition: transform .2s; }
-  .lid { transform-origin: center; transition: transform .2s; }
-  .mouth { transition: d .2s, stroke .2s; }
-  .emo-spark { opacity: 0; transition: opacity .2s; }
-  #emo-trigger[data-mood="happy"] .mouth { }
-  #emo-trigger[data-mood="laugh"] .eye { transform: scaleY(.25); }
-  #emo-trigger[data-mood="laugh"] .mouth { fill: #ff8baf; }
-  #emo-trigger[data-mood="suspicious"] .eye.left { transform: translateY(2px) scaleY(.72); }
-  #emo-trigger[data-mood="suspicious"] .eye.right { transform: translateY(-3px) scaleY(.58); }
-  #emo-trigger[data-mood="sleepy"] .eye { transform: scaleY(.15); }
-  #emo-trigger[data-mood="sleep"] .eye { transform: scaleY(.03); }
-  #emo-trigger[data-mood="sleep"] .mouth { opacity: .5; }
-  #emo-trigger[data-mood="excited"] .eye { transform: scale(1.18); }
-  #emo-trigger[data-mood="excited"] .emo-spark { opacity: 1; }
-  #emo-trigger[data-mood="curious"] .eye.right { transform: translate(2px,-2px) scale(1.12); }
-  #emo-trigger[data-mood="relax"] .eye { transform: scaleY(.45); }
-  #emo-trigger[data-mood="surprised"] .mouth { fill: #ff8baf; }
-  #emo-trigger[data-mood="hello"] { animation: hello-bob .55s ease-in-out 2; }
-  #emo-trigger[data-mood="idle"] { animation: float 3.5s ease-in-out infinite; }
-  #emo-trigger[data-mood="laugh"] { animation: bounce .45s ease-in-out 3; }
-  #emo-trigger[data-mood="excited"] { animation: bounce .35s ease-in-out 3; }
-  .zzz { opacity: 0; font-size: 14px; font-weight: 800; fill: #b7b1ff; }
-  #emo-trigger[data-mood="sleep"] .zzz { opacity: 1; animation: zzz 2s ease-in-out infinite; }
-  #emo-trigger[data-mood="sleepy"] .zzz { opacity: .5; }
-  #emo-trigger:focus-visible { outline: 2px solid var(--emo-glow); }
-  #emo-panel {
-    width: min(320px, calc(100vw - 32px)); display: none; overflow: hidden;
-    color: #eaf5ff; background: #101b30; border: 1px solid #62e7ff5c;
-    border-radius: 18px; box-shadow: 0 16px 48px #0009;
+  .emo-avatar-mini {
+    width:36px;height:36px;flex:0 0 36px;border-radius:12px;
+    display:grid;place-items:center;background:#0b1425;border:1px solid #56e8ef75;
   }
-  #emo-panel.open { display: block; animation: panel-in .2s ease-out; }
-  .panel-head { padding: 15px 16px; display:flex; align-items:center; justify-content:space-between;
-    background: linear-gradient(110deg,#1c3153,#17213b); border-bottom: 1px solid #ffffff12; }
-  .panel-head strong { font-size: 14px; }
-  .panel-head small { display:block; color:#a9c0df; font-size:11px; margin-top:2px; }
-  #emo-close { color:#dceaff; background:transparent; border:0; font-size:22px; cursor:pointer; }
-  .panel-body { padding: 16px; }
-  .panel-body p { margin:0 0 12px; font-size:13px; color:#c3d5ef; }
-  .panel-body label { display:block; font-size:12px; margin:10px 0 5px; color:#d9e9ff; }
-  .panel-body input, .panel-body textarea {
-    width:100%; color:#f5faff; background:#091426; border:1px solid #344966;
-    border-radius:9px; padding:10px; font:inherit; font-size:13px; outline:none;
+  .emo-avatar-mini svg { width:30px;height:30px; }
+  .emo-chat-title { flex:1; min-width:0; }
+  .emo-chat-title strong { display:block; font-size:14px; }
+  .emo-chat-title small { color:#9be9d3; font-size:11px; }
+  #ai-emo-close { background:transparent;border:0;color:#eaf4ff;font-size:25px;line-height:1;cursor:pointer;padding:3px 5px; }
+  #ai-emo-messages { padding:14px; overflow:auto; flex:1; display:flex; flex-direction:column; gap:10px; }
+  .emo-msg { max-width:88%; border-radius:13px; padding:10px 12px; font-size:13px; line-height:1.45; overflow-wrap:anywhere; }
+  .emo-msg.bot { align-self:flex-start; background:#1e304a; border:1px solid #ffffff0d; border-bottom-left-radius:4px; }
+  .emo-msg.user { align-self:flex-end; background:#267f91; color:white; border-bottom-right-radius:4px; }
+  .emo-chat-compose { display:flex; gap:8px; padding:11px; border-top:1px solid #ffffff15; background:#0c1525; }
+  #ai-emo-input { flex:1; min-width:0; resize:none; max-height:90px; border:1px solid #344863; border-radius:11px; padding:10px 11px; background:#111f33; color:white; font:inherit; font-size:13px; outline:none; }
+  #ai-emo-input:focus { border-color:var(--emo-cyan); }
+  #ai-emo-send { border:0;border-radius:11px;padding:0 13px;background:linear-gradient(135deg,#57e9ee,#9ca4ff);color:#071827;font-weight:800;cursor:pointer; }
+  #ai-emo-send:disabled { opacity:.45; cursor:default; }
+  .emo-typing { color:#a9c0dc; font-size:12px; padding:0 14px 8px; display:none; }
+  @keyframes emo-float { 0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)} }
+  @keyframes emo-bounce { 0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)} }
+  @keyframes emo-wave { 0%,100%{transform:rotate(0)}30%{transform:rotate(4deg)}70%{transform:rotate(-4deg)} }
+  @keyframes emo-chat-in { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
+  @media(max-width:480px) {
+    #ai-emo-widget { right:10px; bottom:10px; }
+    #ai-emo-launcher { width:88px;height:121px; }
+    #ai-emo-chat { bottom:132px; }
   }
-  .panel-body input:focus, .panel-body textarea:focus { border-color:#62e7ff; }
-  .panel-body textarea { min-height:76px; resize:vertical; }
-  .panel-body button[type="submit"] {
-    margin-top:12px; width:100%; padding:11px; border:0; border-radius:10px;
-    background:linear-gradient(90deg,#62dff4,#a79aff); color:#071426; font-weight:800; cursor:pointer;
-  }
-  #emo-note { margin-top:10px; font-size:12px; color:#8df1c3; display:none; }
-  .mini-hint { margin: 0; font-size: 10px; color:#9eb2d2; text-align:center; }
-  @keyframes orbit { to { transform: rotate(360deg); } }
-  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-  @keyframes bounce { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-7px) rotate(-3deg); } }
-  @keyframes hello-bob { 0%,100% { transform: rotate(0); } 30% { transform: rotate(8deg) translateY(-4px); } 65% { transform: rotate(-7deg); } }
-  @keyframes zzz { 0% { transform: translate(0,0); opacity:0; } 25% { opacity:1; } 100% { transform: translate(8px,-17px); opacity:0; } }
-  @keyframes panel-in { from { opacity:0; transform:translateY(8px) scale(.98); } to { opacity:1; transform:translateY(0) scale(1); } }
-  @media (max-width:480px) {
-    #emo-widget { right: 12px; bottom: 12px; }
-    :root { --emo-size: 86px; }
-    #emo-bubble { font-size:12px; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  @media(prefers-reduced-motion:reduce) {
+    #ai-emo-widget *, #ai-emo-widget *::before { animation:none !important; transition:none !important; }
   }
 </style>
 </head>
 <body>
-<main class="demo-content">
-  <h1>Halo, selamat datang 👋</h1>
-  <p>Ini adalah contoh halaman untuk mencoba maskot AI EMO. Arahkan kursor ke maskot di pojok kanan bawah, atau klik untuk membuka panel buku tamu.</p>
-  <p>Untuk memasangnya di website, salin bagian widget beserta CSS dan JavaScript ke halaman situsmu.</p>
-</main>
-
-<div id="emo-widget">
-  <div id="emo-bubble" role="status" aria-live="polite"><strong>AI EMO</strong><span id="emo-message">Hai! Selamat datang 👋</span></div>
-  <button id="emo-trigger" type="button" aria-label="Buka buku tamu bersama AI EMO" aria-expanded="false" data-mood="idle">
-    <span id="emo-face">
-      <svg viewBox="0 0 120 120" role="img" aria-label="Wajah robot AI EMO">
-        <defs>
-          <linearGradient id="faceGradient" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#b8f8ff"/><stop offset=".48" stop-color="#69d9f4"/><stop offset="1" stop-color="#7e83ff"/>
-          </linearGradient>
-          <linearGradient id="cheekGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#ff8cae" stop-opacity=".85"/><stop offset="1" stop-color="#ff8cae" stop-opacity=".12"/>
-          </linearGradient>
-        </defs>
-        <path d="M60 15 C84 15 101 32 101 57 L101 67 C101 91 83 104 60 104 C37 104 19 91 19 67 L19 57 C19 32 36 15 60 15Z"
-          fill="url(#faceGradient)" opacity=".12" stroke="#75efff" stroke-width="1.5"/>
-        <path d="M20 54 L11 54 L11 70 L21 70 M100 54 L109 54 L109 70 L99 70" fill="none" stroke="#8d9bff" stroke-width="3" stroke-linecap="round"/>
-        <path d="M32 40 Q60 20 88 40" fill="none" stroke="#b8f8ff" stroke-width="1.5" opacity=".7"/>
-        <ellipse cx="43" cy="57" rx="9" ry="11" fill="#e9fdff" class="eye left"/>
-        <ellipse cx="77" cy="57" rx="9" ry="11" fill="#e9fdff" class="eye right"/>
-        <ellipse cx="45" cy="59" rx="4.5" ry="6.5" fill="#152b50" class="eye left"/>
-        <ellipse cx="79" cy="59" rx="4.5" ry="6.5" fill="#152b50" class="eye right"/>
-        <circle cx="46.5" cy="56.5" r="1.8" fill="white"/>
-        <circle cx="80.5" cy="56.5" r="1.8" fill="white"/>
-        <path d="M31 45 Q42 39 51 44" fill="none" stroke="#b8f8ff" stroke-width="2.5" stroke-linecap="round" class="lid"/>
-        <path d="M69 44 Q78 39 89 45" fill="none" stroke="#b8f8ff" stroke-width="2.5" stroke-linecap="round" class="lid"/>
-        <ellipse cx="32" cy="72" rx="7" ry="3.5" fill="url(#cheekGradient)"/>
-        <ellipse cx="88" cy="72" rx="7" ry="3.5" fill="url(#cheekGradient)"/>
-        <path class="mouth" d="M46 76 Q60 88 74 76" fill="none" stroke="#e8fdff" stroke-width="3" stroke-linecap="round"/>
-        <path d="M29 31 L24 25 M91 31 L96 25" stroke="#62e7ff" stroke-width="2" stroke-linecap="round"/>
-        <circle cx="24" cy="23" r="2.5" fill="#a99bff"/><circle cx="96" cy="23" r="2.5" fill="#a99bff"/>
-        <path class="emo-spark" d="M19 38 L21 43 L26 45 L21 47 L19 52 L17 47 L12 45 L17 43Z" fill="#fff1a8"/>
-        <path class="emo-spark" d="M100 77 L102 82 L107 84 L102 86 L100 91 L98 86 L93 84 L98 82Z" fill="#fff1a8"/>
-        <text class="zzz" x="83" y="31">Z</text><text class="zzz" x="96" y="20" style="animation-delay:.5s">z</text>
-      </svg>
-    </span>
-  </button>
-  <p class="mini-hint">Klik untuk buku tamu</p>
-  <section id="emo-panel" aria-label="Panel buku tamu">
-    <div class="panel-head">
-      <div><strong>📖 Buku Tamu</strong><small>Disambut oleh AI EMO</small></div>
-      <button id="emo-close" type="button" aria-label="Tutup panel">×</button>
+<!--
+  Widget ini tidak membuat background/body demo.
+  Pasang blok ini beserta CSS dan JavaScript di website yang sudah ada.
+-->
+<div id="ai-emo-widget">
+  <section id="ai-emo-chat" role="dialog" aria-label="Chat dengan AI EMO" aria-hidden="true">
+    <header class="emo-chat-header">
+      <div class="emo-avatar-mini" aria-hidden="true">
+        <svg viewBox="0 0 50 50">
+          <rect x="8" y="12" width="34" height="29" rx="10" fill="#293548" stroke="#778aa9" stroke-width="1.5"/>
+          <rect x="12" y="16" width="26" height="21" rx="7" fill="#080f1c"/>
+          <rect x="16" y="23" width="6" height="7" rx="2" fill="#48f0f3"/>
+          <rect x="28" y="23" width="6" height="7" rx="2" fill="#48f0f3"/>
+          <path d="M7 18 Q2 19 4 31 L8 33 M43 18 Q48 19 46 31 L42 33" fill="none" stroke="#8e9cff" stroke-width="3"/>
+        </svg>
+      </div>
+      <div class="emo-chat-title"><strong>AI EMO</strong><small>Siap menyambutmu ✨</small></div>
+      <button id="ai-emo-close" type="button" aria-label="Tutup chat">×</button>
+    </header>
+    <div id="ai-emo-messages" aria-live="polite">
+      <div class="emo-msg bot">Halo! 👋 Selamat datang. Ada yang ingin kamu sampaikan di buku tamu?</div>
     </div>
-    <div class="panel-body">
-      <p>Halo! Senang kamu mampir. Tinggalkan pesan untuk kami, ya. ✨</p>
-      <form id="emo-form">
-        <label for="emo-name">Nama</label>
-        <input id="emo-name" name="name" placeholder="Nama kamu" required maxlength="80">
-        <label for="emo-guest-message">Pesan</label>
-        <textarea id="emo-guest-message" name="message" placeholder="Tulis pesan atau salam..." required maxlength="1000"></textarea>
-        <button type="submit">Kirim pesan</button>
-        <div id="emo-note" role="status">Terima kasih! Pesan sudah disiapkan. Hubungkan form ini ke backend untuk menyimpan pesan. 💙</div>
-      </form>
-    </div>
+    <div class="emo-typing" id="ai-emo-typing">AI EMO sedang berpikir...</div>
+    <form class="emo-chat-compose" id="ai-emo-form">
+      <textarea id="ai-emo-input" rows="1" placeholder="Tulis pesan..." aria-label="Tulis pesan" maxlength="1000" required></textarea>
+      <button id="ai-emo-send" type="submit" aria-label="Kirim pesan">➤</button>
+    </form>
   </section>
+
+  <button id="ai-emo-launcher" type="button" data-mood="idle" aria-label="Buka chat AI EMO" aria-expanded="false">
+    <svg viewBox="0 0 120 160" role="img" aria-label="Robot AI EMO lucu dengan headset">
+      <defs>
+        <linearGradient id="emo-head-shell" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f5fbff"/><stop offset=".42" stop-color="#aab9d4"/><stop offset="1" stop-color="#5d6d89"/>
+        </linearGradient>
+        <linearGradient id="emo-screen" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#202b3d"/><stop offset="1" stop-color="#050a12"/>
+        </linearGradient>
+        <linearGradient id="emo-leg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#4d5b76"/><stop offset="1" stop-color="#111827"/>
+        </linearGradient>
+        <filter id="emo-glow"><feGaussianBlur stdDeviation="2.1" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <!-- Headset band and ear cups -->
+      <path d="M18 48 C16 10 34 5 60 5 C86 5 104 14 102 48" fill="none" stroke="#28344b" stroke-width="8" stroke-linecap="round"/>
+      <path d="M18 45 C17 14 36 10 60 10 C84 10 101 16 102 45" fill="none" stroke="#dce8fa" stroke-width="3.3" stroke-linecap="round"/>
+      <path d="M17 35 Q8 36 9 51 L9 69 Q10 77 18 75 L23 67 L23 42Z" fill="#253b67" stroke="#8297c4" stroke-width="1.5"/>
+      <path d="M103 35 Q112 36 111 51 L111 69 Q110 77 102 75 L97 67 L97 42Z" fill="#253b67" stroke="#8297c4" stroke-width="1.5"/>
+      <rect x="10" y="47" width="7" height="20" rx="3.5" fill="#42dfe9"/>
+      <rect x="103" y="47" width="7" height="20" rx="3.5" fill="#8b9cff"/>
+      <!-- Neck -->
+      <path d="M47 101 L47 113 Q47 119 42 122 L37 125 L83 125 L78 121 Q73 118 73 112 L73 101Z" fill="#667590" stroke="#a8b9d4" stroke-width="1.4"/>
+      <!-- Legs -->
+      <path d="M39 111 L39 139 Q39 145 33 147 L23 150 Q20 152 22 155 L49 155 Q54 154 54 149 L55 121Z" fill="url(#emo-leg)" stroke="#6d7d9a" stroke-width="1.5"/>
+      <path d="M65 121 L66 149 Q66 154 71 155 L98 155 Q101 152 97 150 L87 147 Q81 145 81 139 L81 111Z" fill="url(#emo-leg)" stroke="#6d7d9a" stroke-width="1.5"/>
+      <path d="M29 151 L46 151 M74 151 L91 151" stroke="#8d9cb5" stroke-width="2" stroke-linecap="round"/>
+      <path d="M36 119 L36 139 M84 119 L84 139" stroke="#25334b" stroke-width="3" stroke-linecap="round"/>
+      <!-- Head shell -->
+      <rect x="19" y="24" width="82" height="82" rx="27" fill="#1a2436" stroke="#aab8d1" stroke-width="2"/>
+      <rect x="23" y="28" width="74" height="73" rx="23" fill="url(#emo-head-shell)" stroke="#e3edfb" stroke-width="1.2"/>
+      <rect x="29" y="35" width="62" height="59" rx="18" fill="#3e4b60" stroke="#7889a5" stroke-width="1.5"/>
+      <rect x="33" y="39" width="54" height="51" rx="15" fill="url(#emo-screen)" stroke="#0b1220" stroke-width="1.5"/>
+      <!-- Brows -->
+      <path class="brow left" d="M40 49 Q48 46 54 49" fill="none" stroke="#79f7f7" stroke-width="2.2" stroke-linecap="round"/>
+      <path class="brow right" d="M66 49 Q73 46 80 49" fill="none" stroke="#79f7f7" stroke-width="2.2" stroke-linecap="round"/>
+      <!-- Glowing eyes -->
+      <rect class="eye left" x="40" y="54" width="14" height="16" rx="4" fill="#47f1f2" filter="url(#emo-glow)"/>
+      <rect class="eye right" x="66" y="54" width="14" height="16" rx="4" fill="#47f1f2" filter="url(#emo-glow)"/>
+      <path class="mouth" d="M49 78 Q60 86 71 78" fill="none" stroke="#9dfbff" stroke-width="2.8" stroke-linecap="round"/>
+      <path d="M38 87 Q60 96 82 87" fill="none" stroke="#4f6682" stroke-width="1.2" opacity=".65"/>
+      <path class="spark" d="M24 23 L27 30 L34 33 L27 36 L24 43 L21 36 L14 33 L21 30Z" fill="#fff3a6"/>
+      <path class="spark" d="M96 82 L98 87 L103 89 L98 91 L96 96 L94 91 L89 89 L94 87Z" fill="#fff3a6"/>
+      <text class="zzz" x="86" y="24" fill="#b8c2ff" font-size="13" font-weight="800">Zz</text>
+    </svg>
+  </button>
 </div>
 
 <script>
 (() => {
-  const trigger = document.getElementById('emo-trigger');
-  const bubble = document.getElementById('emo-bubble');
-  const message = document.getElementById('emo-message');
-  const panel = document.getElementById('emo-panel');
-  const close = document.getElementById('emo-close');
-  const form = document.getElementById('emo-form');
-  const note = document.getElementById('emo-note');
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let timers = [];
-  let bubbleTimer;
-  let isHovering = false;
+  const root = document.getElementById('ai-emo-widget');
+  if (!root || root.dataset.initialized === 'true') return;
+  root.dataset.initialized = 'true';
+
+  const launcher = document.getElementById('ai-emo-launcher');
+  const chat = document.getElementById('ai-emo-chat');
+  const close = document.getElementById('ai-emo-close');
+  const messages = document.getElementById('ai-emo-messages');
+  const form = document.getElementById('ai-emo-form');
+  const input = document.getElementById('ai-emo-input');
+  const typing = document.getElementById('ai-emo-typing');
   let isOpen = false;
-  let greeted = false;
-  let pointerInside = false;
+  let hoverTimer = null;
+  let returnTimer = null;
+  let cycleTimer = null;
 
-  const clearMoodTimers = () => {
-    timers.forEach(clearTimeout); timers = [];
-  };
-  const say = (text, duration = 2600) => {
-    message.textContent = text;
-    bubble.classList.add('show');
-    clearTimeout(bubbleTimer);
-    if (duration > 0) bubbleTimer = setTimeout(() => {
-      if (!isHovering && !isOpen) bubble.classList.remove('show');
-    }, duration);
-  };
-  const mood = (name) => { trigger.dataset.mood = name; };
-  const sequence = (steps) => {
-    clearMoodTimers();
-    steps.forEach(([name, text, delay], index) => {
-      timers.push(setTimeout(() => {
-        mood(name);
-        if (text) say(text, index === steps.length - 1 ? 3600 : 1800);
-      }, delay));
-    });
-  };
-  const greet = () => {
-    sequence([
-      ['suspicious', 'Hmm? Ada yang mendekat nih... 🤨', 0],
-      ['curious', 'Hai, sedang mencari buku tamu? 👀', 850],
-      ['hello', 'Halo! Selamat datang di website ini! 👋', 1750],
-      ['happy', 'Senang kamu berkunjung. Klik aku untuk menulis pesan! 💙', 2600]
-    ]);
-    greeted = true;
-  };
-
-  trigger.addEventListener('pointerenter', () => {
-    isHovering = true;
-    if (!greeted) greet();
-    else {
-      sequence([
-        ['suspicious', 'Hmm... siapa di sana? 🤨', 0],
-        ['curious', 'Oh, kamu! Mau meninggalkan pesan? 👀', 700],
-        ['hello', 'Halo lagi! Selamat datang 😊', 1450],
-        ['happy', 'Yuk, isi buku tamu! 💙', 2200]
-      ]);
-    }
-    bubble.classList.add('show');
-  });
-  trigger.addEventListener('pointerleave', () => {
-    isHovering = false;
-    clearMoodTimers();
-    mood('happy');
-    say('Sampai jumpa di buku tamu! 😊', 1800);
-    timers.push(setTimeout(() => { if (!isHovering && !isOpen) mood('idle'); }, 1400));
-  });
-  trigger.addEventListener('pointermove', (event) => {
-    // Pupil bergerak sedikit mengikuti posisi kursor di dalam maskot.
-    const rect = trigger.getBoundingClientRect();
-    const dx = (event.clientX - (rect.left + rect.width / 2)) / rect.width;
-    const dy = (event.clientY - (rect.top + rect.height / 2)) / rect.height;
-    const eyes = trigger.querySelectorAll('.eye');
-    eyes.forEach(eye => {
-      eye.style.translate = `${Math.max(-2, Math.min(2, dx * 5))}px ${Math.max(-2, Math.min(2, dy * 5))}px`;
-    });
-  });
-  trigger.addEventListener('pointerleave', () => {
-    trigger.querySelectorAll('.eye').forEach(eye => eye.style.translate = '0 0');
-  });
-  trigger.addEventListener('click', () => {
-    isOpen = !isOpen;
-    panel.classList.toggle('open', isOpen);
-    trigger.setAttribute('aria-expanded', String(isOpen));
-    if (isOpen) {
-      mood('excited');
-      say('Yeay! Aku siap menyambut pesanmu! ✨', 0);
-      document.getElementById('emo-name').focus({ preventScroll: true });
-    } else {
-      mood('happy');
-      say('Oke, sampai jumpa lagi! 👋', 2000);
-    }
-  });
-  close.addEventListener('click', () => {
+  function setMood(mood) { launcher.dataset.mood = mood; }
+  function openChat() {
+    isOpen = true;
+    chat.classList.add('open');
+    chat.setAttribute('aria-hidden', 'false');
+    launcher.setAttribute('aria-expanded', 'true');
+    setMood('excited');
+    window.setTimeout(() => input.focus({preventScroll:true}), 60);
+  }
+  function closeChat() {
     isOpen = false;
-    panel.classList.remove('open');
-    trigger.setAttribute('aria-expanded', 'false');
-    mood('happy');
-    say('Terima kasih sudah mampir! 💙', 2200);
-    trigger.focus();
+    chat.classList.remove('open');
+    chat.setAttribute('aria-hidden', 'true');
+    launcher.setAttribute('aria-expanded', 'false');
+    setMood('happy');
+    launcher.focus({preventScroll:true});
+  }
+  function addMessage(text, who) {
+    const el = document.createElement('div');
+    el.className = 'emo-msg ' + who;
+    el.textContent = text;
+    messages.appendChild(el);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  launcher.addEventListener('pointerenter', () => {
+    if (isOpen) return;
+    clearTimeout(hoverTimer); clearTimeout(returnTimer);
+    setMood('suspicious');
+    hoverTimer = setTimeout(() => {
+      if (isOpen) return;
+      setMood('curious');
+      returnTimer = setTimeout(() => {
+        if (!isOpen) setMood('hello');
+        returnTimer = setTimeout(() => { if (!isOpen) setMood('happy'); }, 800);
+      }, 700);
+    }, 350);
   });
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    if (!form.reportValidity()) return;
-    // Demo saja: belum menyimpan atau mengirim ke server.
-    note.style.display = 'block';
-    say('Terima kasih, ' + document.getElementById('emo-name').value.trim() + '! 💙', 0);
-    mood('excited');
+  launcher.addEventListener('pointerleave', () => {
+    clearTimeout(hoverTimer); clearTimeout(returnTimer);
+    if (!isOpen) {
+      setMood('happy');
+      returnTimer = setTimeout(() => { if (!isOpen) setMood('idle'); }, 1300);
+    }
+  });
+  launcher.addEventListener('click', () => isOpen ? closeChat() : openChat());
+  close.addEventListener('click', closeChat);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen) closeChat(); });
+
+  // Demo chat lokal: belum memakai AI sungguhan atau mengirim pesan ke server.
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+    addMessage(text, 'user');
+    input.value = '';
+    setMood('curious');
+    typing.style.display = 'block';
+    messages.scrollTop = messages.scrollHeight;
+    setTimeout(() => {
+      typing.style.display = 'none';
+      const lower = text.toLowerCase();
+      let reply = 'Terima kasih sudah mampir! 💙 Pesanmu bisa dijadikan bagian dari buku tamu website ini.';
+      if (/halo|hai|hello|hi\b/.test(lower)) reply = 'Halooo! 👋 Senang bertemu denganmu. Selamat datang!';
+      else if (/buku tamu|pesan|menulis/.test(lower)) reply = 'Yuk, tinggalkan salam atau pesan yang ingin kamu sampaikan. ✨';
+      else if (/siapa|namamu|nama kamu/.test(lower)) reply = 'Aku AI EMO, maskot kecil yang bertugas menyambut pengunjung! 🤖';
+      else if (/terima kasih|makasih|thanks/.test(lower)) reply = 'Sama-sama! Senang bisa menyambutmu. 😊';
+      addMessage(reply, 'bot');
+      setMood('happy');
+    }, 650);
   });
 
-  // Ekspresi santai, mengantuk, tidur, bangun, semangat, lalu senyum.
-  const idleCycle = () => {
-    if (isHovering || isOpen) return;
-    const cycles = [
-      ['relax', 3200], ['happy', 2400], ['sleepy', 2600],
-      ['sleep', 4200], ['surprised', 700], ['excited', 1600],
-      ['laugh', 1300], ['happy', 2600], ['idle', 3200]
+  // Siklus ekspresi otomatis ketika tidak sedang diarahkan kursor atau membuka chat.
+  function runMoodCycle() {
+    if (isOpen || root.matches(':hover')) { cycleTimer = setTimeout(runMoodCycle, 2500); return; }
+    const moods = [
+      ['idle', 3000], ['happy', 2600], ['laugh', 1200],
+      ['relax', 3000], ['sleepy', 2400], ['sleep', 3500],
+      ['surprised', 700], ['excited', 1500], ['happy', 2400]
     ];
-    let t = 0;
-    cycles.forEach(([name, duration]) => {
-      timers.push(setTimeout(() => {
-        if (!isHovering && !isOpen) mood(name);
-      }, t));
-      t += duration;
+    let elapsed = 0;
+    moods.forEach(([mood, duration]) => {
+      setTimeout(() => { if (!isOpen && !root.matches(':hover')) setMood(mood); }, elapsed);
+      elapsed += duration;
     });
-    timers.push(setTimeout(idleCycle, t + 200));
-  };
-  // Sapa singkat saat halaman dimuat, lalu mulai siklus ekspresi.
-  mood('hello');
-  say('Hai! Aku AI EMO. Senang bertemu denganmu! 👋', 4200);
-  timers.push(setTimeout(() => {
-    if (!isHovering && !isOpen) { mood('happy'); idleCycle(); }
-  }, reduceMotion ? 5000 : 4200));
+    cycleTimer = setTimeout(runMoodCycle, elapsed + 100);
+  }
+  runMoodCycle();
 })();
 </script>
 </body>
