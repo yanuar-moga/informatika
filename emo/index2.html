@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI EMO — Widget Buku Tamu</title>
+<style>
+  /* AI EMO — semua style dibatasi ke widget agar tidak merusak style website utama */
+  #ai-emo-widget {
+    --emo-cyan: #00f2fe;
+    --emo-blue: #4facfe;
+    --emo-purple: #5c32a8;
+    --emo-dark: #0d1322;
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 99999;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #f0f6ff;
+  }
+  #ai-emo-widget * { box-sizing: border-box; }
+
+  /* Speech Bubble (Balon Sapaan) */
+  #ai-emo-speech-bubble {
+    position: absolute;
+    bottom: 155px;
+    right: 10px;
+    background: linear-gradient(135deg, rgba(20, 30, 55, 0.95), rgba(10, 16, 32, 0.98));
+    border: 1px solid rgba(0, 242, 254, 0.4);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 242, 254, 0.2);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 10px 14px;
+    width: max-content;
+    max-width: 210px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #e2f1ff;
+    cursor: pointer;
+    pointer-events: auto;
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 10;
+  }
+  #ai-emo-speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    right: 35px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid rgba(10, 16, 32, 0.98);
+  }
+  #ai-emo-speech-bubble.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  #ai-emo-speech-bubble strong {
+    color: var(--emo-cyan);
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+  }
+
+  /* Launcher Button & Avatar */
+  #ai-emo-launcher {
+    display: block;
+    width: 115px;
+    height: 145px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    filter: drop-shadow(0 12px 20px rgba(0,0,0,0.45));
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s ease;
+  }
+  #ai-emo-launcher:hover {
+    transform: scale(1.05);
+  }
+  #ai-emo-launcher svg { display:block; width:100%; height:100%; overflow:visible; }
+  #ai-emo-launcher:focus-visible { outline: 2px solid var(--emo-cyan); outline-offset: 4px; border-radius: 20px; }
+  
+  /* Expressions & Mood Animations */
+  #ai-emo-launcher .eye { transition: transform .18s ease; transform-box: fill-box; transform-origin: center; }
+  #ai-emo-launcher .brow { transition: all .2s ease; }
+  #ai-emo-launcher[data-mood="suspicious"] .brow.left { transform: rotate(-16deg) translateY(-2px); }
+  #ai-emo-launcher[data-mood="suspicious"] .brow.right { transform: rotate(12deg) translateY(2px); }
+  #ai-emo-launcher[data-mood="suspicious"] .eye.left { transform: scaleY(.72); }
+  #ai-emo-launcher[data-mood="suspicious"] .eye.right { transform: scaleY(.86); }
+  #ai-emo-launcher[data-mood="sleepy"] .eye { transform: scaleY(.12); }
+  #ai-emo-launcher[data-mood="sleep"] .eye { transform: scaleY(.04); }
+  #ai-emo-launcher[data-mood="excited"] .eye { transform: scale(1.12); }
+  #ai-emo-launcher[data-mood="laugh"] .eye { transform: scaleY(.15); }
+  #ai-emo-launcher[data-mood="sleep"] .zzz { opacity:1; }
+  #ai-emo-launcher .zzz { opacity:0; transition:opacity .2s; }
+  #ai-emo-launcher[data-mood="excited"] .spark { opacity:1; }
+  #ai-emo-launcher .spark { opacity:0; }
+
+  /* Body Floating & Wave Animations */
+  #ai-emo-launcher[data-mood="hello"] { animation: emo-wave .6s ease-in-out 2; transform-origin: 50% 85%; }
+  #ai-emo-launcher[data-mood="idle"] { animation: emo-float 3.5s ease-in-out infinite; }
+  #ai-emo-launcher[data-mood="laugh"], #ai-emo-launcher[data-mood="excited"] { animation: emo-bounce .4s ease-in-out 3; }
+
+  /* ANIMASI KAKI PEGEL: Injak-Injak Bumi & Tendang-Tendang */
+  #emo-leg-left-group, #emo-leg-right-group {
+    transform-box: fill-box;
+    transform-origin: top center;
+  }
+
+  /* Saat Idle: Animasi Kaki Injak-Injak Bumi (Stepping/Stomping) */
+  #ai-emo-launcher[data-mood="idle"] #emo-leg-left-group {
+    animation: emo-foot-fidget-left 4s ease-in-out infinite;
+  }
+  #ai-emo-launcher[data-mood="idle"] #emo-leg-right-group {
+    animation: emo-foot-fidget-right 4s ease-in-out infinite;
+  }
+
+  /* Saat Mood Happy / Excited / Hello: Animasi Tendang Kaki */
+  #ai-emo-launcher[data-mood="hello"] #emo-leg-right-group,
+  #ai-emo-launcher[data-mood="excited"] #emo-leg-right-group {
+    animation: emo-leg-kick 0.6s ease-in-out infinite alternate;
+  }
+
+  /* Chat Window */
+  #ai-emo-chat {
+    position: absolute;
+    right: 0;
+    bottom: 155px;
+    width: min(340px, calc(100vw - 32px));
+    height: min(460px, calc(100dvh - 170px));
+    min-height: 320px;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(0, 242, 254, 0.25);
+    border-radius: 24px;
+    background: linear-gradient(165deg, rgba(13, 19, 34, 0.96), rgba(8, 12, 22, 0.98));
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 242, 254, 0.15);
+    backdrop-filter: blur(16px);
+  }
+  #ai-emo-chat.open { display: flex; animation: emo-chat-in .25s cubic-bezier(0.16, 1, 0.3, 1); }
+  
+  .emo-chat-header {
+    display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+    background: linear-gradient(90deg, rgba(24, 36, 62, 0.8), rgba(15, 23, 42, 0.8));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .emo-avatar-mini {
+    width: 38px; height: 38px; flex: 0 0 38px; border-radius: 12px;
+    display: grid; place-items: center; background: #070d19; border: 1px solid rgba(0, 242, 254, 0.5);
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+  }
+  .emo-avatar-mini svg { width: 30px; height: 30px; }
+  .emo-chat-title { flex: 1; min-width: 0; }
+  .emo-chat-title strong { display: block; font-size: 14px; font-weight: 700; color: #ffffff; }
+  .emo-chat-title small { color: var(--emo-cyan); font-size: 11px; display: flex; align-items: center; gap: 4px; }
+  .emo-chat-title small::before { content:''; display:inline-block; width:6px; height:6px; background:#00f2fe; border-radius:50%; box-shadow:0 0 6px #00f2fe; }
+
+  #ai-emo-close {
+    background: rgba(255, 255, 255, 0.05); border: 0; color: #a0aec0;
+    width: 28px; height: 28px; border-radius: 50%; font-size: 18px;
+    cursor: pointer; display: grid; place-items: center; transition: all 0.2s;
+  }
+  #ai-emo-close:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
+
+  /* Message List */
+  #ai-emo-messages { padding: 16px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+  .emo-msg { max-width: 88%; border-radius: 16px; padding: 11px 14px; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+  .emo-msg.bot {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #e2e8f0;
+    border-bottom-left-radius: 4px;
+  }
+  .emo-msg.user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, var(--emo-blue), var(--emo-cyan));
+    color: #040914;
+    font-weight: 600;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 242, 254, 0.25);
+  }
+
+  /* Form & Input */
+  .emo-chat-compose { display: flex; gap: 8px; padding: 12px; border-top: 1px solid rgba(255, 255, 255, 0.08); background: rgba(6, 10, 18, 0.95); }
+  #ai-emo-input {
+    flex: 1; min-width: 0; resize: none; max-height: 80px;
+    border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px;
+    padding: 10px 12px; background: rgba(255, 255, 255, 0.04);
+    color: white; font: inherit; font-size: 13px; outline: none; transition: border-color 0.2s;
+  }
+  #ai-emo-input:focus { border-color: var(--emo-cyan); background: rgba(255, 255, 255, 0.07); }
+  #ai-emo-send {
+    border: 0; border-radius: 12px; padding: 0 14px;
+    background: linear-gradient(135deg, var(--emo-cyan), var(--emo-blue));
+    color: #040814; font-weight: 700; cursor: pointer; transition: transform 0.1s, opacity 0.2s;
+  }
+  #ai-emo-send:active { transform: scale(0.95); }
+  #ai-emo-send:disabled { opacity: 0.4; cursor: default; }
+  .emo-typing { color: var(--emo-cyan); font-size: 11px; padding: 0 16px 8px; display: none; font-style: italic; }
+
+  /* Keyframe Animations */
+  @keyframes emo-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  @keyframes emo-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+  @keyframes emo-wave { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(6deg); } 70% { transform: rotate(-6deg); } }
+  @keyframes emo-chat-in { from { opacity: 0; transform: translateY(12px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+  /* Keyframes Animasi Kaki Pegel Injak-Injak Bumi (Stepping/Stomping) */
+  @keyframes emo-foot-fidget-left {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    12% { transform: translateY(-4px) rotate(-3deg); }
+    18% { transform: translateY(0) rotate(0deg); }
+    24% { transform: translateY(-3px) rotate(-2deg); }
+    30% { transform: translateY(0) rotate(0deg); }
+    70% { transform: translateY(0) rotate(0deg); }
+  }
+
+  @keyframes emo-foot-fidget-right {
+    0%, 40%, 100% { transform: translateY(0) rotate(0deg); }
+    52% { transform: translateY(-5px) rotate(4deg); }
+    58% { transform: translateY(0) rotate(0deg); }
+    64% { transform: translateY(-3px) rotate(2deg); }
+    70% { transform: translateY(0) rotate(0deg); }
+  }
+
+  /* Keyframes Animasi Tendang Kaki */
+  @keyframes emo-leg-kick {
+    0% { transform: rotate(0deg) translateY(0); }
+    50% { transform: rotate(-18deg) translateY(-6px) translateX(3px); }
+    100% { transform: rotate(8deg) translateY(1px); }
+  }
+
+  @media(max-width: 480px) {
+    #ai-emo-widget { right: 12px; bottom: 12px; }
+    #ai-emo-launcher { width: 100px; height: 128px; }
+    #ai-emo-chat { bottom: 140px; }
+    #ai-emo-speech-bubble { bottom: 135px; }
+  }
+  @media(prefers-reduced-motion: reduce) {
+    #ai-emo-widget *, #ai-emo-widget *::before { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="ai-emo-widget">
+  <!-- Balon Sapaan Melayang (Speech Bubble) -->
+  <div id="ai-emo-speech-bubble" role="button" aria-label="Buka pesan AI EMO">
+    <strong>AI EMO</strong>
+    <span>Hai Kak! Isi buku tamu di sini yuk ✨</span>
+  </div>
+
+  <!-- Jendela Chat -->
+  <section id="ai-emo-chat" role="dialog" aria-label="Chat dengan AI EMO" aria-hidden="true">
+    <header class="emo-chat-header">
+      <div class="emo-avatar-mini" aria-hidden="true">
+        <svg viewBox="0 0 50 50">
+          <rect x="8" y="12" width="34" height="29" rx="10" fill="#182232" stroke="#00f2fe" stroke-width="1.5"/>
+          <rect x="12" y="16" width="26" height="21" rx="7" fill="#060b14"/>
+          <rect x="18" y="22" width="5" height="6" rx="1.5" fill="#00f2fe"/>
+          <rect x="27" y="22" width="5" height="6" rx="1.5" fill="#00f2fe"/>
+        </svg>
+      </div>
+      <div class="emo-chat-title">
+        <strong>AI EMO</strong>
+        <small>Online &amp; Siap Menyapa</small>
+      </div>
+      <button id="ai-emo-close" type="button" aria-label="Tutup chat">✕</button>
+    </header>
+    
+    <div id="ai-emo-messages" aria-live="polite">
+      <div class="emo-msg bot">
+        Halo! 👋 Aku **AI EMO**, maskot pintar yang siap menyambutmu di sini!
+      </div>
+      <div class="emo-msg bot">
+        Jangan lupa isi **buku tamu** ya! Tuliskan nama dan kesanmu untuk situs ini 😊✨
+      </div>
+    </div>
+    
+    <div class="emo-typing" id="ai-emo-typing">AI EMO sedang mengetik...</div>
+    
+    <form class="emo-chat-compose" id="ai-emo-form">
+      <textarea id="ai-emo-input" rows="1" placeholder="Tulis nama/pesan buku tamu..." aria-label="Tulis pesan" maxlength="1000" required></textarea>
+      <button id="ai-emo-send" type="submit" aria-label="Kirim pesan">➤</button>
+    </form>
+  </section>
+
+  <!-- Launcher Character SVG (EMO dengan Headphone Tebal & Animasi Kaki) -->
+  <button id="ai-emo-launcher" type="button" data-mood="idle" aria-label="Buka chat AI EMO" aria-expanded="false">
+    <svg viewBox="0 0 120 155" role="img" aria-label="Robot AI EMO">
+      <defs>
+        <!-- Gradient Headphone Tebal -->
+        <linearGradient id="emo-hp-band-outer" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#3d3763"/>
+          <stop offset="40%" stop-color="#231e42"/>
+          <stop offset="100%" stop-color="#110d29"/>
+        </linearGradient>
+
+        <linearGradient id="emo-hp-band-inner" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#1d1933"/>
+          <stop offset="100%" stop-color="#0a0817"/>
+        </linearGradient>
+
+        <linearGradient id="emo-hp-cup-grad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#483f7a"/>
+          <stop offset="50%" stop-color="#272147"/>
+          <stop offset="100%" stop-color="#120e2b"/>
+        </linearGradient>
+
+        <linearGradient id="emo-body-grad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2f3442"/>
+          <stop offset="40%" stop-color="#1f232e"/>
+          <stop offset="100%" stop-color="#12151c"/>
+        </linearGradient>
+
+        <linearGradient id="emo-screen-bg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#181c26"/>
+          <stop offset="100%" stop-color="#080a0e"/>
+        </linearGradient>
+
+        <linearGradient id="emo-leg-grad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#171b26"/>
+          <stop offset="50%" stop-color="#2d354a"/>
+          <stop offset="100%" stop-color="#141824"/>
+        </linearGradient>
+
+        <linearGradient id="emo-foot-base" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#3b2b70"/>
+          <stop offset="100%" stop-color="#1c123d"/>
+        </linearGradient>
+
+        <filter id="emo-glow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="2.5" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+
+      <!-- 1. HEADPHONE TEBAL DI ATAS KEPALA (BANDO MENYESUAIKAN BENTUK WAJAH & ADA SPACE KOSONG) -->
+      <!-- Bando Utama Headphone Mengikuti Kontur Wajah Robot dengan Gap di Atas Kepala -->
+      <path d="M 12 56 C 10 22, 26 12, 50 12 L 70 12 C 94 12, 110 22, 108 56" fill="none" stroke="url(#emo-hp-band-outer)" stroke-width="16" stroke-linecap="round"/>
+      <path d="M 12 56 C 10 22, 26 12, 50 12 L 70 12 C 94 12, 110 22, 108 56" fill="none" stroke="url(#emo-hp-band-inner)" stroke-width="9" stroke-linecap="round"/>
+      <!-- Aksen Neon Cyan/Hijau Menyala Mengikuti Bentuk Atas Bando -->
+      <path d="M 36 13 Q 60 7 84 13" fill="none" stroke="#00f2fe" stroke-width="3" stroke-linecap="round" filter="url(#emo-glow)"/>
+      <path d="M 46 13 Q 60 9 74 13" fill="none" stroke="#00ffcc" stroke-width="2" stroke-linecap="round"/>
+
+      <!-- 2. KAKINYA BISA GERAK (INJAK-INJAK BUMI & TENDANG-TENDANG) -->
+      <!-- Kaki Kiri Group (Tiang Vertikal + Platform Sepatu Ringkas) -->
+      <g id="emo-leg-left-group">
+        <rect x="36" y="86" width="12" height="38" rx="6" fill="url(#emo-leg-grad)" stroke="#0d1017" stroke-width="1"/>
+        <line x1="42" y1="113" x2="42" y2="117" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" filter="url(#emo-glow)"/>
+        
+        <!-- Sepatu Kiri -->
+        <g id="emo-left-foot">
+          <rect x="23" y="109" width="28" height="23" rx="7" fill="#181a24" stroke="#0d0f17" stroke-width="1.2"/>
+          <rect x="23" y="125" width="28" height="7" rx="3" fill="url(#emo-foot-base)" stroke="#3e3878" stroke-width="0.8"/>
+          <line x1="26" y1="130" x2="48" y2="130" stroke="#00f2fe" stroke-width="1.5" stroke-linecap="round" filter="url(#emo-glow)"/>
+        </g>
+      </g>
+
+      <!-- Kaki Kanan Group (Tiang Vertikal + Platform Sepatu Ringkas) -->
+      <g id="emo-leg-right-group">
+        <rect x="72" y="86" width="12" height="38" rx="6" fill="url(#emo-leg-grad)" stroke="#0d1017" stroke-width="1"/>
+        <line x1="78" y1="113" x2="78" y2="117" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" filter="url(#emo-glow)"/>
+        
+        <!-- Sepatu Kanan -->
+        <g id="emo-right-foot">
+          <rect x="69" y="109" width="28" height="23" rx="7" fill="#181a24" stroke="#0d0f17" stroke-width="1.2"/>
+          <rect x="69" y="125" width="28" height="7" rx="3" fill="url(#emo-foot-base)" stroke="#3e3878" stroke-width="0.8"/>
+          <line x1="72" y1="130" x2="94" y2="130" stroke="#00f2fe" stroke-width="1.5" stroke-linecap="round" filter="url(#emo-glow)"/>
+        </g>
+      </g>
+
+      <!-- 3. KEPALA & LAYAR UTAMA (SQUIRCLE EM0) -->
+      <!-- Cangkang Luar Kepala -->
+      <rect x="21" y="26" width="78" height="70" rx="26" fill="url(#emo-body-grad)" stroke="#3e4759" stroke-width="1.8"/>
+      <!-- Bezel Lis Perak / Abu-abu Layar -->
+      <rect x="25" y="30" width="70" height="62" rx="22" fill="#2b3140" stroke="#717c96" stroke-width="1.5"/>
+      <!-- Layar Hitam Utama -->
+      <rect x="29" y="34" width="62" height="54" rx="17" fill="url(#emo-screen-bg)" stroke="#05070a" stroke-width="1.2"/>
+
+      <!-- 4. HEADPHONE EARCUP SAMPLING TEBAL (SAMPING KIRI & KANAN) -->
+      <!-- Headphone Earcup Kiri (Kapsul Tebal & Bulat) -->
+      <g id="earcup-left">
+        <rect x="5" y="36" width="20" height="38" rx="10" fill="url(#emo-hp-cup-grad)" stroke="#53468e" stroke-width="1.8"/>
+        <rect x="18" y="41" width="5" height="28" rx="2.5" fill="#0b0917"/>
+        <line x1="12" y1="43" x2="12" y2="67" stroke="#00f2fe" stroke-width="2.5" stroke-linecap="round" filter="url(#emo-glow)"/>
+      </g>
+
+      <!-- Headphone Earcup Kanan (Kapsul Tebal & Bulat) -->
+      <g id="earcup-right">
+        <rect x="95" y="36" width="20" height="38" rx="10" fill="url(#emo-hp-cup-grad)" stroke="#53468e" stroke-width="1.8"/>
+        <rect x="97" y="41" width="5" height="28" rx="2.5" fill="#0b0917"/>
+        <line x1="108" y1="43" x2="108" y2="67" stroke="#00f2fe" stroke-width="2.5" stroke-linecap="round" filter="url(#emo-glow)"/>
+      </g>
+
+      <!-- Alis / Brows -->
+      <path class="brow left" d="M39 44 Q45 42 51 44" fill="none" stroke="#00f2fe" stroke-width="2" stroke-linecap="round"/>
+      <path class="brow right" d="M69 44 Q75 42 81 44" fill="none" stroke="#00f2fe" stroke-width="2" stroke-linecap="round"/>
+
+      <!-- Glowing Cyan Eyes (Mata Square Rounded Presisi) -->
+      <rect class="eye left" x="38" y="49" width="17" height="17" rx="5" fill="#00f2fe" filter="url(#emo-glow)"/>
+      <rect class="eye right" x="65" y="49" width="17" height="17" rx="5" fill="#00f2fe" filter="url(#emo-glow)"/>
+
+      <!-- Dagu Kecil / Aksen Garis Dagu -->
+      <rect x="54" y="83" width="12" height="3" rx="1.5" fill="#505a70"/>
+
+      <!-- Sparks & Sleep Effect -->
+      <path class="spark" d="M22 14 L25 20 L31 23 L25 26 L22 32 L19 26 L13 23 L19 20Z" fill="#ffdd67"/>
+      <text class="zzz" x="90" y="20" fill="#a4baff" font-size="12" font-weight="800">Zz</text>
+    </svg>
+  </button>
+</div>
+
+<script>
+(() => {
+  const root = document.getElementById('ai-emo-widget');
+  if (!root || root.dataset.initialized === 'true') return;
+  root.dataset.initialized = 'true';
+
+  const launcher = document.getElementById('ai-emo-launcher');
+  const chat = document.getElementById('ai-emo-chat');
+  const close = document.getElementById('ai-emo-close');
+  const messages = document.getElementById('ai-emo-messages');
+  const form = document.getElementById('ai-emo-form');
+  const input = document.getElementById('ai-emo-input');
+  const typing = document.getElementById('ai-emo-typing');
+  const speechBubble = document.getElementById('ai-emo-speech-bubble');
+
+  let isOpen = false;
+  let hoverTimer = null;
+  let returnTimer = null;
+  let cycleTimer = null;
+
+  // Tampilkan balon sapaan setelah 1.5 detik
+  setTimeout(() => {
+    if (!isOpen) speechBubble.classList.add('show');
+  }, 1500);
+
+  function setMood(mood) { launcher.dataset.mood = mood; }
+
+  function openChat() {
+    isOpen = true;
+    chat.classList.add('open');
+    chat.setAttribute('aria-hidden', 'false');
+    launcher.setAttribute('aria-expanded', 'true');
+    speechBubble.classList.remove('show');
+    setMood('excited');
+    setTimeout(() => input.focus({preventScroll:true}), 100);
+  }
+
+  function closeChat() {
+    isOpen = false;
+    chat.classList.remove('open');
+    chat.setAttribute('aria-hidden', 'true');
+    launcher.setAttribute('aria-expanded', 'false');
+    setMood('happy');
+    launcher.focus({preventScroll:true});
+  }
+
+  function addMessage(text, who) {
+    const el = document.createElement('div');
+    el.className = 'emo-msg ' + who;
+    el.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    messages.appendChild(el);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  speechBubble.addEventListener('click', openChat);
+
+  launcher.addEventListener('pointerenter', () => {
+    if (isOpen) return;
+    clearTimeout(hoverTimer); clearTimeout(returnTimer);
+    setMood('suspicious');
+    hoverTimer = setTimeout(() => {
+      if (isOpen) return;
+      setMood('hello');
+    }, 250);
+  });
+
+  launcher.addEventListener('pointerleave', () => {
+    clearTimeout(hoverTimer); clearTimeout(returnTimer);
+    if (!isOpen) {
+      setMood('happy');
+      returnTimer = setTimeout(() => { if (!isOpen) setMood('idle'); }, 1200);
+    }
+  });
+
+  launcher.addEventListener('click', () => isOpen ? closeChat() : openChat());
+  close.addEventListener('click', closeChat);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen) closeChat(); });
+
+  // Respon Chat & Buku Tamu
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMessage(text, 'user');
+    input.value = '';
+    setMood('excited');
+    typing.style.display = 'block';
+    messages.scrollTop = messages.scrollHeight;
+
+    setTimeout(() => {
+      typing.style.display = 'none';
+      const lower = text.toLowerCase();
+      let reply = 'Terima kasih banyak sudah mengisi buku tamu! Pesanmu sangat berharga ✨';
+
+      if (/halo|hai|hello|hi\b/.test(lower)) {
+        reply = 'Hai Kak! 👋 Salam kenal dari AI EMO. Ada pesan atau salam yang mau dititipkan di buku tamu?';
+      } else if (/siapa|nama|perkenalan/.test(lower)) {
+        reply = 'Aku **AI EMO**, asisten & maskot virtual website ini! Tugas utamaku menyambut pengunjung ramah seperti kamu 💙';
+      } else if (/terima kasih|makasih|thanks/.test(lower)) {
+        reply = 'Sama-sama! Senang bisa menyambutmu di sini 😊✨';
+      }
+
+      addMessage(reply, 'bot');
+      setMood('happy');
+    }, 700);
+  });
+
+  // Siklus Mood / Ekspresi Otomatis
+  function runMoodCycle() {
+    if (isOpen || root.matches(':hover')) { cycleTimer = setTimeout(runMoodCycle, 2500); return; }
+    const moods = [
+      ['idle', 3500], ['happy', 2500], ['laugh', 1200],
+      ['sleepy', 2000], ['sleep', 3000], ['excited', 1500]
+    ];
+    let elapsed = 0;
+    moods.forEach(([mood, duration]) => {
+      setTimeout(() => { if (!isOpen && !root.matches(':hover')) setMood(mood); }, elapsed);
+      elapsed += duration;
+    });
+    cycleTimer = setTimeout(runMoodCycle, elapsed + 100);
+  }
+  runMoodCycle();
+})();
+</script>
+</body>
+</html>
