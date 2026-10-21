@@ -206,7 +206,7 @@
       <strong>EMO</strong>
       <button class="emo-close-btn" id="emo-bubble-close" title="Tutup">✕</button>
     </div>
-    <span id="ai-emo-speech-text">Hai Kak! Ketik atau sentuh aku untuk isi buku tamu ya ✨</span>
+    <span id="ai-emo-speech-text">Hai, aku EMO ✨</span>
     
     <div id="emo-chat-input-wrapper">
       <input type="text" id="emo-chat-input" placeholder="Tulis balasan..." autocomplete="off">
@@ -223,24 +223,26 @@
   <button id="ai-emo-launcher" type="button" data-mood="idle" aria-label="Karakter EMO">
     <svg viewBox="0 0 120 165" role="img">
       <defs>
-        <!-- Gradasi Bando Headphone -->
+        <!-- Bando Headphone Gradasi -->
         <linearGradient id="emo-hp-band-outer" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#3a4253"/>
-          <stop offset="50%" stop-color="#181d26"/>
+          <stop offset="0%" stop-color="#414a5e"/>
+          <stop offset="50%" stop-color="#1e2430"/>
           <stop offset="100%" stop-color="#0a0d14"/>
         </linearGradient>
 
-        <!-- Gradasi Ear Cup Samping (Hitam Pekat ke Abu-Abu Metalik) -->
-        <linearGradient id="emo-earcup-grad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#3a4253"/>
-          <stop offset="40%" stop-color="#181e2b"/>
-          <stop offset="100%" stop-color="#0a0d14"/>
+        <!-- Ear Cup Bevel Gradasi (Effect Bevel 3D Hitam-Abu Metalik) -->
+        <linearGradient id="emo-earcup-bevel" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#5a657c"/>
+          <stop offset="25%" stop-color="#323948"/>
+          <stop offset="70%" stop-color="#141924"/>
+          <stop offset="100%" stop-color="#05070c"/>
         </linearGradient>
 
-        <!-- Gradasi Badan -->
-        <linearGradient id="emo-body-grad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#2f3442"/>
-          <stop offset="100%" stop-color="#12151c"/>
+        <!-- Gradasi Muka/Kepala (Sedikit Rounded Corner) -->
+        <linearGradient id="emo-head-grad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#363d4e"/>
+          <stop offset="40%" stop-color="#212733"/>
+          <stop offset="100%" stop-color="#10141d"/>
         </linearGradient>
 
         <linearGradient id="emo-screen-bg" x1="0" y1="0" x2="0" y2="1">
@@ -248,18 +250,19 @@
           <stop offset="100%" stop-color="#080a0e"/>
         </linearGradient>
 
-        <!-- Gradasi Kaki (Hitam ke Abu Metalik ke Hitam) -->
-        <linearGradient id="emo-leg-grad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#0d111a"/>
-          <stop offset="50%" stop-color="#424b61"/>
-          <stop offset="100%" stop-color="#101420"/>
+        <!-- Gradasi Kaki dengan Efek Bevel Metalik -->
+        <linearGradient id="emo-leg-bevel" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#4f5970"/>
+          <stop offset="20%" stop-color="#2a3140"/>
+          <stop offset="70%" stop-color="#121620"/>
+          <stop offset="100%" stop-color="#070a0f"/>
         </linearGradient>
 
-        <!-- Gradasi Sepatu (Hitam-Abu) -->
-        <linearGradient id="emo-foot-grad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#353d52"/>
-          <stop offset="50%" stop-color="#191f2d"/>
-          <stop offset="100%" stop-color="#090c12"/>
+        <!-- Gradasi Sepatu Metalik Bevel -->
+        <linearGradient id="emo-foot-bevel" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#454f63"/>
+          <stop offset="35%" stop-color="#232936"/>
+          <stop offset="100%" stop-color="#0a0d14"/>
         </linearGradient>
 
         <!-- Glow Effect Cyber Light Blue -->
@@ -276,52 +279,43 @@
       <path d="M 16 54 C 14 24, 28 17, 50 17 L 70 17 C 92 17, 106 24, 104 54" fill="none" stroke="url(#emo-hp-band-outer)" stroke-width="5" stroke-linecap="round"/>
       <path d="M 38 18 Q 60 14 82 18" fill="none" stroke="#00f2fe" stroke-width="1.5" stroke-linecap="round" filter="url(#emo-glow)"/>
 
-      <!-- Kaki Diberikan Gradasi + Lis Cyber Neon -->
+      <!-- Kaki Diberikan Gradasi Bevel Metalik + Lis Cyber Neon -->
       <g id="emo-leg-left-group">
-        <rect x="36" y="90" width="12" height="43" rx="6" fill="url(#emo-leg-grad)" stroke="#00f2fe" stroke-width="0.8"/>
-        <!-- Ring/Joint Lutut dengan Gradasi & Glow -->
+        <rect x="36" y="90" width="12" height="43" rx="5" fill="url(#emo-leg-bevel)" stroke="#00f2fe" stroke-width="0.8"/>
+        <!-- Joint Ring Lutut -->
         <rect x="35" y="105" width="14" height="4" rx="2" fill="#00f2fe" opacity="0.9" filter="url(#emo-glow)"/>
         <g id="emo-left-foot">
-          <rect x="23" y="117" width="28" height="23" rx="6" fill="url(#emo-foot-grad)" stroke="#00f2fe" stroke-width="1"/>
+          <rect x="23" y="117" width="28" height="23" rx="5" fill="url(#emo-foot-bevel)" stroke="#00f2fe" stroke-width="1"/>
           <rect x="23" y="133" width="28" height="7" rx="2" fill="#0c1018" stroke="#2c354a" stroke-width="0.8"/>
           <line x1="26" y1="138" x2="48" y2="138" stroke="#00f2fe" stroke-width="1.5" filter="url(#emo-glow)"/>
         </g>
       </g>
 
       <g id="emo-leg-right-group">
-        <rect x="72" y="90" width="12" height="43" rx="6" fill="url(#emo-leg-grad)" stroke="#00f2fe" stroke-width="0.8"/>
-        <!-- Ring/Joint Lutut dengan Gradasi & Glow -->
+        <rect x="72" y="90" width="12" height="43" rx="5" fill="url(#emo-leg-bevel)" stroke="#00f2fe" stroke-width="0.8"/>
+        <!-- Joint Ring Lutut -->
         <rect x="71" y="105" width="14" height="4" rx="2" fill="#00f2fe" opacity="0.9" filter="url(#emo-glow)"/>
         <g id="emo-right-foot">
-          <rect x="69" y="117" width="28" height="23" rx="6" fill="url(#emo-foot-grad)" stroke="#00f2fe" stroke-width="1"/>
+          <rect x="69" y="117" width="28" height="23" rx="5" fill="url(#emo-foot-bevel)" stroke="#00f2fe" stroke-width="1"/>
           <rect x="69" y="133" width="28" height="7" rx="2" fill="#0c1018" stroke="#2c354a" stroke-width="0.8"/>
           <line x1="72" y1="138" x2="94" y2="138" stroke="#00f2fe" stroke-width="1.5" filter="url(#emo-glow)"/>
         </g>
       </g>
 
-      <!-- Badan Utama -->
-      <rect x="21" y="28" width="78" height="70" rx="26" fill="url(#emo-body-grad)" stroke="#3e4759" stroke-width="1.8"/>
-      <rect x="29" y="36" width="62" height="54" rx="17" fill="url(#emo-screen-bg)"/>
+      <!-- Bentuk Muka/Kepala Baru: Persegi Panjang Presisi dengan Sedikit Rounded Corner (rx=14) -->
+      <rect x="20" y="28" width="80" height="68" rx="14" fill="url(#emo-head-grad)" stroke="#4a556d" stroke-width="1.8"/>
+      <rect x="25" y="33" width="70" height="58" rx="10" fill="#1d2330" stroke="#364054" stroke-width="1.2"/>
+      <rect x="28" y="36" width="64" height="52" rx="8" fill="url(#emo-screen-bg)"/>
 
-      <!-- Ear Cup Samping: Gradasi Hitam-Abu & Bentuk Rounded Corner Sedikit (rx=5) -->
+      <!-- Ear Cup Samping: Gradasi Bevel 3D, Rounded Corner (rx=5), TANPA LINE ART -->
       <g id="earcup-left">
-        <!-- Blok Utama Ear Cup -->
-        <rect x="6" y="38" width="18" height="44" rx="5" fill="url(#emo-earcup-grad)" stroke="#00f2fe" stroke-width="1.2" filter="url(#emo-glow)"/>
-        <!-- Inner Padding Hitam -->
+        <rect x="5" y="38" width="18" height="44" rx="5" fill="url(#emo-earcup-bevel)" stroke="#00f2fe" stroke-width="1.2" filter="url(#emo-glow)"/>
         <rect x="18" y="43" width="5" height="34" rx="2" fill="#06080e"/>
-        <!-- Art Line Cyber Neon Biru Muda (Pola Futuristik Siku) -->
-        <path d="M 10 45 L 14 45 L 14 75 L 10 75" fill="none" stroke="#00f2fe" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" filter="url(#emo-glow)"/>
-        <circle cx="14" cy="60" r="1.8" fill="#00f2fe" filter="url(#emo-glow)"/>
       </g>
 
       <g id="earcup-right">
-        <!-- Blok Utama Ear Cup -->
-        <rect x="96" y="38" width="18" height="44" rx="5" fill="url(#emo-earcup-grad)" stroke="#00f2fe" stroke-width="1.2" filter="url(#emo-glow)"/>
-        <!-- Inner Padding Hitam -->
+        <rect x="97" y="38" width="18" height="44" rx="5" fill="url(#emo-earcup-bevel)" stroke="#00f2fe" stroke-width="1.2" filter="url(#emo-glow)"/>
         <rect x="97" y="43" width="5" height="34" rx="2" fill="#06080e"/>
-        <!-- Art Line Cyber Neon Biru Muda (Pola Futuristik Siku) -->
-        <path d="M 110 45 L 106 45 L 106 75 L 110 75" fill="none" stroke="#00f2fe" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" filter="url(#emo-glow)"/>
-        <circle cx="106" cy="60" r="1.8" fill="#00f2fe" filter="url(#emo-glow)"/>
       </g>
 
       <!-- Muka / Mata EMO -->
@@ -348,9 +342,8 @@
   const optNo = document.getElementById('emo-opt-no');
   const closeBtn = document.getElementById('emo-bubble-close');
 
-  // State percakapan
-  let isInteracting = false; // Flag status interaksi
-  let step = 0; // 0: Sapaan Awal, 1: Nama, 2: Alamat, 3: Kontak, 4: Pesan, 5: Konfirmasi
+  let isInteracting = false; 
+  let step = 0; 
   let guestData = {
     nama: localStorage.getItem('emo_guest_nama') || '',
     alamat: '',
@@ -361,21 +354,24 @@
 
   function setMood(mood) { launcher.dataset.mood = mood; }
 
+  function getTimeString() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
   // Alur dialog bertahap
   function askNextStep() {
     optionsWrapper.style.display = 'none';
     inputWrapper.style.display = 'flex';
 
-    if (!isInteracting) {
-      speechText.innerHTML = "Hai Kak! Ketik atau sentuh aku untuk isi buku tamu ya ✨";
-      setMood('idle');
-      return;
-    }
+    if (!isInteracting) return;
 
     if (step === 1) {
       if (guestData.nama) {
         speechText.innerHTML = `Halo Kak <b>${guestData.nama}</b>! Mau titip pesan di buku tamu? Tulis alamat asal Kakak dulu yuk! 🏠`;
-        step = 2; // Langsung lompat ke alamat jika nama sudah tersimpan
+        step = 2; 
       } else {
         speechText.innerHTML = "Halo! Boleh tau nama lengkap Kakak siapa? 🤖";
       }
@@ -409,7 +405,7 @@
 
     if (step === 1) {
       guestData.nama = val;
-      localStorage.setItem('emo_guest_nama', val); // Simpan nama di cache
+      localStorage.setItem('emo_guest_nama', val);
       step = 2;
       askNextStep();
     } else if (step === 2) {
@@ -427,13 +423,11 @@
     }
   }
 
-  // Klik Kirim / Tekan Enter
   sendBtn.addEventListener('click', handleSend);
   chatInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') handleSend();
   });
 
-  // Tombol [Ya, Kirim!]
   optYes.addEventListener('click', async () => {
     optionsWrapper.style.display = 'none';
     speechText.innerHTML = "Sedang mengirim data pesan Kakak... ⏳";
@@ -452,7 +446,7 @@
       setTimeout(() => {
         isInteracting = false;
         step = 0;
-        askNextStep();
+        startIntroGreeting();
       }, 5000);
     } catch (err) {
       speechText.innerHTML = "Aduh, gagal mengirim data. Coba lagi nanti ya! 😢";
@@ -460,19 +454,16 @@
     }
   });
 
-  // Tombol [🔄 Ulangi]
   optNo.addEventListener('click', () => {
     step = 1;
     askNextStep();
   });
 
-  // Tutup / Buka Balon Chat
   closeBtn.addEventListener('click', () => {
     bubble.classList.remove('show');
     setMood('idle');
   });
 
-  // Ketika Icon EMO Disentuh / Diklik
   launcher.addEventListener('click', () => {
     bubble.classList.add('show');
     if (!isInteracting) {
@@ -483,10 +474,50 @@
     chatInput.focus();
   });
 
-  // Tampilkan balon sapaan awal saat dimuat
-  setTimeout(() => {
-    askNextStep();
-  }, 800);
+  // Urutan Sapaan Awal (Hai, Aku EMO -> Pengingat Jam -> Jeda -> Random Sapaan)
+  function startIntroGreeting() {
+    if (isInteracting) return;
+
+    // 1. Sapaan Pertama
+    speechText.innerHTML = "Hai, aku EMO! 👋";
+    bubble.classList.add('show');
+    setMood('hello');
+
+    // 2. Mengingatkan Jam
+    setTimeout(() => {
+      if (isInteracting) return;
+      speechText.innerHTML = `Sekarang jam ${getTimeString()} WIB nih, jangan lupa isi buku tamu ya! ⏰`;
+      setMood('chatty');
+    }, 3000);
+
+    // 3. Jeda/Diem Sejenak
+    setTimeout(() => {
+      if (isInteracting) return;
+      setMood('idle');
+    }, 7000);
+
+    // 4. Perputaran Random Sapaan Lain Secara Berkala
+    setInterval(() => {
+      if (isInteracting || document.activeElement === chatInput) return;
+      const greetings = [
+        "Ada pesan atau kesan? Tulis di buku tamu yuk! 📝",
+        "Klik atau ketik di sini kalau mau sapa admin! 💬",
+        "EMO siap mencatat pesan Kakak kapan aja! 🤖",
+        "Diem-diem bae, yuk titip pesan manis di sini! ✨",
+        `Sudah jam ${getTimeString()} WIB, tetap semangat ya Kak! ☀️`
+      ];
+      const randomMsg = greetings[Math.floor(Math.random() * greetings.length)];
+      speechText.innerHTML = randomMsg;
+      setMood('excited');
+      
+      setTimeout(() => {
+        if (!isInteracting) setMood('idle');
+      }, 3500);
+    }, 15000);
+  }
+
+  // Mulai Sapaan Awal Saat Dimuat
+  setTimeout(startIntroGreeting, 800);
 })();
 </script>
 </body>
