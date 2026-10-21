@@ -351,7 +351,7 @@
   function personalizedGreeting(){const name=guestData.nama.trim();return `${getGreeting()}${name?' Kak '+name:''}! Aku EMO 🤖✨`}
   async function fetchLyrics(){
     try{const r=await fetch(SCRIPT_URL+'?action=get_lyrics',{method:'GET',cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);const d=await r.json();
-      if(d&&Array.isArray(d.lyrics)){lyricList=d.lyrics.map(x=>({lyric:String(x.lyric||x.teks||''),audio:String(x.audio||''),mood:String(x.mood||'smile'),duration:Number(x.duration||4500)})).filter(x=>x.lyric);}
+      if(d&&Array.isArray(d.lyrics)){lyricList=d.lyrics.map(x=>({lyric:String(x.lyric||x.teks||''),audio:String(x.audio||''),mood:String(x.mood||'smile'),duration:Math.max(1,Number(x.duration||4.5))*1000})).filter(x=>x.lyric);}
       if(!lyricList.length)lyricList=fallbackLyrics;
     }catch(e){lyricList=fallbackLyrics;}
   }
@@ -380,23 +380,23 @@
   function playAudio(rawUrl){
     const url=normalizeAudioUrl(rawUrl);currentAudioUrl=url;
     if(!url){stopAudio(true);return;}
-    // Browser modern sering memblokir audio otomatis sebelum ada interaksi pengguna.
-    // URL disimpan; akan dicoba lagi pada interaksi pertama.
-    if(!audioUnlocked)return;
+    // Coba autoplay saat lirik muncul dengan mode muted terlebih dahulu.
+    // Jika browser mengizinkan, suara dibuka lalu volume naik perlahan.
+    // Jika ditolak, percobaan diulang setelah interaksi pertama pengguna.
     try{
-      clearAudioFade();audioPlayer.pause();audioPlayer.src=url;audioPlayer.preload='auto';audioPlayer.volume=0;
+      clearAudioFade();audioPlayer.pause();audioPlayer.src=url;audioPlayer.preload='auto';audioPlayer.volume=0;audioPlayer.muted=true;
       audioPlayer.load();
       const p=audioPlayer.play();
-      if(p&&p.then)p.then(()=>fadeAudioTo(audioTargetVolume,650)).catch(err=>{console.warn('EMO: audio tidak dapat diputar. Periksa izin autoplay dan tautan MP3 publik.',err);});
-      else fadeAudioTo(audioTargetVolume,650);
-    }catch(e){console.warn('EMO: gagal memulai audio.',e);}
+      if(p&&p.then)p.then(()=>{audioUnlocked=true;audioPlayer.muted=false;fadeAudioTo(audioTargetVolume,650);}).catch(err=>{audioPlayer.muted=false;console.warn('EMO: autoplay diblokir atau URL audio tidak valid. Akan dicoba lagi setelah klik/sentuhan pertama.',err);});
+      else{audioPlayer.muted=false;fadeAudioTo(audioTargetVolume,650);}
+    }catch(e){audioPlayer.muted=false;console.warn('EMO: gagal memulai audio.',e);}
   }
   function unlockAudio(){
     if(audioUnlocked)return;
     audioUnlocked=true;
     if(currentAudioUrl)playAudio(currentAudioUrl);
   }
-  // Satu klik/sentuhan pertama mengizinkan pemutaran audio berikutnya.
+  // Jika autoplay ditolak browser, interaksi pertama menjadi kesempatan mencoba lagi.
   document.addEventListener('pointerdown',unlockAudio,{once:true,capture:true});
   document.addEventListener('keydown',unlockAudio,{once:true,capture:true});
   function playItem(item){if(isInteracting||!item)return;stopBubbleTimer();showBubble();safeText(item.lyric);setMood(item.mood||'smile');playAudio(item.audio);const duration=Math.max(1500,Number(item.duration)||4500);bubbleTimer=setTimeout(()=>{if(!isInteracting){fadeAudioTo(0,700,true);setMood('idle');scheduleNextLyric(1400);}},duration);}
