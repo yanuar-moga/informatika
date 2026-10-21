@@ -29,7 +29,7 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 242, 254, 0.25);
     backdrop-filter: blur(12px);
     border-radius: 20px;
-    padding: 34px 16px 14px;
+    padding: 14px 16px 14px;
     width: 270px;
     font-size: 13px;
     line-height: 1.4;
@@ -61,9 +61,11 @@
     word-break: break-word;
   }
   #emo-bubble-close {
-    position: absolute;
-    top: 8px;
-    right: 9px;
+    position: relative;
+    float: right;
+    top: auto;
+    right: auto;
+    margin: -2px -2px 4px 8px;
     width: 23px;
     height: 23px;
     display: grid;
@@ -322,6 +324,7 @@
   let isInteracting=false, step=0, lyricList=[], lyricIndex=-1, lyricTimer=null, bubbleTimer=null, blinkTimer=null;
   let audioPlayer=new Audio(); audioPlayer.preload='auto'; audioPlayer.volume=0;
   let audioFadeTimer=null, audioTargetVolume=.55, busySending=false, bubbleManuallyClosed=false;
+  let audioUnlocked=false, currentAudioUrl='';
   let guestData={nama:localStorage.getItem('emo_guest_nama')||'', alamat:'', kontak:'', subjek:'Buku Tamu Web', pesan:''};
   const fallbackLyrics=[
     {lyric:'Boleh kah sekecakep ini~ 🎵🎶',audio:'',mood:'whistle',duration:4500},
@@ -331,7 +334,15 @@
     {lyric:'Bunga abadi takkan pernah layu~ 🌸',audio:'',mood:'smile',duration:5000}
   ];
   function setMood(mood){ const allowed=['idle','suspicious','chatty','look-left','look-right','whistle','grumble','smile','hello','jump','run','laugh','excited','curious','love','sleepy','dance']; launcher.dataset.mood=allowed.includes(mood)?mood:'smile'; }
-  function safeText(value){ speechText.textContent=String(value??''); }
+  // Menampilkan teks dari Spreadsheet sebagai teks biasa, tetapi mengubah tag <br>, <br/> atau <br /> menjadi baris baru. Tag HTML lain tetap dianggap teks agar aman.
+  function safeText(value){
+    speechText.replaceChildren();
+    const parts=String(value??'').split(/<br\s*\/?\s*>/i);
+    parts.forEach((part,index)=>{
+      if(index>0) speechText.appendChild(document.createElement('br'));
+      speechText.appendChild(document.createTextNode(part));
+    });
+  }
   function showBubble(){bubble.classList.add('show');bubbleManuallyClosed=false;}
   function stopBubbleTimer(){if(bubbleTimer){clearTimeout(bubbleTimer);bubbleTimer=null;}}
   function scheduleNextLyric(ms){if(lyricTimer)clearTimeout(lyricTimer); lyricTimer=setTimeout(rotateLyric,Math.max(5000,ms));}
@@ -357,16 +368,37 @@
     },40);
   }
   function stopAudio(fade=true){if(fade){fadeAudioTo(0,500,true);}else{clearAudioFade();try{audioPlayer.pause();audioPlayer.currentTime=0;audioPlayer.volume=0;}catch(e){}}}
-  function playAudio(url){
+  function normalizeAudioUrl(raw){
+    const url=String(raw||'').trim();
+    if(!url)return '';
+    // Ubah tautan berbagi Google Drive menjadi URL pemutaran langsung.
+    let m=url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if(!m)m=url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if(m && /drive\.google\.com|docs\.google\.com/.test(url))return 'https://drive.google.com/uc?export=download&id='+m[1];
+    return url;
+  }
+  function playAudio(rawUrl){
+    const url=normalizeAudioUrl(rawUrl);currentAudioUrl=url;
     if(!url){stopAudio(true);return;}
+    // Browser modern sering memblokir audio otomatis sebelum ada interaksi pengguna.
+    // URL disimpan; akan dicoba lagi pada interaksi pertama.
+    if(!audioUnlocked)return;
     try{
       clearAudioFade();audioPlayer.pause();audioPlayer.src=url;audioPlayer.preload='auto';audioPlayer.volume=0;
       audioPlayer.load();
       const p=audioPlayer.play();
-      if(p&&p.then)p.then(()=>fadeAudioTo(audioTargetVolume,650)).catch(()=>{/* Browser may block autoplay until the visitor interacts with the page. */});
+      if(p&&p.then)p.then(()=>fadeAudioTo(audioTargetVolume,650)).catch(err=>{console.warn('EMO: audio tidak dapat diputar. Periksa izin autoplay dan tautan MP3 publik.',err);});
       else fadeAudioTo(audioTargetVolume,650);
-    }catch(e){}
+    }catch(e){console.warn('EMO: gagal memulai audio.',e);}
   }
+  function unlockAudio(){
+    if(audioUnlocked)return;
+    audioUnlocked=true;
+    if(currentAudioUrl)playAudio(currentAudioUrl);
+  }
+  // Satu klik/sentuhan pertama mengizinkan pemutaran audio berikutnya.
+  document.addEventListener('pointerdown',unlockAudio,{once:true,capture:true});
+  document.addEventListener('keydown',unlockAudio,{once:true,capture:true});
   function playItem(item){if(isInteracting||!item)return;stopBubbleTimer();showBubble();safeText(item.lyric);setMood(item.mood||'smile');playAudio(item.audio);const duration=Math.max(1500,Number(item.duration)||4500);bubbleTimer=setTimeout(()=>{if(!isInteracting){fadeAudioTo(0,700,true);setMood('idle');scheduleNextLyric(1400);}},duration);}
   function rotateLyric(){if(isInteracting||document.hidden){scheduleNextLyric(5000);return;}if(!lyricList.length)lyricList=fallbackLyrics;let next=lyricList.length===1?0:Math.floor(Math.random()*lyricList.length);if(next===lyricIndex&&lyricList.length>1)next=(next+1)%lyricList.length;lyricIndex=next;const item=lyricList[next];playItem(item);scheduleNextLyric(Math.max(9000,Number(item.duration)||4500)+9000);}
   function blinkLoop(){clearTimeout(blinkTimer);blinkTimer=setTimeout(()=>{if(!isInteracting){launcher.classList.add('blinking');setTimeout(()=>launcher.classList.remove('blinking'),130); }blinkLoop();},2200+Math.random()*3800);}
@@ -400,7 +432,7 @@ Pesan: ${guestData.pesan}`;summary.style.whiteSpace='pre-line';speechText.append
     bubble.classList.remove('show');bubbleManuallyClosed=true;stopBubbleTimer();fadeAudioTo(0,450,true);
     if(!isInteracting)setMood('idle');
   });
-  audioPlayer.addEventListener('ended',()=>{});audioPlayer.addEventListener('error',()=>{});
+  audioPlayer.addEventListener('ended',()=>{});audioPlayer.addEventListener('error',()=>{console.warn('EMO: file audio gagal dimuat. Pastikan URL menuju MP3 yang bisa diakses publik.',audioPlayer.error);});
   document.addEventListener('visibilitychange',()=>{if(document.hidden){clearAudioFade();audioPlayer.pause();}else if(!isInteracting&&lyricList[lyricIndex]&&lyricList[lyricIndex].audio){playAudio(lyricList[lyricIndex].audio);}});
   fetchLyrics().finally(()=>{setTimeout(startIntro,800);});blinkLoop();
 })();
