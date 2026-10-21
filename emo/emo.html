@@ -135,6 +135,16 @@
   #ai-emo-launcher .eye { transition: transform .18s ease; transform-box: fill-box; transform-origin: center; }
   #ai-emo-launcher .brow { transition: all .2s ease; }
   #ai-emo-launcher .eye-smile { display: none; }
+  #ai-emo-launcher .eye-rect { transform-box: fill-box; transform-origin: center; }
+  #ai-emo-launcher.blinking .eye-rect { transform: scaleY(.08); }
+  #ai-emo-launcher[data-mood="curious"] .eye { transform: scale(1.12) translateY(-1px); }
+  #ai-emo-launcher[data-mood="curious"] .brow { transform: translateY(-4px); }
+  #ai-emo-launcher[data-mood="love"] .eye { filter: drop-shadow(0 0 5px #ff6bc8); }
+  #ai-emo-launcher[data-mood="love"] .brow { stroke: #ff8bd7; }
+  #ai-emo-launcher[data-mood="sleepy"] .eye { transform: scaleY(.28); }
+  #ai-emo-launcher[data-mood="dance"] .emo-body-group { animation: emo-dance .55s ease-in-out infinite alternate; transform-origin: 60px 100px; }
+  @keyframes emo-dance { from { transform: rotate(-4deg) translateY(0); } to { transform: rotate(4deg) translateY(-4px); } }
+
 
   #ai-emo-launcher[data-mood="suspicious"] .brow.left { transform: rotate(-16deg) translateY(-2px); }
   #ai-emo-launcher[data-mood="suspicious"] .brow.right { transform: rotate(12deg) translateY(2px); }
@@ -183,6 +193,7 @@
     #ai-emo-chat-bubble { bottom: 155px; width: calc(100vw - 40px); max-width: 280px; }
   }
 </style>
+<meta name="theme-color" content="#0d1322">
 </head>
 <body>
 
@@ -191,6 +202,7 @@
   <div id="ai-emo-chat-bubble" class="show">
     <span id="ai-emo-speech-text">Hai, aku EMO ✨</span>
     
+    <div id="emo-audio-controls" style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px;color:#b9dce9;"><button type="button" id="emo-mute-toggle" aria-label="Matikan atau nyalakan audio" style="border:1px solid rgba(0,242,254,.35);border-radius:8px;background:rgba(0,242,254,.08);color:#dffaff;padding:4px 7px;cursor:pointer;">♫ Audio ON</button><input id="emo-volume" aria-label="Volume audio" type="range" min="0" max="100" value="55" style="width:82px;accent-color:#00f2fe;"><span id="emo-volume-label">55%</span></div>
     <div id="emo-chat-input-wrapper">
       <input type="text" id="emo-chat-input" placeholder="Tulis balasan..." autocomplete="off">
       <button class="emo-send-btn" id="emo-chat-send">Kirim</button>
@@ -254,15 +266,15 @@
         <rect x="95" y="38" width="18" height="42" rx="9" fill="url(#emo-earcup-seamless)" stroke="none"/>
 
         <!-- Kaki Proporsi Pas (Tidak Terlalu Jangkung) -->
-        <rect x="36" y="92" width="12" height="38" rx="5" fill="url(#emo-leg-bevel)" stroke="#00f2fe" stroke-width="0.8"/>
-        <rect x="35" y="106" width="14" height="4" rx="2" fill="#00f2fe" opacity="0.9" filter="url(#emo-glow)"/>
-        <rect x="23" y="126" width="28" height="23" rx="5" fill="url(#emo-foot-bevel)" stroke="#00f2fe" stroke-width="1"/>
-        <line x1="26" y1="145" x2="48" y2="145" stroke="#00f2fe" stroke-width="1.5" filter="url(#emo-glow)"/>
+        <rect x="36" y="92" width="12" height="28" rx="5" fill="url(#emo-leg-bevel)" stroke="#00f2fe" stroke-width="0.8"/>
+        <rect x="35" y="102" width="14" height="4" rx="2" fill="#00f2fe" opacity="0.9" filter="url(#emo-glow)"/>
+        <rect x="23" y="118" width="28" height="31" rx="5" fill="url(#emo-foot-bevel)" stroke="#00f2fe" stroke-width="1"/>
+        <line x1="26" y1="144" x2="48" y2="144" stroke="#00f2fe" stroke-width="1.5" filter="url(#emo-glow)"/>
 
-        <rect x="72" y="92" width="12" height="38" rx="5" fill="url(#emo-leg-bevel)" stroke="#00f2fe" stroke-width="0.8"/>
-        <rect x="71" y="106" width="14" height="4" rx="2" fill="#00f2fe" opacity="0.9" filter="url(#emo-glow)"/>
-        <rect x="69" y="126" width="28" height="23" rx="5" fill="url(#emo-foot-bevel)" stroke="#00f2fe" stroke-width="1"/>
-        <line x1="72" y1="145" x2="94" y2="145" stroke="#00f2fe" stroke-width="1.5" filter="url(#emo-glow)"/>
+        <rect x="72" y="92" width="12" height="28" rx="5" fill="url(#emo-leg-bevel)" stroke="#00f2fe" stroke-width="0.8"/>
+        <rect x="71" y="102" width="14" height="4" rx="2" fill="#00f2fe" opacity="0.9" filter="url(#emo-glow)"/>
+        <rect x="69" y="118" width="28" height="31" rx="5" fill="url(#emo-foot-bevel)" stroke="#00f2fe" stroke-width="1"/>
+        <line x1="72" y1="144" x2="94" y2="144" stroke="#00f2fe" stroke-width="1.5" filter="url(#emo-glow)"/>
 
         <!-- Muka/Kepala Robot -->
         <rect x="20" y="28" width="80" height="66" rx="14" fill="url(#emo-head-grad)" stroke="#4a556d" stroke-width="1.8"/>
@@ -283,204 +295,74 @@
 
 <script>
 (() => {
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxd71ivnmGxMVnULaqIS85Ipw49xtJPVOOUKzXIuPID4MAglan2tBQW6ITFXEiXVlXQvA/exec';
-
-  const launcher = document.getElementById('ai-emo-launcher');
-  const bubble = document.getElementById('ai-emo-chat-bubble');
-  const speechText = document.getElementById('ai-emo-speech-text');
-  const chatInput = document.getElementById('emo-chat-input');
-  const sendBtn = document.getElementById('emo-chat-send');
-  const inputWrapper = document.getElementById('emo-chat-input-wrapper');
-  const optionsWrapper = document.getElementById('emo-chat-options');
-  const optYes = document.getElementById('emo-opt-yes');
-  const optNo = document.getElementById('emo-opt-no');
-
-  let isInteracting = false; 
-  let step = 0; 
-  let audioPlayer = new Audio();
-  let lyricList = [];
-  let currentTimeout = null;
-
-  let guestData = {
-    nama: localStorage.getItem('emo_guest_nama') || '',
-    alamat: '',
-    kontak: '',
-    subjek: 'Buku Tamu Web',
-    pesan: ''
-  };
-
-  function setMood(mood) { launcher.dataset.mood = mood; }
-
-  function getTimeString() {
-    const now = new Date();
-    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  'use strict';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzP2VeQq5DhMxxLo5Pt9rk730u5X93XMJ_Ty1b-9LQP5TmbiYLjoRdAjKYMNK7WQw/exec';
+  const $ = id => document.getElementById(id);
+  const launcher=$('ai-emo-launcher'), bubble=$('ai-emo-chat-bubble'), speechText=$('ai-emo-speech-text');
+  const chatInput=$('emo-chat-input'), sendBtn=$('emo-chat-send'), inputWrapper=$('emo-chat-input-wrapper');
+  const optionsWrapper=$('emo-chat-options'), optYes=$('emo-opt-yes'), optNo=$('emo-opt-no');
+  const muteBtn=$('emo-mute-toggle'), volume=$('emo-volume'), volumeLabel=$('emo-volume-label');
+  let isInteracting=false, step=0, lyricList=[], lyricIndex=-1, lyricTimer=null, bubbleTimer=null, blinkTimer=null;
+  let audioPlayer=new Audio(); audioPlayer.preload='none'; audioPlayer.volume=.55;
+  let muted=false, busySending=false;
+  let guestData={nama:localStorage.getItem('emo_guest_nama')||'', alamat:'', kontak:'', subjek:'Buku Tamu Web', pesan:''};
+  const fallbackLyrics=[
+    {lyric:'Boleh kah sekecakep ini~ 🎵🎶',audio:'',mood:'whistle',duration:4500},
+    {lyric:'Masa lalu biarlah masa lalu~ ✨',audio:'',mood:'jump',duration:5000},
+    {lyric:'Salting sendiri kan lu? 👀🎧',audio:'',mood:'look-right',duration:3500},
+    {lyric:'Lagi lari-lari kecil nih~ 🏃‍♂️💨',audio:'',mood:'run',duration:4000},
+    {lyric:'Bunga abadi takkan pernah layu~ 🌸',audio:'',mood:'smile',duration:5000}
+  ];
+  function setMood(mood){ const allowed=['idle','suspicious','chatty','look-left','look-right','whistle','grumble','smile','hello','jump','run','laugh','excited','curious','love','sleepy','dance']; launcher.dataset.mood=allowed.includes(mood)?mood:'smile'; }
+  function safeText(value){ speechText.textContent=String(value??''); }
+  function showBubble(){bubble.classList.add('show');}
+  function stopBubbleTimer(){if(bubbleTimer){clearTimeout(bubbleTimer);bubbleTimer=null;}}
+  function scheduleNextLyric(ms){if(lyricTimer)clearTimeout(lyricTimer); lyricTimer=setTimeout(rotateLyric,Math.max(5000,ms));}
+  function getTimeString(){const n=new Date();return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;}
+  function getGreeting(){const h=new Date().getHours(); if(h>=4&&h<11)return 'Selamat pagi'; if(h>=11&&h<15)return 'Selamat siang'; if(h>=15&&h<18)return 'Selamat sore'; return 'Selamat malam';}
+  function personalizedGreeting(){const name=guestData.nama.trim();return `${getGreeting()}${name?' Kak '+name:''}! Aku EMO 🤖✨`}
+  async function fetchLyrics(){
+    try{const r=await fetch(SCRIPT_URL+'?action=get_lyrics',{method:'GET',cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);const d=await r.json();
+      if(d&&Array.isArray(d.lyrics)){lyricList=d.lyrics.map(x=>({lyric:String(x.lyric||x.teks||''),audio:String(x.audio||''),mood:String(x.mood||'smile'),duration:Number(x.duration||4500)})).filter(x=>x.lyric);}
+      if(!lyricList.length)lyricList=fallbackLyrics;
+    }catch(e){lyricList=fallbackLyrics;}
   }
-
-  async function fetchLyricsFromSpreadsheet() {
-    try {
-      const res = await fetch(SCRIPT_URL + '?action=get_lyrics');
-      const data = await res.json();
-      if (data && data.lyrics && data.lyrics.length > 0) {
-        lyricList = data.lyrics;
-      }
-    } catch (e) {
-      lyricList = [
-        { lyric: "Boleh kah sekecakep ini~ 🎵🎶", audio: "", mood: "whistle", duration: 4000 },
-        { lyric: "Salting sendiri kan lu? 👀🎧", audio: "", mood: "jump", duration: 3500 },
-        { lyric: "Lagi lari-lari kecil nih~ 🏃‍♂️💨", audio: "", mood: "run", duration: 4000 }
-      ];
-    }
-  }
-
-  function playAudioAndShow(item) {
-    if (isInteracting) return;
-    
-    if (currentTimeout) clearTimeout(currentTimeout);
-
-    speechText.innerHTML = item.lyric;
-    setMood(item.mood || 'whistle');
-    bubble.classList.add('show');
-
-    // Putar audio jika ada link-nya
-    if (item.audio) {
-      try {
-        audioPlayer.src = item.audio;
-        audioPlayer.play().catch(() => {});
-        
-        // Sesuaikan durasi tampil balon dengan panjang audio (jika metadata audio terbaca)
-        audioPlayer.onloadedmetadata = () => {
-          const durationMs = (audioPlayer.duration * 1000) || (item.duration || 4000);
-          scheduleHideBubble(durationMs);
-        };
-      } catch (e) {
-        scheduleHideBubble(item.duration || 4000);
-      }
-    } else {
-      scheduleHideBubble(item.duration || 4000);
-    }
-  }
-
-  function scheduleHideBubble(duration) {
-    currentTimeout = setTimeout(() => {
-      if (!isInteracting) {
-        setMood('idle');
-      }
-    }, duration);
-  }
-
-  function askNextStep() {
-    optionsWrapper.style.display = 'none';
-    if (!isInteracting) {
-      inputWrapper.style.display = 'none';
-      return;
-    }
-    inputWrapper.style.display = 'flex';
-
-    if (step === 1) {
-      if (guestData.nama) {
-        speechText.innerHTML = `Halo Kak <b>${guestData.nama}</b>! Mau titip pesan di buku tamu? Tulis alamat asal Kakak dulu yuk! 🏠`;
-        step = 2; 
-      } else {
-        speechText.innerHTML = "Halo! Boleh tau nama lengkap Kakak siapa? 🤖";
-      }
-      setMood('chatty');
-    } else if (step === 2) {
-      speechText.innerHTML = `Salam kenal Kak <b>${guestData.nama}</b>! Boleh tau alamat/kota asal Kakak? 🏠`;
-      setMood('smile');
-    } else if (step === 3) {
-      speechText.innerHTML = "Oke! Boleh minta nomor WhatsApp / Kontak yang bisa dihubungi? 📱";
-      setMood('whistle');
-    } else if (step === 4) {
-      speechText.innerHTML = "Sip! Silakan tuliskan pesan/kesan Kakak di sini... 📝";
-      setMood('smile');
-    } else if (step === 5) {
-      inputWrapper.style.display = 'none';
-      optionsWrapper.style.display = 'flex';
-      speechText.innerHTML = `Apakah data ini sudah yakin benar?<br><b>Nama:</b> ${guestData.nama}<br><b>Alamat:</b>${guestData.alamat}<br><b>HP:</b> ${guestData.kontak}<br><b>Pesan:</b>${guestData.pesan}`;
-      setMood('suspicious');
-    }
-  }
-
-  function handleSend() {
-    const val = chatInput.value.trim();
-    if (!isInteracting) {
-      isInteracting = true;
-      step = 1;
-    }
-    if (!val && step !== 0) return;
-    chatInput.value = '';
-
-    if (step === 1) { guestData.nama = val; localStorage.setItem('emo_guest_nama', val); step = 2; askNextStep(); }
-    else if (step === 2) { guestData.alamat = val; step = 3; askNextStep(); }
-    else if (step === 3) { guestData.kontak = val; step = 4; askNextStep(); }
-    else if (step === 4) { guestData.pesan = val; step = 5; askNextStep(); }
-  }
-
-  sendBtn.addEventListener('click', handleSend);
-  chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSend(); });
-
-  optYes.addEventListener('click', async () => {
-    optionsWrapper.style.display = 'none';
-    speechText.innerHTML = "Sedang mengirim data pesan Kakak... ⏳";
-    setMood('whistle');
-
-    try {
-      const body = new URLSearchParams(guestData);
-      await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body });
-
-      speechText.innerHTML = "Yeay! Data buku tamu berhasil terkirim ke spreadsheet! Terima kasih Kak ✨🎉";
-      setMood('smile');
-      setTimeout(() => { isInteracting = false; step = 0; startIntroGreeting(); }, 5000);
-    } catch (err) {
-      speechText.innerHTML = "Aduh, gagal mengirim data. Coba lagi nanti ya! 😢";
-      setMood('grumble');
-    }
+  function stopAudio(){try{audioPlayer.pause();audioPlayer.currentTime=0;}catch(e){}}
+  function playAudio(url){if(!url||muted)return;try{audioPlayer.pause();audioPlayer.src=url;audioPlayer.volume=Number(volume.value)/100;const p=audioPlayer.play();if(p&&p.catch)p.catch(()=>{/* autoplay may require a user gesture */});}catch(e){}}
+  function playItem(item){if(isInteracting||!item)return;stopBubbleTimer();showBubble();safeText(item.lyric);setMood(item.mood||'smile');playAudio(item.audio);const duration=Math.max(1500,Number(item.duration)||4500);bubbleTimer=setTimeout(()=>{if(!isInteracting){setMood('idle');scheduleNextLyric(1400);}},duration);}
+  function rotateLyric(){if(isInteracting||document.hidden){scheduleNextLyric(5000);return;}if(!lyricList.length)lyricList=fallbackLyrics;let next=lyricList.length===1?0:Math.floor(Math.random()*lyricList.length);if(next===lyricIndex&&lyricList.length>1)next=(next+1)%lyricList.length;lyricIndex=next;const item=lyricList[next];playItem(item);scheduleNextLyric(Math.max(9000,Number(item.duration)||4500)+9000);}
+  function blinkLoop(){clearTimeout(blinkTimer);blinkTimer=setTimeout(()=>{if(!isInteracting){launcher.classList.add('blinking');setTimeout(()=>launcher.classList.remove('blinking'),130); }blinkLoop();},2200+Math.random()*3800);}
+  document.addEventListener('mousemove',e=>{if(isInteracting)return;const r=launcher.getBoundingClientRect(),mid=r.left+r.width/2;setMood(e.clientX<mid-20?'look-left':e.clientX>mid+20?'look-right':'idle');});
+  function startIntro(){if(isInteracting)return;showBubble();safeText(personalizedGreeting());setMood('hello');stopBubbleTimer();bubbleTimer=setTimeout(()=>{if(!isInteracting){safeText(`Sekarang pukul ${getTimeString()} WIB. Jangan lupa mampir dan isi buku tamu ya! ⏰`);setMood('smile');}},3500);scheduleNextLyric(9000);}
+  function showInput(){optionsWrapper.style.display='none';inputWrapper.style.display='flex';chatInput.value='';chatInput.focus();}
+  function askNextStep(){optionsWrapper.style.display='none';if(!isInteracting){inputWrapper.style.display='none';return;}inputWrapper.style.display='flex';chatInput.value='';
+    if(step===1){safeText(guestData.nama?`${getGreeting()} Kak ${guestData.nama}! Mau titip pesan di buku tamu? Tulis alamat/kota asal dulu yuk! 🏠`:'Hai! Boleh tahu nama lengkap Kakak? 🤖');setMood('chatty');}
+    else if(step===2){safeText(`Salam kenal Kak ${guestData.nama}! Boleh tahu alamat/kota asal Kakak? 🏠`);setMood('smile');}
+    else if(step===3){safeText('Oke! Boleh isi nomor WhatsApp/kontak yang bisa dihubungi? 📱');setMood('whistle');}
+    else if(step===4){safeText('Sip! Tulis pesan atau kesan Kakak di sini ya... 📝');setMood('smile');}
+    else if(step===5){inputWrapper.style.display='none';optionsWrapper.style.display='flex';speechText.textContent='';
+      const summary=document.createElement('span');summary.textContent=`Apakah data ini sudah benar?
+Nama: ${guestData.nama}
+Alamat: ${guestData.alamat}
+HP: ${guestData.kontak}
+Pesan: ${guestData.pesan}`;summary.style.whiteSpace='pre-line';speechText.appendChild(summary);setMood('curious');}
+    showBubble();}
+  function handleSend(){const val=chatInput.value.trim();if(!val)return;if(!isInteracting){isInteracting=true;step=1;}if(val.length>1500){safeText('Pesannya kepanjangan, maksimal 1.500 karakter ya.');return;}
+    if(step===1){guestData.nama=val;localStorage.setItem('emo_guest_nama',val);step=2;}else if(step===2){guestData.alamat=val;step=3;}else if(step===3){guestData.kontak=val;step=4;}else if(step===4){guestData.pesan=val;step=5;}askNextStep();}
+  sendBtn.addEventListener('click',handleSend);chatInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();handleSend();}});
+  optYes.addEventListener('click',async()=>{if(busySending)return;busySending=true;optionsWrapper.style.display='none';safeText('Sedang mengirim data buku tamu... ⏳');setMood('whistle');
+    try{await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'save_guestbook',...guestData})});
+      safeText('Permintaan buku tamu sudah dikirim. Browser tidak bisa membaca konfirmasi dari server, jadi pastikan data masuk di spreadsheet. Terima kasih sudah mampir! ✨');setMood('smile');localStorage.setItem('emo_guest_nama',guestData.nama);setTimeout(()=>{isInteracting=false;step=0;guestData={nama:localStorage.getItem('emo_guest_nama')||'',alamat:'',kontak:'',subjek:'Buku Tamu Web',pesan:''};startIntro();},6000);
+    }catch(err){safeText('Belum bisa memastikan data tersimpan. Cek koneksi lalu coba lagi ya. 😢');setMood('grumble');optionsWrapper.style.display='flex';}
+    finally{busySending=false;}
   });
-
-  optNo.addEventListener('click', () => { step = 1; askNextStep(); });
-
-  launcher.addEventListener('click', () => {
-    bubble.classList.add('show');
-    if (!isInteracting) {
-      isInteracting = true;
-      step = 1;
-      askNextStep();
-    }
-    chatInput.focus();
-  });
-
-  async function startIntroGreeting() {
-    if (isInteracting) return;
-    await fetchLyricsFromSpreadsheet();
-
-    inputWrapper.style.display = 'none';
-    optionsWrapper.style.display = 'none';
-
-    speechText.innerHTML = "Hai, aku EMO! 👋";
-    bubble.classList.add('show');
-    setMood('hello');
-
-    setTimeout(() => {
-      if (isInteracting) return;
-      speechText.innerHTML = `Sekarang jam ${getTimeString()} WIB nih, jangan lupa isi buku tamu ya! ⏰`;
-      setMood('smile');
-    }, 3000);
-
-    // Rotasi Sapaan & Lirik Lagu Sesuai Panjang Durasi Audio
-    setInterval(() => {
-      if (isInteracting || document.activeElement === chatInput) return;
-
-      if (lyricList.length > 0) {
-        const item = lyricList[Math.floor(Math.random() * lyricList.length)];
-        playAudioAndShow(item);
-      } else {
-        speechText.innerHTML = `Sekarang jam ${getTimeString()} WIB, tetap semangat! ✨`;
-        setMood('chatty');
-      }
-    }, 14000);
-  }
-
-  setTimeout(startIntroGreeting, 800);
+  optNo.addEventListener('click',()=>{guestData.alamat='';guestData.kontak='';guestData.pesan='';step=1;askNextStep();});
+  launcher.addEventListener('click',()=>{showBubble();stopBubbleTimer();if(!isInteracting){isInteracting=true;stopAudio();step=1;askNextStep();}else if(step>=1&&step<=4){chatInput.focus();}});
+  muteBtn.addEventListener('click',()=>{muted=!muted;muteBtn.textContent=muted?'♫ Audio OFF':'♫ Audio ON';if(muted)stopAudio();else if(!isInteracting&&lyricList[lyricIndex])playAudio(lyricList[lyricIndex].audio);});
+  volume.addEventListener('input',()=>{audioPlayer.volume=Number(volume.value)/100;volumeLabel.textContent=volume.value+'%';});
+  audioPlayer.addEventListener('ended',()=>{});audioPlayer.addEventListener('error',()=>{});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)audioPlayer.pause();});
+  fetchLyrics().finally(()=>{setTimeout(startIntro,800);});blinkLoop();
 })();
 </script>
 </body>
