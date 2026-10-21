@@ -29,7 +29,7 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 242, 254, 0.25);
     backdrop-filter: blur(12px);
     border-radius: 20px;
-    padding: 14px 16px;
+    padding: 34px 16px 14px;
     width: 270px;
     font-size: 13px;
     line-height: 1.4;
@@ -60,6 +60,24 @@
     display: block;
     word-break: break-word;
   }
+  #emo-bubble-close {
+    position: absolute;
+    top: 8px;
+    right: 9px;
+    width: 23px;
+    height: 23px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(0,242,254,.35);
+    border-radius: 50%;
+    background: rgba(0,242,254,.09);
+    color: #dffaff;
+    font-size: 17px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background .2s ease, transform .2s ease;
+  }
+  #emo-bubble-close:hover { background: rgba(0,242,254,.22); transform: scale(1.08); }
 
   /* Input Form di Dalam Balon Chat (Default Disembunyikan) */
   #emo-chat-input-wrapper {
@@ -200,9 +218,8 @@
 <div id="ai-emo-widget">
   <!-- Balon Percakapan Melayang Interaktif -->
   <div id="ai-emo-chat-bubble" class="show">
+    <button type="button" id="emo-bubble-close" aria-label="Tutup balon percakapan" title="Tutup">×</button>
     <span id="ai-emo-speech-text">Hai, aku EMO ✨</span>
-    
-    <div id="emo-audio-controls" style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px;color:#b9dce9;"><button type="button" id="emo-mute-toggle" aria-label="Matikan atau nyalakan audio" style="border:1px solid rgba(0,242,254,.35);border-radius:8px;background:rgba(0,242,254,.08);color:#dffaff;padding:4px 7px;cursor:pointer;">♫ Audio ON</button><input id="emo-volume" aria-label="Volume audio" type="range" min="0" max="100" value="55" style="width:82px;accent-color:#00f2fe;"><span id="emo-volume-label">55%</span></div>
     <div id="emo-chat-input-wrapper">
       <input type="text" id="emo-chat-input" placeholder="Tulis balasan..." autocomplete="off">
       <button class="emo-send-btn" id="emo-chat-send">Kirim</button>
@@ -301,10 +318,10 @@
   const launcher=$('ai-emo-launcher'), bubble=$('ai-emo-chat-bubble'), speechText=$('ai-emo-speech-text');
   const chatInput=$('emo-chat-input'), sendBtn=$('emo-chat-send'), inputWrapper=$('emo-chat-input-wrapper');
   const optionsWrapper=$('emo-chat-options'), optYes=$('emo-opt-yes'), optNo=$('emo-opt-no');
-  const muteBtn=$('emo-mute-toggle'), volume=$('emo-volume'), volumeLabel=$('emo-volume-label');
+  const closeBubbleBtn=$('emo-bubble-close');
   let isInteracting=false, step=0, lyricList=[], lyricIndex=-1, lyricTimer=null, bubbleTimer=null, blinkTimer=null;
-  let audioPlayer=new Audio(); audioPlayer.preload='none'; audioPlayer.volume=.55;
-  let muted=false, busySending=false;
+  let audioPlayer=new Audio(); audioPlayer.preload='auto'; audioPlayer.volume=0;
+  let audioFadeTimer=null, audioTargetVolume=.55, busySending=false, bubbleManuallyClosed=false;
   let guestData={nama:localStorage.getItem('emo_guest_nama')||'', alamat:'', kontak:'', subjek:'Buku Tamu Web', pesan:''};
   const fallbackLyrics=[
     {lyric:'Boleh kah sekecakep ini~ 🎵🎶',audio:'',mood:'whistle',duration:4500},
@@ -315,7 +332,7 @@
   ];
   function setMood(mood){ const allowed=['idle','suspicious','chatty','look-left','look-right','whistle','grumble','smile','hello','jump','run','laugh','excited','curious','love','sleepy','dance']; launcher.dataset.mood=allowed.includes(mood)?mood:'smile'; }
   function safeText(value){ speechText.textContent=String(value??''); }
-  function showBubble(){bubble.classList.add('show');}
+  function showBubble(){bubble.classList.add('show');bubbleManuallyClosed=false;}
   function stopBubbleTimer(){if(bubbleTimer){clearTimeout(bubbleTimer);bubbleTimer=null;}}
   function scheduleNextLyric(ms){if(lyricTimer)clearTimeout(lyricTimer); lyricTimer=setTimeout(rotateLyric,Math.max(5000,ms));}
   function getTimeString(){const n=new Date();return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;}
@@ -327,9 +344,30 @@
       if(!lyricList.length)lyricList=fallbackLyrics;
     }catch(e){lyricList=fallbackLyrics;}
   }
-  function stopAudio(){try{audioPlayer.pause();audioPlayer.currentTime=0;}catch(e){}}
-  function playAudio(url){if(!url||muted)return;try{audioPlayer.pause();audioPlayer.src=url;audioPlayer.volume=Number(volume.value)/100;const p=audioPlayer.play();if(p&&p.catch)p.catch(()=>{/* autoplay may require a user gesture */});}catch(e){}}
-  function playItem(item){if(isInteracting||!item)return;stopBubbleTimer();showBubble();safeText(item.lyric);setMood(item.mood||'smile');playAudio(item.audio);const duration=Math.max(1500,Number(item.duration)||4500);bubbleTimer=setTimeout(()=>{if(!isInteracting){setMood('idle');scheduleNextLyric(1400);}},duration);}
+  function clearAudioFade(){if(audioFadeTimer){clearInterval(audioFadeTimer);audioFadeTimer=null;}}
+  function fadeAudioTo(target,duration,stopAfter=false){
+    clearAudioFade();
+    const start=Number(audioPlayer.volume)||0, end=Math.max(0,Math.min(1,target));
+    const steps=Math.max(1,Math.round(duration/40)); let step=0;
+    if(duration<=0){audioPlayer.volume=end;if(stopAfter){audioPlayer.pause();audioPlayer.currentTime=0;}return;}
+    audioFadeTimer=setInterval(()=>{
+      step++; const t=Math.min(1,step/steps);
+      audioPlayer.volume=Math.max(0,Math.min(1,start+(end-start)*t));
+      if(t>=1){clearAudioFade();if(stopAfter){audioPlayer.pause();try{audioPlayer.currentTime=0;}catch(e){}}}
+    },40);
+  }
+  function stopAudio(fade=true){if(fade){fadeAudioTo(0,500,true);}else{clearAudioFade();try{audioPlayer.pause();audioPlayer.currentTime=0;audioPlayer.volume=0;}catch(e){}}}
+  function playAudio(url){
+    if(!url){stopAudio(true);return;}
+    try{
+      clearAudioFade();audioPlayer.pause();audioPlayer.src=url;audioPlayer.preload='auto';audioPlayer.volume=0;
+      audioPlayer.load();
+      const p=audioPlayer.play();
+      if(p&&p.then)p.then(()=>fadeAudioTo(audioTargetVolume,650)).catch(()=>{/* Browser may block autoplay until the visitor interacts with the page. */});
+      else fadeAudioTo(audioTargetVolume,650);
+    }catch(e){}
+  }
+  function playItem(item){if(isInteracting||!item)return;stopBubbleTimer();showBubble();safeText(item.lyric);setMood(item.mood||'smile');playAudio(item.audio);const duration=Math.max(1500,Number(item.duration)||4500);bubbleTimer=setTimeout(()=>{if(!isInteracting){fadeAudioTo(0,700,true);setMood('idle');scheduleNextLyric(1400);}},duration);}
   function rotateLyric(){if(isInteracting||document.hidden){scheduleNextLyric(5000);return;}if(!lyricList.length)lyricList=fallbackLyrics;let next=lyricList.length===1?0:Math.floor(Math.random()*lyricList.length);if(next===lyricIndex&&lyricList.length>1)next=(next+1)%lyricList.length;lyricIndex=next;const item=lyricList[next];playItem(item);scheduleNextLyric(Math.max(9000,Number(item.duration)||4500)+9000);}
   function blinkLoop(){clearTimeout(blinkTimer);blinkTimer=setTimeout(()=>{if(!isInteracting){launcher.classList.add('blinking');setTimeout(()=>launcher.classList.remove('blinking'),130); }blinkLoop();},2200+Math.random()*3800);}
   document.addEventListener('mousemove',e=>{if(isInteracting)return;const r=launcher.getBoundingClientRect(),mid=r.left+r.width/2;setMood(e.clientX<mid-20?'look-left':e.clientX>mid+20?'look-right':'idle');});
@@ -357,11 +395,13 @@ Pesan: ${guestData.pesan}`;summary.style.whiteSpace='pre-line';speechText.append
     finally{busySending=false;}
   });
   optNo.addEventListener('click',()=>{guestData.alamat='';guestData.kontak='';guestData.pesan='';step=1;askNextStep();});
-  launcher.addEventListener('click',()=>{showBubble();stopBubbleTimer();if(!isInteracting){isInteracting=true;stopAudio();step=1;askNextStep();}else if(step>=1&&step<=4){chatInput.focus();}});
-  muteBtn.addEventListener('click',()=>{muted=!muted;muteBtn.textContent=muted?'♫ Audio OFF':'♫ Audio ON';if(muted)stopAudio();else if(!isInteracting&&lyricList[lyricIndex])playAudio(lyricList[lyricIndex].audio);});
-  volume.addEventListener('input',()=>{audioPlayer.volume=Number(volume.value)/100;volumeLabel.textContent=volume.value+'%';});
+  launcher.addEventListener('click',()=>{showBubble();stopBubbleTimer();if(!isInteracting){isInteracting=true;stopAudio(false);step=1;askNextStep();}else if(step>=1&&step<=4){chatInput.focus();}});
+  closeBubbleBtn.addEventListener('click',()=>{
+    bubble.classList.remove('show');bubbleManuallyClosed=true;stopBubbleTimer();fadeAudioTo(0,450,true);
+    if(!isInteracting)setMood('idle');
+  });
   audioPlayer.addEventListener('ended',()=>{});audioPlayer.addEventListener('error',()=>{});
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)audioPlayer.pause();});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){clearAudioFade();audioPlayer.pause();}else if(!isInteracting&&lyricList[lyricIndex]&&lyricList[lyricIndex].audio){playAudio(lyricList[lyricIndex].audio);}});
   fetchLyrics().finally(()=>{setTimeout(startIntro,800);});blinkLoop();
 })();
 </script>
