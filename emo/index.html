@@ -1,0 +1,2045 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMO — Demo Widget Buku Tamu, Chat, Cuaca, Jadwal & Quiz</title>
+<style>
+  /* EMO — Scope Widget */
+  #ai-emo-widget {
+    --emo-cyan: #00f2fe;
+    --emo-blue: #4facfe;
+    --emo-dark: #0d1322;
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 99999;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #f0f6ff;
+  }
+  #ai-emo-widget * { box-sizing: border-box; }
+
+  /* Balon Chat Interaktif Melayang */
+  #ai-emo-chat-bubble {
+    position: absolute;
+    bottom: 170px;
+    right: 10px;
+    background: linear-gradient(135deg, rgba(18, 26, 43, 0.96), rgba(8, 12, 22, 0.98));
+    border: 1px solid rgba(0, 242, 254, 0.4);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 242, 254, 0.25);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 12px 16px;
+    width: 270px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #e2f1ff;
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 10;
+    pointer-events: auto;
+  }
+  #ai-emo-chat-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    right: 35px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid rgba(8, 12, 22, 0.98);
+  }
+  #ai-emo-chat-bubble.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .emo-bubble-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .emo-bubble-header strong {
+    color: var(--emo-cyan);
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .emo-close-btn {
+    background: transparent;
+    border: none;
+    color: #8da2fb;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+  }
+  .emo-close-btn:hover { color: #fff; }
+
+  #ai-emo-speech-text {
+    display: block;
+    word-break: break-word;
+  }
+
+  /* Input Form di Dalam Balon Chat (Default Disembunyikan) */
+  #emo-chat-input-wrapper {
+    display: none;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  #emo-chat-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(0, 242, 254, 0.3);
+    border-radius: 10px;
+    padding: 6px 10px;
+    color: #fff;
+    font-size: 12px;
+    outline: none;
+  }
+  #emo-chat-input:focus {
+    border-color: var(--emo-cyan);
+    box-shadow: 0 0 8px rgba(0, 242, 254, 0.3);
+  }
+  .emo-send-btn {
+    background: linear-gradient(135deg, var(--emo-cyan), var(--emo-blue));
+    border: none;
+    border-radius: 10px;
+    color: #040814;
+    font-weight: bold;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .emo-send-btn:active { transform: scale(0.95); }
+
+  /* Tombol Pilihan Konfirmasi (Ya / Tidak) */
+  .emo-options-wrapper {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .emo-opt-btn {
+    flex: 1;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.1s;
+  }
+  .emo-opt-yes { background: var(--emo-cyan); color: #040814; }
+  .emo-opt-no { background: rgba(255, 255, 255, 0.15); color: #e2f1ff; border: 1px solid rgba(255, 255, 255, 0.2); }
+  .emo-opt-btn:active { transform: scale(0.95); }
+
+  /* Tombol Aksi Cepat Saat Idle (Chat / Solat / Lagu / Cuaca / Jadwal / Quiz / About) */
+  #emo-quick-actions {
+    display: none;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .emo-qa-btn {
+    flex: 1 1 52px;
+    padding: 6px 4px;
+    border-radius: 10px;
+    background: rgba(0, 242, 254, 0.1);
+    border: 1px solid rgba(0, 242, 254, 0.35);
+    color: #bfefff;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.2s;
+  }
+  .emo-qa-btn:hover { background: rgba(0, 242, 254, 0.22); color: #fff; }
+  .emo-qa-btn:active { transform: scale(0.95); }
+
+  /* Chip Topik & Pertanyaan (Bot Chat dari Spreadsheet) */
+  #emo-chips {
+    display: none;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .emo-chip {
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(141, 162, 251, 0.15);
+    border: 1px solid rgba(141, 162, 251, 0.4);
+    color: #dfe6ff;
+    font-family: inherit;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .emo-chip:hover { background: rgba(0, 242, 254, 0.18); border-color: rgba(0, 242, 254, 0.5); color: #fff; }
+  .emo-chip-back { background: rgba(255, 255, 255, 0.1); }
+
+  /* Launcher karakter SVG transparan, tanpa gambar raster/background */
+  #ai-emo-launcher {
+    display:block; width:120px; height:160px; padding:0; border:0;
+    background:transparent; cursor:pointer; position:relative;
+    filter:drop-shadow(0 10px 12px rgba(0,0,0,.24));
+    -webkit-tap-highlight-color:transparent;
+    transform-origin:50% 85%;
+    transition:filter .25s ease;
+    will-change:transform;
+  }
+  #ai-emo-launcher:hover { filter:drop-shadow(0 13px 17px rgba(0,0,0,.3)); }
+  #ai-emo-launcher svg { display:block; width:100%; height:100%; overflow:visible; }
+  #ai-emo-launcher .eye { transition:transform .22s cubic-bezier(.2,.8,.2,1); transform-box:fill-box; transform-origin:center; }
+  #ai-emo-launcher .brow { transition:transform .24s cubic-bezier(.2,.8,.2,1); transform-box:fill-box; transform-origin:center; }
+  #ai-emo-launcher .eye-smile { display:none; }
+  #ai-emo-launcher #emo-ground-shadow { transform-box:fill-box; transform-origin:center; transition:transform .25s ease,opacity .25s ease; }
+  /* Pivot kaki di pinggul (agar lari/dangling/ayun kaki natural) */
+  #ai-emo-launcher #emo-leg-left-group,
+  #ai-emo-launcher #emo-leg-right-group { transform-box:view-box; transition:transform .22s cubic-bezier(.2,.8,.2,1); }
+  #ai-emo-launcher #emo-leg-left-group { transform-origin:41.5px 92px; }
+  #ai-emo-launcher #emo-leg-right-group { transform-origin:78.5px 92px; }
+  #ai-emo-launcher .m, #ai-emo-launcher .note, #ai-emo-launcher .zz, #ai-emo-launcher .cf, #ai-emo-launcher .du { transform-box:fill-box; transform-origin:center; }
+  #ai-emo-launcher .eq { transform-box:fill-box; transform-origin:50% 100%; }
+
+  /* Ekspresi wajah */
+  #ai-emo-launcher[data-mood="suspicious"] .brow.left { transform:rotate(-16deg) translateY(-2px); }
+  #ai-emo-launcher[data-mood="suspicious"] .brow.right { transform:rotate(12deg) translateY(2px); }
+  #ai-emo-launcher[data-mood="suspicious"] .eye.left { transform:scaleY(.72); }
+  #ai-emo-launcher[data-mood="suspicious"] .eye.right { transform:scaleY(.86); }
+  #ai-emo-launcher[data-mood="angry"] .brow.left,
+  #ai-emo-launcher[data-mood="grumble"] .brow.left { transform:translateY(3px) rotate(22deg); }
+  #ai-emo-launcher[data-mood="angry"] .brow.right,
+  #ai-emo-launcher[data-mood="grumble"] .brow.right { transform:translateY(3px) rotate(-22deg); }
+  #ai-emo-launcher[data-mood="angry"] .eye,
+  #ai-emo-launcher[data-mood="grumble"] .eye { transform:scaleY(.48); }
+  #ai-emo-launcher[data-mood="chatty"] .brow.left { transform:translateY(-3px) rotate(-8deg); }
+  #ai-emo-launcher[data-mood="chatty"] .brow.right { transform:translateY(-3px) rotate(8deg); }
+  #ai-emo-launcher[data-mood="chatty"] .eye { transform:scale(1.05); }
+  #ai-emo-launcher[data-mood="look-left"] .eye { transform:translateX(-5px); }
+  #ai-emo-launcher[data-mood="look-left"] .brow { transform:translateX(-3px); }
+  #ai-emo-launcher[data-mood="look-right"] .eye { transform:translateX(5px); }
+  #ai-emo-launcher[data-mood="look-right"] .brow { transform:translateX(3px); }
+  #ai-emo-launcher[data-mood="whistle"] .brow { transform:translateY(-3px); }
+  #ai-emo-launcher[data-mood="whistle"] .eye { transform:scale(.88); }
+  #ai-emo-launcher[data-mood="smile"] .brow { transform:translateY(-3px); }
+  #ai-emo-launcher[data-mood="smile"] .eye-rect { display:none; }
+  #ai-emo-launcher[data-mood="smile"] .eye-smile { display:block; }
+  #ai-emo-launcher[data-mood="surprised"] .brow { transform:translateY(-5px); }
+  #ai-emo-launcher[data-mood="surprised"] .eye { transform:scale(1.12); }
+
+  /* === Ekspresi BARU: luwes & variatif === */
+  /* Lirik kanan-kiri (mata melirik bolak-balik) */
+  #ai-emo-launcher[data-mood="glance"] .eye { animation:emo-eye-glance 2.3s ease-in-out 1 both; }
+  #ai-emo-launcher[data-mood="glance"] .brow { animation:emo-brow-glance 2.3s ease-in-out 1 both; }
+  #ai-emo-launcher[data-mood="glance"] { animation:emo-body-glance 2.3s ease-in-out 1 both; }
+  /* Mata ngantuk (setengah terpejam + Zzz) */
+  #ai-emo-launcher[data-mood="sleepy"] .eye { transform:scaleY(.38) translateY(3.5px); }
+  #ai-emo-launcher[data-mood="sleepy"] .brow.left { transform:translateY(3px) rotate(-7deg); }
+  #ai-emo-launcher[data-mood="sleepy"] .brow.right { transform:translateY(3px) rotate(7deg); }
+  #ai-emo-launcher[data-mood="sleepy"] { animation:emo-sway-sleep 3.6s ease-in-out infinite; }
+  /* Mata belo (membulat besar + mulut cucu) */
+  #ai-emo-launcher[data-mood="belo"] .eye { transform:scale(1.3); }
+  #ai-emo-launcher[data-mood="belo"] .brow { transform:translateY(-6px); }
+  #ai-emo-launcher[data-mood="belo"] { animation:emo-lean-back 2.6s ease-in-out infinite; }
+  /* Melotot (alis menceng tajam + badan gemetar) */
+  #ai-emo-launcher[data-mood="melotot"] .eye { transform:scale(1.16,.92); }
+  #ai-emo-launcher[data-mood="melotot"] .brow.left { transform:translateY(5px) rotate(28deg); }
+  #ai-emo-launcher[data-mood="melotot"] .brow.right { transform:translateY(5px) rotate(-28deg); }
+  #ai-emo-launcher[data-mood="melotot"] { animation:emo-tremble .14s linear infinite; }
+  /* Tubuh melayang (kaki bergantian mengayun, bayangan mengecil) */
+  #ai-emo-launcher[data-mood="float"] { animation:emo-float-body 3.4s ease-in-out infinite; }
+  #ai-emo-launcher[data-mood="float"] #emo-leg-left-group { animation:emo-dangle-l 3.4s ease-in-out infinite; }
+  #ai-emo-launcher[data-mood="float"] #emo-leg-right-group { animation:emo-dangle-r 3.4s ease-in-out infinite; }
+  #ai-emo-launcher[data-mood="float"] #emo-ground-shadow { animation:emo-shadow-float 3.4s ease-in-out infinite; }
+  /* Gembira (mata senyum lebar + lompat + konfeti) */
+  #ai-emo-launcher[data-mood="happy"] .eye-rect { display:none; }
+  #ai-emo-launcher[data-mood="happy"] .eye-smile { display:block; }
+  #ai-emo-launcher[data-mood="happy"] .brow.left { transform:translateY(-4px) rotate(-6deg); }
+  #ai-emo-launcher[data-mood="happy"] .brow.right { transform:translateY(-4px) rotate(6deg); }
+  #ai-emo-launcher[data-mood="happy"] { animation:emo-party-jump .62s cubic-bezier(.3,.7,.3,1) 2; }
+  /* Curiga kini badannya ikut mundur pelan (lebih hidup) */
+  #ai-emo-launcher[data-mood="suspicious"] { animation:emo-lean-back 2.8s ease-in-out infinite; }
+
+  /* === Mode musik: equalizer di atas kepala + garis headset berdenyut === */
+  #ai-emo-launcher .eq { opacity:0; transition:opacity .3s ease; }
+  #ai-emo-launcher.emo-music .eq { opacity:1; }
+  #ai-emo-launcher.emo-music .eq-b1 { animation:emo-eq-bounce .58s ease-in-out infinite; }
+  #ai-emo-launcher.emo-music .eq-b2 { animation:emo-eq-bounce .46s ease-in-out infinite .08s; }
+  #ai-emo-launcher.emo-music .eq-b3 { animation:emo-eq-bounce .66s ease-in-out infinite .16s; }
+  #ai-emo-launcher.emo-music .eq-b4 { animation:emo-eq-bounce .52s ease-in-out infinite .04s; }
+  #ai-emo-launcher.emo-music .eq-b5 { animation:emo-eq-bounce .6s ease-in-out infinite .12s; }
+  #ai-emo-launcher.emo-music .hp-stripe,
+  #ai-emo-launcher.emo-music .hp-band-stripe { animation:emo-stripe-pulse .55s ease-in-out infinite; }
+
+  /* Mood menyanyi: EMO ikut bergroove sambil buka-tutup mulut saat lagu diputar */
+  #ai-emo-launcher[data-mood="sing"] { animation:emo-groove 1.05s ease-in-out infinite; }
+  #ai-emo-launcher[data-mood="sing"] .brow { transform:translateY(-3px); }
+  #ai-emo-launcher[data-mood="sing"] .eye { transform:scaleY(.82); }
+
+  /* Catatan musik melayang saat bersiul */
+  #ai-emo-launcher .note { opacity:0; font-size:10px; font-weight:bold; fill:var(--emo-cyan); }
+  #ai-emo-launcher[data-mood="whistle"] .note { animation:emo-note-float 1.9s ease-out infinite; }
+  #ai-emo-launcher[data-mood="whistle"] .note.n2 { animation-delay:.6s; }
+  #ai-emo-launcher[data-mood="whistle"] .note.n3 { animation-delay:1.2s; }
+  /* Huruf Zzz saat ngantuk */
+  #ai-emo-launcher .zz { opacity:0; font-size:11px; font-weight:bold; fill:#8da2fb; }
+  #ai-emo-launcher[data-mood="sleepy"] .zz { animation:emo-zzz-float 2.6s ease-out infinite; }
+  #ai-emo-launcher[data-mood="sleepy"] .zz.z2 { animation-delay:.85s; }
+  #ai-emo-launcher[data-mood="sleepy"] .zz.z3 { animation-delay:1.7s; }
+  /* Konfeti meledak saat gembira */
+  #ai-emo-launcher .cf { opacity:0; }
+  #ai-emo-launcher.emo-party .cf { animation:emo-confetti 1.05s ease-out 1 forwards; }
+  #ai-emo-launcher.emo-party .cf.c2 { animation-delay:.09s; }
+  #ai-emo-launcher.emo-party .cf.c3 { animation-delay:.16s; }
+  #ai-emo-launcher.emo-party .cf.c4 { animation-delay:.05s; }
+  #ai-emo-launcher.emo-party .cf.c5 { animation-delay:.12s; }
+  #ai-emo-launcher.emo-party .cf.c6 { animation-delay:.2s; }
+  #ai-emo-launcher.emo-party .cf.c7 { animation-delay:.08s; }
+  #ai-emo-launcher.emo-party .cf.c8 { animation-delay:.14s; }
+  /* Debu berhembus saat kaki berlari */
+  #ai-emo-launcher .du { opacity:0; }
+  #ai-emo-launcher.emo-run .du { animation:emo-dust .5s ease-out infinite; }
+  #ai-emo-launcher.emo-run .du.d2 { animation-delay:.17s; }
+  #ai-emo-launcher.emo-run .du.d3 { animation-delay:.33s; }
+
+  /* === Mulut ekspresif (default: garis halus) === */
+  #ai-emo-launcher .m { display:none; }
+  #ai-emo-launcher .m-line { display:inline; }
+  #ai-emo-launcher[data-mood="chatty"] .m-line { animation:emo-talk-mouth .45s ease-in-out infinite; }
+  #ai-emo-launcher[data-mood="smile"] .m, #ai-emo-launcher[data-mood="laugh"] .m,
+  #ai-emo-launcher[data-mood="excited"] .m, #ai-emo-launcher[data-mood="hello"] .m,
+  #ai-emo-launcher[data-mood="happy"] .m, #ai-emo-launcher[data-mood="whistle"] .m,
+  #ai-emo-launcher[data-mood="belo"] .m, #ai-emo-launcher[data-mood="surprised"] .m,
+  #ai-emo-launcher[data-mood="sleepy"] .m, #ai-emo-launcher[data-mood="suspicious"] .m,
+  #ai-emo-launcher[data-mood="angry"] .m, #ai-emo-launcher[data-mood="grumble"] .m,
+  #ai-emo-launcher[data-mood="melotot"] .m { display:none; }
+  #ai-emo-launcher[data-mood="smile"] .m-smile, #ai-emo-launcher[data-mood="laugh"] .m-smile,
+  #ai-emo-launcher[data-mood="excited"] .m-smile, #ai-emo-launcher[data-mood="hello"] .m-smile { display:inline; }
+  #ai-emo-launcher[data-mood="happy"] .m-open { display:inline; }
+  #ai-emo-launcher[data-mood="whistle"] .m-o, #ai-emo-launcher[data-mood="belo"] .m-o,
+  #ai-emo-launcher[data-mood="surprised"] .m-o { display:inline; }
+  #ai-emo-launcher[data-mood="belo"] .m-o { transform:scale(.8); }
+  #ai-emo-launcher[data-mood="whistle"] .m-o { animation:emo-o-pulse .85s ease-in-out infinite; }
+  #ai-emo-launcher[data-mood="sleepy"] .m-flat, #ai-emo-launcher[data-mood="suspicious"] .m-flat { display:inline; }
+  #ai-emo-launcher[data-mood="angry"] .m-grit, #ai-emo-launcher[data-mood="grumble"] .m-grit,
+  #ai-emo-launcher[data-mood="melotot"] .m-grit { display:inline; }
+  #ai-emo-launcher[data-mood="sing"] .m { display:none; }
+  #ai-emo-launcher[data-mood="sing"] .m-o { display:inline; }
+
+  /* Idle terasa hidup: badan mengambang halus, kepala mengangguk, kaki bergerak kecil */
+  #ai-emo-launcher[data-mood="idle"] { animation:emo-idle-body 3.8s cubic-bezier(.45,0,.55,1) infinite; }
+  #ai-emo-launcher[data-mood="idle"] #emo-ground-shadow { animation:emo-shadow-breathe 3.8s ease-in-out infinite; }
+  #ai-emo-launcher[data-mood="idle"] #emo-leg-left-group { animation:emo-foot-left 4.4s ease-in-out infinite; }
+  #ai-emo-launcher[data-mood="idle"] #emo-leg-right-group { animation:emo-foot-right 4.4s ease-in-out infinite; }
+  #ai-emo-launcher[data-mood="hello"] { animation:emo-greet .8s ease-in-out 2; }
+  #ai-emo-launcher[data-mood="laugh"], #ai-emo-launcher[data-mood="excited"] { animation:emo-happy-hop .55s cubic-bezier(.25,.7,.25,1) 3; }
+  #ai-emo-launcher[data-mood="chatty"] { animation:emo-talk-bob 1.1s ease-in-out infinite; }
+  #ai-emo-launcher[data-mood="whistle"] { animation:emo-whistle-bob 1.6s ease-in-out infinite; }
+  #ai-emo-launcher[data-mood="grumble"] { animation:emo-grumble .28s ease-in-out infinite; }
+  #ai-emo-launcher[data-mood="look-left"] { animation:emo-look .6s ease-out 1; }
+  #ai-emo-launcher[data-mood="look-right"] { animation:emo-look .6s ease-out 1; }
+  #ai-emo-launcher.emo-jump { animation:emo-jump .9s cubic-bezier(.2,.75,.25,1) 1 !important; }
+  #ai-emo-launcher.emo-dance { animation:emo-dance 1.45s ease-in-out 1 !important; }
+  #ai-emo-launcher.emo-wiggle { animation:emo-wiggle .75s ease-in-out 1 !important; }
+  /* Kaki berlari (lari di tempat: kaki ayun cepat, badan miring dinamis, debu berhembus) */
+  #ai-emo-launcher.emo-run { animation:emo-run-body .46s ease-in-out infinite !important; }
+  #ai-emo-launcher.emo-run #emo-leg-left-group { animation:emo-run-leg-a .36s linear infinite; }
+  #ai-emo-launcher.emo-run #emo-leg-right-group { animation:emo-run-leg-b .36s linear infinite; }
+  /* Putaran 720deg — dipakai easter egg #spin & gerakan ambient */
+  #ai-emo-launcher.emo-spin { animation:emo-spin 1.15s cubic-bezier(.3,.6,.3,1) 1 !important; }
+
+  @keyframes emo-idle-body {
+    0%,100% { transform:translate3d(0,0,0) rotate(0) scale(1); }
+    24% { transform:translate3d(0,-2px,0) rotate(-.6deg) scale(1.006); }
+    52% { transform:translate3d(0,-5px,0) rotate(.5deg) scale(1.01); }
+    78% { transform:translate3d(0,-2px,0) rotate(-.25deg) scale(1.004); }
+  }
+  @keyframes emo-shadow-breathe {
+    0%,100% { transform:scale(1); opacity:.68; }
+    50% { transform:scale(.83); opacity:.4; }
+  }
+  @keyframes emo-foot-left { 0%,100%{transform:rotate(0)} 30%{transform:rotate(-2deg) translateY(-1px)} 55%{transform:rotate(0)} }
+  @keyframes emo-foot-right { 0%,35%,100%{transform:rotate(0)} 58%{transform:rotate(2deg) translateY(-1px)} 75%{transform:rotate(0)} }
+  @keyframes emo-greet { 0%,100%{transform:rotate(0) translateY(0)} 22%{transform:rotate(5deg) translateY(-3px)} 48%{transform:rotate(-5deg) translateY(-1px)} 72%{transform:rotate(3deg)} }
+  @keyframes emo-happy-hop { 0%,100%{transform:translateY(0) scale(1,1)} 24%{transform:translateY(-10px) scale(.98,1.04)} 42%{transform:translateY(-12px) scale(1.02,.98)} 62%{transform:translateY(1px) scale(1.04,.94)} 78%{transform:translateY(-3px) scale(.99,1.02)} }
+  @keyframes emo-talk-bob { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-2px) rotate(-1deg)} 55%{transform:translateY(-4px) rotate(1deg)} 80%{transform:translateY(-1px)} }
+  @keyframes emo-whistle-bob { 0%,100%{transform:translateY(0) rotate(0)} 35%{transform:translateY(-4px) rotate(1.2deg)} 70%{transform:translateY(-2px) rotate(-1deg)} }
+  @keyframes emo-grumble { 0%,100%{transform:translateX(0) rotate(0)} 25%{transform:translateX(-1.6px) rotate(-1deg)} 75%{transform:translateX(1.6px) rotate(1deg)} }
+  @keyframes emo-look { 0%{transform:translateX(0)} 35%{transform:translateX(-2px) rotate(-1deg)} 70%{transform:translateX(2px) rotate(1deg)} 100%{transform:translateX(0)} }
+  @keyframes emo-jump { 0%{transform:translateY(0) scale(1,1) rotate(0)} 18%{transform:translateY(2px) scale(1.05,.93)} 42%{transform:translateY(-24px) scale(.97,1.04) rotate(-2deg)} 57%{transform:translateY(-27px) scale(1,1) rotate(2deg)} 76%{transform:translateY(2px) scale(1.06,.91)} 88%{transform:translateY(-3px) scale(.99,1.02)} 100%{transform:translateY(0) scale(1) rotate(0)} }
+  @keyframes emo-dance { 0%,100%{transform:translateY(0) rotate(0)} 15%{transform:translateY(-5px) rotate(-5deg)} 30%{transform:translateY(0) rotate(5deg)} 45%{transform:translateY(-7px) rotate(-4deg)} 60%{transform:translateY(0) rotate(4deg)} 78%{transform:translateY(-3px) rotate(-2deg)} }
+  @keyframes emo-wiggle { 0%,100%{transform:rotate(0)} 20%{transform:rotate(-4deg)} 40%{transform:rotate(4deg)} 60%{transform:rotate(-3deg)} 80%{transform:rotate(2deg)} }
+  @keyframes emo-eye-glance { 0%{transform:translateX(0)} 18%,34%{transform:translateX(-5.5px)} 54%,70%{transform:translateX(5.5px)} 88%,100%{transform:translateX(0)} }
+  @keyframes emo-brow-glance { 0%{transform:translateX(0)} 18%,34%{transform:translateX(-3px)} 54%,70%{transform:translateX(3px)} 88%,100%{transform:translateX(0)} }
+  @keyframes emo-body-glance { 0%{transform:rotate(0)} 25%{transform:rotate(-1.6deg) translateX(-1px)} 60%{transform:rotate(1.6deg) translateX(1px)} 100%{transform:rotate(0)} }
+  @keyframes emo-sway-sleep { 0%,100%{transform:translateY(0) rotate(-1.1deg)} 50%{transform:translateY(1.5px) rotate(1.1deg)} }
+  @keyframes emo-lean-back { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(1px) rotate(-1.2deg)} }
+  @keyframes emo-tremble { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-1px,-.5px)} 50%{transform:translate(1px,.5px)} 75%{transform:translate(-1px,.5px)} }
+  @keyframes emo-float-body { 0%,100%{transform:translateY(0)} 32%{transform:translateY(-13px)} 56%{transform:translateY(-7px)} 80%{transform:translateY(-12px)} }
+  @keyframes emo-dangle-l { 0%,100%{transform:rotate(4deg)} 50%{transform:rotate(-7deg)} }
+  @keyframes emo-dangle-r { 0%,100%{transform:rotate(-4deg)} 50%{transform:rotate(7deg)} }
+  @keyframes emo-shadow-float { 0%,100%{transform:scale(1);opacity:.68} 45%{transform:scale(.55);opacity:.28} }
+  @keyframes emo-note-float { 0%{opacity:0;transform:translate(0,6px) rotate(-10deg) scale(.6)} 30%{opacity:1} 100%{opacity:0;transform:translate(8px,-18px) rotate(12deg) scale(1.15)} }
+  @keyframes emo-zzz-float { 0%{opacity:0;transform:translate(0,5px) scale(.7)} 30%{opacity:.95} 100%{opacity:0;transform:translate(7px,-11px) scale(1.2)} }
+  @keyframes emo-o-pulse { 0%,100%{transform:scale(.78)} 50%{transform:scale(1.12)} }
+  @keyframes emo-talk-mouth { 0%,100%{transform:scaleY(1)} 50%{transform:scaleY(2.1)} }
+  @keyframes emo-confetti { 0%{opacity:0;transform:translate(0,0) scale(.4) rotate(0)} 14%{opacity:1} 100%{opacity:0;transform:translate(var(--dx,0),var(--dy,-34px)) scale(1) rotate(220deg)} }
+  @keyframes emo-dust { 0%{opacity:0;transform:translate(0,0) scale(.5)} 30%{opacity:.75} 100%{opacity:0;transform:translate(-9px,-6px) scale(1.5)} }
+  @keyframes emo-run-body { 0%,100%{transform:translateY(0) rotate(3deg)} 30%{transform:translateY(-3.5px) rotate(4.5deg)} 65%{transform:translateY(0) rotate(3deg)} }
+  @keyframes emo-run-leg-a { 0%{transform:rotate(27deg)} 50%{transform:rotate(-25deg)} 100%{transform:rotate(27deg)} }
+  @keyframes emo-run-leg-b { 0%{transform:rotate(-25deg)} 50%{transform:rotate(27deg)} 100%{transform:rotate(-25deg)} }
+  @keyframes emo-party-jump { 0%,100%{transform:translateY(0) scale(1,1) rotate(0)} 18%{transform:translateY(3px) scale(1.08,.88)} 48%{transform:translateY(-22px) scale(.96,1.07) rotate(-3deg)} 72%{transform:translateY(-15px) scale(1,1) rotate(3deg)} 90%{transform:translateY(2px) scale(1.06,.92)} }
+  @keyframes emo-eq-bounce { 0%,100%{transform:scaleY(.3)} 50%{transform:scaleY(1)} }
+  @keyframes emo-stripe-pulse { 0%,100%{opacity:.45} 50%{opacity:1} }
+  @keyframes emo-groove { 0%,100%{transform:translateY(0) rotate(-2.2deg)} 50%{transform:translateY(-3.5px) rotate(2.2deg)} }
+  @keyframes emo-spin { 0%{transform:rotate(0) translateY(0)} 50%{transform:rotate(380deg) translateY(-9px)} 100%{transform:rotate(720deg) translateY(0)} }
+  @media (prefers-reduced-motion:reduce) {
+    #ai-emo-launcher, #ai-emo-launcher *, #ai-emo-launcher #emo-ground-shadow { animation:none !important; transition:none !important; }
+  }
+
+  /* ====== HALAMAN DEMO (hapus blok .emo-demo jika hanya ingin menempel widget ke situs sendiri) ====== */
+  body {
+    margin: 0; min-height: 100vh;
+    background: radial-gradient(1200px 600px at 70% -10%, #0f1b33, #070a12 60%);
+    color: #e2f1ff;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .emo-demo { max-width: 760px; padding: 64px 24px 340px; }
+  .emo-demo h1 { font-size: 30px; line-height: 1.25; margin: 0 0 12px; color: #fff; }
+  .emo-demo h1 span { color: #00f2fe; }
+  .emo-demo > p { color: #9fb4d8; line-height: 1.7; margin: 0 0 24px; }
+  .emo-demo .card {
+    background: rgba(18, 26, 43, 0.72);
+    border: 1px solid rgba(0, 242, 254, 0.25);
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  .emo-demo .card h2 { margin: 0 0 10px; font-size: 15px; color: #00f2fe; letter-spacing: .5px; }
+  .emo-demo .card ol { margin: 0; padding-left: 20px; color: #9fb4d8; font-size: 13.5px; line-height: 1.9; }
+  .emo-demo .card b { color: #e2f1ff; }
+
+  @media(max-width: 480px) {
+    #ai-emo-widget { right: 12px; bottom: 12px; }
+    #ai-emo-launcher { width: 105px; height: 140px; }
+    #ai-emo-chat-bubble { bottom: 152px; width: calc(100vw - 40px); max-width: 280px; }
+  }
+</style>
+</head>
+<body>
+
+<section class="emo-demo">
+  <h1>Robot <span>EMO</span> — Buku Tamu, Chat, Cuaca, Jadwal &amp; Quiz</h1>
+  <p>Widget melayang di pojok <b>kanan bawah</b> halaman ini. Klik badan robotnya untuk mulai, atau coba tombol <b>💬 Chat</b>, <b>🕌 Solat</b>, <b>🎵 Lagu</b>, <b>⛅ Cuaca</b>, <b>📅 Jadwal</b>, <b>🧠 Quiz</b>, dan <b>ℹ️ About</b> di balon percakapannya. Pst... ketik <b>#joke</b>, <b>#quiz</b>, atau <b>#dance</b> di kolom chat 😉</p>
+  <div class="card">
+    <h2>FITUR</h2>
+    <ol>
+      <li><b>Buku tamu + pilihan tujuan</b> — Buku Tamu / Kritik &amp; Saran / Kirim Atesi / Curhat / Lainnya — tersimpan otomatis ke Google Spreadsheet (Apps Script).</li>
+      <li><b>Lagu &amp; sapaan otomatis</b> — dari sheet <b>Lirik</b>; saat audio diputar EMO <b>menyanyi + equalizer</b> di atas kepalanya.</li>
+      <li><b>Bot chat</b> — dari sheet <b>Chat</b> (pertanyaan, opsi jawaban pertama, jawaban ke 2, jawaban ke 3, kategori).</li>
+      <li><b>Tiket antrean #ticket</b> — by name &amp; kelas (Siswa/Guru/Umum), nomor antrean otomatis ke sheet <b>Ticket</b> (aktif dari sheet <b>Konfig</b>).</li>
+      <li><b>Cuaca otomatis ⛅</b> — suhu + prakiraan 3 hari (Open-Meteo, gratis tanpa API key) + saran bawa payung; sapaan pembuka menyertakan cuaca kota.</li>
+      <li><b>Jadwal pelajaran 📅</b> — dari sheet <b>Jadwal</b>; tampil otomatis per hari ini, bisa lihat hari lain &amp; filter kelas.</li>
+      <li><b>Quiz interaktif 🧠</b> — dari sheet <b>Quiz</b>; soal diacak, poin, skor akhir, predikat &amp; rekor pribadi.</li>
+      <li><b>Pengingat waktu solat</b> — jadwal otomatis via API Aladhan (metode Kemenag RI), bisa ganti kota.</li>
+      <li><b>Karakter hidup</b> — efek ketik, sapaan pagi/siang/sore/malam, mode begadang, efek suara blip (🔊 on/off), dan easter egg <b>#dance #party #joke #love #spin</b>.</li>
+    </ol>
+  </div>
+</section>
+
+<div id="ai-emo-widget">
+  <!-- Balon Percakapan Melayang Interaktif -->
+  <div id="ai-emo-chat-bubble" class="show">
+    <div class="emo-bubble-header">
+      <strong>EMO</strong>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="emo-close-btn" id="emo-sound-toggle" title="Efek suara on/off">🔊</button>
+        <button class="emo-close-btn" id="emo-bubble-close" title="Tutup">✕</button>
+      </div>
+    </div>
+    <span id="ai-emo-speech-text">Hai, aku EMO ✨</span>
+
+    <div id="emo-chat-input-wrapper">
+      <input type="text" id="emo-chat-input" placeholder="Tulis balasan..." autocomplete="off">
+      <button class="emo-send-btn" id="emo-chat-send">Kirim</button>
+    </div>
+
+    <div id="emo-chat-options" class="emo-options-wrapper" style="display: none;">
+      <button class="emo-opt-btn emo-opt-yes" id="emo-opt-yes">Ya, Kirim!</button>
+      <button class="emo-opt-btn emo-opt-no" id="emo-opt-no">🔄 Ulangi</button>
+    </div>
+
+    <!-- Aksi Cepat: Chat Bot / Solat / Lagu / Cuaca / Jadwal / Quiz -->
+    <div id="emo-quick-actions">
+      <button class="emo-qa-btn" id="emo-qa-chat" type="button">💬 Chat</button>
+      <button class="emo-qa-btn" id="emo-qa-solat" type="button">🕌 Solat</button>
+      <button class="emo-qa-btn" id="emo-qa-song" type="button">🎵 Lagu</button>
+      <button class="emo-qa-btn" id="emo-qa-cuaca" type="button">⛅ Cuaca</button>
+      <button class="emo-qa-btn" id="emo-qa-jadwal" type="button">📅 Jadwal</button>
+      <button class="emo-qa-btn" id="emo-qa-quiz" type="button">🧠 Quiz</button>
+      <button class="emo-qa-btn" id="emo-qa-about" type="button">ℹ️ About</button>
+    </div>
+
+    <!-- Chip Topik & Pertanyaan Bot Chat -->
+    <div id="emo-chips"></div>
+  </div>
+
+  <!-- Launcher Karakter Robot EMO -->
+  <button id="ai-emo-launcher" type="button" data-mood="idle" aria-label="Karakter EMO">
+    <svg viewBox="0 0 120 160" role="img">
+      <defs>
+        <!-- Bayangan Kontak Langsung Kaki Menapak Bumi -->
+        <radialGradient id="emo-foot-shadow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#000000" stop-opacity="0.9"/>
+          <stop offset="50%" stop-color="#000000" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+        </radialGradient>
+
+        <!-- Bayangan Area Lantai Utama -->
+        <radialGradient id="emo-shadow-grad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#000000" stop-opacity="0.75"/>
+          <stop offset="70%" stop-color="#000000" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+        </radialGradient>
+
+        <!-- Frame Kepala Putih Silver Metalik -->
+        <linearGradient id="emo-frame-grad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="45%" stop-color="#dde6f2"/>
+          <stop offset="100%" stop-color="#8ea0bd"/>
+        </linearGradient>
+
+        <!-- Bando Headphone Biru Navy -->
+        <linearGradient id="emo-hp-band-outer" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#3d5ea8"/>
+          <stop offset="55%" stop-color="#1c3266"/>
+          <stop offset="100%" stop-color="#0e1b3a"/>
+        </linearGradient>
+
+        <!-- Ear Cup Biru Navy Seamless -->
+        <linearGradient id="emo-earcup-seamless" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#4568b8"/>
+          <stop offset="35%" stop-color="#22396e"/>
+          <stop offset="85%" stop-color="#101f42"/>
+          <stop offset="100%" stop-color="#081228"/>
+        </linearGradient>
+
+        <!-- Gradasi Muka/Kepala Glossy -->
+        <linearGradient id="emo-head-grad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4a5266"/>
+          <stop offset="38%" stop-color="#262c3a"/>
+          <stop offset="100%" stop-color="#0c0f17"/>
+        </linearGradient>
+
+        <linearGradient id="emo-screen-bg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#141824"/>
+          <stop offset="100%" stop-color="#05070c"/>
+        </linearGradient>
+
+        <!-- Gradasi Kaki Gelap Metalik -->
+        <linearGradient id="emo-leg-bevel" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#3a4254"/>
+          <stop offset="25%" stop-color="#181d28"/>
+          <stop offset="75%" stop-color="#0b0e15"/>
+          <stop offset="100%" stop-color="#05070b"/>
+        </linearGradient>
+
+        <!-- Gradasi Sepatu Biru Navy -->
+        <linearGradient id="emo-foot-bevel" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#3b5aa6"/>
+          <stop offset="40%" stop-color="#1d3465"/>
+          <stop offset="100%" stop-color="#0b1734"/>
+        </linearGradient>
+
+        <!-- Gradasi Bar Equalizer Musik -->
+        <linearGradient id="emo-eq-grad" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stop-color="#4facfe"/>
+          <stop offset="100%" stop-color="#00f2fe"/>
+        </linearGradient>
+
+        <!-- Glow Effect Cyber Light Blue -->
+        <filter id="emo-glow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="2" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+
+      <!-- BASE EFEK LANTAI & BAYANGAN PENAPAK (GROUND FOOTING) -->
+      <g id="emo-ground-base">
+        <!-- Plat Permukaan Lantai Perspektif -->
+        <ellipse cx="60" cy="143" rx="46" ry="9" fill="#070a12" stroke="#1c2538" stroke-width="0.8" opacity="0.6"/>
+        <ellipse id="emo-ground-shadow" cx="60" cy="143" rx="42" ry="8" fill="url(#emo-shadow-grad)" transform-box="fill-box" transform-origin="center"/>
+        <!-- Bayangan Langsung di Bawah Telapak Kaki Kiri & Kanan -->
+        <ellipse cx="37" cy="141" rx="16" ry="4" fill="url(#emo-foot-shadow)"/>
+        <ellipse cx="83" cy="141" rx="16" ry="4" fill="url(#emo-foot-shadow)"/>
+      </g>
+
+      <!-- Kaki Tebal Gelap Menapak Kokoh, Sepatu Navy Ber-garis Cyan (sesuai desain baru) -->
+      <g id="emo-leg-left-group">
+        <rect x="34" y="90" width="15" height="36" rx="6.5" fill="url(#emo-leg-bevel)" stroke="#232c42" stroke-width="0.8"/>
+        <rect x="33" y="103" width="17" height="3.6" rx="1.8" fill="#00f2fe" opacity="0.85" filter="url(#emo-glow)"/>
+        <g id="emo-left-foot">
+          <rect x="22" y="120" width="30" height="19" rx="6" fill="url(#emo-foot-bevel)" stroke="#31497f" stroke-width="1"/>
+          <rect x="27" y="123.8" width="20" height="2.6" rx="1.3" fill="#00f2fe" filter="url(#emo-glow)"/>
+          <rect x="22" y="133.5" width="30" height="5.5" rx="2.75" fill="#070b14"/>
+        </g>
+      </g>
+
+      <g id="emo-leg-right-group">
+        <rect x="71" y="90" width="15" height="36" rx="6.5" fill="url(#emo-leg-bevel)" stroke="#232c42" stroke-width="0.8"/>
+        <rect x="70" y="103" width="17" height="3.6" rx="1.8" fill="#00f2fe" opacity="0.85" filter="url(#emo-glow)"/>
+        <g id="emo-right-foot">
+          <rect x="68" y="120" width="30" height="19" rx="6" fill="url(#emo-foot-bevel)" stroke="#31497f" stroke-width="1"/>
+          <rect x="73" y="123.8" width="20" height="2.6" rx="1.3" fill="#00f2fe" filter="url(#emo-glow)"/>
+          <rect x="68" y="133.5" width="30" height="5.5" rx="2.75" fill="#070b14"/>
+        </g>
+      </g>
+
+      <!-- Kepala Robot Glossy dengan Frame Silver (seperti referensi) -->
+      <rect x="17" y="25" width="86" height="72" rx="17" fill="url(#emo-frame-grad)" stroke="#7484a3" stroke-width="0.8"/>
+      <rect x="22" y="30" width="76" height="62" rx="13" fill="url(#emo-head-grad)"/>
+      <rect x="27" y="35" width="66" height="52" rx="9" fill="url(#emo-screen-bg)" stroke="#1f2839" stroke-width="0.8"/>
+      <ellipse cx="41" cy="41.5" rx="24" ry="8" transform="rotate(-16 41 41.5)" fill="#ffffff" opacity="0.12"/>
+      <ellipse cx="30" cy="36.5" rx="7" ry="2.8" transform="rotate(-22 30 36.5)" fill="#ffffff" opacity="0.2"/>
+
+      <!-- Alis & Mata Kotak Menyala EMO -->
+      <path class="brow left" d="M38 45.5 Q46 43 54 45.5" fill="none" stroke="#00f2fe" stroke-width="2" stroke-linecap="round"/>
+      <path class="brow right" d="M66 45.5 Q74 43 82 45.5" fill="none" stroke="#00f2fe" stroke-width="2" stroke-linecap="round"/>
+
+      <rect class="eye left eye-rect" x="37" y="50" width="18" height="18" rx="5" fill="#00f2fe" filter="url(#emo-glow)"/>
+      <rect class="eye right eye-rect" x="65" y="50" width="18" height="18" rx="5" fill="#00f2fe" filter="url(#emo-glow)"/>
+
+      <path class="eye left eye-smile" d="M37 60 Q46 49 55 60" fill="none" stroke="#00f2fe" stroke-width="3.5" stroke-linecap="round" filter="url(#emo-glow)"/>
+      <path class="eye right eye-smile" d="M65 60 Q74 49 83 60" fill="none" stroke="#00f2fe" stroke-width="3.5" stroke-linecap="round" filter="url(#emo-glow)"/>
+
+      <!-- Mulut Ekspresif EMO (berubah sesuai mood) -->
+      <g id="emo-mouth">
+        <path class="m m-line" d="M52 77 Q60 80 68 77" fill="none" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" opacity=".85"/>
+        <path class="m m-smile" d="M50 74 Q60 83 70 74" fill="none" stroke="#00f2fe" stroke-width="2.4" stroke-linecap="round" filter="url(#emo-glow)"/>
+        <path class="m m-open" d="M51 73 Q60 75 69 73 Q68 85 60 85 Q52 85 51 73 Z" fill="#00f2fe" opacity=".92" filter="url(#emo-glow)"/>
+        <circle class="m m-o" cx="60" cy="77" r="4" fill="none" stroke="#00f2fe" stroke-width="2" filter="url(#emo-glow)"/>
+        <path class="m m-flat" d="M53 78 L67 78" fill="none" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" opacity=".65"/>
+        <rect class="m m-grit" x="51" y="74.5" width="18" height="5" rx="2.4" fill="none" stroke="#00f2fe" stroke-width="1.8"/>
+      </g>
+
+      <!-- Headset Biru Navy Melingkari Kepala: bando + garis cyan menyala (digambar setelah kepala agar menempel) -->
+      <path d="M 14 46 C 14 22, 34 21, 60 21 C 86 21, 106 22, 106 46" fill="none" stroke="url(#emo-hp-band-outer)" stroke-width="7.5" stroke-linecap="round"/>
+      <path class="hp-band-stripe" d="M 14 46 C 14 22, 34 21, 60 21 C 86 21, 106 22, 106 46" fill="none" stroke="#00f2fe" stroke-width="1.8" stroke-linecap="round" opacity="0.9" filter="url(#emo-glow)"/>
+
+      <!-- Ear Cup Samping Navy dengan Garis LED Cyan Menyala -->
+      <g id="earcup-left">
+        <rect x="4" y="40" width="20" height="46" rx="10" fill="url(#emo-earcup-seamless)" stroke="none"/>
+        <rect class="hp-stripe" x="12.4" y="47" width="3.2" height="26" rx="1.6" fill="#00f2fe" opacity="0.9" filter="url(#emo-glow)"/>
+      </g>
+      <g id="earcup-right">
+        <rect x="96" y="40" width="20" height="46" rx="10" fill="url(#emo-earcup-seamless)" stroke="none"/>
+        <rect class="hp-stripe" x="104.4" y="47" width="3.2" height="26" rx="1.6" fill="#00f2fe" opacity="0.9" filter="url(#emo-glow)"/>
+      </g>
+
+      <!-- Catatan Musik Saat Bersiul -->
+      <g id="emo-notes">
+        <text class="note n1" x="94" y="36">♪</text>
+        <text class="note n2" x="103" y="50">♫</text>
+        <text class="note n3" x="89" y="22">♩</text>
+      </g>
+
+      <!-- Huruf Zzz Saat Ngantuk -->
+      <g id="emo-zzz">
+        <text class="zz z1" x="92" y="34">Z</text>
+        <text class="zz z2" x="101" y="24">z</text>
+        <text class="zz z3" x="108" y="15">z</text>
+      </g>
+
+      <!-- Konfeti Saat Gembira (arah ledak via --dx/--dy) -->
+      <g id="emo-confetti">
+        <circle class="cf c1" cx="16" cy="64" r="2.6" fill="#ffd166" style="--dx:-12px;--dy:-26px"/>
+        <rect class="cf c2" x="99" y="46" width="4.5" height="4.5" fill="#ff6b9d" style="--dx:13px;--dy:-24px"/>
+        <circle class="cf c3" cx="105" cy="88" r="2.2" fill="#00f2fe" style="--dx:15px;--dy:-14px"/>
+        <rect class="cf c4" x="8" y="94" width="4.5" height="4.5" fill="#8da2fb" style="--dx:-15px;--dy:-12px"/>
+        <circle class="cf c5" cx="60" cy="6" r="2.4" fill="#ffd166" style="--dx:0px;--dy:-16px"/>
+        <rect class="cf c6" x="28" y="2" width="4" height="4" fill="#00f2fe" style="--dx:-10px;--dy:-18px"/>
+        <circle class="cf c7" cx="90" cy="8" r="2.2" fill="#ff6b9d" style="--dx:11px;--dy:-20px"/>
+        <rect class="cf c8" x="46" y="10" width="3.6" height="3.6" fill="#8da2fb" style="--dx:-5px;--dy:-24px"/>
+      </g>
+
+      <!-- Debu Saat Kaki Berlari -->
+      <g id="emo-dust">
+        <circle class="du d1" cx="14" cy="135" r="3" fill="#3b465c"/>
+        <circle class="du d2" cx="106" cy="136" r="2.6" fill="#3b465c"/>
+        <circle class="du d3" cx="7" cy="140" r="2.2" fill="#3b465c"/>
+      </g>
+
+      <!-- Bar Equalizer Melayang Saat Lagu Diputar -->
+      <g id="emo-eq">
+        <rect class="eq eq-b1" x="4" y="6" width="3.2" height="6" rx="1.6" fill="url(#emo-eq-grad)"/>
+        <rect class="eq eq-b2" x="9.4" y="2" width="3.2" height="10" rx="1.6" fill="url(#emo-eq-grad)"/>
+        <rect class="eq eq-b3" x="14.8" y="4" width="3.2" height="8" rx="1.6" fill="url(#emo-eq-grad)"/>
+        <rect class="eq eq-b4" x="20.2" y="1" width="3.2" height="11" rx="1.6" fill="url(#emo-eq-grad)"/>
+        <rect class="eq eq-b5" x="25.6" y="3" width="3.2" height="9" rx="1.6" fill="url(#emo-eq-grad)"/>
+      </g>
+    </svg>
+  </button>
+</div>
+
+<script>
+(() => {
+  // ═══════════════════ PENGATURAN WAJIB ═══════════════════
+  // 1) SCRIPT_URL = URL Web App Apps Script (berakhiran /exec).
+  //    Cara: deploy Code.gs → Deploy → Web app → salin URL /exec ke sini.
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz4wk6nNS5ajOhvTb53rh3eXAB-izlsJIGySjQnr1tk3Km2oeYOgjbo-9dMc6uvh4E8uw/exec';
+  // 2) Sheet Konfig: atur aplikasi_on, ticket_on, cuaca_on, jadwal_on, quiz_on, about.
+  const ALADHAN_API = 'https://api.aladhan.com/v1/timingsByCity';
+  // Cuaca otomatis — Open-Meteo, gratis tanpa API key
+  const OPEN_METEO = 'https://api.open-meteo.com/v1/forecast';
+  const OPEN_METEO_GEO = 'https://geocoding-api.open-meteo.com/v1/search';
+
+  const launcher = document.getElementById('ai-emo-launcher');
+  const bubble = document.getElementById('ai-emo-chat-bubble');
+  const speechText = document.getElementById('ai-emo-speech-text');
+  const chatInput = document.getElementById('emo-chat-input');
+  const sendBtn = document.getElementById('emo-chat-send');
+  const inputWrapper = document.getElementById('emo-chat-input-wrapper');
+  const optionsWrapper = document.getElementById('emo-chat-options');
+  const optYes = document.getElementById('emo-opt-yes');
+  const optNo = document.getElementById('emo-opt-no');
+  const closeBtn = document.getElementById('emo-bubble-close');
+  const quickActions = document.getElementById('emo-quick-actions');
+  const qaChat = document.getElementById('emo-qa-chat');
+  const qaSolat = document.getElementById('emo-qa-solat');
+  const qaSong = document.getElementById('emo-qa-song');
+  const chipsBox = document.getElementById('emo-chips');
+  const qaAbout = document.getElementById('emo-qa-about');
+  const qaCuaca = document.getElementById('emo-qa-cuaca');
+  const qaJadwal = document.getElementById('emo-qa-jadwal');
+  const qaQuiz = document.getElementById('emo-qa-quiz');
+
+  let isInteracting = false;  // sedang dalam alur buku tamu
+  let mode = 'guest';         // 'guest' | 'chat' | 'solat' | 'ticket' | 'cuaca' | 'jadwal' | 'quiz'
+  let step = 0;
+  let audioPlayer = new Audio();
+  let lyricList = [];         // lirik & audio dari Spreadsheet
+  let qnaList = [];           // data bot chat dari Spreadsheet
+  let rotatorStarted = false; // cegah interval rotasi lirik dobel
+  let tstep = 0;              // langkah alur tiket antrean
+  let ticketData = { nama: '', kelas: '', kategori: '', keperluan: '' };
+
+  let guestData = {
+    nama: localStorage.getItem('emo_guest_nama') || '',
+    alamat: '',
+    kontak: '',
+    subjek: '',
+    pesan: ''
+  };
+
+  // ===== Kebijakan autoplay browser: audio baru boleh bunyi setelah ada interaksi =====
+  let userInteracted = false;
+  let pendingAudio = null;
+  function unlockAudio() {
+    userInteracted = true;
+    if (pendingAudio) { const u = pendingAudio; pendingAudio = null; playAudio(u); }
+  }
+  document.addEventListener('pointerdown', unlockAudio);
+  document.addEventListener('keydown', unlockAudio);
+
+  // ====== EFEK SUARA BLIP (Web Audio, tanpa file eksternal — hanya setelah interaksi) ======
+  let audioCtx = null;
+  let soundOn = localStorage.getItem('emo_sound') !== 'off';
+  function blip(freq, dur) {
+    if (!soundOn || !userInteracted) return;
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const t0 = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.value = freq || 640;
+      g.gain.setValueAtTime(0.05, t0);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + (dur || 0.09));
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.start(t0); osc.stop(t0 + (dur || 0.09) + 0.02);
+    } catch (e) {}
+  }
+  function blipSequence(seq) { (seq || [[560, .07], [840, .11]]).forEach(([f, d], i) => setTimeout(() => blip(f, d), i * 90)); }
+
+  function setMood(mood) { launcher.dataset.mood = mood; }
+
+  // Gembira saat EMO memberi respon: lompat gembira + konfeti meledak
+  function celebrate(ms) {
+    blipSequence([[560, .07], [840, .11]]); // bunyi riang saat EMO gembira
+    launcher.classList.remove('emo-party');
+    void launcher.offsetWidth; // paksa restart animasi
+    launcher.classList.add('emo-party');
+    setMood('happy');
+    setTimeout(() => {
+      launcher.classList.remove('emo-party');
+      if (!isInteracting && mode === 'guest') setMood('idle');
+    }, ms || 1900);
+  }
+
+  // Kaki berlari di tempat: badan miring dinamis + debu berhembus
+  function doRun(ms) {
+    launcher.classList.remove('emo-run');
+    void launcher.offsetWidth;
+    launcher.classList.add('emo-run');
+    setMood('excited');
+    setTimeout(() => {
+      launcher.classList.remove('emo-run');
+      if (!isInteracting) setMood('idle');
+    }, ms || 1700);
+  }
+
+  // ====== EASTER EGG: kode rahasia #dance #party #joke #love #spin ======
+  const JOKES = [
+    'Kenapa robot nggak pernah panik? Karena jaringannya kuat 😎',
+    'Buku apa yang nggak bisa dibaca? Buku tabungan yang tipis 😭',
+    'Komputer makan apa? Kenyang makan data, cuma lapar wifi 🍪',
+    'Robot makan apa? Cip-cip... chip! 🤖',
+    'Kenapa EMO solatnya selalu tepat waktu? Karena ada pengingat otomatis 🕌😄'
+  ];
+  function eggShow(html) { bubble.classList.add('show'); say(html); }
+  function doDance() {
+    launcher.classList.remove('emo-dance'); void launcher.offsetWidth; launcher.classList.add('emo-dance');
+    setMood('laugh');
+    eggShow('🕺 EMO joget mode ON! Siapa suruh ketik #dance~ 🎶');
+    blipSequence([[520, .07], [660, .07], [780, .12]]);
+    setTimeout(() => { launcher.classList.remove('emo-dance'); if (!isInteracting) setMood('idle'); }, 1500);
+  }
+  function doParty() { eggShow('🥳 PESTA! Konfeti spesial buat Kakak, yay!'); celebrate(3200); }
+  function doJoke() {
+    eggShow(JOKES[Math.floor(Math.random() * JOKES.length)]);
+    setMood('laugh');
+    blip(700, .08);
+    setTimeout(() => { if (!isInteracting && mode === 'guest') setMood('idle'); }, 3200);
+  }
+  function doLove() { eggShow('💙 EMO juga sayang Kakak balik! Jangan lupa isi buku tamu ya 💙'); celebrate(2600); }
+  function doSpin() {
+    launcher.classList.remove('emo-spin'); void launcher.offsetWidth; launcher.classList.add('emo-spin');
+    setMood('excited');
+    eggShow('🌀 Huiiinngg... EMO jadi pusing woy! 😵‍💫');
+    blipSequence([[880, .06], [660, .06], [520, .09]]);
+    setTimeout(() => { launcher.classList.remove('emo-spin'); if (!isInteracting) setMood('idle'); }, 1250);
+  }
+
+  // ================= KONFIGURASI APLIKASI (sheet Konfig) =================
+  const ABOUT_DEFAULT = 'EMO: buku tamu digital, bot chat, lagu, tiket antrean, pengingat solat, cuaca otomatis, jadwal pelajaran & quiz untuk web sekolah. Ditenagai Google Spreadsheet + Apps Script.';
+  let appConfig = { aplikasi_on: true, ticket_on: false, cuaca_on: true, jadwal_on: true, quiz_on: true, about: '' };
+
+  function normBool(v) {
+    if (v === true) return true;
+    const s = String(v == null ? '' : v).trim().toLowerCase();
+    return ['true', 'ya', 'on', '1', 'aktif', 'yes', 'enabled'].indexOf(s) !== -1;
+  }
+
+  async function fetchConfig() {
+    try {
+      const res = await fetch(SCRIPT_URL + '?action=get_config');
+      const data = await res.json();
+      const c = (data && (data.config || data)) || {};
+      appConfig = {
+        aplikasi_on: c.aplikasi_on === undefined ? true : normBool(c.aplikasi_on),
+        ticket_on: c.ticket_on === undefined ? false : normBool(c.ticket_on),
+        cuaca_on: c.cuaca_on === undefined ? true : normBool(c.cuaca_on),
+        jadwal_on: c.jadwal_on === undefined ? true : normBool(c.jadwal_on),
+        quiz_on: c.quiz_on === undefined ? true : normBool(c.quiz_on),
+        about: String(c.about || '')
+      };
+      updateQuickActionsVisibility(); // sembunyikan tombol fitur yang dimatikan admin
+    } catch (e) { /* Sheet Konfig belum ada: pakai default (aplikasi on, tiket off) */ }
+  }
+
+  // Tombol fitur yang off dari sheet Konfig otomatis disembunyikan
+  function updateQuickActionsVisibility() {
+    if (qaCuaca) qaCuaca.style.display = appConfig.cuaca_on ? '' : 'none';
+    if (qaJadwal) qaJadwal.style.display = appConfig.jadwal_on ? '' : 'none';
+    if (qaQuiz) qaQuiz.style.display = appConfig.quiz_on ? '' : 'none';
+  }
+
+  function showAbout() {
+    bubble.classList.add('show');
+    inputWrapper.style.display = 'none';
+    optionsWrapper.style.display = 'none';
+    clearChips();
+    showQuickActions(true);
+    say(`ℹ️ <b>Tentang Aplikasi</b><br>${escapeHtml(appConfig.about || ABOUT_DEFAULT)}`);
+    setMood('smile');
+  }
+
+  function showAppOff() {
+    isInteracting = false; step = 0; tstep = 0;
+    inputWrapper.style.display = 'none';
+    optionsWrapper.style.display = 'none';
+    clearChips();
+    showQuickActions(false);
+    say('🔧 <b>Aplikasi sedang dinonaktifkan</b> oleh admin (atur di sheet <b>Konfig</b>). Terima kasih atas pengertiannya! 🙏');
+    bubble.classList.add('show');
+    setMood('grumble');
+  }
+
+  function getTimeString() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
+  // Sapaan sesuai waktu + deteksi begadang (buat mode malam 😴)
+  function greetByTime() {
+    const h = new Date().getHours();
+    if (h >= 4 && h < 11) return 'pagi';
+    if (h < 15) return 'siang';
+    if (h < 18) return 'sore';
+    return 'malam';
+  }
+  function isNightOwl() { const h = new Date().getHours(); return h >= 21 || h < 4; }
+
+  function showQuickActions(v) { quickActions.style.display = v ? 'flex' : 'none'; }
+  function clearChips() { chipsBox.style.display = 'none'; chipsBox.innerHTML = ''; }
+
+  // ====== EFEK KETIK: teks balon muncul huruf demi huruf (lebih hidup) ======
+  let typeTimer = null;
+  function say(html, instant) {
+    clearTimeout(typeTimer);
+    const full = String(html == null ? '' : html);
+    if (instant) { speechText.innerHTML = full; return; }
+    const parts = full.match(/<[^>]+>|&[a-zA-Z#0-9]+;|[\s\S]/g) || [];
+    let i = 0, out = '';
+    speechText.innerHTML = '';
+    (function tick() {
+      if (i >= parts.length) return;
+      out += parts[i++];
+      speechText.innerHTML = out;
+      typeTimer = setTimeout(tick, 13);
+    })();
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function resetToIdle() {
+    isInteracting = false; step = 0; tstep = 0; mode = 'guest';
+    inputWrapper.style.display = 'none';
+    optionsWrapper.style.display = 'none';
+    clearChips();
+    chatInput.placeholder = 'Tulis balasan...';
+    showQuickActions(true);
+    setMood('idle');
+  }
+
+  // ================= DATA DARI SPREADSHEET =================
+  // Terima beberapa kemungkinan format respons agar tetap jalan
+  function normalizeLyrics(data) {
+    const arr = data && (data.lyrics || data.data || data.lirik);
+    if (!Array.isArray(arr)) return [];
+    return arr.map(it => ({
+      lyric: it.lyric || it.lirik || it.text || it.msg || it.pesan || '',
+      audio: it.audio || it.mp3 || it.url || '',
+      mood: it.mood || 'whistle'
+    })).filter(it => it.lyric);
+  }
+
+  async function fetchLyricsFromSpreadsheet() {
+    try {
+      const res = await fetch(SCRIPT_URL + '?action=get_lyrics');
+      const data = await res.json();
+      const list = normalizeLyrics(data);
+      if (list.length > 0) lyricList = list;
+    } catch (e) {
+      // Fallback lokal jika spreadsheet belum setup action=get_lyrics
+      if (lyricList.length === 0) {
+        lyricList = [
+          { lyric: 'Boleh kah sekecakep ini~ 🎵🎶', audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', mood: 'whistle' },
+          { lyric: 'Salting sendiri kan lu? 👀🎧', audio: '', mood: 'glance' },
+          { lyric: 'Zzz... haaah, EMO jadi ngantuk gini 😴', audio: '', mood: 'sleepy' }
+        ];
+      }
+    }
+  }
+
+  // Ambil data bot chat: header "pertanyaan | opsi jawaban pertama | jawaban ke 2 | jawaban ke 3 | kategori"
+  async function fetchQnA() {
+    if (qnaList.length > 0) return qnaList;
+    try {
+      const res = await fetch(SCRIPT_URL + '?action=get_qna');
+      const data = await res.json();
+      const arr = data && (data.qna || data.chat || data.data);
+      if (Array.isArray(arr)) {
+        qnaList = arr.map(r => ({
+          q: r.pertanyaan || r.q || '',
+          a1: r.jawaban1 || r['opsi jawaban pertama'] || '',
+          a2: r.jawaban2 || r['jawaban ke 2'] || '',
+          a3: r.jawaban3 || r['jawaban ke 3'] || '',
+          kategori: r.kategori || 'Umum'
+        })).filter(r => r.q);
+      }
+    } catch (e) { /* pakai fallback di bawah */ }
+    if (qnaList.length === 0) {
+      qnaList = [
+        { q: 'apa itu emo', a1: 'Aku EMO 🤖 robot buku tamu sekaligus teman ngobrol di web ini!', a2: 'Aku EMO, asisten mini yang siap nemenin Kakak ✨', a3: '', kategori: 'Umum' },
+        { q: 'assalamualaikum', a1: 'Waalaikumsalam Kak! Ada yang bisa EMO bantu? 😊', a2: 'Waalaikumsalam 🙏 yuk ngobrol sama EMO!', a3: '', kategori: 'Salam' },
+        { q: 'cara isi buku tamu', a1: 'Gampang! Klik badan EMO, nanti EMO pandu step by step 📝', a2: '', a3: '', kategori: 'Bantuan' },
+        { q: 'cara ambil tiket', a1: 'Ketik #ticket di kolom chat EMO, form tiket antrean langsung muncul 🎟️', a2: 'Tiket diaktifkan admin lewat sheet Konfig ya Kak', a3: '', kategori: 'Bantuan' }
+      ];
+    }
+    return qnaList;
+  }
+
+  // ====== MESIN JAWABAN BOT CHAT (pencocokan kata kunci sederhana) ======
+  function normStr(s) {
+    return String(s || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  function findAnswer(text) {
+    const t = normStr(text);
+    if (!t) return null;
+    const tokens = t.split(' ').filter(w => w.length > 2);
+    let best = null, bestScore = 0;
+    qnaList.forEach(row => {
+      const q = normStr(row.q);
+      if (!q) return;
+      let score = 0;
+      if (q === t) score += 100;                                  // sama persis
+      if (t.includes(q)) score += 20;                             // input memuat pertanyaan
+      if (q.includes(t)) score += 10;                             // pertanyaan memuat input
+      tokens.forEach(w => { if (q.includes(w)) score += 3; });    // kata input ada di pertanyaan
+      q.split(' ').forEach(w => { if (w.length > 2 && t.includes(w)) score += 2; }); // kata pertanyaan ada di input
+      const kat = normStr(row.kategori);
+      if (kat && t.includes(kat)) score += 2;
+      if (score > bestScore) { bestScore = score; best = row; }
+    });
+    return bestScore > 0 ? best : null;
+  }
+
+  // Pilih salah satu dari 3 opsi jawaban yang tersedia (acak, biar tidak monoton)
+  function pickAnswer(row) {
+    const opts = [row.a1, row.a2, row.a3].filter(Boolean);
+    return opts.length ? opts[Math.floor(Math.random() * opts.length)] : 'EMO belum punya jawabannya 🤔';
+  }
+
+  // ================= AUDIO =================
+  function playAudio(url) {
+    if (!url) return;
+    if (!userInteracted) { pendingAudio = url; return; } // autoplay diblokir browser, antre dulu
+    try {
+      audioPlayer.src = url;
+      const p = audioPlayer.play();
+      if (p && p.catch) p.catch(() => { pendingAudio = url; });
+    } catch (e) {}
+  }
+
+  // ====== MODE MUSIK: headset berdenyut + equalizer + mood menyanyi saat lagu diputar ======
+  function startMusicMode() { launcher.classList.add('emo-music'); setMood('sing'); }
+  function stopMusicMode() {
+    launcher.classList.remove('emo-music');
+    if (launcher.dataset.mood === 'sing') {
+      if (!isInteracting && mode === 'guest') setMood('idle'); else setMood('chatty');
+    }
+  }
+  audioPlayer.addEventListener('play', startMusicMode);
+  audioPlayer.addEventListener('ended', stopMusicMode);
+  audioPlayer.addEventListener('pause', stopMusicMode);
+
+  function playRandomLyric() {
+    if (lyricList.length > 0) {
+      const item = lyricList[Math.floor(Math.random() * lyricList.length)];
+      let html = escapeHtml(item.lyric);
+      if (item.audio) {
+        playAudio(item.audio);
+        if (pendingAudio) html += '<br><small>🔊 ketuk halaman dulu untuk mengaktifkan suara</small>';
+      }
+      say(html);
+      setMood(item.mood || 'whistle');
+    } else {
+      say(`Sekarang jam ${getTimeString()} WIB, tetap semangat! ✨`);
+      setMood('chatty');
+    }
+  }
+
+  // ================= ALUR BUKU TAMU =================
+  // Pilihan tujuan titipan — tersimpan ke kolom "subjek" sheet BukuTamu
+  const SUBJEK_OPSI = [
+    ['Buku Tamu', '📖 Buku Tamu'],
+    ['Kritik dan Saran', '🗣️ Kritik & Saran'],
+    ['Kirim Atesi', '🎁 Kirim Atesi'],
+    ['Curhat', '💚 Curhat'],
+    ['Lainnya', '✨ Lainnya']
+  ];
+
+  function renderSubjekChips() {
+    chipsBox.innerHTML = '';
+    SUBJEK_OPSI.forEach(([val, label]) => {
+      const b = document.createElement('button');
+      b.className = 'emo-chip';
+      b.type = 'button';
+      b.textContent = label;
+      b.addEventListener('click', () => {
+        guestData.subjek = val;
+        step = 1;
+        clearChips();
+        askNextStep();
+      });
+      chipsBox.appendChild(b);
+    });
+    chipsBox.style.display = 'flex';
+  }
+
+  // Cadangan bila pengunjung mengetik pilihannya (bukan klik chip)
+  function pickSubjekFromText(val) {
+    const t = normStr(val);
+    const map = [['kritik', 'Kritik dan Saran'], ['saran', 'Kritik dan Saran'], ['atesi', 'Kirim Atesi'], ['curhat', 'Curhat'], ['buku tamu', 'Buku Tamu'], ['tamu', 'Buku Tamu'], ['lain', 'Lainnya']];
+    for (const [k, v] of map) {
+      if (t.indexOf(k) !== -1) {
+        guestData.subjek = v;
+        step = 1;
+        clearChips();
+        askNextStep();
+        return;
+      }
+    }
+    say('Pilih salah satu tombol di atas ya Kak, atau ketik <b>#ticket</b> kalau butuh tiket antrean 🎟️');
+  }
+
+  function askNextStep() {
+    optionsWrapper.style.display = 'none';
+
+    if (!isInteracting) {
+      inputWrapper.style.display = 'none';
+      return;
+    }
+
+    inputWrapper.style.display = 'flex';
+    chatInput.placeholder = 'Tulis balasan...';
+
+    if (step === 0) {
+      chatInput.placeholder = 'Pilih di atas, atau ketik #ticket 🎟️';
+      say('Halo Kak! Mau titip <b>apa</b> hari ini? Pilih salah satu di bawah 👇');
+      renderSubjekChips();
+      setMood('chatty');
+    } else if (step === 1) {
+      if (guestData.nama) {
+        say(`Halo Kak <b>${escapeHtml(guestData.nama)}</b>! Mau titip pesan di buku tamu? Tulis alamat asal Kakak dulu yuk! 🏠`);
+        step = 2;
+      } else {
+        say('Halo! Boleh tau nama lengkap Kakak siapa? 🤖');
+      }
+      setMood('chatty');
+    } else if (step === 2) {
+      say(`Salam kenal Kak <b>${escapeHtml(guestData.nama)}</b>! Boleh tau alamat/kota asal Kakak? 🏠`);
+      setMood('smile');
+    } else if (step === 3) {
+      say('Oke! Boleh minta nomor WhatsApp / Kontak yang bisa dihubungi? 📱');
+      setMood('whistle');
+    } else if (step === 4) {
+      say('Sip! Silakan tuliskan pesan/kesan Kakak di sini... 📝');
+      setMood('smile');
+    } else if (step === 5) {
+      inputWrapper.style.display = 'none';
+      optionsWrapper.style.display = 'flex';
+      say(`Apakah data ini sudah yakin benar?<br><b>Nama:</b> ${escapeHtml(guestData.nama)}<br><b>Alamat:</b> ${escapeHtml(guestData.alamat)}<br><b>HP:</b> ${escapeHtml(guestData.kontak)}<br><b>Pesan:</b> ${escapeHtml(guestData.pesan)}`);
+      setMood('suspicious');
+    }
+  }
+
+  function handleSend() {
+    const val = chatInput.value.trim();
+    if (!val) return;
+    chatInput.value = '';
+
+    // Kode rahasia tiket — bisa diketik dari mode mana pun
+    if (/^#(ticket|tiket)\b/i.test(val)) { enterTicketMode(); return; }
+
+    // Cuaca = layanan umum seperti solat: tetap bisa walau aplikasi off
+    if (/^#(cuaca|weather)\b/i.test(val)) { enterWeatherMode(); return; }
+
+    if (!appConfig.aplikasi_on) { showAppOff(); return; }
+
+    // Kode fitur dari spreadsheet — jadwal pelajaran & quiz
+    if (/^#(jadwal|pelajaran)\b/i.test(val)) { enterJadwalMode(); return; }
+    if (/^#(quiz|kuis)\b/i.test(val)) { enterQuizMode(); return; }
+
+    // Kode rahasia easter egg — biar makin seru 😄
+    if (/^#(dance|joget)\b/i.test(val)) return doDance();
+    if (/^#(party|pesta)\b/i.test(val)) return doParty();
+    if (/^#(joke|lawak)\b/i.test(val)) return doJoke();
+    if (/^#(love|sayang)\b/i.test(val)) return doLove();
+    if (/^#(spin|putar)\b/i.test(val)) return doSpin();
+
+    if (mode === 'chat') return answerChat(val);
+    if (mode === 'solat') return handleSolatInput(val);
+    if (mode === 'cuaca') return handleCuacaInput(val);
+    if (mode === 'jadwal') return handleJadwalInput(val);
+    if (mode === 'ticket') return handleTicketInput(val);
+    if (mode === 'quiz') return handleQuizInput(val);
+
+    // Mode buku tamu
+    if (!isInteracting) { isInteracting = true; step = 0; askNextStep(); return; }
+
+    if (step === 0) return pickSubjekFromText(val);
+
+    if (step === 1) {
+      guestData.nama = val;
+      localStorage.setItem('emo_guest_nama', val);
+      step = 2;
+      askNextStep();
+    } else if (step === 2) {
+      guestData.alamat = val;
+      step = 3;
+      askNextStep();
+    } else if (step === 3) {
+      guestData.kontak = val;
+      step = 4;
+      askNextStep();
+    } else if (step === 4) {
+      guestData.pesan = val;
+      step = 5;
+      askNextStep();
+    }
+  }
+
+  // ================= MODE CHAT BOT DENGAN EMO =================
+  async function enterChatMode() {
+    mode = 'chat'; isInteracting = false; step = 0;
+    showQuickActions(false);
+    optionsWrapper.style.display = 'none';
+    inputWrapper.style.display = 'flex';
+    chatInput.placeholder = 'Tanya EMO apa aja...';
+    chatInput.value = '';
+    bubble.classList.add('show');
+    say('Kakak mau tanya apa nih? Ketik pertanyaanmu, atau pilih topik di bawah 👇');
+    setMood('chatty');
+    await fetchQnA();
+    renderKategoriChips();
+    chatInput.focus();
+  }
+
+  // Tampilkan chip daftar kategori dari kolom "kategori"
+  function renderKategoriChips() {
+    const kats = [...new Set(qnaList.map(r => r.kategori).filter(Boolean))];
+    if (kats.length === 0) { clearChips(); return; }
+    chipsBox.innerHTML = '';
+    kats.slice(0, 8).forEach(k => {
+      const b = document.createElement('button');
+      b.className = 'emo-chip';
+      b.type = 'button';
+      b.textContent = '🏷️ ' + k;
+      b.addEventListener('click', () => renderPertanyaanChips(k));
+      chipsBox.appendChild(b);
+    });
+    chipsBox.style.display = 'flex';
+  }
+
+  // Tampilkan chip daftar pertanyaan pada kategori terpilih
+  function renderPertanyaanChips(kat) {
+    const rows = qnaList.filter(r => r.kategori === kat);
+    chipsBox.innerHTML = '';
+    const back = document.createElement('button');
+    back.className = 'emo-chip emo-chip-back';
+    back.type = 'button';
+    back.textContent = '⬅ Topik';
+    back.addEventListener('click', renderKategoriChips);
+    chipsBox.appendChild(back);
+    rows.forEach(r => {
+      const b = document.createElement('button');
+      b.className = 'emo-chip';
+      b.type = 'button';
+      b.textContent = r.q.length > 36 ? r.q.slice(0, 35) + '…' : r.q;
+      b.addEventListener('click', () => {
+        say(`<b>${escapeHtml(r.q)}</b><br>${escapeHtml(pickAnswer(r))}`);
+        celebrate(); // gembira saat berhasil menjawab
+      });
+      chipsBox.appendChild(b);
+    });
+    chipsBox.style.display = 'flex';
+  }
+
+  function answerChat(val) {
+    const t = normStr(val);
+    if (/tentang|about/.test(t)) {
+      showAbout();
+      celebrate();
+      renderKategoriChips();
+      return;
+    }
+    // Alihkan ke fitur bila pengunjung bertanya soal cuaca/quiz/jadwal pelajaran
+    if (/(cuaca|hujan|suhu|weather)/.test(t)) { enterWeatherMode(); return; }
+    if (/kuis|quiz/.test(t)) { enterQuizMode(); return; }
+    if (/jadwal\s*(pelajaran|mapel|sekolah|kelas)/.test(t) || /pelajaran/.test(t)) { enterJadwalMode(); return; }
+    const row = findAnswer(val);
+    if (row) {
+      say(`<b>${escapeHtml(row.q)}</b><br>${escapeHtml(pickAnswer(row))}`);
+      celebrate(); // EMO gembira bisa menjawab pertanyaan Kakak
+    } else {
+      say('Waduh, EMO belum tau jawabannya 🤔 Coba kata kunci lain, atau pilih topik di bawah ya Kak!');
+      setMood('suspicious');
+    }
+    renderKategoriChips();
+  }
+
+  // ================= MODE TIKET ANTREAN (kode #ticket) =================
+  const TIKET_KATEGORI = [['Siswa', '🎓 Siswa'], ['Guru', '🧑‍🏫 Guru'], ['Umum', '👤 Umum']];
+
+  async function enterTicketMode() {
+    await fetchConfig(); // pastikan status on/off terbaru dari sheet Konfig
+    bubble.classList.add('show');
+    if (!appConfig.aplikasi_on) return showAppOff();
+    if (!appConfig.ticket_on) {
+      inputWrapper.style.display = 'none';
+      optionsWrapper.style.display = 'none';
+      clearChips();
+      say('🎟️ Maaf, <b>tiket sedang ditutup</b> oleh admin (atur di sheet <b>Konfig</b>). Coba lagi nanti ya!');
+      setMood('grumble');
+      return;
+    }
+    mode = 'ticket'; isInteracting = true; tstep = 0;
+    ticketData = { nama: '', kelas: '', kategori: '', keperluan: '' };
+    showQuickActions(false);
+    bubble.classList.add('show');
+    askNextTicketStep();
+    setMood('chatty');
+  }
+
+  function renderTiketKategoriChips() {
+    chipsBox.innerHTML = '';
+    TIKET_KATEGORI.forEach(([val, label]) => {
+      const b = document.createElement('button');
+      b.className = 'emo-chip';
+      b.type = 'button';
+      b.textContent = label;
+      b.addEventListener('click', () => {
+        ticketData.kategori = val;
+        tstep = 1;
+        clearChips();
+        askNextTicketStep();
+      });
+      chipsBox.appendChild(b);
+    });
+    chipsBox.style.display = 'flex';
+  }
+
+  function askNextTicketStep() {
+    optionsWrapper.style.display = 'none';
+    clearChips();
+
+    if (tstep === 0) {
+      inputWrapper.style.display = 'none';
+      say('🎟️ <b>Mode Tiket Antrean!</b> Tiket untuk kegiatan ini — daftar sebagai siapa?');
+      renderTiketKategoriChips();
+      setMood('chatty');
+      return;
+    }
+
+    inputWrapper.style.display = 'flex';
+    chatInput.placeholder = 'Tulis balasan...';
+
+    if (tstep === 1) {
+      say(`Oke, tiket kategori <b>${escapeHtml(ticketData.kategori)}</b>! Siapa nama lengkap Kakak? (tiket by name 📝)`);
+      setMood('chatty');
+    } else if (tstep === 2) {
+      say(`Hai <b>${escapeHtml(ticketData.nama)}</b>! Kelas berapa? (contoh: 7A / XI IPA 1)`);
+      setMood('smile');
+    } else if (tstep === 3) {
+      say('Terakhir, keperluan apa? (contoh: setor tugas, janjian guru, ambil rapor) 📋');
+      setMood('smile');
+    } else if (tstep === 4) {
+      inputWrapper.style.display = 'none';
+      optionsWrapper.style.display = 'flex';
+      say(`Yakin sudah benar?<br><b>Kategori:</b> ${escapeHtml(ticketData.kategori)}<br><b>Nama:</b> ${escapeHtml(ticketData.nama)}${ticketData.kelas && ticketData.kelas !== '-' ? `<br><b>Kelas:</b> ${escapeHtml(ticketData.kelas)}` : ''}<br><b>Keperluan:</b> ${escapeHtml(ticketData.keperluan)}`);
+      setMood('suspicious');
+    }
+  }
+
+  function handleTicketInput(val) {
+    if (tstep === 1) {
+      ticketData.nama = val;
+      if (ticketData.kategori === 'Siswa') { tstep = 2; } else { ticketData.kelas = '-'; tstep = 3; }
+      askNextTicketStep();
+    } else if (tstep === 2) {
+      ticketData.kelas = val;
+      tstep = 3;
+      askNextTicketStep();
+    } else if (tstep === 3) {
+      ticketData.keperluan = val;
+      tstep = 4;
+      askNextTicketStep();
+    }
+  }
+
+  async function submitTicket() {
+    const body = new URLSearchParams({
+      jenis: 'ticket',
+      nama: ticketData.nama,
+      kelas: ticketData.kelas,
+      kategori: ticketData.kategori,
+      keperluan: ticketData.keperluan
+    });
+    try {
+      const res = await fetch(SCRIPT_URL, { method: 'POST', body });
+      let nomor = null;
+      try { const j = await res.json(); if (j && j.nomor) nomor = j.nomor; } catch (e2) {}
+      return nomor || 'T-' + String(Date.now()).slice(-5); // sudah terkirim, jangan kirim ulang
+    } catch (e) {
+      // Respons tertutup CORS: kirim ulang no-cors agar data tetap masuk
+      try { await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body }); } catch (e2) {}
+      return 'T-' + String(Date.now()).slice(-5);
+    }
+  }
+
+  async function submitTicketFlow() {
+    optionsWrapper.style.display = 'none';
+    say('Sedang menerbitkan nomor tiket Kakak... ⏳', true);
+    setMood('whistle');
+    const nomor = await submitTicket();
+    say(`🎟️ <b>Tiket terbit!</b><br>Nomor antrean Kakak: <b>${escapeHtml(nomor)}</b><br><small>${escapeHtml(ticketData.kategori)} · ${escapeHtml(ticketData.nama)}${ticketData.kelas && ticketData.kelas !== '-' ? ' · Kelas ' + escapeHtml(ticketData.kelas) : ''}</small><br>Tunjukkan nomor ini ke panitia ya! ✨`);
+    celebrate(2600);
+    setTimeout(() => {
+      resetToIdle();
+      startIntroGreeting();
+    }, 6000);
+  }
+
+  // ================= PENGINGAT WAKTU SOLAT =================
+  let solatCity = localStorage.getItem('emo_solat_kota') || 'Jakarta';
+  let solatTimings = null;
+  let solatTimingsDate = '';
+  let solatTimingsCity = '';
+  let lastRemindKey = '';
+
+  // [kode API, label Indonesia]
+  const PRAYERS = [['Imsak', 'Imsak'], ['Fajr', 'Subuh'], ['Dhuhr', 'Dzuhur'], ['Asr', 'Ashar'], ['Maghrib', 'Maghrib'], ['Isha', 'Isya']];
+
+  async function fetchPrayerTimes(city) {
+    const url = `${ALADHAN_API}?city=${encodeURIComponent(city)}&country=Indonesia&method=20`;
+    const res = await fetch(url);
+    const json = await res.json();
+    if (!json || json.code !== 200 || !json.data || !json.data.timings) throw new Error('gagal ambil jadwal');
+    const t = {};
+    PRAYERS.forEach(([k]) => {
+      t[k] = String(json.data.timings[k] || '').split(' ')[0].slice(0, 5);
+    });
+    return t;
+  }
+
+  async function loadPrayerTimes(force) {
+    const today = new Date().toDateString();
+    if (!force && solatTimings && solatTimingsDate === today && solatTimingsCity === solatCity) {
+      renderJadwal();
+      return;
+    }
+    say('Sedang ambil jadwal solat dari server... ⏳', true);
+    try {
+      solatTimings = await fetchPrayerTimes(solatCity);
+      solatTimingsDate = today;
+      solatTimingsCity = solatCity;
+      renderJadwal();
+      setMood('smile');
+    } catch (e) {
+      say(`Gagal ambil jadwal solat 😢 Pastikan kota "<b>${escapeHtml(solatCity)}</b>" benar & koneksi ok.`);
+      setMood('grumble');
+    }
+  }
+
+  function renderJadwal() {
+    const rows = PRAYERS.map(([k, label]) => `${label} <b>${solatTimings[k] || '-'}</b>`).join(' &nbsp;|&nbsp; ');
+    const next = getNextPrayer();
+    say(`🕌 <b>Jadwal Solat — ${escapeHtml(solatCity)}</b><br>${rows}${next ? `<br>⏳ Menuju <b>${next.label}</b> ± <b>${next.diff}</b> lagi` : ''}`);
+  }
+
+  function getNextPrayer() {
+    if (!solatTimings) return null;
+    const now = new Date();
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    for (const [k, label] of PRAYERS) {
+      const [h, m] = (solatTimings[k] || '').split(':').map(Number);
+      if (isNaN(h) || isNaN(m)) continue;
+      const pm = h * 60 + m;
+      if (pm > nowMin) {
+        const d = pm - nowMin;
+        return { label, diff: (d >= 60 ? `${Math.floor(d / 60)} jam ` : '') + `${d % 60} menit` };
+      }
+    }
+    return null;
+  }
+
+  async function enterSolatMode() {
+    mode = 'solat'; isInteracting = false; step = 0;
+    showQuickActions(false);
+    optionsWrapper.style.display = 'none';
+    inputWrapper.style.display = 'flex';
+    chatInput.placeholder = 'Ganti kota? ketik: kota: Bandung';
+    chatInput.value = '';
+    bubble.classList.add('show');
+    setMood('chatty');
+    await loadPrayerTimes();
+    chatInput.focus();
+  }
+
+  async function handleSolatInput(val) {
+    const m = val.match(/^(?:kota|ganti kota)\s*:\s*(.+)/i);
+    if (m && m[1].trim()) {
+      solatCity = m[1].trim().replace(/[.!?]+$/, '');
+      localStorage.setItem('emo_solat_kota', solatCity);
+      solatTimings = null;
+      say(`Oke! EMO cek jadwal untuk <b>${escapeHtml(solatCity)}</b>... 🔍`);
+      await loadPrayerTimes(true);
+    } else if (/^(jadwal|solat|jadwal solat)$/i.test(val)) {
+      await loadPrayerTimes();
+    } else {
+      await fetchQnA();
+      answerChat(val); // selain perintah solat, lempar ke bot chat
+    }
+  }
+
+  // Pemeriksa pengingat tiap 30 detik (jadwal diambil 1x per hari)
+  setInterval(async () => {
+    const today = new Date().toDateString();
+    if (!solatTimings || solatTimingsDate !== today || solatTimingsCity !== solatCity) {
+      try {
+        solatTimings = await fetchPrayerTimes(solatCity);
+        solatTimingsDate = today;
+        solatTimingsCity = solatCity;
+      } catch (e) { return; }
+    }
+    const hhmm = getTimeString();
+    PRAYERS.forEach(([k, label]) => {
+      const key = today + '|' + k + '|' + hhmm;
+      if (solatTimings[k] === hhmm && lastRemindKey !== key) {
+        lastRemindKey = key;
+        announceReminder(`🕌 <b>Waktunya ${label}</b> telah masuk!<br>Yuk Kakak, mari solat dulu 🤲✨`, 'hello');
+      }
+    });
+  }, 30000);
+
+  function announceReminder(html, mood) {
+    if (isInteracting || mode !== 'guest') return; // jangan interupsi alur yang sedang berjalan
+    inputWrapper.style.display = 'none';
+    optionsWrapper.style.display = 'none';
+    clearChips();
+    showQuickActions(true);
+    say(html);
+    bubble.classList.add('show');
+    setMood(mood);
+    setTimeout(() => { if (!isInteracting && mode === 'guest') setMood('idle'); }, 8000);
+  }
+
+  // ================= CUACA OTOMATIS (Open-Meteo — gratis, tanpa API key) =================
+  const HARI_ID = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  let weatherCity = localStorage.getItem('emo_weather_kota') || solatCity || 'Jakarta';
+  let weatherData = null;
+  let weatherStamp = 0;
+  let introWeather = ''; // cuplikan cuaca untuk sapaan pembuka
+
+  // Batasi waktu tunggu fetch (biar sapaan intro tidak lambat saat jaringan buruk)
+  function withTimeout(p, ms) {
+    return Promise.race([p, new Promise(res => setTimeout(() => res(null), ms))]);
+  }
+
+  // Kode cuaca WMO → label & emoji
+  function wmoInfo(code) {
+    code = Number(code);
+    if (code === 0) return { label: 'Cerah', emoji: '☀️' };
+    if (code === 1) return { label: 'Cerah Berawan', emoji: '🌤️' };
+    if (code === 2) return { label: 'Berawan Sebagian', emoji: '⛅' };
+    if (code === 3) return { label: 'Berawan', emoji: '☁️' };
+    if (code === 45 || code === 48) return { label: 'Berkabut', emoji: '🌫️' };
+    if (code >= 51 && code <= 57) return { label: 'Gerimis', emoji: '🌦️' };
+    if (code >= 61 && code <= 67) return { label: 'Hujan', emoji: '🌧️' };
+    if (code >= 71 && code <= 77) return { label: 'Salju', emoji: '❄️' };
+    if (code >= 80 && code <= 82) return { label: 'Hujan Deras', emoji: '⛈️' };
+    if (code >= 95) return { label: 'Badai Petir', emoji: '⛈️' };
+    return { label: 'Cuaca', emoji: '🌍' };
+  }
+
+  async function fetchWeather(city, force) {
+    if (!city) return null;
+    if (!force && weatherData && String(weatherData.city).toLowerCase() === String(city).toLowerCase() && Date.now() - weatherStamp < 30 * 60000) {
+      return weatherData; // pakai cache maksimal 30 menit
+    }
+    const geoRes = await fetch(OPEN_METEO_GEO + '?name=' + encodeURIComponent(city) + '&count=1&language=id&format=json');
+    const geo = await geoRes.json();
+    const loc = geo && geo.results && geo.results[0];
+    if (!loc) throw new Error('kota tidak ditemukan');
+    const url = OPEN_METEO +
+      '?latitude=' + loc.latitude + '&longitude=' + loc.longitude +
+      '&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m' +
+      '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&forecast_days=3&timezone=auto';
+    const res = await fetch(url);
+    const j = await res.json();
+    if (!j || !j.current) throw new Error('gagal ambil cuaca');
+    const cur = j.current;
+    const daily = ((j.daily && j.daily.time) || []).map((d, i) => ({
+      hari: HARI_ID[new Date(d + 'T00:00:00').getDay()],
+      info: wmoInfo(j.daily.weather_code ? j.daily.weather_code[i] : 0),
+      max: Math.round(j.daily.temperature_2m_max[i]),
+      min: Math.round(j.daily.temperature_2m_min[i]),
+      rain: j.daily.precipitation_probability_max ? (j.daily.precipitation_probability_max[i] || 0) : 0
+    }));
+    weatherData = {
+      city: loc.name,
+      temp: Math.round(cur.temperature_2m),
+      feels: Math.round(cur.apparent_temperature),
+      humid: cur.relative_humidity_2m,
+      wind: Math.round(cur.wind_speed_10m),
+      info: wmoInfo(cur.weather_code),
+      daily: daily
+    };
+    weatherStamp = Date.now();
+    return weatherData;
+  }
+
+  async function renderCuaca(force) {
+    say(`Sedang cek cuaca di <b>${escapeHtml(weatherCity)}</b>... ⏳`, true);
+    setMood('look-right');
+    try {
+      const w = await fetchWeather(weatherCity, force);
+      const today = w.daily[0];
+      const payung = today && (today.rain >= 50 || /hujan|gerimis|badai/i.test(today.info.label));
+      let html = `${w.info.emoji} <b>Cuaca ${escapeHtml(w.city)}</b> — ${w.info.label}<br>` +
+        `🌡️ Suhu <b>${w.temp}°C</b> (terasa ${w.feels}°C) · 💧 ${w.humid}% · 💨 ${w.wind} km/j<br>` +
+        w.daily.slice(0, 3).map(d => `${d.info.emoji} <b>${d.hari}</b>: ${d.info.label} ${d.min}–${d.max}°C · 💧${d.rain}%`).join('<br>');
+      if (payung) html += '<br>☂️ Kemungkinan hujan tinggi, <b>bawa payung</b> ya Kak!';
+      say(html);
+      setMood('smile');
+    } catch (e) {
+      say(`Waduh, gagal ambil cuaca 😢 Pastikan kota "<b>${escapeHtml(weatherCity)}</b>" benar & koneksi ok.`);
+      setMood('grumble');
+    }
+  }
+
+  async function enterWeatherMode() {
+    mode = 'cuaca'; isInteracting = false; step = 0;
+    showQuickActions(false);
+    optionsWrapper.style.display = 'none';
+    inputWrapper.style.display = 'flex';
+    chatInput.placeholder = 'Ganti kota? ketik: kota: Bandung';
+    chatInput.value = '';
+    bubble.classList.add('show');
+    setMood('chatty');
+    await renderCuaca(false);
+    chatInput.focus();
+  }
+
+  async function handleCuacaInput(val) {
+    const m = val.match(/^(?:kota|ganti kota)\s*:\s*(.+)/i);
+    if (m && m[1].trim()) {
+      weatherCity = m[1].trim().replace(/[.!?]+$/, '');
+      localStorage.setItem('emo_weather_kota', weatherCity);
+      say(`Oke! EMO cek cuaca <b>${escapeHtml(weatherCity)}</b>... 🔍`);
+      await renderCuaca(true);
+    } else if (/^(cuaca|refresh|update)$/i.test(val)) {
+      await renderCuaca(true);
+    } else {
+      await fetchQnA();
+      answerChat(val); // selain perintah cuaca, lempar ke bot chat
+    }
+  }
+
+  // ================= JADWAL PELAJARAN (sheet Jadwal) =================
+  let jadwalList = [];
+
+  async function fetchJadwal() {
+    if (jadwalList.length) return jadwalList;
+    try {
+      const res = await fetch(SCRIPT_URL + '?action=get_jadwal');
+      const data = await res.json();
+      const arr = data && (data.jadwal || data.data);
+      if (Array.isArray(arr)) {
+        jadwalList = arr.map(r => ({
+          hari: String(r.hari || '').trim(),
+          jam: String(r.jam || r.waktu || '').trim(),
+          kelas: String(r.kelas || '').trim(),
+          mapel: String(r.mapel || '').trim(),
+          guru: String(r.guru || '').trim(),
+          ruangan: String(r.ruangan || '').trim()
+        })).filter(r => r.hari && r.mapel);
+      }
+    } catch (e) { /* sheet Jadwal belum ada */ }
+    return jadwalList;
+  }
+
+  function hariIni() { return HARI_ID[new Date().getDay()]; }
+
+  function renderJadwalPelajaran(hari, kelasFilter, note) {
+    let rows = jadwalList.filter(r => r.hari.toLowerCase() === String(hari).toLowerCase());
+    if (kelasFilter) rows = rows.filter(r => r.kelas.toLowerCase().includes(String(kelasFilter).toLowerCase()));
+    let html = `📅 <b>Jadwal Pelajaran — ${escapeHtml(hari)}</b>${kelasFilter ? ` · Kelas <b>${escapeHtml(kelasFilter)}</b>` : ''}`;
+    if (note) html += `<br><small>${escapeHtml(note)}</small>`;
+    html += '<br>';
+    if (!rows.length) {
+      html += jadwalList.length
+        ? `Tidak ada jadwal${kelasFilter ? ' untuk kelas itu' : ''}. Lihat hari lain: ketik <b>hari: Senin</b> 📚`
+        : 'Sheet <b>Jadwal</b> di spreadsheet masih kosong 😅 Isi dulu: hari | jam | mapel | kelas | guru | ruangan.';
+    } else {
+      html += rows.map(r => `⏰ <b>${escapeHtml(r.jam || '-')}</b> — <b>${escapeHtml(r.mapel)}</b>` +
+        (r.kelas ? ` (${escapeHtml(r.kelas)})` : '') +
+        (r.guru ? ` · ${escapeHtml(r.guru)}` : '') +
+        (r.ruangan ? ` · 🚪 ${escapeHtml(r.ruangan)}` : '')).join('<br>');
+    }
+    say(html);
+    setMood('smile');
+  }
+
+  async function enterJadwalMode() {
+    if (!appConfig.jadwal_on) {
+      bubble.classList.add('show');
+      say('📅 Maaf, fitur <b>jadwal sedang dimatikan</b> oleh admin (atur di sheet <b>Konfig</b>).');
+      setMood('grumble');
+      return;
+    }
+    mode = 'jadwal'; isInteracting = false; step = 0;
+    showQuickActions(false);
+    optionsWrapper.style.display = 'none';
+    inputWrapper.style.display = 'flex';
+    chatInput.placeholder = 'Lihat hari lain? ketik: hari: Senin';
+    chatInput.value = '';
+    bubble.classList.add('show');
+    setMood('chatty');
+    say('Sedang ambil jadwal pelajaran dari spreadsheet... ⏳', true);
+    await fetchJadwal();
+    const h = hariIni();
+    if (h === 'Sabtu' || h === 'Minggu') renderJadwalPelajaran('Senin', '', `Hari ini ${h} — libur! Ini preview jadwal Senin ya 📚`);
+    else renderJadwalPelajaran(h);
+    chatInput.focus();
+  }
+
+  async function handleJadwalInput(val) {
+    const mh = val.match(/^(?:hari|lihat)\s*:\s*([a-zA-Z]+)/i);
+    const mk = val.match(/^kelas\s*:\s*(.+)/i);
+    if (mh && mh[1].trim()) {
+      const h = mh[1].trim().charAt(0).toUpperCase() + mh[1].trim().slice(1).toLowerCase();
+      if (HARI_ID.includes(h)) {
+        renderJadwalPelajaran(h);
+      } else {
+        say('Nama hari tidak dikenal 😅 pilih: Senin, Selasa, Rabu, Kamis, Jumat, Sabtu, atau Minggu.');
+        setMood('suspicious');
+      }
+    } else if (mk && mk[1].trim()) {
+      const h = hariIni();
+      renderJadwalPelajaran((h === 'Sabtu' || h === 'Minggu') ? 'Senin' : h, mk[1].trim());
+    } else {
+      await fetchQnA();
+      answerChat(val); // selain perintah jadwal, lempar ke bot chat
+    }
+  }
+
+  // ================= MODE QUIZ (sheet Quiz) =================
+  let quizList = [];
+  let quizOrder = [];
+  let quizIdx = 0;
+  let quizScore = 0;
+  let quizMax = 0;
+
+  async function fetchQuiz() {
+    if (quizList.length) return quizList;
+    try {
+      const res = await fetch(SCRIPT_URL + '?action=get_quiz');
+      const data = await res.json();
+      const arr = data && (data.quiz || data.data);
+      if (Array.isArray(arr)) {
+        quizList = arr.map(r => {
+          const opts = [r.a, r.b, r.c, r.d].map(x => String(x == null ? '' : x).trim());
+          return {
+            q: String(r.pertanyaan || r.q || r.soal || '').trim(),
+            opts: opts,
+            jawaban: String(r.jawaban || r.kunci || 'A').trim().toUpperCase().charAt(0),
+            poin: Number(r.poin) > 0 ? Number(r.poin) : 10
+          };
+        }).filter(r => r.q && r.opts[0] && r.opts[1] && 'ABCD'.includes(r.jawaban));
+      }
+    } catch (e) { /* sheet Quiz belum ada */ }
+    return quizList;
+  }
+
+  function shuffleArr(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  async function enterQuizMode() {
+    if (!appConfig.quiz_on) {
+      bubble.classList.add('show');
+      say('🧠 Maaf, fitur <b>quiz sedang dimatikan</b> oleh admin (atur di sheet <b>Konfig</b>).');
+      setMood('grumble');
+      return;
+    }
+    mode = 'quiz'; isInteracting = false; step = 0;
+    showQuickActions(false);
+    optionsWrapper.style.display = 'none';
+    inputWrapper.style.display = 'flex';
+    chatInput.placeholder = 'Pilih jawaban lewat tombol ya 👆';
+    chatInput.value = '';
+    bubble.classList.add('show');
+    setMood('chatty');
+    say('Sedang ambil soal quiz dari spreadsheet... ⏳', true);
+    await fetchQuiz();
+    if (quizList.length === 0) {
+      say('Sheet <b>Quiz</b> di spreadsheet masih kosong 😅 Isi dulu: pertanyaan | pilihan a | pilihan b | pilihan c | pilihan d | jawaban | poin.');
+      setMood('suspicious');
+      return;
+    }
+    quizOrder = shuffleArr(quizList).slice(0, 8); // maksimal 8 soal, urutan acak
+    quizIdx = 0; quizScore = 0;
+    quizMax = quizOrder.reduce((s, r) => s + r.poin, 0);
+    say(`🧠 <b>Mode Quiz!</b> Ada <b>${quizOrder.length} soal</b> (total ${quizMax} poin).<br>Jawab lewat tombol ya. Siap? Gas! 🚀`);
+    setMood('excited');
+    blipSequence([[520, .07], [660, .07], [840, .1]]);
+    setTimeout(() => { if (mode === 'quiz') showQuizQuestion(); }, 1800);
+  }
+
+  function showQuizQuestion() {
+    if (quizIdx >= quizOrder.length) return quizFinish();
+    const row = quizOrder[quizIdx];
+    say(`🧠 Soal <b>${quizIdx + 1}/${quizOrder.length}</b> (poin ${row.poin})<br><b>${escapeHtml(row.q)}</b>`);
+    chipsBox.innerHTML = '';
+    row.opts.forEach((opt, i) => {
+      if (!opt) return;
+      const huruf = 'ABCD'[i];
+      const b = document.createElement('button');
+      b.className = 'emo-chip';
+      b.type = 'button';
+      b.textContent = `${huruf}. ${opt.length > 26 ? opt.slice(0, 25) + '…' : opt}`;
+      b.addEventListener('click', () => answerQuiz(huruf, opt));
+      chipsBox.appendChild(b);
+    });
+    chipsBox.style.display = 'flex';
+    setMood('chatty');
+  }
+
+  function answerQuiz(pilih, optText) {
+    const row = quizOrder[quizIdx];
+    const benar = pilih === row.jawaban;
+    clearChips();
+    if (benar) {
+      quizScore += row.poin;
+      say(`✅ <b>Benar!</b> (${escapeHtml(optText)}) +${row.poin} poin<br>Skor sementara: <b>${quizScore}</b>`);
+      celebrate();
+    } else {
+      const teks = row.opts['ABCD'.indexOf(row.jawaban)];
+      say(`❌ <b>Belum tepat.</b> Jawabannya <b>${row.jawaban}. ${escapeHtml(teks || '')}</b><br>Skor sementara: <b>${quizScore}</b>`);
+      setMood('suspicious');
+      blip(300, .14);
+    }
+    quizIdx++;
+    setTimeout(() => { if (mode === 'quiz') showQuizQuestion(); }, benar ? 2100 : 2600);
+  }
+
+  function quizFinish() {
+    const persen = quizMax ? Math.round((quizScore / quizMax) * 100) : 0;
+    const best = Number(localStorage.getItem('emo_quiz_best') || 0);
+    const rekor = persen > best;
+    if (rekor) localStorage.setItem('emo_quiz_best', String(persen));
+    const predikat = persen >= 80 ? '🏆 LUAR BIASA! Kamu jenius!' :
+      persen >= 60 ? '🌟 Hebat banget!' :
+      persen >= 40 ? '👍 Lumayan! Terus belajar ya' : '💪 Semangat! Ayo belajar lagi bareng EMO';
+    say(`🏁 <b>Quiz selesai!</b><br>Skor Kakak: <b>${quizScore}/${quizMax}</b> (${persen}%)<br>${predikat}` +
+      (rekor ? '<br>🎊 Rekor pribadi baru!' : `<br><small>Rekor pribadi: ${best}%</small>`));
+    if (persen >= 60) celebrate(3200); else setMood('smile');
+    setTimeout(() => {
+      resetToIdle();
+      startIntroGreeting();
+    }, 7000);
+  }
+
+  function handleQuizInput(val) {
+    if (/^(mulai|ulang|lagi|start)$/i.test(val)) { enterQuizMode(); return; }
+    say('Pilih jawaban lewat tombol di atas ya Kak! 👆 (ketik <b>mulai</b> kalau mau main lagi)');
+    setMood('chatty');
+  }
+
+  // ================= EVENT =================
+  sendBtn.addEventListener('click', handleSend);
+  sendBtn.addEventListener('click', () => blip(720, .06));
+  chipsBox.addEventListener('click', () => blip(680, .05));
+  chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleSend();
+  });
+
+  optYes.addEventListener('click', async () => {
+    if (mode === 'ticket') return submitTicketFlow();
+    optionsWrapper.style.display = 'none';
+    if (!guestData.subjek) guestData.subjek = 'Buku Tamu';
+    say('Sedang mengirim data pesan Kakak... ⏳', true);
+    setMood('whistle');
+
+    try {
+      const body = new URLSearchParams(guestData);
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body
+      });
+
+      say('Yeay! Data buku tamu berhasil terkirim ke spreadsheet! Terima kasih Kak ✨🎉');
+      celebrate(2400); // rayakan keberhasilan kirim data
+      setTimeout(() => {
+        resetToIdle();
+        startIntroGreeting();
+      }, 5000);
+    } catch (err) {
+      say('Aduh, gagal mengirim data. Coba lagi nanti ya! 😢');
+      setMood('grumble');
+    }
+  });
+
+  optNo.addEventListener('click', () => {
+    if (mode === 'ticket') { tstep = 0; askNextTicketStep(); return; }
+    step = 1;
+    askNextStep();
+  });
+
+  closeBtn.addEventListener('click', () => {
+    bubble.classList.remove('show');
+    resetToIdle();
+  });
+
+  launcher.addEventListener('click', () => {
+    bubble.classList.add('show');
+    if (!appConfig.aplikasi_on) { showAppOff(); return; }
+    if (!isInteracting && mode === 'guest') {
+      isInteracting = true;
+      step = 0;
+      showQuickActions(false);
+      clearChips();
+      askNextStep();
+    }
+    chatInput.focus();
+  });
+
+  qaChat.addEventListener('click', () => { if (!appConfig.aplikasi_on) return showAppOff(); enterChatMode(); });
+  qaSolat.addEventListener('click', enterSolatMode); // jadwal solat tetap tersedia walau aplikasi off
+  qaSong.addEventListener('click', () => { if (!appConfig.aplikasi_on) return showAppOff(); playRandomLyric(); });
+  qaAbout.addEventListener('click', showAbout);
+  qaCuaca.addEventListener('click', enterWeatherMode); // cuaca = layanan umum, tetap aktif walau aplikasi off
+  qaJadwal.addEventListener('click', () => { if (!appConfig.aplikasi_on) return showAppOff(); enterJadwalMode(); });
+  qaQuiz.addEventListener('click', () => { if (!appConfig.aplikasi_on) return showAppOff(); enterQuizMode(); });
+
+  // ====== Saklar efek suara (ikon 🔊 di header balon) ======
+  const soundToggle = document.getElementById('emo-sound-toggle');
+  function renderSoundBtn() { soundToggle.textContent = soundOn ? '🔊' : '🔇'; }
+  soundToggle.addEventListener('click', () => {
+    soundOn = !soundOn;
+    localStorage.setItem('emo_sound', soundOn ? 'on' : 'off');
+    renderSoundBtn();
+    if (soundOn) blip(760, .1);
+  });
+  renderSoundBtn();
+
+  // ================= SAPAAN AWAL & ROTASI LIRIK =================
+  async function startIntroGreeting() {
+    if (isInteracting) return;
+
+    await fetchConfig();
+    if (!appConfig.aplikasi_on) { showAppOff(); return; }
+
+    await fetchLyricsFromSpreadsheet();
+
+    // Cuaca otomatis untuk sapaan pembuka (diam-diam; gagal/lambat diabaikan)
+    if (appConfig.cuaca_on) {
+      try {
+        const w = await withTimeout(fetchWeather(weatherCity, false), 3500);
+        if (w) introWeather = `${w.info.emoji} Cuaca ${escapeHtml(w.city)} hari ini: <b>${w.temp}°C</b>, ${w.info.label.toLowerCase()}`;
+      } catch (e) {}
+    }
+
+    inputWrapper.style.display = 'none';
+    optionsWrapper.style.display = 'none';
+    showQuickActions(true);
+
+    say(`Selamat ${greetByTime()}, aku EMO! 👋`);
+    bubble.classList.add('show');
+    setMood('hello');
+
+    setTimeout(() => {
+      if (isInteracting) return;
+      let msg = `Sekarang jam ${getTimeString()} WIB nih, jangan lupa isi buku tamu ya! ⏰<br>Butuh tiket antrean kegiatan? Ketik <b>#ticket</b> 🎟️`;
+      if (introWeather) msg = `${introWeather}<br>` + msg;
+      if (isNightOwl()) msg += '<br>😴 Udah malam nih Kak, jangan begadang ya!';
+      else msg += '<br>Pst... coba juga <b>#quiz</b>, <b>#jadwal</b>, <b>#cuaca</b>, atau <b>#joke</b> 😉';
+      say(msg);
+      setMood('smile');
+    }, 3000);
+
+    setTimeout(() => {
+      if (!isInteracting) setMood('idle');
+    }, 7000);
+
+    // Rotasi sapaan & putar audio otomatis (dibuat 1x saja, tidak dobel)
+    if (!rotatorStarted) {
+      rotatorStarted = true;
+      setInterval(() => {
+        if (!appConfig.aplikasi_on) return;
+        if (isInteracting || mode !== 'guest' || document.activeElement === chatInput) return;
+        playRandomLyric();
+        setTimeout(() => {
+          if (!isInteracting && mode === 'guest') setMood('idle');
+        }, 4500);
+      }, 13000);
+    }
+  }
+
+  // Gerakan ambient acak hanya saat EMO tidak sedang menjalankan dialog.
+  let ambientTimer = null;
+  function scheduleAmbientMotion() {
+    clearTimeout(ambientTimer);
+    ambientTimer = setTimeout(() => {
+      if (!isInteracting && launcher.dataset.mood === 'idle' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const pick = Math.random();
+        launcher.classList.remove('emo-jump', 'emo-dance', 'emo-wiggle', 'emo-run', 'emo-party', 'emo-spin');
+        if (isNightOwl() && Math.random() < 0.45) {
+          // Dini hari/malam: EMO lebih sering menguap ngantuk 😴
+          setMood('sleepy');
+          setTimeout(() => { if (!isInteracting) setMood('idle'); }, 4200);
+        } else if (pick < 0.18) {
+          launcher.classList.add('emo-jump');
+          setMood('excited');
+          setTimeout(() => { launcher.classList.remove('emo-jump'); if (!isInteracting) setMood('idle'); }, 950);
+        } else if (pick < 0.34) {
+          launcher.classList.add('emo-dance');
+          setMood('laugh');
+          setTimeout(() => { launcher.classList.remove('emo-dance'); if (!isInteracting) setMood('idle'); }, 1500);
+        } else if (pick < 0.48) {
+          launcher.classList.add('emo-wiggle');
+          setMood('look-left');
+          setTimeout(() => { launcher.classList.remove('emo-wiggle'); if (!isInteracting) setMood('idle'); }, 800);
+        } else if (pick < 0.58) {
+          doRun(); // sesekali kaki EMO berlari di tempat
+        } else if (pick < 0.65) {
+          launcher.classList.add('emo-spin'); // sesekali berputar 720deg 🌀
+          setMood('excited');
+          setTimeout(() => { launcher.classList.remove('emo-spin'); if (!isInteracting) setMood('idle'); }, 1250);
+        } else {
+          // Rotasi ekspresi baru: lirik kanan-kiri, ngantuk, belo, melotot, melayang, dsb.
+          const moods = ['glance', 'glance', 'look-left', 'look-right', 'suspicious', 'whistle', 'chatty', 'sleepy', 'belo', 'melotot', 'float'];
+          const m = moods[Math.floor(Math.random() * moods.length)];
+          setMood(m);
+          const hold = { glance: 2600, sleepy: 3800, belo: 2800, melotot: 2200, float: 3600, whistle: 2600 }[m] || (1600 + Math.random() * 700);
+          setTimeout(() => { if (!isInteracting) setMood('idle'); }, hold);
+        }
+      }
+      scheduleAmbientMotion();
+    }, 4800 + Math.random() * 5200);
+  }
+  scheduleAmbientMotion();
+
+  // Peringatan bila URL Web App belum dipasang (SCRIPT_URL masih placeholder)
+  if (/GANTI|XXXXX|CONTOH|placeholder/i.test(SCRIPT_URL)) {
+    setTimeout(() => say('⚙️ <b>Admin,</b> pasang dulu URL Web App (akhiran /exec) ke variabel <b>SCRIPT_URL</b> di file HTML ini!'), 1500);
+  }
+
+  fetchConfig();
+  setInterval(fetchConfig, 180000); // segarkan saklar on/off tiap 3 menit
+  setTimeout(startIntroGreeting, 800);
+})();
+</script>
+</body>
+</html>
