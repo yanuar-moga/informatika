@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<!--
+═══════════════════════════════════════════════════════════════════════════
+ EMO TICKER — Teks titipan Buku Tamu / Kirim Atesi / Curhat / Kritik & Saran
+ Berisi NAMA + ALAMAT + PESAN dari Google Spreadsheet (sheet BukuTamu).
+
+ Efek: pesan MUNCUL DIKETIK huruf demi huruf → setelah selesai diketik
+ diberi JEDA 5 DETIK → lalu SLIDE UP berganti ke pesan baris berikutnya.
+
+ CARA PAKAI (2 pilihan):
+ 1. Upload file ini utuh ke hosting → buka langsung (halaman demo jalan).
+ 2. Tempel ke halaman web Anda (Blogger/website sekolah):
+    - blok  <style>…</style>
+    - blok  <div id="emo-ticker">…</div>
+    - blok  <script>…</script>
+    Ketiganya independen, tidak butuh library apa pun.
+
+ SYARAT:
+ - Code.gs versi terbaru sudah di-deploy (ada action ?action=get_ticker).
+ - SCRIPT_URL di bawah = URL Web App /exec yang sama dengan widget EMO.
+
+ PENGATURAN cepat ada di objek EMO_TICKER_CFG dalam <script>:
+   LIMIT       → jumlah titipan maksimal yang ditampilkan (default 25)
+   TYPE_MS     → kecepatan mengetik (ms per karakter, default 45)
+   JEDA_MS     → jeda tampil setelah selesai diketik (default 5000 = 5 detik)
+   KATEGORI    → filter subjek. Kosongkan [] untuk menampilkan SEMUA.
+                 Contoh: ['Buku Tamu','Kirim Atesi','Curhat','Kritik dan Saran']
+═══════════════════════════════════════════════════════════════════════════
+-->
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMO Ticker — Titipan Buku Tamu</title>
+
+<style>
+/* ═══════ MULAI BLOK STYLE (copy dari sini bila mau menempel) ═══════ */
+#emo-ticker {
+  --et-cyan: #00f2fe;
+  --et-blue: #4facfe;
+  box-sizing: border-box;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 16px 18px 14px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #0e1a30, #10142a);
+  border: 1px solid rgba(0, 242, 254, 0.35);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.4), 0 0 22px rgba(0, 242, 254, 0.12) inset;
+  font-family: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', sans-serif;
+  color: #e7f6ff;
+  overflow: hidden;
+}
+#emo-ticker * { box-sizing: border-box; }
+
+#emo-ticker .et-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px; gap: 10px;
+}
+#emo-ticker .et-title {
+  font-size: 15px; font-weight: 700; letter-spacing: .4px;
+  background: linear-gradient(90deg, var(--et-cyan), var(--et-blue));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+#emo-ticker .et-live {
+  flex: none; font-size: 10.5px; font-weight: 700; letter-spacing: 1px;
+  color: var(--et-cyan); border: 1px solid rgba(0,242,254,.45);
+  border-radius: 999px; padding: 3px 9px;
+  animation: et-blink-dot 2.2s infinite;
+}
+@keyframes et-blink-dot { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+
+#emo-ticker .et-view {
+  position: relative; min-height: 104px; overflow: hidden;
+}
+#emo-ticker .et-slide {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; justify-content: center; gap: 7px;
+  transition: transform .55s cubic-bezier(.4,0,.2,1), opacity .55s ease;
+  will-change: transform, opacity;
+}
+#emo-ticker .et-slide.et-hide { transition: none; transform: translateY(115%); opacity: 0; }
+#emo-ticker .et-slide.et-out  { transform: translateY(-115%); opacity: 0; }
+#emo-ticker .et-slide.et-show { transform: translateY(0); opacity: 1; }
+
+#emo-ticker .et-meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px;
+  font-size: 12.5px; color: #9fb4d8;
+}
+#emo-ticker .et-badge {
+  flex: none; font-size: 10.5px; font-weight: 700; color: #06121f;
+  background: linear-gradient(90deg, var(--et-cyan), var(--et-blue));
+  border-radius: 999px; padding: 3px 10px;
+}
+#emo-ticker .et-nama { font-weight: 700; color: #fff; font-size: 13px; }
+#emo-ticker .et-alamat::before { content: '🏠 '; }
+#emo-ticker .et-waktu::before { content: '🕒 '; }
+
+#emo-ticker .et-msg {
+  font-size: 14.5px; line-height: 1.55; color: #dcecff;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  min-height: 3.1em;
+}
+#emo-ticker .et-cursor {
+  display: inline-block; width: 8px; margin-left: 2px;
+  color: var(--et-cyan); font-weight: 700;
+  animation: et-caret .8s steps(1) infinite;
+}
+@keyframes et-caret { 50% { opacity: 0; } }
+
+#emo-ticker .et-foot {
+  margin-top: 10px; font-size: 10.5px; color: #64809f; text-align: right;
+}
+#emo-ticker .et-foot b { color: var(--et-cyan); font-weight: 700; }
+
+@media (max-width: 480px) {
+  #emo-ticker { border-radius: 16px; padding: 13px 14px 11px; }
+  #emo-ticker .et-msg { font-size: 13.5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #emo-ticker .et-slide { transition-duration: .01s; }
+}
+/* ═══════ AKHIR BLOK STYLE ═══════ */
+</style>
+</head>
+
+<body style="margin:0;min-height:100vh;display:flex;flex-direction:column;justify-content:center;gap:22px;background:radial-gradient(900px 500px at 70% -10%, #0f1b33, #070a12 60%);padding:34px 16px;">
+
+<!-- ═══════ MULAI BLOK HTML (copy dari sini bila mau menempel) ═══════ -->
+<div id="emo-ticker" aria-live="polite">
+  <div class="et-head">
+    <div class="et-title">📣 Titipan Terbaru — Buku Tamu, Atesi, Curhat &amp; Kritik</div>
+    <div class="et-live">● LIVE</div>
+  </div>
+  <div class="et-view">
+    <div class="et-slide" id="et-slide">
+      <div class="et-meta" id="et-meta"></div>
+      <div class="et-msg" id="et-msg"><span id="et-text"></span><span class="et-cursor" id="et-cursor">▌</span></div>
+    </div>
+  </div>
+  <div class="et-foot">diperbarui otomatis oleh <b>EMO 🤖</b> dari Google Spreadsheet</div>
+</div>
+<!-- ═══════ AKHIR BLOK HTML ═══════ -->
+
+<script>
+/* ═══════ MULAI BLOK SCRIPT (copy dari sini bila mau menempel) ═══════ */
+(function () {
+  // ================= PENGATURAN =================
+  const EMO_TICKER_CFG = {
+    // URL Web App Apps Script — HARUS sama dengan SCRIPT_URL di widget EMO
+    SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzYTRpMIG9LW9W1bFOssh9M5hwWrFzzWnViVm7G7SkSol8-8s8L5H8RU-M6oAwx7uyO/exec',
+
+    LIMIT: 25,          // jumlah titipan maksimal yang ditampilkan
+    TYPE_MS: 45,        // kecepatan mengetik (ms per karakter)
+    JEDA_MS: 5000,      // jeda 5 detik setelah pesan selesai diketik
+    SLIDE_MS: 600,      // durasi animasi slide up (ms)
+    REFRESH_MS: 120000, // ambil data terbaru tiap 2 menit
+
+    // Filter subjek yang ditampilkan. Kosongkan [] = tampilkan SEMUA titipan.
+    // Contoh: ['Buku Tamu', 'Kirim Atesi', 'Curhat', 'Kritik dan Saran']
+    KATEGORI: []
+  };
+  // ==============================================
+
+  const slide = document.getElementById('et-slide');
+  const metaEl = document.getElementById('et-meta');
+  const textEl = document.getElementById('et-text');
+  const cursorEl = document.getElementById('et-cursor');
+
+  // Data cadangan — dipakai bila Apps Script belum terpasang/belum ter-deploy
+  const DEMO = [
+    { nama: 'Yanuar', alamat: 'Moga, Pemalang', subjek: 'Buku Tamu', pesan: 'Webnya keren banget! Robot EMO nya lucu 😄', waktu: '' },
+    { nama: 'Siti', alamat: 'Pemalang, Jawa Tengah', subjek: 'Curhat', pesan: 'Semangat buat semua siswa, jangan lupa solat ya 🤲', waktu: '' },
+    { nama: 'Budi', alamat: 'Comal, Pemalang', subjek: 'Kritik dan Saran', pesan: 'Tambahan foto kegiatan dong di halaman depan 👍', waktu: '' }
+  ];
+
+  let data = [];
+  let idx = 0;
+  let typeTimer = null;
+  let busy = false;
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // Teks dari spreadsheet → HTML aman; tag <br/> & enter → baris baru
+  // (gabungan tag + enter dihitung satu baris, biar rapi)
+  function richText(s) {
+    const t = esc(s).replace(/&lt;\s*\/?\s*br\s*\/?\s*&gt;/gi, '\n');
+    return t.split('\n').map(l => l.trim()).filter(l => l !== '').join('<br>');
+  }
+
+  // Tokenisasi seperti efek ketik widget EMO: tag & entity dianggap 1 langkah
+  function tokenize(html) {
+    return html.match(/<[^>]+>|&[a-zA-Z#0-9]+;|[\s\S]/g) || [];
+  }
+
+  function potong(html, maks) {
+    if (html.length <= maks) return html;
+    return html.slice(0, maks - 1).replace(/\s+\S*$/, '') + '…';
+  }
+
+  async function fetchTicker() {
+    try {
+      const res = await fetch(EMO_TICKER_CFG.SCRIPT_URL + '?action=get_ticker&limit=' + EMO_TICKER_CFG.LIMIT);
+      const j = await res.json();
+      if (!j || !j.ok || !Array.isArray(j.ticker)) throw new Error('format');
+      let arr = j.ticker.filter(x => x.nama || x.pesan);
+      if (EMO_TICKER_CFG.KATEGORI.length) {
+        const ok = EMO_TICKER_CFG.KATEGORI.map(k => String(k).toLowerCase());
+        arr = arr.filter(x => ok.indexOf(String(x.subjek || '').toLowerCase()) !== -1);
+      }
+      if (arr.length) data = arr;
+    } catch (e) {
+      if (!data.length) data = DEMO; // offline / action belum ada → pakai demo
+    }
+  }
+
+  function renderMeta(item) {
+    let h = '';
+    if (item.subjek) h += '<span class="et-badge">' + esc(item.subjek) + '</span>';
+    if (item.nama) h += '<span class="et-nama">👤 ' + esc(item.nama) + '</span>';
+    if (item.alamat) h += '<span class="et-alamat">' + esc(item.alamat) + '</span>';
+    if (item.waktu) h += '<span class="et-waktu">' + esc(item.waktu) + '</span>';
+    metaEl.innerHTML = h || '<span class="et-nama">👤 Pengunjung</span>';
+  }
+
+  function ketik(tokens, selesai) {
+    let i = 0, out = '';
+    (function tick() {
+      if (i >= tokens.length) { if (selesai) selesai(); return; }
+      out += tokens[i++];
+      textEl.innerHTML = out;
+      typeTimer = setTimeout(tick, EMO_TICKER_CFG.TYPE_MS);
+    })();
+  }
+
+  function tampilkan(item) {
+    renderMeta(item);
+    const pesan = potong(richText(item.pesan || 'Terima kasih sudah mampir 🙏'), 260);
+    textEl.innerHTML = '';
+    slide.classList.remove('et-out');
+    slide.classList.add('et-hide');
+    void slide.offsetWidth; // paksa reflow supaya posisi awal (bawah) terpasang
+    slide.classList.remove('et-hide');
+    slide.classList.add('et-show');
+    ketik(tokenize(pesan), () => {
+      // pesan selesai diketik → jeda 5 detik → slide up ke pesan berikutnya
+      setTimeout(next, EMO_TICKER_CFG.JEDA_MS);
+    });
+  }
+
+  function next() {
+    if (busy) return;
+    if (!data.length) return;
+    busy = true;
+    clearTimeout(typeTimer);
+    slide.classList.remove('et-show');
+    slide.classList.add('et-out'); // slide up keluar
+    setTimeout(() => {
+      busy = false;
+      idx = (idx + 1) % data.length;
+      tampilkan(data[idx]);
+    }, EMO_TICKER_CFG.SLIDE_MS);
+  }
+
+  function mulai() {
+    if (!data.length) {
+      metaEl.innerHTML = '<span class="et-nama">💬 Belum ada titipan</span>';
+      textEl.textContent = 'Yuk jadi yang pertama isi buku tamu lewat robot EMO di pojok kanan bawah! ✨';
+      setTimeout(mulai, EMO_TICKER_CFG.REFRESH_MS);
+      return;
+    }
+    idx = 0;
+    tampilkan(data[0]);
+  }
+
+  (async function init() {
+    await fetchTicker();
+    mulai();
+    setInterval(fetchTicker, EMO_TICKER_CFG.REFRESH_MS); // data baru masuk otomatis
+  })();
+})();
+/* ═══════ AKHIR BLOK SCRIPT ═══════ */
+</script>
+
+<!-- Contoh pesan dengan <br/> di spreadsheet: akan tampil sebagai alinea baru:
+     "Halo semuanya!<br/>Mari berkunjung ke web sekolah kita.<br/>Salam hangat!" -->
+</body>
+</html>
