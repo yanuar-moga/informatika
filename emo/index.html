@@ -84,6 +84,14 @@
     word-break: break-word;
   }
 
+  /* Tautan di dalam balon chat (mis. link About) */
+  #ai-emo-speech-text a {
+    color: var(--emo-cyan);
+    font-weight: 600;
+    text-decoration: underline;
+  }
+  #ai-emo-speech-text a:hover { color: #fff; }
+
   /* Input Form di Dalam Balon Chat (Default Disembunyikan) */
   #emo-chat-input-wrapper {
     display: none;
@@ -439,16 +447,17 @@
   <div class="card">
     <h2>FITUR</h2>
     <ol>
-      <li><b>Buku tamu + pilihan tujuan</b> — Buku Tamu / Kritik &amp; Saran / Kirim Atesi / Curhat / Lainnya — tersimpan otomatis ke Google Spreadsheet (Apps Script). Klik <b>✨ Lainnya</b> untuk membuka <b>semua menu EMO</b>: ngobrol, playlist lagu, cuaca, jadwal solat, jadwal pelajaran, quiz, tiket &amp; about.</li>
+      <li><b>Buku tamu + pilihan tujuan</b> — Buku Tamu / Kritik &amp; Saran / Kirim Atesi / Curhat / Lainnya — tersimpan otomatis ke Google Spreadsheet (Apps Script). Klik <b>✨ Lainnya</b> untuk membuka <b>semua menu EMO</b>: ngobrol, playlist lagu, cuaca, jadwal solat, jadwal pelajaran, quiz &amp; about.</li>
       <li><b>Playlist lagu 🎧</b> — tombol 🎵 Lagu membuka daftar lagu dari sheet <b>Lirik</b> (kolom judul opsional); pilih lagunya, atau ketik judulnya. Saat audio diputar EMO <b>menyanyi + equalizer</b>. Ikon <b>🔊/🔇</b> kini benar-benar mematikan lagu &amp; efek suara. Tag <b>&lt;br/&gt;</b> (atau enter) di kolom lirik spreadsheet tampil sebagai <b>alinea baru</b> di balon chat.</li>
       <li><b>Bot chat</b> — dari sheet <b>Chat</b> (pertanyaan, opsi jawaban pertama, jawaban ke 2, jawaban ke 3, kategori).</li>
-      <li><b>Tiket antrean #ticket</b> — by name &amp; kelas (Siswa/Guru/Umum), nomor antrean otomatis ke sheet <b>Ticket</b> (aktif dari sheet <b>Konfig</b>).</li>
+      <li><b>Tiket antrean #ticket (tersembunyi 🤫)</b> — sengaja <b>tidak ada di menu/hint</b>; fitur tetap aktif bila pengunjung mengetik <b>#ticket</b> di kolom chat: by name &amp; kelas (Siswa/Guru/Umum), nomor antrean otomatis ke sheet <b>Ticket</b> (aktif dari Konfig <b>ticket_on</b>).</li>
       <li><b>Cuaca otomatis ⛅</b> — default <b>Moga, Pemalang</b> (koordinat presisi); ketik nama kota lain di menu cuaca (contoh: <i>jakarta</i>) untuk lihat cuaca kotanya. Suhu + prakiraan 3 hari (Open-Meteo, gratis tanpa API key) + saran bawa payung.</li>
       <li><b>Jadwal pelajaran 📅</b> — dari sheet <b>Jadwal</b>; tampil otomatis per hari ini, bisa lihat hari lain &amp; filter kelas.</li>
       <li><b>Quiz interaktif 🧠</b> — dari sheet <b>Quiz</b>; soal diacak, poin, skor akhir, predikat &amp; rekor pribadi.</li>
-      <li><b>Pengingat waktu solat</b> — default <b>Moga, Pemalang</b> via koordinat (API Aladhan metode Kemenag RI), bisa ganti kota.</li>
+      <li><b>Pengingat waktu solat</b> — default <b>Moga, Pemalang</b> via koordinat (API Aladhan metode Kemenag RI), bisa ganti kota. Jadwal tampil <b>rapi satu baris per waktu</b> (Imsak → Isya).</li>
       <li><b>Ticker titipan 📣</b> — file <b>emo-ticker.html</b> menampilkan titipan buku tamu / atesi / curhat / kritik &amp; saran (nama, alamat, pesan) dengan <b>efek mengetik</b>, jeda <b>5 detik</b>, lalu <b>slide up</b> ke pesan berikutnya. Data dari sheet BukuTamu via action <b>get_ticker</b>.</li>
       <li><b>Karakter hidup</b> — efek ketik, sapaan pagi/siang/sore/malam, mode begadang, efek suara blip, dan easter egg <b>#dance #party #joke #love #spin</b>.</li>
+      <li><b>About ℹ️</b> — deskripsi aplikasi + kredit <b>Dev by MB</b> · <b>Build 25 Oct 2026</b> · link <b>lynk.id/mb_dprint</b>. Kata "spreadsheet" sudah dihapus dari semua teks balon — diganti "sistem" agar backend tidak terlihat pengunjung.</li>
     </ol>
   </div>
 </section>
@@ -839,7 +848,9 @@
   }
 
   // ================= KONFIGURASI APLIKASI (sheet Konfig) =================
-  const ABOUT_DEFAULT = 'EMO: buku tamu digital, bot chat, playlist lagu, tiket antrean, pengingat solat, cuaca otomatis, jadwal pelajaran & quiz untuk web sekolah. Ditenagai Google Spreadsheet + Apps Script.';
+  const ABOUT_DEFAULT = 'EMO: buku tamu digital, bot chat, playlist lagu, pengingat solat, cuaca otomatis, jadwal pelajaran & quiz untuk web sekolah. Ditenagai sistem modern.';
+  // Kredit About — selalu tampil di bawah deskripsi aplikasi
+  const ABOUT_CREDIT = '👨‍💻 Dev by <b>MB</b> · 🛠️ Build 25 Oct 2026<br>🔗 <a href="https://lynk.id/mb_dprint" target="_blank" rel="noopener noreferrer">lynk.id/mb_dprint</a>';
   let appConfig = { aplikasi_on: true, ticket_on: false, cuaca_on: true, jadwal_on: true, quiz_on: true, about: '' };
 
   function normBool(v) {
@@ -878,7 +889,7 @@
     optionsWrapper.style.display = 'none';
     clearChips();
     showQuickActions(true);
-    say(`ℹ️ <b>Tentang Aplikasi</b><br>${richText(appConfig.about || ABOUT_DEFAULT)}`);
+    say(`ℹ️ <b>Tentang Aplikasi</b><br>${richText(appConfig.about || ABOUT_DEFAULT)}<br><br>${ABOUT_CREDIT}`);
     setMood('smile');
   }
 
@@ -888,7 +899,7 @@
     optionsWrapper.style.display = 'none';
     clearChips();
     showQuickActions(false);
-    say('🔧 <b>Aplikasi sedang dinonaktifkan</b> oleh admin (atur di sheet <b>Konfig</b>). Terima kasih atas pengertiannya! 🙏');
+    say('🔧 <b>Aplikasi sedang dinonaktifkan</b> oleh admin. Terima kasih atas pengertiannya! 🙏');
     bubble.classList.add('show');
     setMood('grumble');
   }
@@ -1005,7 +1016,7 @@
         { q: 'apa itu emo', a1: 'Aku EMO 🤖 robot buku tamu sekaligus teman ngobrol di web ini!', a2: 'Aku EMO, asisten mini yang siap nemenin Kakak ✨', a3: '', kategori: 'Umum' },
         { q: 'assalamualaikum', a1: 'Waalaikumsalam Kak! Ada yang bisa EMO bantu? 😊', a2: 'Waalaikumsalam 🙏 yuk ngobrol sama EMO!', a3: '', kategori: 'Salam' },
         { q: 'cara isi buku tamu', a1: 'Gampang! Klik badan EMO, nanti EMO pandu step by step 📝', a2: '', a3: '', kategori: 'Bantuan' },
-        { q: 'cara ambil tiket', a1: 'Ketik #ticket di kolom chat EMO, form tiket antrean langsung muncul 🎟️', a2: 'Tiket diaktifkan admin lewat sheet Konfig ya Kak', a3: '', kategori: 'Bantuan' }
+        { q: 'cara ambil tiket', a1: 'Untuk tiket kegiatan, silakan tanyakan langsung ke panitia/petugas ya Kak 😊', a2: '', a3: '', kategori: 'Bantuan' }
       ];
     }
     return qnaList;
@@ -1227,12 +1238,13 @@
         return;
       }
     }
-    say('Pilih salah satu tombol di atas ya Kak, atau ketik <b>#ticket</b> kalau butuh tiket antrean 🎟️');
+    say('Pilih salah satu tombol di atas ya Kak 😊');
   }
 
   // ✨ MENU LAINNYA — pintu ke semua fitur EMO: ngobrol, lagu, solat, cuaca,
-  // jadwal pelajaran, quiz, tiket, about. Yang dimatikan admin lewat sheet
-  // Konfig otomatis tidak ikut tampil.
+  // jadwal pelajaran, quiz, about. Yang dimatikan admin otomatis tidak ikut
+  // tampil. Fitur tiket SENGAJA disembunyikan dari menu — tetap aktif lewat
+  // perintah rahasia #ticket yang diketik langsung di kolom chat.
   function showMoreMenu() {
     mode = 'guest'; isInteracting = true; step = 0;
     inputWrapper.style.display = 'none';
@@ -1257,7 +1269,6 @@
     addChip('🕌 Jadwal Solat', enterSolatMode);
     if (appConfig.jadwal_on) addChip('📅 Jadwal Pelajaran', enterJadwalMode);
     if (appConfig.quiz_on) addChip('🧠 Quiz', enterQuizMode);
-    if (appConfig.ticket_on) addChip('🎟️ Tiket Antrean', enterTicketMode);
     addChip('ℹ️ About', showAbout);
     addChip('⬅ Isi Buku Tamu', () => { clearChips(); askNextStep(); });
     chipsBox.style.display = 'flex';
@@ -1275,7 +1286,7 @@
     chatInput.placeholder = 'Tulis balasan...';
 
     if (step === 0) {
-      chatInput.placeholder = 'Pilih di atas, atau ketik #ticket 🎟️';
+      chatInput.placeholder = 'Pilih di atas, atau ketik pesanmu... ✏️';
       say('Halo Kak! Mau titip <b>apa</b> hari ini? Pilih di bawah 👇<br><small>Klik <b>✨ Lainnya</b> untuk membuka semua menu EMO (solat, lagu, cuaca, dll) 😉</small>');
       renderSubjekChips();
       setMood('chatty');
@@ -1456,7 +1467,7 @@
       inputWrapper.style.display = 'none';
       optionsWrapper.style.display = 'none';
       clearChips();
-      say('🎟️ Maaf, <b>tiket sedang ditutup</b> oleh admin (atur di sheet <b>Konfig</b>). Coba lagi nanti ya!');
+      say('🎟️ Maaf, <b>tiket sedang ditutup</b> oleh admin. Coba lagi nanti ya!');
       setMood('grumble');
       return;
     }
@@ -1630,7 +1641,8 @@
   }
 
   function renderJadwal() {
-    const rows = PRAYERS.map(([k, label]) => `${label} <b>${solatTimings[k] || '-'}</b>`).join(' &nbsp;|&nbsp; ');
+    // Tampilan rapi: setiap waktu solat di baris/alinea sendiri
+    const rows = PRAYERS.map(([k, label]) => `• ${label} <b>${solatTimings[k] || '-'}</b>`).join('<br>');
     const next = getNextPrayer();
     say(`🕌 <b>Jadwal Solat — ${escapeHtml(solatCity)}</b><br>${rows}${next ? `<br>⏳ Menuju <b>${next.label}</b> ± <b>${next.diff}</b> lagi` : ''}`);
   }
@@ -1878,7 +1890,7 @@
     if (!rows.length) {
       html += jadwalList.length
         ? `Tidak ada jadwal${kelasFilter ? ' untuk kelas itu' : ''}. Lihat hari lain: ketik <b>hari: Senin</b> 📚`
-        : 'Sheet <b>Jadwal</b> di spreadsheet masih kosong 😅 Isi dulu: hari | jam | mapel | kelas | guru | ruangan.';
+        : 'Maaf, data <b>Jadwal</b> belum tersedia di sistem 😅 Coba lagi nanti ya.';
     } else {
       html += rows.map(r => `⏰ <b>${escapeHtml(r.jam || '-')}</b> — <b>${escapeHtml(r.mapel)}</b>` +
         (r.kelas ? ` (${escapeHtml(r.kelas)})` : '') +
@@ -1892,7 +1904,7 @@
   async function enterJadwalMode() {
     if (!appConfig.jadwal_on) {
       bubble.classList.add('show');
-      say('📅 Maaf, fitur <b>jadwal sedang dimatikan</b> oleh admin (atur di sheet <b>Konfig</b>).');
+      say('📅 Maaf, fitur <b>jadwal sedang dimatikan</b> oleh admin.');
       setMood('grumble');
       return;
     }
@@ -1904,7 +1916,7 @@
     chatInput.value = '';
     bubble.classList.add('show');
     setMood('chatty');
-    say('Sedang ambil jadwal pelajaran dari spreadsheet... ⏳', true);
+    say('Sedang ambil jadwal pelajaran dari sistem... ⏳', true);
     await fetchJadwal();
     const h = hariIni();
     if (h === 'Sabtu' || h === 'Minggu') renderJadwalPelajaran('Senin', '', `Hari ini ${h} — libur! Ini preview jadwal Senin ya 📚`);
@@ -1972,7 +1984,7 @@
   async function enterQuizMode() {
     if (!appConfig.quiz_on) {
       bubble.classList.add('show');
-      say('🧠 Maaf, fitur <b>quiz sedang dimatikan</b> oleh admin (atur di sheet <b>Konfig</b>).');
+      say('🧠 Maaf, fitur <b>quiz sedang dimatikan</b> oleh admin.');
       setMood('grumble');
       return;
     }
@@ -1984,10 +1996,10 @@
     chatInput.value = '';
     bubble.classList.add('show');
     setMood('chatty');
-    say('Sedang ambil soal quiz dari spreadsheet... ⏳', true);
+    say('Sedang ambil soal quiz dari sistem... ⏳', true);
     await fetchQuiz();
     if (quizList.length === 0) {
-      say('Sheet <b>Quiz</b> di spreadsheet masih kosong 😅 Isi dulu: pertanyaan | pilihan a | pilihan b | pilihan c | pilihan d | jawaban | poin.');
+      say('Maaf, data <b>Quiz</b> belum tersedia di sistem 😅 Coba lagi nanti ya.');
       setMood('suspicious');
       return;
     }
@@ -2083,7 +2095,7 @@
         body
       });
 
-      say('Yeay! Data buku tamu berhasil terkirim ke spreadsheet! Terima kasih Kak ✨🎉');
+      say('Yeay! Data buku tamu berhasil terkirim ke sistem! Terima kasih Kak ✨🎉');
       celebrate(2400); // rayakan keberhasilan kirim data
       setTimeout(() => {
         resetToIdle();
@@ -2174,7 +2186,7 @@
 
     setTimeout(() => {
       if (isInteracting) return;
-      let msg = `Sekarang jam ${getTimeString()} WIB nih, jangan lupa isi buku tamu ya! ⏰<br>Butuh tiket antrean kegiatan? Ketik <b>#ticket</b> 🎟️`;
+      let msg = `Sekarang jam ${getTimeString()} WIB nih, jangan lupa isi buku tamu ya! ⏰`;
       if (introWeather) msg = `${introWeather}<br>` + msg;
       if (isNightOwl()) msg += '<br>😴 Udah malam nih Kak, jangan begadang ya!';
       else msg += '<br>Pst... coba juga <b>#lagu</b>, <b>#quiz</b>, <b>#joke</b> — atau klik <b>✨ Lainnya</b> di menu buku tamu untuk membuka semua fitur 😉';
