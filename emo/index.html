@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EMO — Demo Widget Buku Tamu, Chat, Playlist Lagu, Cuaca, Jadwal & Quiz</title>
+<title>EMO</title>
 <style>
   /* EMO — Scope Widget */
   #ai-emo-widget {
@@ -410,27 +410,11 @@
     #ai-emo-launcher, #ai-emo-launcher *, #ai-emo-launcher #emo-ground-shadow { animation:none !important; transition:none !important; }
   }
 
-  /* ====== HALAMAN DEMO (hapus blok .emo-demo jika hanya ingin menempel widget ke situs sendiri) ====== */
+  /* ====== LATAR HALAMAN (hapus blok ini jika menempel widget ke situs sendiri) ====== */
   body {
     margin: 0; min-height: 100vh;
     background: radial-gradient(1200px 600px at 70% -10%, #0f1b33, #070a12 60%);
-    color: #e2f1ff;
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
-  .emo-demo { max-width: 760px; padding: 64px 24px 340px; }
-  .emo-demo h1 { font-size: 30px; line-height: 1.25; margin: 0 0 12px; color: #fff; }
-  .emo-demo h1 span { color: #00f2fe; }
-  .emo-demo > p { color: #9fb4d8; line-height: 1.7; margin: 0 0 24px; }
-  .emo-demo .card {
-    background: rgba(18, 26, 43, 0.72);
-    border: 1px solid rgba(0, 242, 254, 0.25);
-    border-radius: 16px;
-    padding: 18px 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,.35);
-  }
-  .emo-demo .card h2 { margin: 0 0 10px; font-size: 15px; color: #00f2fe; letter-spacing: .5px; }
-  .emo-demo .card ol { margin: 0; padding-left: 20px; color: #9fb4d8; font-size: 13.5px; line-height: 1.9; }
-  .emo-demo .card b { color: #e2f1ff; }
 
   @media(max-width: 480px) {
     #ai-emo-widget { right: 12px; bottom: 12px; }
@@ -440,27 +424,6 @@
 </style>
 </head>
 <body>
-
-<section class="emo-demo">
-  <h1>Robot <span>EMO</span> — Buku Tamu, Chat, Playlist Lagu, Cuaca, Jadwal &amp; Quiz</h1>
-  <p>Widget melayang di pojok <b>kanan bawah</b> halaman ini. Klik badan robotnya untuk mulai, atau coba tombol <b>💬 Chat</b>, <b>🕌 Solat</b>, <b>🎵 Lagu</b> (playlist!), <b>⛅ Cuaca</b>, <b>📅 Jadwal</b>, <b>🧠 Quiz</b>, dan <b>ℹ️ About</b> di balon percakapannya. Pst... ketik <b>#lagu</b>, <b>#joke</b>, <b>#quiz</b>, atau <b>#dance</b> di kolom chat, atau klik <b>✨ Lainnya</b> di menu buku tamu untuk membuka SEMUA menu 😉</p>
-  <div class="card">
-    <h2>FITUR</h2>
-    <ol>
-      <li><b>Buku tamu + pilihan tujuan</b> — Buku Tamu / Kritik &amp; Saran / Kirim Atesi / Curhat / Lainnya — tersimpan otomatis ke Google Spreadsheet (Apps Script). Klik <b>✨ Lainnya</b> untuk membuka <b>semua menu EMO</b>: ngobrol, playlist lagu, cuaca, jadwal solat, jadwal pelajaran, quiz &amp; about.</li>
-      <li><b>Playlist lagu 🎧</b> — tombol 🎵 Lagu membuka daftar lagu dari sheet <b>Lirik</b> (kolom judul opsional); pilih lagunya, atau ketik judulnya. Saat audio diputar EMO <b>menyanyi + equalizer</b>. Ikon <b>🔊/🔇</b> kini benar-benar mematikan lagu &amp; efek suara. Tag <b>&lt;br/&gt;</b> (atau enter) di kolom lirik spreadsheet tampil sebagai <b>alinea baru</b> di balon chat.</li>
-      <li><b>Bot chat</b> — dari sheet <b>Chat</b> (pertanyaan, opsi jawaban pertama, jawaban ke 2, jawaban ke 3, kategori).</li>
-      <li><b>Tiket antrean #ticket (tersembunyi 🤫)</b> — sengaja <b>tidak ada di menu/hint</b>; fitur tetap aktif bila pengunjung mengetik <b>#ticket</b> di kolom chat: by name &amp; kelas (Siswa/Guru/Umum), nomor antrean otomatis ke sheet <b>Ticket</b> (aktif dari Konfig <b>ticket_on</b>).</li>
-      <li><b>Cuaca otomatis ⛅</b> — default <b>Moga, Pemalang</b> (koordinat presisi); ketik nama kota lain di menu cuaca (contoh: <i>jakarta</i>) untuk lihat cuaca kotanya. Suhu + prakiraan 3 hari (Open-Meteo, gratis tanpa API key) + saran bawa payung.</li>
-      <li><b>Jadwal pelajaran 📅</b> — dari sheet <b>Jadwal</b>; tampil otomatis per hari ini, bisa lihat hari lain &amp; filter kelas.</li>
-      <li><b>Quiz interaktif 🧠</b> — dari sheet <b>Quiz</b>; soal diacak, poin, skor akhir, predikat &amp; rekor pribadi.</li>
-      <li><b>Pengingat waktu solat</b> — default <b>Moga, Pemalang</b> via koordinat (API Aladhan metode Kemenag RI), bisa ganti kota. Jadwal tampil <b>rapi satu baris per waktu</b> (Imsak → Isya).</li>
-      <li><b>Ticker titipan 📣</b> — file <b>emo-ticker.html</b> menampilkan titipan buku tamu / atesi / curhat / kritik &amp; saran (nama, alamat, pesan) dengan <b>efek mengetik</b>, jeda <b>5 detik</b>, lalu <b>slide up</b> ke pesan berikutnya. Data dari sheet BukuTamu via action <b>get_ticker</b>.</li>
-      <li><b>Karakter hidup</b> — efek ketik, sapaan pagi/siang/sore/malam, mode begadang, efek suara blip, dan easter egg <b>#dance #party #joke #love #spin</b>.</li>
-      <li><b>About ℹ️</b> — deskripsi aplikasi + kredit <b>Dev by MB</b> · <b>Build 25 Oct 2026</b> · link <b>lynk.id/mb_dprint</b>. Kata "spreadsheet" sudah dihapus dari semua teks balon — diganti "sistem" agar backend tidak terlihat pengunjung.</li>
-    </ol>
-  </div>
-</section>
 
 <div id="ai-emo-widget">
   <!-- Balon Percakapan Melayang Interaktif -->
@@ -640,17 +603,21 @@
         <rect class="m m-grit" x="51" y="74.5" width="18" height="5" rx="2.4" fill="none" stroke="#00f2fe" stroke-width="1.8"/>
       </g>
 
-      <!-- Headset Biru Navy Melingkari Kepala: bando + garis cyan menyala (digambar setelah kepala agar menempel) -->
-      <path d="M 14 46 C 14 22, 34 21, 60 21 C 86 21, 106 22, 106 46" fill="none" stroke="url(#emo-hp-band-outer)" stroke-width="7.5" stroke-linecap="round"/>
-      <path class="hp-band-stripe" d="M 14 46 C 14 22, 34 21, 60 21 C 86 21, 106 22, 106 46" fill="none" stroke="#00f2fe" stroke-width="1.8" stroke-linecap="round" opacity="0.9" filter="url(#emo-glow)"/>
+      <!-- Headset Biru Navy Melingkari Kepala: bando + garis cyan menyala.
+           Bando diangkat sedikit dari kepala; sudut cubic BEZIER LEMBUT yang
+           sebangun dengan kepala (bagian datar atas 52px = lebar datar kepala),
+           transisi sisi-ke-atas mengalir tanpa gembung — proporsional -->
+      <path d="M 14 46 L 14 35 C 14 22, 23 17, 34 17 L 86 17 C 97 17, 106 22, 106 35 L 106 46" fill="none" stroke="url(#emo-hp-band-outer)" stroke-width="7.5" stroke-linecap="round"/>
+      <path class="hp-band-stripe" d="M 14 46 L 14 35 C 14 22, 23 17, 34 17 L 86 17 C 97 17, 106 22, 106 35 L 106 46" fill="none" stroke="#00f2fe" stroke-width="1.8" stroke-linecap="round" opacity="0.9" filter="url(#emo-glow)"/>
 
-      <!-- Ear Cup Samping Navy dengan Garis LED Cyan Menyala -->
+      <!-- Ear Cup Samping Navy dengan Garis LED Cyan Menyala.
+           Sisi LUAR membulat (rounded), sisi yang menyentuh wajah KOTAK (menyatu) -->
       <g id="earcup-left">
-        <rect x="4" y="40" width="20" height="46" rx="10" fill="url(#emo-earcup-seamless)" stroke="none"/>
+        <path d="M 24 40 L 14 40 Q 4 40 4 50 L 4 76 Q 4 86 14 86 L 24 86 Z" fill="url(#emo-earcup-seamless)" stroke="none"/>
         <rect class="hp-stripe" x="12.4" y="47" width="3.2" height="26" rx="1.6" fill="#00f2fe" opacity="0.9" filter="url(#emo-glow)"/>
       </g>
       <g id="earcup-right">
-        <rect x="96" y="40" width="20" height="46" rx="10" fill="url(#emo-earcup-seamless)" stroke="none"/>
+        <path d="M 96 40 L 106 40 Q 116 40 116 50 L 116 76 Q 116 86 106 86 L 96 86 Z" fill="url(#emo-earcup-seamless)" stroke="none"/>
         <rect class="hp-stripe" x="104.4" y="47" width="3.2" height="26" rx="1.6" fill="#00f2fe" opacity="0.9" filter="url(#emo-glow)"/>
       </g>
 
@@ -704,7 +671,7 @@
   // ═══════════════════ PENGATURAN WAJIB ═══════════════════
   // 1) SCRIPT_URL = URL Web App Apps Script (berakhiran /exec).
   //    Cara: deploy Code.gs → Deploy → Web app → salin URL /exec ke sini.
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYTRpMIG9LW9W1bFOssh9M5hwWrFzzWnViVm7G7SkSol8-8s8L5H8RU-M6oAwx7uyO/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz4wk6nNS5ajOhvTb53rh3eXAB-izlsJIGySjQnr1tk3Km2oeYOgjbo-9dMc6uvh4E8uw/exec';
   // 2) Sheet Konfig: atur aplikasi_on, ticket_on, cuaca_on, jadwal_on, quiz_on, about.
   const ALADHAN_API = 'https://api.aladhan.com/v1/timingsByCity';
   const ALADHAN_COORD = 'https://api.aladhan.com/v1/timings';
