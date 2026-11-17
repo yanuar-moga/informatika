@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rekap Presensi Guru — Informatika Kelas 9</title>
+<style>
+:root{
+  --bg:#eef2f9; --card:#ffffff; --ink:#0f172a; --mut:#64748b; --line:#e2e8f0;
+  --pri:#2563eb; --pri-dark:#1d4ed8; --pri-soft:#dbeafe;
+  --h:#16a34a; --i:#d97706; --s:#7c3aed; --a:#dc2626; --tk:#64748b;
+  --h-soft:#dcfce7; --i-soft:#fef3c7; --s-soft:#ede9fe; --a-soft:#fee2e2; --tk-soft:#f1f5f9;
+  --rad:14px; --sh:0 4px 14px rgba(15,23,42,.06), 0 1px 3px rgba(15,23,42,.05);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:var(--bg); color:var(--ink); font-size:14px; line-height:1.45;
+}
+button{font-family:inherit}
+
+/* ===== TOPBAR ===== */
+.topbar{
+  position:sticky; top:0; z-index:50;
+  background:linear-gradient(120deg,#1e3a8a,#2563eb 60%,#3b82f6);
+  color:#fff; padding:12px 18px;
+  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  box-shadow:0 4px 18px rgba(30,58,138,.25);
+}
+.brand{display:flex; align-items:center; gap:12px; min-width:0}
+.brand-icon{
+  width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.18);
+  display:flex;align-items:center;justify-content:center;font-size:24px;flex:0 0 auto;
+}
+.brand h1{margin:0;font-size:17px;font-weight:800;letter-spacing:.2px}
+.brand .sub{font-size:12px;opacity:.85;margin-top:2px}
+.top-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{
+  background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.3);
+  border-radius:999px; padding:5px 12px; font-size:12px; font-weight:600; white-space:nowrap;
+}
+.tbtn{
+  background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.35);
+  border-radius:10px; padding:7px 12px; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap;
+}
+.tbtn:hover{background:rgba(255,255,255,.26)}
+.tbtn.primary{background:#fff;color:var(--pri-dark);border-color:#fff}
+
+/* ===== TABS ===== */
+.tabs{
+  background:var(--card); border-bottom:1px solid var(--line);
+  display:flex; gap:4px; padding:6px 14px 0 14px; overflow-x:auto;
+  position:sticky; top:68px; z-index:40;
+}
+.tabs button{
+  border:none;background:none;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--mut);
+  padding:10px 14px;border-radius:10px 10px 0 0;border-bottom:3px solid transparent;white-space:nowrap;
+}
+.tabs button:hover{color:var(--pri)}
+.tabs button.active{color:var(--pri-dark);border-bottom-color:var(--pri);background:#f0f6ff}
+
+main{max-width:1280px;margin:0 auto;padding:18px 14px 60px 14px}
+.tab-pane{display:none}
+.tab-pane.active{display:block;animation:fade .18s ease}
+@keyframes fade{from{opacity:.35;transform:translateY(3px)}to{opacity:1;transform:none}}
+
+/* ===== CARDS / PANELS ===== */
+.panel{background:var(--card);border-radius:var(--rad);box-shadow:var(--sh);padding:16px 18px;margin-bottom:16px}
+.panel h2{margin:0 0 4px 0;font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.panel .hint{color:var(--mut);font-size:12px;margin:2px 0 12px 0}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:900px){.g4{grid-template-columns:repeat(2,1fr)}.g3,.g2{grid-template-columns:1fr}}
+
+/* KPI */
+.kpi{border-radius:12px;padding:12px 14px;border:1px solid var(--line);background:#fbfdff}
+.kpi .lab{font-size:11.5px;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.kpi .val{font-size:24px;font-weight:800;margin-top:2px}
+.kpi .foot{font-size:11.5px;color:var(--mut);margin-top:2px}
+.kpi.k-pri{border-color:#bfdbfe;background:#eff6ff}.kpi.k-pri .val{color:var(--pri-dark)}
+.kpi.k-h{border-color:#bbf7d0;background:#f0fdf4}.kpi.k-h .val{color:var(--h)}
+.kpi.k-i{border-color:#fde68a;background:#fffbeb}.kpi.k-i .val{color:#b45309}
+.kpi.k-s{border-color:#ddd6fe;background:#f5f3ff}.kpi.k-s .val{color:#6d28d9}
+.kpi.k-a{border-color:#fecaca;background:#fef2f2}.kpi.k-a .val{color:#b91c1c}
+.kpi.k-tk{border-color:#cbd5e1;background:#f8fafc}.kpi.k-tk .val{color:#475569}
+
+/* ===== TOOLBAR ===== */
+.toolbar{
+  display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;
+  background:var(--card);border-radius:var(--rad);box-shadow:var(--sh);padding:12px 16px;margin-bottom:14px;
+}
+.toolbar label{font-size:11.5px;font-weight:700;color:var(--mut);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.toolbar select,.toolbar input{
+  padding:8px 10px;border:1px solid #cbd5e1;border-radius:10px;font-size:13.5px;background:#fff;color:var(--ink);min-width:180px;
+}
+.toolbar select:focus,.toolbar input:focus{outline:2px solid var(--pri-soft);border-color:var(--pri)}
+.navbtns{display:flex;gap:6px}
+.navbtns button{
+  border:1px solid #cbd5e1;background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:700;color:var(--pri-dark);font-size:14px;
+}
+.navbtns button:hover{background:#eff6ff}
+
+/* ===== TABLES ===== */
+.scroll{overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+table.tbl{border-collapse:separate;border-spacing:0;width:100%;font-size:12.8px;min-width:760px}
+.tbl th,table.tbl td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap}
+.tbl thead th{
+  position:sticky;top:0;z-index:5;background:#f1f5f9;font-size:11.5px;font-weight:800;color:#334155;
+  text-transform:uppercase;letter-spacing:.3px;border-bottom:2px solid #cbd5e1;
+}
+.tbl thead th:first-child,.tbl td:first-child{text-align:left;position:sticky;left:0;background:#fff;z-index:4;font-weight:700}
+.tbl thead th:first-child{background:#f1f5f9;z-index:6}
+.tbl tbody tr:hover td{background:#f0f6ff}
+.tbl tbody tr:hover td:first-child{background:#f0f6ff}
+.tbl tfoot td{background:#f8fafc;font-weight:800;border-top:2px solid #cbd5e1}
+.tbl .kl{display:flex;align-items:center;gap:7px}
+.kdot{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
+.tbl .num{font-variant-numeric:tabular-nums}
+
+/* day cell */
+.daycell{border-radius:8px;padding:4px 6px;min-width:74px;cursor:pointer}
+.daycell b{font-size:13px;display:block}
+.daycell small{font-size:10.5px;opacity:.85;display:block;line-height:1.3}
+.daycell.na{background:#f1f5f9;color:#94a3b8;cursor:default}
+.t-g{background:var(--h-soft);color:#166534}
+.t-lg{background:#ecfdf3;color:#15803d}
+.t-y{background:var(--i-soft);color:#92400e}
+.t-r{background:var(--a-soft);color:#991b1b}
+.t-na{background:#f8fafc;color:#94a3b8}
+
+/* student grid letters */
+.chip{
+  display:inline-block;min-width:22px;padding:2px 5px;border-radius:7px;font-weight:800;font-size:11px;
+}
+.chip.h{background:var(--h-soft);color:#166534}
+.chip.i{background:var(--i-soft);color:#92400e}
+.chip.s{background:var(--s-soft);color:#5b21b6}
+.chip.a{background:var(--a-soft);color:#991b1b}
+.chip.tk{background:#f1f5f9;color:#94a3b8}
+
+/* status pill */
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:700}
+.pill.ok{background:var(--h-soft);color:#166534}
+.pill.warn{background:var(--i-soft);color:#92400e}
+.pill.bad{background:var(--a-soft);color:#991b1c}
+.pill.info{background:var(--s-soft);color:#5b21b6}
+.pill.mut{background:var(--tk-soft);color:#475569}
+.jk{font-size:10.5px;font-weight:800;border-radius:6px;padding:2px 6px}
+.jk.L{background:#dbeafe;color:#1e40af}
+.jk.P{background:#fce7f3;color:#9d174d}
+
+/* progress */
+.bar{height:9px;border-radius:99px;background:#e2e8f0;overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:99px;background:var(--pri)}
+.bar.g>i{background:var(--h)} .bar.y>i{background:#d97706} .bar.r>i{background:var(--a)}
+
+/* charts */
+.chart-wrap{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.donut{
+  width:150px;height:150px;border-radius:50%;flex:0 0 auto;position:relative;
+  box-shadow:inset 0 0 0 1px rgba(15,23,42,.06);
+}
+.donut::after{
+  content:"";position:absolute;inset:26px;background:#fff;border-radius:50%;
+  box-shadow:0 1px 6px rgba(15,23,42,.12);
+}
+.donut .c{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;
+}
+.donut .c b{font-size:19px}
+.donut .c span{font-size:10.5px;color:var(--mut)}
+.legend{display:flex;flex-direction:column;gap:7px;font-size:12.5px;min-width:180px;flex:1}
+.legend .li{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.legend .li .l{display:flex;align-items:center;gap:8px}
+.legend .li b{font-variant-numeric:tabular-nums}
+.sw{width:11px;height:11px;border-radius:4px;flex:0 0 auto}
+.hbars{display:flex;flex-direction:column;gap:9px}
+.hbar{display:grid;grid-template-columns:86px 1fr 52px;align-items:center;gap:10px;font-size:12.5px}
+.hbar .tr{background:#eef2f7;border-radius:99px;height:13px;overflow:hidden}
+.hbar .tr>i{display:block;height:100%;border-radius:99px}
+.hbar b{text-align:right;font-variant-numeric:tabular-nums}
+.vchart{display:flex;align-items:flex-end;gap:6px;height:150px;padding:4px 2px 0 2px}
+.vchart .vb{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;height:100%}
+.vchart .vb i{display:block;width:100%;max-width:34px;border-radius:6px 6px 2px 2px;background:var(--pri);min-height:2px}
+.vchart .vb span{font-size:10px;color:var(--mut);white-space:nowrap}
+.vchart .vb b{font-size:10px;color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* narasi */
+.narasi{
+  background:linear-gradient(120deg,#eff6ff,#f5f3ff);border:1px solid #dbeafe;border-radius:12px;
+  padding:13px 16px;font-size:13.5px;line-height:1.65;
+}
+.narasi b{color:var(--pri-dark)}
+
+/* lists */
+.att-list{display:flex;flex-direction:column;gap:8px}
+.att-item{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:#fbfdff;font-size:12.8px;
+}
+.att-item .nm{font-weight:700}
+.att-item .mt{color:var(--mut);font-size:11.5px}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+
+/* hari ini */
+.today-card{border:1px solid var(--line);border-radius:12px;padding:13px 14px;background:#fff}
+.today-card .hd{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px}
+.today-card .hd b{font-size:14px}
+.today-card .pct{font-weight:800;font-size:15px}
+.today-card .belum{margin-top:9px;font-size:12px;color:var(--mut);line-height:1.5}
+.today-card .belum .nm{color:#b91c1c;font-weight:600}
+
+/* modal */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:16px;
+}
+.modal-bg.show{display:flex}
+.modal{
+  background:#fff;border-radius:16px;max-width:680px;width:100%;max-height:85vh;overflow:auto;
+  padding:20px 22px;box-shadow:0 24px 60px rgba(15,23,42,.3);
+}
+.modal h3{margin:0 0 4px 0;font-size:17px}
+.modal .sub{color:var(--mut);font-size:12.5px;margin-bottom:14px}
+.modal .x{float:right;border:none;background:#f1f5f9;border-radius:9px;width:30px;height:30px;cursor:pointer;font-weight:800;color:#475569}
+.log-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.log-chips .lg{font-size:11px;border-radius:8px;padding:4px 8px;font-weight:700}
+
+/* footer */
+footer{max-width:1280px;margin:0 auto;padding:0 14px 26px;color:var(--mut);font-size:11.5px;text-align:center}
+
+/* print */
+@media print{
+  body{background:#fff}
+  .topbar{background:#1e3a8a!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .top-actions,.tabs,.toolbar,.navbtns,footer,.tbtn,#btnHelp{display:none!important}
+  .panel{box-shadow:none;border:1px solid #cbd5e1;break-inside:avoid}
+  .tab-pane{display:none!important}
+  .tab-pane.active{display:block!important}
+  .scroll{overflow:visible;border:none}
+  table.tbl{min-width:0}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-icon">🎓</div>
+    <div>
+      <h1>Rekap Presensi Guru</h1>
+      <div class="sub">Informatika · Kelas 9 — rekap mingguan, bulanan &amp; harian</div>
+    </div>
+  </div>
+  <div class="top-actions">
+    <span class="badge" id="srcBadge">📦 Snapshot Excel</span>
+    <button class="tbtn primary" id="btnLive" title="Tarik data terbaru langsung dari Google Sheet">🔄 Muat Data Live</button>
+    <button class="tbtn" id="btnCsv" title="Unduh tabel tab aktif sebagai CSV">⬇️ CSV</button>
+    <button class="tbtn" id="btnPrint" title="Cetak rekap tab aktif">🖨️ Cetak</button>
+    <button class="tbtn" id="btnHelp" title="Panduan penggunaan">❓</button>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="ringkasan" class="active">📊 Ringkasan</button>
+  <button data-tab="mingguan">📅 Rekap Mingguan</button>
+  <button data-tab="bulanan">🗓️ Rekap Bulanan</button>
+  <button data-tab="siswa">👤 Rekap Siswa</button>
+  <button data-tab="hariini">📌 Hari Ini</button>
+</nav>
+
+<main>
+
+  <!-- ============ RINGKASAN ============ -->
+  <section id="tab-ringkasan" class="tab-pane active">
+    <div class="toolbar">
+      <div>
+        <label>Cakupan Kelas</label>
+        <select id="selKelasR"></select>
+      </div>
+      <div style="flex:1"></div>
+      <div style="color:var(--mut);font-size:12px" id="infoPeriodeR"></div>
+    </div>
+    <div class="panel">
+      <h2>🧾 Ringkasan Otomatis</h2>
+      <div class="narasi" id="narasi"></div>
+    </div>
+    <div class="panel">
+      <h2>📈 Statistik Utama</h2>
+      <div class="hint">Periode: seluruh data tersimpan (<span id="periodeTeks"></span>). <b>% Kehadiran</b> = Hadir ÷ (siswa × hari efektif) — hari-hari saat kelas tidak mengisi presensi ikut mengurangi angka ini (lihat kartu ⚪ Tanpa Catatan).</div>
+      <div class="grid g4" id="kpiGrid"></div>
+    </div>
+    <div class="grid g2">
+      <div class="panel">
+        <h2>🍩 Komposisi Status</h2>
+        <div class="hint">Proporsi seluruh catatan presensi pada cakupan terpilih.</div>
+        <div class="chart-wrap" id="donutWrap"></div>
+      </div>
+      <div class="panel">
+        <h2>🏫 Perbandingan Kelas</h2>
+        <div class="hint">Persentase kehadiran tiap kelas selama periode data.</div>
+        <div class="hbars" id="kelasBars"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>📉 Tren Kehadiran Mingguan</h2>
+      <div class="hint">Rata-rata persentase kehadiran per minggu (Senin–Sabtu).</div>
+      <div class="vchart" id="trenChart"></div>
+    </div>
+    <div class="grid g2">
+      <div class="panel">
+        <h2>🏆 Kelas Terbaik &amp; Perlu Perhatian</h2>
+        <div class="att-list" id="kelasHighlight"></div>
+      </div>
+      <div class="panel">
+        <h2>👀 Siswa Perlu Perhatian</h2>
+        <div class="hint">Alpa ≥ 2, tanpa catatan ≥ 5 hari, atau kehadiran &lt; 60% (dari hari efektif kelasnya).</div>
+        <div class="att-list" id="siswaPerhatian"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MINGGUAN ============ -->
+  <section id="tab-mingguan" class="tab-pane">
+    <div class="toolbar">
+      <div>
+        <label>Kelas</label>
+        <select id="selKelasM"></select>
+      </div>
+      <div>
+        <label>Pilih Minggu</label>
+        <select id="selWeek"></select>
+      </div>
+      <div class="navbtns">
+        <button id="wkPrev" title="Minggu sebelumnya">◀</button>
+        <button id="wkNext" title="Minggu berikutnya">▶</button>
+      </div>
+      <div style="flex:1"></div>
+      <div style="color:var(--mut);font-size:12px" id="infoWeek"></div>
+    </div>
+    <div class="panel" id="weekSummaryWrap">
+      <h2>📅 Rekap Mingguan per Kelas</h2>
+      <div class="hint">Klik sel tanggal untuk melihat rincian nama siswa. Warna: 🟩 ≥ 85% · 🟨 75–85% · 🟥 &lt; 75% · abu-abu = tidak ada presensi tercatat.</div>
+      <div id="weekTable"></div>
+    </div>
+    <div class="panel" id="weekStudentWrap">
+      <h2>🧑‍🏫 Rincian Mingguan per Siswa</h2>
+      <div class="hint">✔ Hadir · <b class="chip i">I</b> Izin · <b class="chip s">S</b> Sakit · <b class="chip a">✖</b> Alpa · <b class="chip tk">·</b> tanpa catatan.</div>
+      <div id="weekStudentTable"></div>
+    </div>
+  </section>
+
+  <!-- ============ BULANAN ============ -->
+  <section id="tab-bulanan" class="tab-pane">
+    <div class="toolbar">
+      <div>
+        <label>Kelas</label>
+        <select id="selKelasB"></select>
+      </div>
+      <div>
+        <label>Pilih Bulan</label>
+        <select id="selMonth"></select>
+      </div>
+      <div class="navbtns">
+        <button id="moPrev" title="Bulan sebelumnya">◀</button>
+        <button id="moNext" title="Bulan berikutnya">▶</button>
+      </div>
+      <div style="flex:1"></div>
+      <div style="color:var(--mut);font-size:12px" id="infoMonth"></div>
+    </div>
+    <div class="panel">
+      <h2>🗓️ Rekap Bulanan per Kelas</h2>
+      <div class="hint">Kolom minggu hanya menghitung hari pada bulan terpilih. Δ = perbandingan % kehadiran dengan bulan sebelumnya.</div>
+      <div id="monthTable"></div>
+    </div>
+    <div class="panel" id="monthStudentWrap">
+      <h2>🧑‍🏫 Rincian Bulanan per Siswa</h2>
+      <div class="hint">Nilai pada kolom minggu = persentase kehadiran siswa pada minggu tersebut.</div>
+      <div id="monthStudentTable"></div>
+    </div>
+  </section>
+
+  <!-- ============ SISWA ============ -->
+  <section id="tab-siswa" class="tab-pane">
+    <div class="toolbar">
+      <div>
+        <label>Kelas (wajib)</label>
+        <select id="selKelasS"></select>
+      </div>
+      <div>
+        <label>Cari Nama</label>
+        <input id="inpCari" type="text" placeholder="Ketik nama siswa…">
+      </div>
+      <div>
+        <label>Urutkan</label>
+        <select id="selSort">
+          <option value="pctAsc">% Kehadiran terendah</option>
+          <option value="pctDesc">% Kehadiran tertinggi</option>
+          <option value="nama">Nama A–Z</option>
+          <option value="alpa">Alpa terbanyak</option>
+          <option value="tk">Tanpa catatan terbanyak</option>
+        </select>
+      </div>
+      <div style="flex:1"></div>
+      <div style="color:var(--mut);font-size:12px">Periode: seluruh data · klik baris siswa untuk detail</div>
+    </div>
+    <div class="panel">
+      <h2>👤 Rekap Individual Siswa</h2>
+      <div class="hint" id="siswaHint"></div>
+      <div id="siswaTable"></div>
+    </div>
+  </section>
+
+  <!-- ============ HARI INI ============ -->
+  <section id="tab-hariini" class="tab-pane">
+    <div class="toolbar">
+      <div>
+        <label>Tanggal</label>
+        <input type="date" id="inpToday">
+      </div>
+      <div class="navbtns">
+        <button id="todayPrev" title="Hari sebelumnya">◀</button>
+        <button id="todayNext" title="Hari berikutnya">▶</button>
+      </div>
+      <div style="flex:1"></div>
+      <button class="tbtn" id="btnLiveBelum" style="background:var(--pri);border-color:var(--pri)" title="Cek langsung ke Google Sheet (endpoint getBelumAbsen yang sudah ada)">🛰️ Cek Live per Kelas</button>
+    </div>
+    <div class="panel">
+      <h2 id="todayTitle">📌 Presensi Hari Ini</h2>
+      <div class="hint">Tingkat kehadiran = jumlah Hadir dibagi total siswa kelas. Daftar "belum absen" = siswa yang belum mengisi presensi pada tanggal terpilih.</div>
+      <div class="grid g3" id="todayGrid"></div>
+      <div id="todayEmpty" style="display:none;color:var(--mut);padding:10px 2px"></div>
+    </div>
+  </section>
+
+</main>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<footer>
+  Aplikasi rekap presensi untuk guru · data sumber: Google Sheet ABSENSI (aplikasi absensi siswa) ·
+  dibuat otomatis dari <span id="footSrc"></span>
+</footer>
+
+<script>
+"use strict";
+const SNAP = {"meta":{"generated":"2026-11-17 05:16","source":"data_siswa_informatika_9_REV2.xlsx","minDate":"20260728","maxDate":"20261117","nAtt":2612,"nDays":65},"kelas":["Kelas 9A","Kelas 9B","Kelas 9C","Kelas 9D","Kelas 9E","Kelas 9F","Kelas 9G","Kelas 9H","Kelas 9I"],"siswa":[[1,"ABI SALAM","L",0],[2,"ADI BAGUS NUGROHO","L",0],[3,"ADINDA MEILI UTAMI","P",0],[4,"AMANDA TUHFATUL HIDAYAT","P",0],[5,"ARUM NADA SYARIFA","P",0],[6,"CAHAYA MULYA PURWITA","P",0],[7,"DHIYA' ULHAQI","L",0],[8,"ELFREDA BISMAKA ABIMANYU","L",0],[9,"HIKMAH YANI","P",0],[10,"INAYATUL MAULA","P",0],[11,"KAYFA KANA ASSARIFA","P",0],[12,"KAYLA ALFA FITRIANA","P",0],[13,"KHAYYUNA SURAYA","P",0],[14,"MUHAMAD ALFARIZI","L",0],[15,"MUHAMAD ARIF ALFARIZI","L",0],[16,"MUHAMAD ARRAFA SETIAWAN","L",0],[17,"MUHAMAD HADZIQUL ABID","L",0],[18,"MUHAMAD IRFAN","L",0],[19,"MUHAMAD NAJA ALIYAN","L",0],[20,"MUHAMMAD DIMAS","L",0],[21,"MUHAMMAD FATHAN KAFABIH","L",0],[22,"MUHAMMAD IQBAL","L",0],[23,"NAELUL AMANIA","P",0],[24,"NAKHLA AIZYAQEELA","P",0],[25,"NASYWA HUWAIDA BILQISTY","P",0],[26,"NUR FATKHIA ISMI AULA","P",0],[27,"RATNA ANTIKA RAMADHANI","P",0],[28,"RISTIKA OKTAVIANI","P",0],[29,"SALMAN ATTARAIKHAN","L",0],[30,"UKTUFIA BIKI NIHAYAH","P",0],[31,"ZAHROTUNNISA","P",0],[32,"ZIGHNIA ANNISA ZAHLA","P",0],[33,"AHMAD KAFA NURIZAL","L",1],[34,"AHMAD ROEKHAN","L",1],[35,"AKHDI KHASBIYAN","L",1],[36,"APRILIA DWI SUSANTI","P",1],[37,"ASYIFA MAHARDIKA RAMADHANI","P",1],[38,"AULIA MUFIDAH","P",1],[39,"AYU CHALWA ANJUMI","P",1],[40,"CITRA MEGA SETIAWAN","P",1],[41,"DEFFA TAZQIATUNNAFTSI ALMAULIA","P",1],[42,"GHOINI FATUS SANI RAMADHANI","P",1],[43,"HANIF ABDILLAH RIFQI","L",1],[44,"KAMILA TALITHA AZ ZAHRA","P",1],[45,"KEISYA AVIANI","P",1],[46,"LATIFATUN NISA","P",1],[47,"MAULIDA ASYIFA","P",1],[48,"MUHAMAD ABDILAH RAMADAN","L",1],[49,"MUHAMAD ARGIA FEBRIAN","L",1],[50,"MUHAMAD FUTUKHUL ILAHIL AKBAR","L",1],[51,"MUHAMAD LUKMAN HAKIM","L",1],[52,"MUHAMMAD AHDAN BAIHAQI","L",1],[53,"MUHAMMAD RAFFI SEPTIAN","L",1],[54,"MUSTOFA ABDUL GHANI","L",1],[55,"NAJMA NAJIBAH","P",1],[56,"NAZLA FELIYA ZAHIRA","P",1],[57,"NUR ASIAH","P",1],[58,"SINTA RANIA PUTRI","P",1],[59,"SYAKIRA KIRANA","P",1],[60,"TIFFANI DEWI RIYATAMA","P",1],[61,"YASMIN DAFARO","P",1],[62,"ZAYAN AQEELA TSANIY","L",1],[63,"ZUYINA NUR AZIMA","P",1],[64,"ADNAN KHIYAR SYARIF","L",2],[65,"ALECIA NAYLA RAHMALIA","P",2],[66,"ALEX DZAKI YUDIN","L",2],[67,"ALFIRSYA TIWE ARTETANI","P",2],[68,"ALMEERA ANINDYA SYACH","P",2],[69,"BAGUS PRADANA PUTRA","L",2],[70,"BINTANY NAJMI ATHAYA","P",2],[71,"FAIRUZ ILHAM HAQIQI","L",2],[72,"FARADILA PUTRI","P",2],[73,"FELICYA PRIMANINGTYAS FATHUDIN","P",2],[74,"GATHAN YUSUF HERWINTO","L",2],[75,"IRMA NUR AENI","P",2],[76,"MARATUS SA'DIYAH","P",2],[77,"MUHAMAD FAQIH PRATAMA","L",2],[78,"MUHAMAD MUHISI ALEK MURTADO","L",2],[79,"MUHAMAD REHAN GOFAR AMRUWOH","L",2],[80,"MUHAMMAD ABDUL GHANI","L",2],[81,"NAHSA SYAHDA SALSA BILA","P",2],[82,"NARA EKHSAN SALMANI","L",2],[83,"NICKA AYU RIZKIANA","P",2],[84,"NIMAS AYU SETIYANINGRUM","P",2],[85,"NUR LAELA","P",2],[86,"RANGGA JAYA MURDOWO","L",2],[87,"RAYA WANITA AULIA","P",2],[88,"REHATA IHSAN AL BANA","L",2],[89,"RESTU AJI BAGASKARA","L",2],[90,"SAFINATUN NAJAH","P",2],[91,"SASHIA MEILANI","P",2],[92,"SITI USWATUN KHASANAH","P",2],[93,"TA'LIP","L",2],[94,"TSANIYA KHAERUNNISA","P",2],[95,"YANUAR REVAN AL FAEZA","L",2],[96,"AHMAD ROBITUNNIAM","L",3],[97,"AIR ADHYASTHA MAULANA","L",3],[98,"AISYA FAZA AIDI RIFATI","P",3],[99,"ANINDYA DIAN AZZAHRA","P",3],[100,"AORA RIZQI AMANDA NAENI SAFITRI","P",3],[101,"AQILA FARIDA","P",3],[102,"DEA MAULIDIYA","P",3],[103,"DESTA RENATA SETYAKINANTO","L",3],[104,"FAYYADH REIZA AL-GHANY","L",3],[105,"GALIH SHAHADA PUTRA","L",3],[106,"GIZZAN FIRAS MAZAYA","L",3],[107,"GUSTINA NUR ARIFIYANI","P",3],[108,"JUAN KHALIFAN","L",3],[109,"KHARISMA RAMADANI","P",3],[110,"MAMLA HEBAT KAFAHAL","P",3],[111,"MELKA FARADILLA HUSNA","P",3],[112,"MUHAMAD FAQIH","L",3],[113,"MUHAMAD IN'AMUL ARZAQI MUSTOFA","L",3],[114,"MUHAMMAD AKHDAN SAKHI","L",3],[115,"MUHAMMAD NI'AM. M.Z","L",3],[116,"MUHAMMAD ZADANIYAL HAQ","L",3],[117,"MUHAMMAD ZULFAN ABDULLAH","L",3],[118,"NADIRA AULIA SAFA","P",3],[119,"NIBROSA UKTUFIA","P",3],[120,"NISWAH AMANDA MEYSHA FAIRUZIYYA","P",3],[121,"RASYA ALFATUNISA","P",3],[122,"RIZQI FITRIANA RAMADHANI","P",3],[123,"RUQOYYATUN NAJWAH","P",3],[124,"SYAFIRA AZALIA","P",3],[125,"TITIAN PUTRIA RAMLAN","P",3],[126,"ZAELNA ANHA PUTRA","L",3],[127,"ZAHRA AULIYA RAMADHANI","P",3],[128,"ADENA ZAHIRAH MAHSA","P",4],[129,"AHMAD ABID SYAKIR","L",4],[130,"AHMAD AKMAL SYARIFUDIN","L",4],[131,"ARINI SABRINA","P",4],[132,"ASSYIFA NAYRA NATANINA","P",4],[133,"ATHA SYAKILA","P",4],[134,"ATIYA INAYATIKA","P",4],[135,"AZIZ HILMAWAN","L",4],[136,"BUNGA INDAH RAMADHANI","P",4],[137,"CALLYSTA ADENAYA AQILASHA ROVI","P",4],[138,"IKFIATUSOFIANA","P",4],[139,"KANESYA AIRA YASMIN","P",4],[140,"MAIDA ISMATUN NIHAYA","P",4],[141,"MAULIDIYA RAHMAWATI","P",4],[142,"MUHAMAD FAIK ARFAN","L",4],[143,"MUHAMAD FATAN RUWAIFI'AZTI","L",4],[144,"MUHAMMAD ABDAN ARFI SYAUKANI","L",4],[145,"MUHAMMAD ALFIN NAJMI","L",4],[146,"MUHAMMAD FARUQ FAZZA","L",4],[147,"MUHAMMAD HUSNI MUBAROK","L",4],[148,"MUHAMMAD KIFFA ABDUL JABAR","L",4],[149,"MUHAMMAD RASYA ATTAYA","L",4],[150,"MUTIARA AYU SALSABILA","P",4],[151,"NAFIESATUL AULIA","P",4],[152,"NASYWA NABILA SUFIONA","P",4],[153,"NUR HAYATI","P",4],[154,"RIZAL ADNAN SYAPUTRA","L",4],[155,"ROFIQOTUL AULIA","P",4],[156,"SAYYIDUN ADLI PRATAMA","L",4],[157,"SHATEER RAMADHAN","L",4],[158,"ULFA YULI KURNIATI","P",4],[159,"WULIDA SYAROFATUL WAFFA","P",4],[160,"AHMAD HAYKAL HILMI","L",5],[161,"AHMAD MUSONIF","L",5],[162,"AHMAD NU'EM. M.Z","L",5],[163,"AIESHA CEMAL SAROSH","P",5],[164,"ARINI QUROTA'AYUN","P",5],[165,"AYESHA NADHIRA CITRA MULIA","P",5],[166,"DAFFA DWI PERMANA","L",5],[167,"DIAN PRATAMA PUTRA","L",5],[168,"EPIFANIA KERENSA NAFTALIYTRI","P",5],[169,"FADLAN ABDUL HAFIZ","L",5],[170,"FIKA PUTRI LUTFIYANI","P",5],[171,"ILHAM DWI INDRA SAPUTRA","L",5],[172,"LAYLA SEFTIANI SAEFUDIN","P",5],[173,"MAULIDA AZAHRA","P",5],[174,"MUHAMAD ALBY FADHIL WIRATAMA","L",5],[175,"MUHAMAD SOHIBUL KIROM","L",5],[176,"MUHAMMAD AKHSANUL KHADIS","L",5],[177,"NAIRA BILQIS AQILA","P",5],[178,"NAISHA ANGELIA ZAFIRA","P",5],[179,"NAJIKHA ASMA HANI","P",5],[180,"NAJMI AULIA","P",5],[181,"NAURA FILZA HAZWANI JALWA","P",5],[182,"NUR SYIFA MAULIDIYA","P",5],[183,"QAULIA FANI","P",5],[184,"RANTIS FIDELYA NARESWARI","P",5],[185,"RENDI SETIAWAN","L",5],[186,"SABRINA AZZAHRA","P",5],[187,"SAID BAKRIZA BUBAKAR","L",5],[188,"TASYATUN NAFIS","P",5],[189,"ZACKY KHOIRUL IKHSAN","L",5],[190,"ZIVARA PUTRI VIA GIO","P",5],[191,"ZULFAN AJI SETIAWAN","L",5],[192,"AHMAD SYAFIQ SYADIDA","L",6],[193,"AHMAD ZACKY MUBAAROK","L",6],[194,"AISYAH AKILLA PUTRI","P",6],[195,"ALFIAN FEBRIANO","L",6],[196,"ASTRIANI","P",6],[197,"ATHAYA GHOSSAN AL VARO","L",6],[198,"DAI TSABIT IMANI","L",6],[199,"DESY'ANA INS KHARISMA","P",6],[200,"FATHIN KHANZA SALSABILA","P",6],[201,"FINA RIVALYNA YUNIASIH","P",6],[202,"IKA ISHMATUL HAWA","P",6],[203,"IKHDA AULIA SYIFA","P",6],[204,"IKVINY KHAQICA","P",6],[205,"MUHAMAD AZMI AJI PRATAMA","L",6],[206,"MUHAMAD FIKRI AL AYUBI","L",6],[207,"MUHAMAD REYHAN RAMADANI","L",6],[208,"MUHAMAD ZIDNA AFAKIH","L",6],[209,"MUHAMMAD ARDANI FAQIH","L",6],[210,"MUHAMMAD DAVID SULAIMAN","L",6],[211,"MUHAMMAD FADHIL RAHMAN","L",6],[212,"NAJWA SYAKIRA AULIA","P",6],[213,"PUTRI YUSRA NURISIATUS SOLEHAH","P",6],[214,"RAFQI HIDAYAT","L",6],[215,"SALMA AQEELA MAHARANI","P",6],[216,"SALSA BILLA","P",6],[217,"SIFANA DELIA RAMADANI","P",6],[218,"TALITHA KARAMINA ARIZAL","P",6],[219,"TJA RIKFAN SAPUTRA","L",6],[220,"TRI FANI SETIANA RIZKI","P",6],[221,"TRI RASYAD GIBRAN PUTRA WAKHYONO","L",6],[222,"VIKANA RAMADHANI","P",6],[223,"YUNIARTA WIDYA PRANATA","L",6],[224,"AHZA ILYA MUZDALIFAH","P",7],[225,"ALIYA NUR HIDAYAH","P",7],[226,"ALYA FITRIANI","P",7],[227,"ANANDA KENZOU MAHARDIKA","L",7],[228,"ANZILNI RAHMATIKA","P",7],[229,"ARBI NAJMI NUGRAHA","L",7],[230,"ATTINA SYARIFA ZAHRA","P",7],[231,"DINA AZKIA FITRIANA","P",7],[232,"HAIDIRRISQI","L",7],[233,"IZZA INDA MILLATINA","P",7],[234,"KARTIKA NUR FEBRIANI","P",7],[235,"KEISYA NAHLA SYARIFA","P",7],[236,"KINANDITA KAYLA PUTRI","P",7],[237,"KRESNA AGUNG BINATARA","L",7],[238,"LILI NUR KHALIFAH","P",7],[239,"MUHAMAD HILMI NAJIB","L",7],[240,"MUHAMAD ILIYAN SYARIF","L",7],[241,"MUHAMAD MAULANA ALI MARZUKI","L",7],[242,"MUHAMMAD DIEGO AZZARISKA","L",7],[243,"MUHAMMAD KHAIRUN NADHIF","L",7],[244,"MUHAMMAD NABIL YAFI","L",7],[245,"MUHAMMAD ROKI DWI SAPUTRA","L",7],[246,"MUHAMMAD SETIA MISCEL NAADSI","L",7],[247,"MUHAMMAD ZULFIKAR MAULANA","P",7],[248,"NADA HILMA HAYATI","P",7],[249,"RAFA ANANDYTA PRATAMA","L",7],[250,"SYAFA'ATUL WULAN MAULIDA","P",7],[251,"SYIFA HUSNA SEPTYANI KHANSA","P",7],[252,"TALITHA ZUHURA","P",7],[253,"YASMIN MEYDINA HANIDAR","P",7],[254,"ZAILA WAFI ZAFARANI","P",7],[255,"ZAILA WAFI ZAFARANI","P",7],[256,"AFIKA KHALDATU RIZQINA","P",8],[257,"AGUS RAMA DANI","L",8],[258,"AHMAD ADLIMU SYA'NI","L",8],[259,"AHMAD ZIDNI ALMADANI","L",8],[260,"ANANDA RADITYA PUTRA","L",8],[261,"ARIFATUL MAULIA","P",8],[262,"ASSYAHLA RUMEENA PRIYANTO PUTRI","P",8],[263,"AYU DINDA KINARA","P",8],[264,"AZAHRA KHUSNA BILA","P",8],[265,"DASYA WULAN ISNAENI","P",8],[266,"FAJRUL AL AZZIDAN","L",8],[267,"FARIZ AIMAN NAJIB","L",8],[268,"INDIRA RAMADHANI","P",8],[269,"ISMA ZAKIA","P",8],[270,"KAISYA AYUNDIRA AZZAHRA","P",8],[271,"LAELATUL WINDANA","P",8],[272,"MEGA SEPTIANI","P",8],[273,"MUHAMAD ARIF ARFAN","L",8],[274,"MUHAMAD DAVINE RAIF ALIFI","L",8],[275,"MUHAMAD FAIZ SAPUTRA","L",8],[276,"MUHAMAD IBASTYAN","L",8],[277,"MUHAMMAD RAFFA","L",8],[278,"NADIA KAYLA PUTRI","P",8],[279,"NAJMA NUR MAULIDA","P",8],[280,"NOVIA UL KHUSNA","P",8],[281,"PRAMESWARY CAHYANINGPURNAMA","P",8],[282,"RAFIANSYAH IMAM MALIK","L",8],[283,"SEVILLA SENINDA EVLIEN","P",8],[284,"SINTA MAHARANI","P",8],[285,"TRIO AJI KURNIAWAN","L",8],[286,"TUBAGUS ZUKNAWA ZIDNA","L",8],[287,"WIHDA MEYGI IRZA SAPUTRI","P",8]],"absen":[[20260728,191,0,22],[20260728,192,0,8],[20260728,193,0,3],[20260728,194,0,30],[20260728,195,0,3],[20260728,196,0,11],[20260728,198,0,20],[20260728,200,0,19],[20260728,201,0,25],[20260728,202,0,29],[20260728,203,0,14],[20260728,205,1,15],[20260728,206,0,7],[20260728,207,0,12],[20260728,208,0,9],[20260728,209,0,4],[20260728,210,0,6],[20260728,212,0,31],[20260728,213,0,5],[20260728,214,0,2],[20260728,215,0,21],[20260728,216,0,18],[20260728,217,0,26],[20260728,218,0,10],[20260728,219,0,32],[20260728,220,0,24],[20260728,221,0,28],[20260728,222,0,23],[20260729,22,0,15],[20260731,160,0,21],[20260731,162,0,7],[20260731,163,0,14],[20260731,164,0,30],[20260731,166,0,2],[20260731,167,0,28],[20260731,168,0,19],[20260731,169,0,9],[20260731,170,0,3],[20260731,171,0,26],[20260731,173,0,4],[20260731,175,0,20],[20260731,176,0,25],[20260731,177,0,11],[20260731,178,0,13],[20260731,179,0,8],[20260731,180,0,33],[20260731,181,0,12],[20260731,182,0,31],[20260731,183,0,5],[20260731,186,0,1],[20260731,187,0,29],[20260731,188,0,22],[20260731,189,0,40],[20260801,64,0,33],[20260801,66,0,31],[20260801,67,0,30],[20260801,68,1,6],[20260801,69,0,26],[20260801,70,0,9],[20260801,71,0,23],[20260801,72,0,28],[20260801,73,0,12],[20260801,74,0,32],[20260801,75,0,34],[20260801,76,0,14],[20260801,77,0,2],[20260801,78,0,1],[20260801,79,0,7],[20260801,80,0,29],[20260801,82,0,18],[20260801,83,0,19],[20260801,84,0,25],[20260801,85,0,23],[20260801,87,0,8],[20260801,88,0,8],[20260801,90,0,27],[20260801,92,0,31],[20260801,93,0,17],[20260801,94,0,11],[20260801,127,0,33],[20260801,128,0,11],[20260801,129,0,4],[20260801,130,0,29],[20260801,131,0,14],[20260801,132,0,18],[20260801,133,0,21],[20260801,134,0,9],[20260801,135,0,13],[20260801,136,0,25],[20260801,137,0,23],[20260801,138,0,19],[20260801,139,0,27],[20260801,140,0,32],[20260801,141,0,40],[20260801,143,0,2],[20260801,144,0,5],[20260801,145,0,12],[20260801,146,1,6],[20260801,147,0,8],[20260801,149,0,34],[20260801,150,0,20],[20260801,151,0,28],[20260801,152,0,26],[20260801,153,0,1],[20260801,154,1,30],[20260801,155,0,7],[20260801,156,0,3],[20260801,157,0,31],[20260801,158,0,24],[20260804,126,0,16],[20260804,187,0,7],[20260804,191,0,13],[20260804,192,0,3],[20260804,193,0,3],[20260804,194,0,19],[20260804,195,0,32],[20260804,198,0,9],[20260804,199,0,30],[20260804,200,0,6],[20260804,201,0,26],[20260804,202,0,12],[20260804,203,0,29],[20260804,204,0,4],[20260804,206,0,14],[20260804,208,0,4],[20260804,209,0,18],[20260804,210,0,40],[20260804,211,0,34],[20260804,212,0,5],[20260804,214,0,33],[20260804,215,0,28],[20260804,216,0,7],[20260804,218,0,1],[20260804,219,0,25],[20260804,220,0,38],[20260804,221,0,11],[20260804,222,0,2],[20260805,0,0,17],[20260805,1,0,18],[20260805,2,0,31],[20260805,3,0,4],[20260805,4,0,11],[20260805,5,0,2],[20260805,6,0,20],[20260805,7,0,19],[20260805,8,0,12],[20260805,9,0,9],[20260805,10,0,30],[20260805,11,0,7],[20260805,12,0,5],[20260805,14,0,26],[20260805,15,0,33],[20260805,16,0,14],[20260805,17,0,27],[20260805,18,0,13],[20260805,19,0,28],[20260805,21,0,34],[20260805,22,0,10],[20260805,23,0,3],[20260805,25,0,8],[20260805,27,0,6],[20260805,28,0,21],[20260805,29,0,1],[20260805,30,0,29],[20260805,31,0,25],[20260805,95,0,3],[20260805,96,0,21],[20260805,97,0,27],[20260805,98,0,11],[20260805,99,0,25],[20260805,100,0,29],[20260805,101,0,24],[20260805,102,0,1],[20260805,103,0,8],[20260805,104,0,6],[20260805,105,0,2],[20260805,106,0,12],[20260805,107,0,10],[20260805,108,0,34],[20260805,109,0,17],[20260805,110,0,23],[20260805,111,0,14],[20260805,112,0,7],[20260805,113,0,13],[20260805,114,0,22],[20260805,115,0,4],[20260805,116,0,9],[20260805,117,0,23],[20260805,118,0,18],[20260805,119,0,20],[20260805,120,0,31],[20260805,121,0,33],[20260805,122,0,19],[20260805,123,0,30],[20260805,124,0,32],[20260805,125,0,5],[20260805,126,0,28],[20260806,4,0,12],[20260806,223,0,21],[20260806,224,0,17],[20260806,225,0,19],[20260806,227,0,26],[20260806,228,0,3],[20260806,229,0,30],[20260806,230,0,24],[20260806,231,0,4],[20260806,232,0,31],[20260806,233,0,32],[20260806,234,0,29],[20260806,235,0,28],[20260806,236,0,11],[20260806,237,0,34],[20260806,238,0,1],[20260806,239,0,7],[20260806,240,0,12],[20260806,241,0,5],[20260806,242,0,8],[20260806,243,0,6],[20260806,244,0,10],[20260806,247,0,25],[20260806,248,0,2],[20260806,249,0,22],[20260806,250,0,33],[20260806,251,0,18],[20260806,252,0,23],[20260806,253,0,20],[20260807,159,0,13],[20260807,160,0,21],[20260807,161,0,18],[20260807,162,0,7],[20260807,163,0,24],[20260807,164,0,30],[20260807,165,0,27],[20260807,166,0,0],[20260807,167,0,28],[20260807,168,0,19],[20260807,169,0,10],[20260807,170,0,3],[20260807,171,0,26],[20260807,172,0,23],[20260807,173,0,4],[20260807,174,0,14],[20260807,175,0,20],[20260807,176,0,25],[20260807,177,0,11],[20260807,178,0,34],[20260807,179,0,8],[20260807,180,0,33],[20260807,181,0,12],[20260807,182,0,31],[20260807,183,0,5],[20260807,184,0,17],[20260807,185,0,32],[20260807,186,0,1],[20260807,187,0,29],[20260807,188,0,22],[20260807,189,0,6],[20260807,190,0,40],[20260808,63,0,10],[20260808,64,0,33],[20260808,65,0,12],[20260808,66,0,31],[20260808,67,0,30],[20260808,68,0,6],[20260808,69,0,26],[20260808,70,0,9],[20260808,71,0,23],[20260808,72,0,28],[20260808,73,0,11],[20260808,74,0,32],[20260808,75,0,34],[20260808,76,0,14],[20260808,77,0,2],[20260808,78,0,1],[20260808,79,0,7],[20260808,80,0,29],[20260808,81,0,40],[20260808,82,0,18],[20260808,84,0,25],[20260808,85,0,23],[20260808,86,0,19],[20260808,87,0,3],[20260808,88,0,8],[20260808,90,0,27],[20260808,92,0,13],[20260808,93,0,17],[20260808,127,0,33],[20260808,128,0,11],[20260808,129,0,4],[20260808,130,0,32],[20260808,131,0,24],[20260808,132,0,18],[20260808,133,0,21],[20260808,134,0,40],[20260808,135,0,23],[20260808,136,0,25],[20260808,137,0,31],[20260808,138,0,19],[20260808,139,0,27],[20260808,140,0,22],[20260808,141,0,12],[20260808,142,0,0],[20260808,143,0,2],[20260808,144,0,5],[20260808,145,0,9],[20260808,146,0,6],[20260808,147,0,8],[20260808,149,0,34],[20260808,150,0,20],[20260808,152,0,26],[20260808,153,0,1],[20260808,154,0,30],[20260808,155,0,7],[20260808,156,0,3],[20260808,158,0,19],[20260811,33,0,27],[20260811,34,0,32],[20260811,35,0,23],[20260811,36,0,3],[20260811,37,0,13],[20260811,38,0,6],[20260811,40,0,9],[20260811,41,0,11],[20260811,42,0,26],[20260811,44,0,30],[20260811,45,0,4],[20260811,46,0,8],[20260811,47,0,25],[20260811,48,0,34],[20260811,49,0,20],[20260811,50,0,21],[20260811,51,0,22],[20260811,52,0,19],[20260811,53,0,28],[20260811,54,0,7],[20260811,55,0,14],[20260811,56,0,12],[20260811,57,0,31],[20260811,58,0,9],[20260811,59,0,29],[20260811,60,0,1],[20260811,61,0,33],[20260811,62,0,2],[20260811,191,0,13],[20260811,192,0,22],[20260811,193,0,0],[20260811,194,0,10],[20260811,195,0,32],[20260811,196,0,20],[20260811,197,0,1],[20260811,198,0,0],[20260811,199,0,30],[20260811,200,0,6],[20260811,201,0,26],[20260811,202,0,12],[20260811,203,0,29],[20260811,204,0,21],[20260811,205,0,17],[20260811,206,0,16],[20260811,207,0,19],[20260811,208,0,9],[20260811,209,0,18],[20260811,210,0,38],[20260811,211,0,34],[20260811,212,0,5],[20260811,213,0,14],[20260811,214,0,33],[20260811,215,0,28],[20260811,216,0,7],[20260811,218,0,2],[20260811,219,0,25],[20260811,220,0,39],[20260811,221,0,11],[20260811,222,0,3],[20260812,0,0,21],[20260812,1,0,18],[20260812,2,0,31],[20260812,3,0,4],[20260812,4,0,11],[20260812,5,0,23],[20260812,6,0,20],[20260812,7,0,14],[20260812,8,0,12],[20260812,9,0,9],[20260812,10,0,30],[20260812,11,0,32],[20260812,12,0,5],[20260812,13,0,26],[20260812,14,0,26],[20260812,15,0,33],[20260812,17,0,27],[20260812,19,0,28],[20260812,20,0,19],[20260812,21,0,34],[20260812,23,0,3],[20260812,24,0,2],[20260812,25,0,8],[20260812,26,0,24],[20260812,27,0,6],[20260812,29,0,1],[20260812,30,0,29],[20260812,31,0,25],[20260812,95,0,3],[20260812,96,0,22],[20260812,97,0,27],[20260812,98,0,11],[20260812,99,0,25],[20260812,101,0,24],[20260812,102,0,1],[20260812,103,0,8],[20260812,104,0,0],[20260812,105,0,2],[20260812,106,0,12],[20260812,107,0,14],[20260812,108,0,34],[20260812,109,0,18],[20260812,110,0,26],[20260812,112,0,7],[20260812,113,0,13],[20260812,114,0,10],[20260812,115,0,17],[20260812,116,0,9],[20260812,117,0,23],[20260812,118,0,29],[20260812,119,0,20],[20260812,120,0,31],[20260812,121,0,33],[20260812,122,0,19],[20260812,123,0,30],[20260812,124,0,32],[20260812,125,0,5],[20260812,126,0,21],[20260813,45,3,18],[20260813,223,0,21],[20260813,224,1,17],[20260813,225,0,19],[20260813,226,0,13],[20260813,227,0,26],[20260813,228,0,3],[20260813,229,0,30],[20260813,230,0,24],[20260813,231,0,4],[20260813,232,0,31],[20260813,233,0,32],[20260813,234,0,29],[20260813,235,0,28],[20260813,236,0,11],[20260813,237,0,34],[20260813,238,0,40],[20260813,239,0,9],[20260813,240,0,12],[20260813,241,0,8],[20260813,242,0,10],[20260813,243,0,6],[20260813,244,0,1],[20260813,245,0,14],[20260813,247,0,25],[20260813,248,0,2],[20260813,249,0,22],[20260813,250,0,33],[20260813,251,0,18],[20260813,252,0,23],[20260813,253,0,20],[20260814,159,0,28],[20260814,160,0,4],[20260814,161,0,19],[20260814,162,0,7],[20260814,163,0,24],[20260814,164,0,33],[20260814,165,0,21],[20260814,166,0,2],[20260814,167,0,25],[20260814,168,0,1],[20260814,169,0,10],[20260814,171,0,26],[20260814,172,0,23],[20260814,174,0,18],[20260814,175,0,3],[20260814,177,0,11],[20260814,178,0,30],[20260814,179,0,8],[20260814,180,0,31],[20260814,181,0,12],[20260814,183,0,5],[20260814,184,0,17],[20260814,185,0,32],[20260814,187,0,29],[20260814,188,1,22],[20260814,189,0,6],[20260814,190,0,20],[20260815,127,0,33],[20260815,128,0,11],[20260815,129,0,4],[20260815,130,0,32],[20260815,131,0,24],[20260815,132,0,18],[20260815,133,0,21],[20260815,134,0,40],[20260815,135,0,23],[20260815,136,0,25],[20260815,137,0,31],[20260815,138,0,19],[20260815,139,0,27],[20260815,140,0,22],[20260815,141,0,12],[20260815,143,0,2],[20260815,144,0,5],[20260815,145,0,10],[20260815,146,0,6],[20260815,147,0,8],[20260815,148,0,9],[20260815,149,0,34],[20260815,150,0,20],[20260815,151,0,32],[20260815,152,0,26],[20260815,153,0,1],[20260815,154,0,30],[20260815,155,0,7],[20260815,156,0,3],[20260815,157,0,29],[20260815,158,0,17],[20260826,0,0,20],[20260826,1,0,18],[20260826,2,0,31],[20260826,3,0,3],[20260826,4,0,11],[20260826,5,1,23],[20260826,6,0,28],[20260826,7,0,27],[20260826,8,0,12],[20260826,9,0,9],[20260826,10,0,30],[20260826,11,0,7],[20260826,12,0,5],[20260826,13,0,17],[20260826,14,0,26],[20260826,15,0,33],[20260826,17,0,0],[20260826,18,0,13],[20260826,20,0,19],[20260826,21,1,0],[20260826,22,0,10],[20260826,24,0,2],[20260826,25,0,8],[20260826,26,0,24],[20260826,27,0,0],[20260826,28,0,21],[20260826,29,0,1],[20260826,30,0,29],[20260826,31,0,25],[20260826,95,0,3],[20260826,96,1,16],[20260826,97,0,26],[20260826,98,0,11],[20260826,99,0,25],[20260826,100,0,29],[20260826,101,0,24],[20260826,102,0,1],[20260826,103,0,8],[20260826,104,0,6],[20260826,105,0,2],[20260826,106,0,12],[20260826,107,0,10],[20260826,108,0,34],[20260826,109,0,17],[20260826,110,0,20],[20260826,112,0,7],[20260826,113,0,28],[20260826,114,1,4],[20260826,115,0,22],[20260826,116,0,9],[20260826,117,0,23],[20260826,118,0,18],[20260826,121,0,33],[20260826,122,0,19],[20260826,123,0,30],[20260826,124,0,31],[20260826,125,0,5],[20260826,126,0,21],[20260826,229,0,17],[20260827,223,0,21],[20260827,224,0,17],[20260827,225,0,29],[20260827,226,0,10],[20260827,227,0,27],[20260827,228,0,3],[20260827,229,0,30],[20260827,230,0,24],[20260827,231,0,4],[20260827,232,0,31],[20260827,233,0,32],[20260827,234,0,29],[20260827,235,0,28],[20260827,236,3,1],[20260827,237,0,34],[20260827,238,2,1],[20260827,241,0,9],[20260827,242,0,13],[20260827,244,0,1],[20260827,245,0,12],[20260827,246,0,11],[20260827,247,0,25],[20260827,248,0,2],[20260827,249,0,34],[20260827,250,0,33],[20260827,251,0,18],[20260827,252,0,23],[20260827,253,0,20],[20260828,159,0,13],[20260828,160,0,17],[20260828,161,1,18],[20260828,162,0,7],[20260828,163,0,24],[20260828,164,0,30],[20260828,165,0,21],[20260828,166,0,1],[20260828,167,0,25],[20260828,168,0,40],[20260828,169,0,10],[20260828,170,0,3],[20260828,171,0,26],[20260828,172,0,23],[20260828,173,0,4],[20260828,174,0,19],[20260828,175,0,28],[20260828,176,0,27],[20260828,177,0,11],[20260828,178,0,33],[20260828,179,0,8],[20260828,180,0,34],[20260828,181,0,12],[20260828,182,0,31],[20260828,183,0,5],[20260828,184,0,9],[20260828,185,0,32],[20260828,186,0,2],[20260828,187,0,29],[20260828,188,0,22],[20260828,189,0,6],[20260828,190,0,20],[20260828,235,0,28],[20260831,255,0,3],[20260831,256,0,25],[20260831,257,0,19],[20260831,259,0,27],[20260831,260,0,32],[20260831,261,0,10],[20260831,262,0,7],[20260831,264,0,30],[20260831,265,0,18],[20260831,266,0,35],[20260831,267,0,33],[20260831,268,0,29],[20260831,269,0,6],[20260831,270,0,34],[20260831,271,0,4],[20260831,273,0,21],[20260831,274,0,20],[20260831,275,0,38],[20260831,276,0,17],[20260831,277,0,11],[20260831,278,0,31],[20260831,280,0,9],[20260831,281,0,22],[20260831,282,0,1],[20260831,283,0,5],[20260831,284,0,24],[20260831,285,0,23],[20260831,286,0,8],[20260901,32,0,18],[20260901,33,0,27],[20260901,34,0,23],[20260901,36,0,3],[20260901,37,0,34],[20260901,38,0,6],[20260901,39,0,5],[20260901,40,0,38],[20260901,41,0,11],[20260901,42,0,26],[20260901,44,0,30],[20260901,45,0,4],[20260901,46,0,8],[20260901,47,0,25],[20260901,48,0,17],[20260901,49,0,20],[20260901,50,0,21],[20260901,51,0,22],[20260901,52,0,19],[20260901,53,0,28],[20260901,54,0,32],[20260901,55,0,33],[20260901,56,0,12],[20260901,57,0,31],[20260901,58,0,9],[20260901,59,0,29],[20260901,60,0,1],[20260901,61,0,40],[20260901,62,0,2],[20260901,191,0,35],[20260901,192,3,0],[20260901,193,0,31],[20260901,194,0,9],[20260901,195,0,32],[20260901,196,0,20],[20260901,197,0,10],[20260901,198,0,5],[20260901,199,0,30],[20260901,200,0,6],[20260901,201,0,26],[20260901,202,0,12],[20260901,203,0,12],[20260901,204,0,21],[20260901,205,0,17],[20260901,206,0,10],[20260901,207,0,19],[20260901,208,0,4],[20260901,209,0,18],[20260901,211,0,34],[20260901,213,0,3],[20260901,214,0,33],[20260901,215,0,28],[20260901,216,0,8],[20260901,217,0,9],[20260901,218,0,2],[20260901,219,0,25],[20260901,221,0,11],[20260902,0,0,20],[20260902,1,0,18],[20260902,2,0,31],[20260902,4,0,11],[20260902,5,0,23],[20260902,6,0,0],[20260902,7,0,2],[20260902,8,0,12],[20260902,9,0,9],[20260902,10,0,30],[20260902,11,0,32],[20260902,12,0,5],[20260902,13,0,17],[20260902,14,0,26],[20260902,15,0,33],[20260902,16,0,4],[20260902,17,0,27],[20260902,18,0,3],[20260902,19,0,1],[20260902,20,0,19],[20260902,21,0,34],[20260902,22,0,10],[20260902,25,0,8],[20260902,26,0,24],[20260902,27,0,6],[20260902,28,0,21],[20260902,29,0,1],[20260902,30,0,29],[20260902,31,0,25],[20260902,97,0,26],[20260902,98,0,11],[20260902,99,0,25],[20260902,100,0,29],[20260902,101,0,24],[20260902,102,0,1],[20260902,103,0,5],[20260902,104,0,6],[20260902,105,0,2],[20260902,106,0,12],[20260902,107,0,0],[20260902,109,0,17],[20260902,110,0,20],[20260902,111,0,27],[20260902,112,0,7],[20260902,113,0,28],[20260902,115,0,3],[20260902,116,0,9],[20260902,117,0,23],[20260902,118,0,18],[20260902,120,0,31],[20260902,121,0,33],[20260902,122,0,19],[20260902,123,0,30],[20260902,124,0,32],[20260902,125,0,5],[20260902,126,0,21],[20260903,223,0,21],[20260903,224,0,17],[20260903,226,0,5],[20260903,227,0,27],[20260903,228,0,3],[20260903,229,0,30],[20260903,230,0,24],[20260903,231,0,3],[20260903,232,0,31],[20260903,233,0,32],[20260903,234,0,29],[20260903,235,0,28],[20260903,236,1,11],[20260903,237,0,26],[20260903,238,0,8],[20260903,239,0,12],[20260903,241,0,10],[20260903,242,0,13],[20260903,243,0,6],[20260903,244,0,1],[20260903,246,0,9],[20260903,247,0,25],[20260903,248,0,2],[20260903,249,0,22],[20260903,250,0,33],[20260903,251,0,18],[20260903,252,0,23],[20260903,253,0,20],[20260904,159,0,35],[20260904,160,0,20],[20260904,161,0,18],[20260904,162,0,30],[20260904,163,0,24],[20260904,165,0,21],[20260904,166,0,3],[20260904,167,0,13],[20260904,168,0,1],[20260904,169,0,10],[20260904,170,0,40],[20260904,171,0,26],[20260904,172,0,23],[20260904,173,0,4],[20260904,174,0,38],[20260904,175,0,22],[20260904,176,0,25],[20260904,177,0,11],[20260904,178,0,34],[20260904,179,0,8],[20260904,180,0,33],[20260904,181,0,12],[20260904,182,0,31],[20260904,183,0,7],[20260904,184,0,17],[20260904,185,0,32],[20260904,186,0,0],[20260904,187,0,29],[20260904,188,0,28],[20260904,189,0,6],[20260904,190,0,19],[20260907,255,0,3],[20260907,256,0,25],[20260907,257,0,19],[20260907,258,0,36],[20260907,259,0,0],[20260907,260,0,32],[20260907,261,0,10],[20260907,262,0,10],[20260907,263,0,1],[20260907,265,0,18],[20260907,268,0,31],[20260907,269,0,6],[20260907,270,0,33],[20260907,271,0,4],[20260907,272,0,0],[20260907,273,0,21],[20260907,274,0,20],[20260907,275,0,38],[20260907,276,0,17],[20260907,277,0,11],[20260907,279,0,34],[20260907,280,0,9],[20260907,281,0,22],[20260907,282,0,2],[20260907,283,0,5],[20260907,284,0,37],[20260907,285,0,23],[20260907,286,0,8],[20260908,32,0,18],[20260908,33,0,27],[20260908,34,0,35],[20260908,35,0,13],[20260908,36,0,3],[20260908,37,0,34],[20260908,38,0,0],[20260908,39,0,0],[20260908,40,0,7],[20260908,41,0,11],[20260908,42,0,23],[20260908,44,0,30],[20260908,45,0,4],[20260908,46,0,10],[20260908,47,0,25],[20260908,48,0,17],[20260908,49,0,20],[20260908,50,0,21],[20260908,51,0,22],[20260908,52,0,19],[20260908,53,0,28],[20260908,54,0,32],[20260908,55,0,33],[20260908,56,0,12],[20260908,57,0,31],[20260908,58,0,9],[20260908,59,0,29],[20260908,60,0,1],[20260908,61,0,38],[20260908,62,0,2],[20260908,191,0,36],[20260908,192,0,22],[20260908,193,0,31],[20260908,194,0,36],[20260908,195,0,32],[20260908,196,0,1],[20260908,197,0,2],[20260908,198,0,5],[20260908,199,0,30],[20260908,200,0,6],[20260908,201,0,26],[20260908,202,0,12],[20260908,203,0,29],[20260908,204,0,21],[20260908,205,0,0],[20260908,206,0,13],[20260908,207,0,19],[20260908,208,0,38],[20260908,209,0,18],[20260908,210,0,36],[20260908,211,0,34],[20260908,212,0,7],[20260908,213,0,3],[20260908,214,0,33],[20260908,215,0,28],[20260908,216,0,8],[20260908,217,0,23],[20260908,218,0,4],[20260908,219,0,25],[20260908,220,0,14],[20260908,221,0,11],[20260908,222,0,20],[20260909,0,0,20],[20260909,1,0,18],[20260909,2,0,31],[20260909,3,0,4],[20260909,4,0,11],[20260909,5,1,23],[20260909,6,0,22],[20260909,7,0,21],[20260909,8,0,12],[20260909,9,0,9],[20260909,10,0,30],[20260909,11,0,32],[20260909,12,0,5],[20260909,13,0,26],[20260909,14,0,27],[20260909,15,0,33],[20260909,16,0,1],[20260909,17,0,27],[20260909,18,0,14],[20260909,19,0,27],[20260909,20,0,19],[20260909,21,0,34],[20260909,22,0,10],[20260909,23,0,3],[20260909,24,0,2],[20260909,25,0,8],[20260909,26,0,24],[20260909,27,0,6],[20260909,28,0,17],[20260909,29,0,1],[20260909,30,0,29],[20260909,31,0,27],[20260909,95,0,4],[20260909,96,0,27],[20260909,97,0,26],[20260909,98,0,11],[20260909,99,0,25],[20260909,100,0,29],[20260909,101,0,24],[20260909,102,0,0],[20260909,103,0,8],[20260909,104,0,6],[20260909,105,0,0],[20260909,106,0,12],[20260909,107,0,35],[20260909,108,0,34],[20260909,109,0,17],[20260909,110,0,20],[20260909,111,2,27],[20260909,112,0,7],[20260909,113,0,14],[20260909,114,0,28],[20260909,115,0,3],[20260909,116,0,9],[20260909,117,0,23],[20260909,118,0,18],[20260909,119,0,22],[20260909,120,0,0],[20260909,121,0,33],[20260909,122,0,19],[20260909,123,0,30],[20260909,124,0,32],[20260909,125,0,5],[20260909,126,0,21],[20260910,223,0,21],[20260910,224,0,17],[20260910,225,0,19],[20260910,226,0,5],[20260910,227,0,27],[20260910,228,0,3],[20260910,229,0,30],[20260910,230,0,24],[20260910,231,0,4],[20260910,232,0,34],[20260910,233,0,32],[20260910,234,0,29],[20260910,236,0,11],[20260910,237,0,26],[20260910,238,0,8],[20260910,239,0,14],[20260910,240,0,12],[20260910,241,0,7],[20260910,242,0,13],[20260910,244,0,1],[20260910,245,0,10],[20260910,246,0,6],[20260910,247,0,25],[20260910,248,0,2],[20260910,249,0,22],[20260910,250,0,33],[20260910,251,0,18],[20260910,252,0,23],[20260910,253,0,20],[20260911,159,0,34],[20260911,160,0,20],[20260911,161,0,38],[20260911,162,0,0],[20260911,163,0,24],[20260911,165,0,21],[20260911,166,0,1],[20260911,168,0,18],[20260911,169,0,10],[20260911,171,0,26],[20260911,174,0,13],[20260911,175,0,22],[20260911,177,0,11],[20260911,179,0,8],[20260911,181,0,12],[20260911,182,0,0],[20260911,184,0,17],[20260911,186,0,2],[20260911,187,0,29],[20260911,188,0,28],[20260911,189,0,6],[20260911,190,0,19],[20260912,63,0,10],[20260912,64,0,33],[20260912,65,0,12],[20260912,66,0,31],[20260912,67,0,0],[20260912,68,0,6],[20260912,69,0,26],[20260912,70,0,9],[20260912,71,0,23],[20260912,72,0,21],[20260912,73,0,11],[20260912,74,0,32],[20260912,75,0,34],[20260912,76,0,14],[20260912,77,0,2],[20260912,78,0,1],[20260912,82,0,18],[20260912,84,0,25],[20260912,86,0,19],[20260912,87,0,3],[20260912,88,0,8],[20260912,89,0,28],[20260912,90,0,22],[20260912,91,0,24],[20260912,93,0,17],[20260912,94,0,4],[20260912,127,0,33],[20260912,129,0,4],[20260912,130,0,32],[20260912,131,0,24],[20260912,132,0,18],[20260912,134,0,5],[20260912,135,0,23],[20260912,136,0,25],[20260912,137,0,31],[20260912,138,0,19],[20260912,139,0,27],[20260912,140,0,22],[20260912,141,0,12],[20260912,142,0,11],[20260912,143,0,2],[20260912,145,0,9],[20260912,146,0,6],[20260912,147,0,8],[20260912,148,0,10],[20260912,149,0,34],[20260912,150,0,20],[20260912,151,0,28],[20260912,152,0,26],[20260912,153,0,1],[20260912,155,0,7],[20260912,156,0,3],[20260912,157,0,30],[20260912,158,0,17],[20260914,255,0,3],[20260914,256,0,25],[20260914,257,0,19],[20260914,258,0,40],[20260914,259,0,1],[20260914,260,0,32],[20260914,261,0,10],[20260914,262,0,7],[20260914,263,0,1],[20260914,264,0,30],[20260914,265,0,18],[20260914,266,0,35],[20260914,267,1,34],[20260914,268,0,29],[20260914,269,0,6],[20260914,270,0,33],[20260914,271,0,4],[20260914,272,0,0],[20260914,273,0,21],[20260914,274,0,20],[20260914,275,0,38],[20260914,276,0,17],[20260914,277,0,11],[20260914,278,0,31],[20260914,279,0,12],[20260914,280,0,9],[20260914,281,0,22],[20260914,282,0,2],[20260914,283,0,5],[20260914,284,0,37],[20260914,285,0,23],[20260914,286,0,8],[20260916,0,0,20],[20260916,2,0,31],[20260916,3,0,4],[20260916,4,0,11],[20260916,5,0,23],[20260916,6,0,18],[20260916,7,0,17],[20260916,8,0,13],[20260916,9,0,9],[20260916,10,0,11],[20260916,11,0,32],[20260916,12,0,5],[20260916,13,0,26],[20260916,15,0,33],[20260916,17,0,27],[20260916,18,0,13],[20260916,20,0,19],[20260916,21,0,34],[20260916,22,0,10],[20260916,23,0,3],[20260916,24,0,2],[20260916,25,0,8],[20260916,26,0,24],[20260916,27,0,6],[20260916,28,0,21],[20260916,29,0,1],[20260916,30,0,29],[20260916,96,0,13],[20260916,97,0,9],[20260916,98,0,23],[20260916,99,0,12],[20260916,100,0,29],[20260916,101,0,31],[20260916,102,0,34],[20260916,103,0,8],[20260916,104,0,1],[20260916,105,2,14],[20260916,106,0,8],[20260916,107,0,5],[20260916,108,0,7],[20260916,109,0,2],[20260916,110,0,3],[20260916,111,0,6],[20260916,112,0,26],[20260916,113,0,28],[20260916,114,0,6],[20260916,115,0,18],[20260916,116,0,33],[20260916,117,0,30],[20260916,118,0,24],[20260916,119,0,10],[20260916,120,0,4],[20260916,121,0,19],[20260916,122,0,25],[20260916,123,0,20],[20260916,124,0,11],[20260916,125,0,22],[20260916,126,0,21],[20260917,223,0,21],[20260917,224,0,18],[20260917,225,0,19],[20260917,226,0,9],[20260917,227,0,27],[20260917,229,0,30],[20260917,230,0,24],[20260917,231,0,4],[20260917,232,0,31],[20260917,233,0,32],[20260917,234,0,29],[20260917,235,0,28],[20260917,236,0,11],[20260917,237,0,26],[20260917,238,0,1],[20260917,240,0,12],[20260917,242,0,13],[20260917,243,0,6],[20260917,244,0,3],[20260917,245,0,10],[20260917,247,0,25],[20260917,248,0,2],[20260917,249,0,22],[20260917,250,0,33],[20260917,251,0,18],[20260917,253,0,20],[20260918,159,0,31],[20260918,160,0,20],[20260918,161,0,31],[20260918,162,0,14],[20260918,163,0,24],[20260918,164,0,7],[20260918,165,0,21],[20260918,166,0,1],[20260918,167,0,26],[20260918,168,0,19],[20260918,169,0,10],[20260918,170,0,3],[20260918,171,0,29],[20260918,172,0,23],[20260918,173,0,3],[20260918,174,0,32],[20260918,175,0,22],[20260918,176,0,30],[20260918,177,0,11],[20260918,178,0,28],[20260918,179,0,8],[20260918,180,0,27],[20260918,181,0,12],[20260918,182,0,25],[20260918,184,0,18],[20260918,185,0,13],[20260918,186,0,2],[20260918,187,0,9],[20260918,188,0,17],[20260918,189,0,6],[20260918,190,0,34],[20260919,63,0,10],[20260919,64,0,33],[20260919,65,0,12],[20260919,66,0,31],[20260919,67,0,30],[20260919,68,0,6],[20260919,69,0,26],[20260919,70,0,9],[20260919,71,0,23],[20260919,72,0,21],[20260919,73,0,0],[20260919,74,0,32],[20260919,75,0,34],[20260919,76,0,14],[20260919,77,0,2],[20260919,79,0,7],[20260919,80,0,29],[20260919,81,0,1],[20260919,82,0,18],[20260919,83,0,2],[20260919,84,0,25],[20260919,85,0,23],[20260919,86,0,19],[20260919,87,0,3],[20260919,88,0,8],[20260919,89,0,27],[20260919,90,0,22],[20260919,91,0,0],[20260919,93,0,17],[20260919,94,0,4],[20260919,127,0,33],[20260919,128,0,11],[20260919,129,0,4],[20260919,130,0,32],[20260919,131,0,24],[20260919,132,0,18],[20260919,133,0,21],[20260919,134,0,8],[20260919,135,0,23],[20260919,136,0,25],[20260919,137,0,31],[20260919,138,0,19],[20260919,139,0,27],[20260919,140,0,22],[20260919,141,0,9],[20260919,142,0,13],[20260919,143,0,2],[20260919,144,0,5],[20260919,145,0,10],[20260919,146,0,6],[20260919,148,0,14],[20260919,149,0,34],[20260919,150,0,20],[20260919,151,0,28],[20260919,152,0,26],[20260919,153,0,1],[20260919,154,0,30],[20260919,156,0,3],[20260919,157,0,29],[20260919,158,0,17],[20260921,255,0,0],[20260921,256,0,0],[20260921,257,0,0],[20260921,258,0,0],[20260921,259,0,0],[20260921,260,0,0],[20260921,262,0,0],[20260921,263,0,26],[20260921,264,0,0],[20260921,265,0,0],[20260921,266,0,1],[20260921,268,0,0],[20260921,269,0,0],[20260921,270,0,27],[20260921,272,0,0],[20260921,273,0,0],[20260921,274,0,0],[20260921,275,1,0],[20260921,276,0,0],[20260921,277,0,0],[20260921,278,0,0],[20260921,279,0,0],[20260921,281,0,0],[20260921,282,0,0],[20260921,286,0,0],[20260922,33,0,9],[20260922,34,0,8],[20260922,35,0,0],[20260922,36,0,0],[20260922,37,0,3],[20260922,39,0,0],[20260922,40,0,0],[20260922,41,0,0],[20260922,42,0,40],[20260922,44,0,0],[20260922,45,0,0],[20260922,46,0,0],[20260922,47,0,0],[20260922,48,0,0],[20260922,49,0,0],[20260922,50,0,0],[20260922,51,0,0],[20260922,52,0,0],[20260922,53,0,0],[20260922,54,0,0],[20260922,55,0,0],[20260922,56,0,0],[20260922,57,0,0],[20260922,58,0,0],[20260922,59,0,0],[20260922,60,0,0],[20260922,61,0,0],[20260922,62,0,0],[20260922,194,0,13],[20260922,196,0,20],[20260922,199,0,30],[20260922,204,0,21],[20260922,205,0,17],[20260922,206,0,21],[20260922,207,0,19],[20260922,209,0,18],[20260922,210,0,15],[20260922,222,0,22],[20260923,0,0,20],[20260923,1,0,18],[20260923,2,0,31],[20260923,3,0,3],[20260923,4,0,11],[20260923,5,0,23],[20260923,6,0,22],[20260923,7,0,21],[20260923,8,0,12],[20260923,9,0,9],[20260923,10,0,30],[20260923,11,0,32],[20260923,12,0,5],[20260923,13,0,26],[20260923,15,0,33],[20260923,16,0,14],[20260923,17,0,27],[20260923,18,0,13],[20260923,19,0,28],[20260923,20,0,19],[20260923,21,0,34],[20260923,22,0,10],[20260923,25,0,8],[20260923,26,0,24],[20260923,27,0,6],[20260923,28,0,17],[20260923,29,0,1],[20260923,30,0,29],[20260923,95,0,27],[20260923,96,0,13],[20260923,97,0,7],[20260923,98,0,23],[20260923,99,0,9],[20260923,100,0,29],[20260923,101,0,31],[20260923,102,0,2],[20260923,103,0,8],[20260923,104,0,1],[20260923,105,0,14],[20260923,106,0,8],[20260923,107,0,0],[20260923,109,0,6],[20260923,110,0,3],[20260923,112,0,26],[20260923,113,0,28],[20260923,115,0,18],[20260923,116,0,33],[20260923,117,0,30],[20260923,118,0,0],[20260923,119,0,10],[20260923,120,0,4],[20260923,121,0,20],[20260923,122,0,25],[20260923,124,0,15],[20260923,125,0,22],[20260923,126,0,21],[20260924,223,0,21],[20260924,224,0,17],[20260924,225,0,19],[20260924,226,0,9],[20260924,227,0,27],[20260924,228,0,3],[20260924,230,0,24],[20260924,231,0,4],[20260924,232,0,31],[20260924,233,0,32],[20260924,234,0,29],[20260924,235,0,29],[20260924,236,0,11],[20260924,237,0,26],[20260924,239,0,14],[20260924,242,0,13],[20260924,243,0,6],[20260924,244,0,1],[20260924,245,0,10],[20260924,246,0,12],[20260924,247,0,25],[20260924,248,0,2],[20260924,249,0,22],[20260924,250,0,33],[20260924,251,0,0],[20260924,252,0,23],[20260924,253,0,20],[20260925,159,0,28],[20260925,160,0,20],[20260925,161,0,27],[20260925,162,0,0],[20260925,163,0,24],[20260925,164,0,31],[20260925,165,0,21],[20260925,166,0,1],[20260925,167,0,29],[20260925,168,0,19],[20260925,169,0,10],[20260925,170,0,3],[20260925,171,0,26],[20260925,172,0,23],[20260925,173,0,4],[20260925,174,0,14],[20260925,175,0,22],[20260925,176,0,25],[20260925,177,0,11],[20260925,178,0,34],[20260925,179,0,8],[20260925,180,0,33],[20260925,181,0,12],[20260925,182,0,30],[20260925,183,0,5],[20260925,184,0,18],[20260925,185,0,32],[20260925,186,0,2],[20260925,187,0,9],[20260925,188,0,17],[20260925,189,0,6],[20260925,190,0,13],[20260926,63,0,0],[20260926,64,0,0],[20260926,65,0,0],[20260926,66,0,31],[20260926,67,0,30],[20260926,68,0,6],[20260926,69,0,26],[20260926,70,0,9],[20260926,71,0,23],[20260926,72,0,21],[20260926,73,0,11],[20260926,74,0,32],[20260926,75,0,0],[20260926,76,0,14],[20260926,77,0,0],[20260926,79,0,7],[20260926,80,0,29],[20260926,82,0,18],[20260926,83,0,2],[20260926,84,0,25],[20260926,86,0,19],[20260926,87,0,3],[20260926,88,0,8],[20260926,89,0,27],[20260926,90,0,22],[20260926,91,0,0],[20260926,92,0,13],[20260926,93,0,17],[20260926,127,0,33],[20260926,128,0,12],[20260926,129,0,4],[20260926,130,0,32],[20260926,131,0,24],[20260926,132,0,18],[20260926,133,0,21],[20260926,134,0,10],[20260926,135,0,23],[20260926,136,0,25],[20260926,137,0,31],[20260926,138,0,19],[20260926,139,0,27],[20260926,140,0,22],[20260926,141,0,11],[20260926,142,0,13],[20260926,143,0,2],[20260926,144,0,5],[20260926,145,0,9],[20260926,146,0,6],[20260926,147,0,8],[20260926,148,0,14],[20260926,149,0,34],[20260926,150,0,20],[20260926,151,0,28],[20260926,152,0,26],[20260926,153,0,1],[20260926,155,0,7],[20260926,156,0,3],[20260926,157,0,30],[20260926,158,0,17],[20260928,255,0,3],[20260928,256,0,25],[20260928,257,0,19],[20260928,258,0,37],[20260928,260,0,32],[20260928,261,0,10],[20260928,262,0,7],[20260928,263,0,29],[20260928,264,0,30],[20260928,265,0,18],[20260928,266,0,24],[20260928,267,0,34],[20260928,268,0,29],[20260928,269,0,15],[20260928,270,0,5],[20260928,271,0,14],[20260928,272,0,0],[20260928,274,0,20],[20260928,276,0,34],[20260928,277,0,11],[20260928,278,0,31],[20260928,279,0,12],[20260928,280,0,9],[20260928,281,0,22],[20260928,282,0,2],[20260928,283,0,33],[20260928,285,0,23],[20260928,286,0,8],[20260929,32,0,18],[20260929,33,0,28],[20260929,34,0,13],[20260929,35,0,9],[20260929,36,0,3],[20260929,37,0,37],[20260929,38,0,6],[20260929,40,0,0],[20260929,41,0,11],[20260929,42,0,24],[20260929,44,0,30],[20260929,45,0,4],[20260929,46,0,7],[20260929,47,0,25],[20260929,48,0,17],[20260929,49,0,20],[20260929,51,0,22],[20260929,52,0,19],[20260929,53,0,28],[20260929,54,0,32],[20260929,55,0,33],[20260929,56,0,12],[20260929,57,0,31],[20260929,58,0,38],[20260929,59,0,29],[20260929,60,0,1],[20260929,61,0,14],[20260929,62,0,2],[20260929,193,0,31],[20260929,195,0,32],[20260929,196,0,20],[20260929,197,2,2],[20260929,198,0,5],[20260929,199,0,30],[20260929,200,0,6],[20260929,201,0,24],[20260929,202,0,13],[20260929,203,0,29],[20260929,204,0,21],[20260929,205,0,17],[20260929,207,0,19],[20260929,208,0,3],[20260929,209,0,18],[20260929,210,0,35],[20260929,211,0,34],[20260929,212,0,7],[20260929,213,0,4],[20260929,214,0,33],[20260929,216,0,8],[20260929,217,0,27],[20260929,218,0,1],[20260929,219,0,25],[20260929,221,0,12],[20260929,222,0,22],[20261005,255,0,3],[20261005,256,0,25],[20261005,258,0,36],[20261005,260,0,32],[20261005,261,0,10],[20261005,262,0,9],[20261005,264,0,30],[20261005,265,0,18],[20261005,266,0,35],[20261005,268,0,29],[20261005,269,0,6],[20261005,270,0,5],[20261005,271,0,4],[20261005,272,0,0],[20261005,273,0,21],[20261005,274,0,20],[20261005,275,1,38],[20261005,276,0,17],[20261005,277,0,11],[20261005,278,0,31],[20261005,279,0,12],[20261005,281,0,22],[20261005,282,0,2],[20261005,283,0,1],[20261005,284,3,37],[20261005,285,0,23],[20261005,286,0,8],[20261014,2,0,31],[20261014,3,0,3],[20261014,4,0,11],[20261014,5,0,23],[20261014,6,0,22],[20261014,7,0,21],[20261014,8,0,12],[20261014,9,0,9],[20261014,10,0,30],[20261014,11,0,32],[20261014,12,0,5],[20261014,13,1,25],[20261014,16,1,13],[20261014,17,0,28],[20261014,18,0,14],[20261014,20,0,20],[20261014,22,0,10],[20261014,23,0,3],[20261014,24,0,2],[20261014,25,0,8],[20261014,26,0,24],[20261014,27,0,6],[20261014,29,0,1],[20261014,30,0,29],[20261014,95,0,3],[20261014,96,0,37],[20261014,97,0,26],[20261014,98,0,9],[20261014,99,0,25],[20261014,100,0,29],[20261014,101,0,27],[20261014,102,0,1],[20261014,103,0,8],[20261014,104,0,0],[20261014,106,0,10],[20261014,107,0,36],[20261014,108,0,12],[20261014,109,0,17],[20261014,110,0,20],[20261014,111,0,13],[20261014,112,0,7],[20261014,113,0,16],[20261014,114,0,38],[20261014,115,0,2],[20261014,116,0,35],[20261014,117,0,23],[20261014,118,0,18],[20261014,119,0,22],[20261014,120,0,31],[20261014,121,0,11],[20261014,122,0,19],[20261014,123,0,30],[20261014,124,0,32],[20261014,125,0,5],[20261014,126,0,0],[20261016,159,0,28],[20261016,160,0,20],[20261016,162,0,7],[20261016,163,0,32],[20261016,164,0,31],[20261016,165,0,21],[20261016,167,0,0],[20261016,168,0,19],[20261016,169,0,10],[20261016,170,0,3],[20261016,171,0,29],[20261016,172,0,24],[20261016,173,0,2],[20261016,174,0,24],[20261016,175,0,22],[20261016,176,0,30],[20261016,177,0,11],[20261016,179,0,8],[20261016,180,0,23],[20261016,181,0,12],[20261016,182,0,14],[20261016,183,0,5],[20261016,184,0,18],[20261016,185,0,38],[20261016,186,0,2],[20261016,187,0,9],[20261016,188,0,17],[20261016,189,0,6],[20261017,63,0,10],[20261017,64,0,0],[20261017,66,0,31],[20261017,67,0,30],[20261017,69,0,0],[20261017,70,0,9],[20261017,71,0,23],[20261017,72,0,21],[20261017,74,0,32],[20261017,75,0,0],[20261017,77,0,2],[20261017,80,0,29],[20261017,83,0,2],[20261017,84,0,25],[20261017,87,0,3],[20261017,89,0,27],[20261017,90,0,22],[20261017,91,0,0],[20261017,92,0,13],[20261017,128,0,11],[20261017,130,0,32],[20261017,132,0,18],[20261017,133,0,21],[20261017,136,0,25],[20261017,137,0,31],[20261017,138,0,19],[20261017,139,0,24],[20261017,140,0,22],[20261017,142,0,13],[20261017,145,0,9],[20261017,146,0,6],[20261017,147,0,8],[20261017,148,0,14],[20261017,149,0,38],[20261017,150,0,20],[20261017,151,0,28],[20261017,152,0,26],[20261017,154,0,30],[20261017,155,0,7],[20261017,158,0,17],[20261019,255,0,3],[20261019,257,0,19],[20261019,258,0,36],[20261019,260,0,32],[20261019,261,0,10],[20261019,262,0,7],[20261019,264,0,30],[20261019,265,0,18],[20261019,267,0,14],[20261019,268,0,29],[20261019,269,0,6],[20261019,270,0,5],[20261019,272,0,0],[20261019,273,0,21],[20261019,274,0,20],[20261019,275,1,38],[20261019,276,0,17],[20261019,277,0,11],[20261019,278,0,31],[20261019,279,0,12],[20261019,280,0,9],[20261019,281,0,22],[20261019,282,0,2],[20261019,283,0,1],[20261019,285,0,23],[20261019,286,0,8],[20261020,191,0,14],[20261020,193,0,31],[20261020,194,0,36],[20261020,196,0,20],[20261020,198,0,5],[20261020,199,0,0],[20261020,200,0,6],[20261020,201,0,26],[20261020,202,0,12],[20261020,204,0,21],[20261020,207,0,19],[20261020,208,1,2],[20261020,209,0,18],[20261020,210,0,35],[20261020,211,0,23],[20261020,212,0,7],[20261020,213,0,3],[20261020,214,0,29],[20261020,216,0,8],[20261020,218,0,1],[20261020,219,0,25],[20261020,221,0,11],[20261020,222,0,22],[20261021,1,0,18],[20261021,2,0,31],[20261021,3,0,4],[20261021,4,0,11],[20261021,5,0,23],[20261021,6,0,22],[20261021,7,0,21],[20261021,8,0,12],[20261021,9,0,9],[20261021,10,0,30],[20261021,11,0,32],[20261021,12,0,5],[20261021,13,0,25],[20261021,15,0,36],[20261021,16,0,13],[20261021,17,0,26],[20261021,18,0,14],[20261021,20,0,19],[20261021,21,0,38],[20261021,22,0,10],[20261021,23,0,3],[20261021,24,0,40],[20261021,25,0,8],[20261021,26,0,24],[20261021,27,0,6],[20261021,28,0,20],[20261021,29,0,1],[20261021,30,0,29],[20261021,95,0,3],[20261021,96,0,37],[20261021,97,0,26],[20261021,98,0,11],[20261021,99,0,25],[20261021,100,0,29],[20261021,101,0,24],[20261021,102,0,1],[20261021,103,0,8],[20261021,104,0,6],[20261021,105,0,4],[20261021,106,0,12],[20261021,107,0,36],[20261021,109,0,17],[20261021,110,0,20],[20261021,111,1,10],[20261021,112,0,7],[20261021,113,0,9],[20261021,115,0,2],[20261021,116,0,35],[20261021,117,0,23],[20261021,118,0,18],[20261021,119,0,22],[20261021,120,0,31],[20261021,122,0,19],[20261021,123,0,30],[20261021,124,0,32],[20261021,125,0,5],[20261021,126,0,21],[20261023,159,0,29],[20261023,160,0,20],[20261023,161,0,32],[20261023,163,0,24],[20261023,164,0,38],[20261023,165,0,21],[20261023,166,0,1],[20261023,167,0,13],[20261023,168,0,19],[20261023,169,0,10],[20261023,170,0,3],[20261023,171,0,25],[20261023,172,0,23],[20261023,173,0,4],[20261023,174,0,31],[20261023,175,0,22],[20261023,177,0,11],[20261023,178,0,36],[20261023,179,0,8],[20261023,180,0,37],[20261023,181,0,12],[20261023,182,0,14],[20261023,184,0,18],[20261023,186,0,2],[20261023,187,0,9],[20261023,188,0,17],[20261023,190,0,31],[20261024,63,0,10],[20261024,64,0,30],[20261024,65,0,12],[20261024,66,0,31],[20261024,67,0,30],[20261024,68,1,6],[20261024,69,0,26],[20261024,70,0,9],[20261024,71,0,23],[20261024,72,0,21],[20261024,73,0,11],[20261024,74,0,32],[20261024,75,0,0],[20261024,77,0,2],[20261024,79,0,7],[20261024,80,0,29],[20261024,82,0,18],[20261024,83,0,2],[20261024,84,0,25],[20261024,85,0,23],[20261024,86,0,19],[20261024,87,0,3],[20261024,88,0,8],[20261024,89,0,28],[20261024,90,0,22],[20261024,91,0,0],[20261024,92,0,13],[20261024,93,0,17],[20261024,94,0,1],[20261024,127,0,36],[20261024,129,0,4],[20261024,130,0,32],[20261024,131,0,24],[20261024,132,0,18],[20261024,133,0,21],[20261024,134,0,10],[20261024,135,0,23],[20261024,136,0,25],[20261024,137,0,31],[20261024,138,0,19],[20261024,139,0,26],[20261024,140,0,22],[20261024,141,0,12],[20261024,142,0,14],[20261024,143,0,2],[20261024,144,0,5],[20261024,145,0,9],[20261024,146,0,6],[20261024,147,0,8],[20261024,148,0,11],[20261024,149,0,29],[20261024,150,0,20],[20261024,151,0,28],[20261024,153,0,1],[20261024,155,0,7],[20261024,156,0,3],[20261024,157,0,30],[20261024,158,0,17],[20261024,278,2,36],[20261026,256,0,25],[20261026,257,1,19],[20261026,258,0,36],[20261026,260,0,32],[20261026,261,0,10],[20261026,262,0,7],[20261026,264,0,0],[20261026,265,0,18],[20261026,267,0,30],[20261026,268,0,29],[20261026,269,0,6],[20261026,270,0,5],[20261026,271,0,4],[20261026,272,0,26],[20261026,273,0,21],[20261026,274,0,20],[20261026,276,0,17],[20261026,277,0,11],[20261026,278,0,31],[20261026,279,0,0],[20261026,280,0,9],[20261026,281,0,22],[20261026,282,0,2],[20261026,283,0,1],[20261026,285,0,23],[20261026,286,0,8],[20261027,32,0,18],[20261027,33,0,26],[20261027,34,0,13],[20261027,35,0,10],[20261027,36,0,3],[20261027,38,0,6],[20261027,39,0,7],[20261027,40,0,5],[20261027,41,0,11],[20261027,42,0,24],[20261027,44,0,30],[20261027,45,0,4],[20261027,46,0,8],[20261027,48,0,17],[20261027,49,0,20],[20261027,50,0,21],[20261027,51,0,22],[20261027,52,0,19],[20261027,54,0,36],[20261027,55,0,35],[20261027,56,0,12],[20261027,57,0,31],[20261027,58,0,32],[20261027,59,0,29],[20261027,60,0,1],[20261027,61,0,14],[20261027,62,0,2],[20261027,191,0,14],[20261027,193,0,31],[20261027,194,0,36],[20261027,195,0,32],[20261027,198,0,0],[20261027,199,0,30],[20261027,200,0,0],[20261027,201,0,26],[20261027,202,0,12],[20261027,203,0,29],[20261027,208,0,1],[20261027,209,0,18],[20261027,210,0,13],[20261027,211,0,23],[20261027,212,0,7],[20261027,213,0,4],[20261027,214,0,24],[20261027,216,0,8],[20261027,217,0,11],[20261027,218,0,4],[20261027,221,0,10],[20261027,222,0,35],[20261030,159,0,26],[20261030,160,0,20],[20261030,161,0,28],[20261030,162,0,7],[20261030,163,0,38],[20261030,164,0,31],[20261030,165,0,21],[20261030,166,0,1],[20261030,167,0,13],[20261030,168,0,19],[20261030,169,0,10],[20261030,170,0,3],[20261030,171,0,35],[20261030,172,0,39],[20261030,173,0,3],[20261030,174,0,24],[20261030,175,0,22],[20261030,176,0,36],[20261030,177,0,11],[20261030,178,0,30],[20261030,179,0,8],[20261030,180,0,32],[20261030,181,0,12],[20261030,182,0,14],[20261030,183,0,5],[20261030,184,0,18],[20261030,185,0,29],[20261030,186,0,3],[20261030,187,0,9],[20261030,188,0,17],[20261030,189,0,1],[20261030,190,0,25],[20261031,63,0,10],[20261031,64,0,0],[20261031,65,0,0],[20261031,66,0,31],[20261031,67,0,30],[20261031,68,0,6],[20261031,69,0,26],[20261031,70,0,9],[20261031,71,0,23],[20261031,72,0,27],[20261031,73,0,11],[20261031,74,1,32],[20261031,75,0,0],[20261031,76,0,14],[20261031,77,0,2],[20261031,78,2,1],[20261031,79,3,0],[20261031,80,0,29],[20261031,81,0,7],[20261031,82,0,18],[20261031,83,0,20],[20261031,84,0,25],[20261031,85,0,23],[20261031,86,0,19],[20261031,87,0,3],[20261031,88,0,8],[20261031,89,3,0],[20261031,90,0,22],[20261031,91,0,0],[20261031,92,0,13],[20261031,93,0,17],[20261031,94,0,4],[20261031,127,0,36],[20261031,128,0,11],[20261031,129,0,4],[20261031,130,0,32],[20261031,131,0,24],[20261031,132,0,18],[20261031,133,0,21],[20261031,134,0,7],[20261031,135,0,23],[20261031,136,0,25],[20261031,137,0,31],[20261031,138,0,19],[20261031,139,0,37],[20261031,140,0,22],[20261031,141,0,12],[20261031,142,0,13],[20261031,143,0,2],[20261031,144,0,5],[20261031,145,0,9],[20261031,146,0,6],[20261031,147,0,8],[20261031,148,0,11],[20261031,149,0,35],[20261031,150,0,20],[20261031,151,0,27],[20261031,152,0,26],[20261031,153,0,1],[20261031,154,0,29],[20261031,156,0,3],[20261031,157,0,30],[20261031,158,0,17],[20261102,255,0,3],[20261102,256,0,25],[20261102,257,0,19],[20261102,258,0,18],[20261102,262,0,7],[20261102,263,0,13],[20261102,264,0,30],[20261102,265,0,26],[20261102,266,0,39],[20261102,267,0,14],[20261102,268,0,29],[20261102,269,0,6],[20261102,270,0,5],[20261102,271,0,4],[20261102,272,0,26],[20261102,274,0,20],[20261102,276,0,17],[20261102,277,0,11],[20261102,278,0,31],[20261102,279,0,12],[20261102,280,0,9],[20261102,282,0,2],[20261102,283,0,1],[20261102,284,0,37],[20261102,285,0,23],[20261102,286,0,8],[20261103,33,0,26],[20261103,34,0,13],[20261103,35,0,10],[20261103,36,0,3],[20261103,37,0,37],[20261103,38,0,6],[20261103,39,0,7],[20261103,40,0,5],[20261103,41,0,11],[20261103,42,0,0],[20261103,43,0,9],[20261103,44,0,30],[20261103,45,0,4],[20261103,46,0,8],[20261103,47,0,25],[20261103,48,0,17],[20261103,49,0,20],[20261103,51,0,22],[20261103,52,0,18],[20261103,53,0,28],[20261103,54,0,36],[20261103,55,1,0],[20261103,56,0,12],[20261103,57,0,31],[20261103,58,0,32],[20261103,59,0,29],[20261103,60,0,1],[20261103,61,0,14],[20261103,62,0,2],[20261103,191,0,14],[20261103,192,1,22],[20261103,193,0,31],[20261103,195,0,32],[20261103,196,0,20],[20261103,198,0,5],[20261103,199,0,30],[20261103,200,0,6],[20261103,201,0,26],[20261103,202,0,11],[20261103,203,0,29],[20261103,204,0,35],[20261103,205,0,17],[20261103,206,0,39],[20261103,207,0,19],[20261103,208,0,2],[20261103,209,0,0],[20261103,210,0,13],[20261103,211,0,23],[20261103,212,0,7],[20261103,213,0,3],[20261103,214,0,24],[20261103,215,0,28],[20261103,216,0,8],[20261103,217,0,10],[20261103,218,0,1],[20261103,219,0,25],[20261103,220,0,38],[20261103,221,0,9],[20261103,222,0,36],[20261104,0,0,20],[20261104,1,0,18],[20261104,2,0,31],[20261104,3,0,4],[20261104,4,0,11],[20261104,5,0,23],[20261104,6,0,22],[20261104,7,0,21],[20261104,8,0,12],[20261104,9,0,9],[20261104,10,0,30],[20261104,11,0,32],[20261104,12,0,5],[20261104,13,0,25],[20261104,15,0,36],[20261104,16,0,13],[20261104,19,0,35],[20261104,20,0,19],[20261104,21,0,39],[20261104,22,0,10],[20261104,23,0,3],[20261104,24,0,2],[20261104,25,0,8],[20261104,26,0,24],[20261104,27,0,6],[20261104,28,0,14],[20261104,29,0,1],[20261104,30,0,29],[20261104,95,0,3],[20261104,96,0,37],[20261104,98,0,11],[20261104,99,0,25],[20261104,100,0,29],[20261104,101,0,24],[20261104,102,0,1],[20261104,103,0,8],[20261104,104,0,6],[20261104,105,0,2],[20261104,106,0,12],[20261104,107,0,36],[20261104,108,0,10],[20261104,109,0,17],[20261104,110,0,20],[20261104,111,0,14],[20261104,112,0,7],[20261104,113,0,13],[20261104,115,0,4],[20261104,116,0,35],[20261104,117,0,23],[20261104,118,0,18],[20261104,119,0,28],[20261104,120,0,31],[20261104,121,0,9],[20261104,122,0,19],[20261104,123,0,30],[20261104,124,0,32],[20261104,125,0,5],[20261104,126,0,22],[20261106,159,0,29],[20261106,160,0,20],[20261106,161,0,0],[20261106,162,0,0],[20261106,163,0,24],[20261106,164,0,40],[20261106,165,0,21],[20261106,167,0,39],[20261106,168,0,19],[20261106,169,0,10],[20261106,170,0,3],[20261106,171,0,35],[20261106,172,0,23],[20261106,174,0,32],[20261106,175,0,22],[20261106,176,0,36],[20261106,177,0,11],[20261106,179,0,8],[20261106,181,0,12],[20261106,182,0,14],[20261106,184,0,18],[20261106,185,0,13],[20261106,186,0,2],[20261106,187,0,9],[20261106,188,0,17],[20261106,189,0,6],[20261106,190,0,23],[20261107,63,0,10],[20261107,64,0,35],[20261107,66,0,31],[20261107,67,0,30],[20261107,69,0,37],[20261107,70,0,9],[20261107,71,0,23],[20261107,72,0,0],[20261107,73,0,11],[20261107,74,0,32],[20261107,75,0,36],[20261107,77,0,2],[20261107,80,0,29],[20261107,82,0,18],[20261107,83,2,20],[20261107,84,0,0],[20261107,85,0,23],[20261107,86,0,0],[20261107,88,0,8],[20261107,89,0,28],[20261107,90,0,22],[20261107,91,0,0],[20261107,92,0,13],[20261107,93,0,17],[20261107,127,0,36],[20261107,128,0,11],[20261107,129,0,4],[20261107,130,0,32],[20261107,131,0,24],[20261107,132,0,20],[20261107,133,0,21],[20261107,134,0,5],[20261107,135,0,23],[20261107,136,0,25],[20261107,137,0,31],[20261107,138,0,19],[20261107,139,0,37],[20261107,140,0,22],[20261107,143,0,2],[20261107,145,0,10],[20261107,146,0,6],[20261107,147,0,8],[20261107,149,0,35],[20261107,151,0,28],[20261107,152,0,38],[20261107,153,0,1],[20261107,154,0,29],[20261107,155,0,0],[20261107,156,0,3],[20261107,157,0,30],[20261107,158,0,17],[20261111,0,0,17],[20261111,2,0,31],[20261111,3,0,4],[20261111,4,0,11],[20261111,5,0,23],[20261111,6,0,22],[20261111,7,0,21],[20261111,8,0,12],[20261111,9,0,9],[20261111,10,0,30],[20261111,11,0,32],[20261111,12,0,5],[20261111,13,0,25],[20261111,15,0,36],[20261111,16,0,14],[20261111,17,0,2],[20261111,18,0,28],[20261111,19,0,35],[20261111,20,0,19],[20261111,21,0,39],[20261111,22,0,10],[20261111,23,0,3],[20261111,24,0,2],[20261111,25,0,8],[20261111,27,0,6],[20261111,28,0,18],[20261111,29,0,1],[20261111,30,0,29],[20261111,95,0,3],[20261111,96,1,37],[20261111,97,0,28],[20261111,98,0,11],[20261111,99,0,25],[20261111,100,0,29],[20261111,101,0,24],[20261111,102,0,1],[20261111,103,0,8],[20261111,104,0,6],[20261111,105,0,5],[20261111,106,0,12],[20261111,107,0,36],[20261111,109,0,17],[20261111,110,0,20],[20261111,111,0,14],[20261111,112,0,7],[20261111,113,0,13],[20261111,114,0,39],[20261111,115,0,4],[20261111,116,0,35],[20261111,117,0,23],[20261111,118,0,18],[20261111,119,0,22],[20261111,120,0,31],[20261111,121,0,9],[20261111,122,0,19],[20261111,123,0,30],[20261111,124,0,32],[20261111,125,0,5],[20261111,126,0,21],[20261112,223,0,21],[20261112,224,0,17],[20261112,226,0,12],[20261112,227,0,28],[20261112,228,0,3],[20261112,229,0,30],[20261112,230,0,24],[20261112,231,0,4],[20261112,232,0,31],[20261112,233,0,32],[20261112,234,0,29],[20261112,237,0,35],[20261112,238,0,8],[20261112,241,0,8],[20261112,242,0,13],[20261112,243,0,14],[20261112,244,0,1],[20261112,245,0,11],[20261112,246,0,7],[20261112,247,0,25],[20261112,248,0,2],[20261112,249,0,22],[20261112,250,0,36],[20261112,251,0,18],[20261112,252,0,23],[20261112,253,0,20],[20261113,159,0,23],[20261113,160,0,20],[20261113,162,0,7],[20261113,163,0,29],[20261113,164,0,32],[20261113,165,0,21],[20261113,166,0,1],[20261113,167,0,36],[20261113,168,0,19],[20261113,169,0,10],[20261113,170,0,3],[20261113,173,1,3],[20261113,174,0,24],[20261113,175,0,22],[20261113,177,0,11],[20261113,178,0,35],[20261113,180,0,31],[20261113,181,0,12],[20261113,182,0,30],[20261113,183,0,5],[20261113,184,0,18],[20261113,186,0,2],[20261113,187,0,9],[20261113,188,0,17],[20261113,189,0,8],[20261113,190,0,24],[20261114,63,0,10],[20261114,64,0,35],[20261114,65,0,12],[20261114,66,0,31],[20261114,67,0,30],[20261114,69,0,0],[20261114,70,0,9],[20261114,71,0,0],[20261114,72,0,0],[20261114,73,0,11],[20261114,74,0,32],[20261114,75,0,36],[20261114,76,0,14],[20261114,77,0,2],[20261114,78,0,1],[20261114,79,0,7],[20261114,82,0,18],[20261114,83,0,25],[20261114,85,0,5],[20261114,86,0,19],[20261114,87,0,3],[20261114,88,0,8],[20261114,90,0,22],[20261114,91,0,0],[20261114,92,0,14],[20261114,93,0,17],[20261114,127,0,36],[20261114,128,0,9],[20261114,129,0,4],[20261114,130,0,32],[20261114,131,0,24],[20261114,132,0,18],[20261114,133,0,21],[20261114,134,0,13],[20261114,135,2,0],[20261114,136,0,25],[20261114,137,0,0],[20261114,138,0,19],[20261114,139,0,37],[20261114,140,0,17],[20261114,141,0,12],[20261114,142,0,10],[20261114,143,0,2],[20261114,144,0,5],[20261114,146,0,6],[20261114,147,0,8],[20261114,148,0,9],[20261114,149,1,35],[20261114,150,0,20],[20261114,151,0,28],[20261114,152,0,38],[20261114,153,0,1],[20261114,154,0,29],[20261114,155,0,7],[20261114,156,0,3],[20261114,157,0,30],[20261116,255,0,3],[20261116,257,0,19],[20261116,258,0,36],[20261116,260,0,32],[20261116,261,0,40],[20261116,262,0,7],[20261116,264,0,30],[20261116,265,0,18],[20261116,266,0,39],[20261116,267,0,14],[20261116,268,0,29],[20261116,269,0,6],[20261116,270,0,5],[20261116,271,0,4],[20261116,274,0,20],[20261116,275,0,38],[20261116,277,0,11],[20261116,278,0,31],[20261116,279,0,12],[20261116,280,0,9],[20261116,281,0,22],[20261116,282,0,2],[20261116,283,0,3],[20261116,284,0,37],[20261116,285,0,23],[20261116,286,0,8],[20261117,32,0,18],[20261117,33,0,26],[20261117,35,0,10],[20261117,36,0,3],[20261117,37,0,37],[20261117,38,0,6],[20261117,39,0,7],[20261117,40,0,5],[20261117,41,0,11],[20261117,42,0,23],[20261117,43,0,9],[20261117,44,0,30],[20261117,45,0,4],[20261117,46,0,8],[20261117,47,0,25],[20261117,48,0,17],[20261117,49,0,20],[20261117,50,0,21],[20261117,51,0,22],[20261117,52,0,19],[20261117,53,0,28],[20261117,54,0,36],[20261117,55,1,0],[20261117,56,0,12],[20261117,57,0,31],[20261117,58,0,32],[20261117,59,0,29],[20261117,60,0,1],[20261117,61,0,14],[20261117,62,0,2],[20261117,191,0,13],[20261117,193,0,31],[20261117,194,0,36],[20261117,195,0,32],[20261117,196,0,20],[20261117,198,0,5],[20261117,199,0,30],[20261117,200,0,6],[20261117,201,0,26],[20261117,202,0,12],[20261117,203,0,29],[20261117,204,0,37],[20261117,205,0,17],[20261117,207,0,19],[20261117,208,0,22],[20261117,209,0,18],[20261117,210,0,14],[20261117,211,0,23],[20261117,212,0,7],[20261117,213,0,3],[20261117,215,0,28],[20261117,216,0,8],[20261117,217,0,11],[20261117,218,0,1],[20261117,219,0,25],[20261117,220,0,38],[20261117,221,0,9],[20261117,222,0,35],[20261117,256,3,0],[20261117,285,3,14]]};
+
+/* ================= KONSTANTA & UTIL ================= */
+const ST = ["Hadir", "Izin", "Sakit", "Alpa"];
+const ST_CLS = ["h", "i", "s", "a"];
+const API_URL = "https://script.google.com/macros/s/AKfycbxoRAOtKcG-1binkkGCFrpEAo1iLoMAhA8qVhUydVszr9hHYEu9s-BA-_MtEZcbKPbJ/exec";
+const DAY_MIN = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"]; // index = getDay()
+const DAY_LONG = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+const BULAN = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+const KELAS_CLR = ["#2563eb", "#0891b2", "#059669", "#65a30d", "#d97706", "#ea580c", "#dc2626", "#7c3aed", "#db2777"];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmtPct = (v, dec = 1) => (v == null || !isFinite(v)) ? "–" : v.toFixed(dec).replace(".", ",") + "%";
+const fmtInt = v => (v == null || !isFinite(v)) ? "–" : String(v);
+
+/* tanggal dalam bentuk kunci yyyymmdd */
+const kToDate = k => new Date(Math.floor(k / 10000), Math.floor(k / 100) % 100 - 1, k % 100);
+const dateToK = dt => dt.getFullYear() * 10000 + (dt.getMonth() + 1) * 100 + dt.getDate();
+const dayW = k => kToDate(k).getDay();
+const addDays = (k, n) => { const dt = kToDate(k); dt.setDate(dt.getDate() + n); return dateToK(dt); };
+const monOf = k => { const dt = kToDate(k); dt.setDate(dt.getDate() - ((dt.getDay() + 6) % 7)); return dateToK(dt); };
+const fmtDM = k => { const dt = kToDate(k); return dt.getDate() + " " + BULAN[dt.getMonth()].slice(0, 3); };
+const fmtDMY = k => { const dt = kToDate(k); return dt.getDate() + " " + BULAN[dt.getMonth()] + " " + dt.getFullYear(); };
+const fmtDL = k => DAY_LONG[dayW(k)] + ", " + fmtDMY(k);
+const fmtMY = m => { const [y, mm] = m.split("-"); return BULAN[+mm - 1] + " " + y; };
+function isoWeek(k) {
+  const d = kToDate(k);
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dn = (t.getUTCDay() + 6) % 7;
+  t.setUTCDate(t.getUTCDate() - dn + 3);
+  const f = new Date(Date.UTC(t.getUTCFullYear(), 0, 4));
+  return 1 + Math.round(((t - f) / 864e5 - 3 + ((f.getUTCDay() + 6) % 7)) / 7);
+}
+function tintCls(p) { if (p == null) return "t-na"; if (p >= 85) return "t-g"; if (p >= 75) return "t-y"; return "t-r"; }
+const barCls = p => p == null ? "" : (p >= 85 ? "g" : p >= 75 ? "y" : "r");
+
+/* ================= STATE & DATA ================= */
+let D = SNAP;              // {meta, kelas, siswa, absen}
+let IDX = null;            // indeks turunan
+const state = {
+  tab: "ringkasan",
+  kelas: "ALL",            // cakupan ringkasan/mingguan/bulanan: "ALL" atau nama kelas
+  week: null,              // kunci hari Senin minggu terpilih
+  month: null,             // "YYYY-MM"
+  sort: "pctAsc",
+  search: "",
+  live: false,
+  liveBelum: null          // hasil cek live per kelas (Hari Ini)
+};
+
+function buildIndexes() {
+  const days = [...new Set(D.absen.map(a => a[0]))].sort((x, y) => x - y);
+  const byDC = new Map();        // day -> classIdx -> {h,i,s,a,rows:[[si,st,m],...]}
+  const byDS = new Map();        // day -> studentIdx -> st
+  const byStu = new Map();       // studentIdx -> array [k,st,m] (sorted)
+  const nKelas = D.kelas.map(() => ({ h: 0, i: 0, s: 0, a: 0, rec: 0, days: new Set() }));
+  D.siswa.forEach((s, si) => byStu.set(si, []));
+  D.absen.forEach(a => {
+    const [k, si, st, m] = a;
+    const ci = D.siswa[si][3];
+    if (!byDC.has(k)) byDC.set(k, new Map());
+    const mm = byDC.get(k);
+    if (!mm.has(ci)) mm.set(ci, { h: 0, i: 0, s: 0, a: 0, rows: [] });
+    const c = mm.get(ci);
+    c[ST_CLS[st]]++; c.rows.push([si, st, m]);
+    if (!byDS.has(k)) byDS.set(k, new Map());
+    byDS.get(k).set(si, st);
+    byStu.get(si).push([k, st, m]);
+    const nk = nKelas[ci]; nk[ST_CLS[st]]++; nk.rec++; nk.days.add(k);
+  });
+  byStu.forEach(arr => arr.sort((x, y) => x[0] - y[0]));
+  IDX = { days, daySet: new Set(days), byDC, byDS, byStu, nKelas };
+  IDX.minDate = days[0]; IDX.maxDate = days[days.length - 1];
+  IDX.nKelasCount = D.kelas.map((_, ci) => D.siswa.filter(s => s[3] === ci).length);
+}
+
+const countSiswa = ci => IDX.nKelasCount[ci];
+const kelasIdx = name => D.kelas.indexOf(name);
+
+/* ---- agregasi kelas pada sekumpulan hari ---- */
+function classStat(ci, kList) {
+  const nS = countSiswa(ci);
+  let h = 0, i = 0, s = 0, a = 0, rec = 0, he = 0;
+  kList.forEach(k => {
+    const cm = IDX.byDC.get(k) && IDX.byDC.get(k).get(ci);
+    if (cm) { he++; h += cm.h; i += cm.i; s += cm.s; a += cm.a; rec += cm.rows.length; }
+  });
+  const total = nS * he;
+  const tk = total - rec;
+  return { nS, h, i, s, a, rec, he, tk, total, pct: total ? h / total * 100 : null };
+}
+function schoolStat(ciList, kList) {
+  const tot = { nS: 0, h: 0, i: 0, s: 0, a: 0, rec: 0, he: 0, tk: 0, total: 0 };
+  ciList.forEach(ci => {
+    const r = classStat(ci, kList);
+    tot.nS += r.nS; tot.h += r.h; tot.i += r.i; tot.s += r.s; tot.a += r.a;
+    tot.rec += r.rec; tot.total += r.total; tot.tk += r.tk;
+    r.he > tot.he && (tot.he = Math.max(tot.he, r.he));
+  });
+  tot.pct = tot.total ? tot.h / tot.total * 100 : null;
+  return tot;
+}
+/* statistik satu siswa pada sekumpulan hari */
+function stuStat(si, kSet) {
+  const ci = D.siswa[si][3];
+  let he = 0;
+  kSet.forEach(k => { const cm = IDX.byDC.get(k) && IDX.byDC.get(k).get(ci); if (cm) he++; });
+  const rec = IDX.byStu.get(si).filter(r => kSet.has(r[0]));
+  const c = [0, 0, 0, 0];
+  rec.forEach(r => c[r[1]]++);
+  const tk = he - rec.length;
+  const pct = he ? c[0] / he * 100 : null;
+  return { he, h: c[0], i: c[1], s: c[2], a: c[3], tk, rec: rec.length, pct };
+}
+
+/* ---- daftar minggu & bulan ---- */
+function allWeeks() {
+  const out = []; let m = monOf(IDX.minDate); const end = monOf(IDX.maxDate);
+  while (m <= end) { out.push(m); m = addDays(m, 7); }
+  return out;
+}
+const weekDays = mon => [0, 1, 2, 3, 4, 5].map(x => addDays(mon, x)); // Sen..Sab
+const weekLabel = mon => {
+  const ds = weekDays(mon);
+  return "Mg " + isoWeek(mon) + " · " + fmtDM(ds[0]) + " – " + fmtDM(ds[5]) + " " + kToDate(ds[5]).getFullYear();
+};
+function allMonths() {
+  const out = [];
+  IDX.days.forEach(k => { const m = String(Math.floor(k / 10000)) + "-" + String(Math.floor(k / 100) % 100).padStart(2, "0"); if (!out.includes(m)) out.push(m); });
+  return out;
+}
+const monthDays = m => IDX.days.filter(k => String(Math.floor(k / 10000)) + "-" + String(Math.floor(k / 100) % 100).padStart(2, "0") === m);
+function monthWeeks(m) {
+  const days = monthDays(m);
+  const groups = [];
+  days.forEach(k => {
+    const mo = monOf(k);
+    let g = groups.find(x => x.mon === mo);
+    if (!g) { g = { mon: mo, days: [] }; groups.push(g); }
+    g.days.push(k);
+  });
+  return groups;
+}
+const monthKeyOf = k => String(Math.floor(k / 10000)) + "-" + String(Math.floor(k / 100) % 100).padStart(2, "0");
+function prevMonth(m) { let [y, mm] = m.split("-").map(Number); mm--; if (mm === 0) { mm = 12; y--; } return y + "-" + String(mm).padStart(2, "0"); }
+
+/* ================= MODAL ================= */
+function openModal(html) { $("modalBox").innerHTML = '<button class="x" onclick="closeModal()">✕</button>' + html; $("modalBg").classList.add("show"); }
+function closeModal() { $("modalBg").classList.remove("show"); }
+$("modalBg").addEventListener("click", e => { if (e.target === $("modalBg")) closeModal(); });
+
+/* ================= RENDER: RINGKASAN ================= */
+const fmtNum = n => n.toLocaleString("id-ID");
+
+function kpiCard(icon, lab, val, foot, cls) {
+  return '<div class="kpi ' + (cls || "") + '"><div class="lab">' + icon + " " + lab + '</div><div class="val">' + val + '</div><div class="foot">' + foot + "</div></div>";
+}
+
+function renderRingkasan() {
+  const ciF = state.kelas === "ALL" ? D.kelas.map((_, i) => i) : [kelasIdx(state.kelas)];
+  const kSet = IDX.days;
+  const tot = schoolStat(ciF, kSet);
+  const nSiswaTot = ciF.reduce((s, ci) => s + countSiswa(ci), 0);
+  const heMax = Math.max(...ciF.map(ci => classStat(ci, kSet).he));
+  const scopeTxt = state.kelas === "ALL" ? "semua kelas (" + D.kelas.length + " kelas, " + nSiswaTot + " siswa)" : state.kelas + " (" + countSiswa(kelasIdx(state.kelas)) + " siswa)";
+  $("infoPeriodeR").textContent = IDX.days.length + " hari tercatat · " + fmtDMY(IDX.minDate) + " – " + fmtDMY(IDX.maxDate);
+  $("periodeTeks").textContent = fmtDMY(IDX.minDate) + " s.d. " + fmtDMY(IDX.maxDate);
+
+  /* narasi otomatis */
+  const perKelas = ciF.map(ci => ({ ci, r: classStat(ci, kSet) })).filter(x => x.r.total > 0).sort((a, b) => b.r.pct - a.r.pct);
+  const best = perKelas[0], worst = perKelas[perKelas.length - 1];
+  const pctRec = tot.rec ? tot.h / tot.rec * 100 : null;
+  let nar = "Selama periode <b>" + fmtDMY(IDX.minDate) + " – " + fmtDMY(IDX.maxDate) + "</b> (" + IDX.days.length + " hari tercatat), cakupan <b>" + esc(scopeTxt) + "</b> mengumpulkan <b>" + fmtNum(tot.rec) + " catatan presensi</b>. Tingkat kehadiran keseluruhan <b>" + fmtPct(tot.pct) + "</b> (Hadir dari seluruh slot siswa × hari efektif) — sementara dari catatan yang benar-benar masuk, <b>" + fmtPct(pctRec) + "</b> berstatus Hadir. ";
+  if (perKelas.length > 1 && best && worst) {
+    nar += "Kehadiran tertinggi diraih <b>" + esc(D.kelas[best.ci]) + "</b> (" + fmtPct(best.r.pct) + ") dan terendah <b>" + esc(D.kelas[worst.ci]) + "</b> (" + fmtPct(worst.r.pct) + "). ";
+  }
+  nar += "Selama ini tercatat <b>" + fmtNum(tot.i) + " Izin</b>, <b>" + fmtNum(tot.s) + " Sakit</b>, dan <b>" + fmtNum(tot.a) + " Alpa</b>";
+  if (tot.tk > 0) nar += ", serta <b>" + fmtNum(tot.tk) + " presensi hilang</b> (siswa tidak mengisi pada hari kelasnya tercatat ada presensi)";
+  nar += ". " + (tot.tk > tot.rec * 0.05
+    ? "⚠️ Jumlah presensi hilang cukup besar — disarankan mengingatkan siswa agar rutin mengisi absensi."
+    : "✅ Kedisiplinan pengisian presensi tergolong baik, pertahankan.");
+  $("narasi").innerHTML = nar;
+
+  /* KPI */
+  $("kpiGrid").innerHTML =
+    kpiCard("👥", "Siswa", fmtNum(nSiswaTot), state.kelas === "ALL" ? D.kelas.length + " kelas (9A–9I)" : esc(state.kelas), "k-pri") +
+    kpiCard("🗓️", "Hari Efektif", fmtNum(heMax), "hari saat kelas tercatat mengisi presensi", "") +
+    kpiCard("✅", "Kehadiran", fmtPct(tot.pct), "Hadir ÷ (siswa × hari efektif)", "k-pri") +
+    kpiCard("🟢", "Hadir", fmtNum(tot.h), fmtPct(pctRec) + " dari catatan masuk", "k-h") +
+    kpiCard("🟡", "Izin", fmtNum(tot.i), fmtPct(tot.i / tot.total * 100) + " dari catatan", "k-i") +
+    kpiCard("🟣", "Sakit", fmtNum(tot.s), fmtPct(tot.s / tot.total * 100) + " dari catatan", "k-s") +
+    kpiCard("🔴", "Alpa", fmtNum(tot.a), fmtPct(tot.a / tot.total * 100) + " dari catatan", "k-a") +
+    kpiCard("⚪", "Tanpa Catatan", fmtNum(tot.tk), "siswa tak mengisi saat kelas presensi", "k-tk");
+
+  /* donut */
+  const parts = [
+    { n: "Hadir", v: tot.h, c: "var(--h)" }, { n: "Izin", v: tot.i, c: "var(--i)" },
+    { n: "Sakit", v: tot.s, c: "var(--s)" }, { n: "Alpa", v: tot.a, c: "var(--a)" },
+    { n: "Tanpa Catatan", v: tot.tk, c: "#cbd5e1" }
+  ].filter(p => p.v > 0);
+  let acc = 0;
+  const stops = parts.map(p => { const a0 = acc / tot.total * 360; acc += p.v; const a1 = acc / tot.total * 360; return p.c + " " + a0.toFixed(2) + "deg " + a1.toFixed(2) + "deg"; });
+  $("donutWrap").innerHTML =
+    '<div class="donut" style="background:conic-gradient(' + stops.join(",") + ')">' +
+    '<div class="c"><b>' + fmtPct(pctRec) + '</b><span>hadir dari<br>catatan masuk</span></div></div>' +
+    '<div class="legend">' + parts.map(p =>
+      '<div class="li"><span class="l"><span class="sw" style="background:' + p.c + '"></span>' + p.n + "</span><b>" + fmtNum(p.v) + ' · ' + fmtPct(p.v / tot.total * 100) + "</b></div>").join("") +
+    "</div>";
+
+  /* bar per kelas */
+  $("kelasBars").innerHTML = perKelas.map(x => {
+    const p = x.r.pct, col = tintCls(p) === "t-g" ? "var(--h)" : tintCls(p) === "t-y" ? "#d97706" : "var(--a)";
+    return '<div class="hbar"><span>' + esc(D.kelas[x.ci].replace("Kelas ", "")) + " · " + countSiswa(x.ci) + ' sw</span>' +
+      '<span class="tr"><i style="width:' + Math.max(2, p).toFixed(1) + "%;background:" + col + '"></i></span>' +
+      "<b>" + fmtPct(p) + "</b></div>";
+  }).join("");
+
+  /* tren mingguan */
+  const weeks = allWeeks();
+  const wdata = weeks.map(mon => {
+    const kl = weekDays(mon).filter(k => IDX.daySet.has(k));
+    return { mon, pct: kl.length ? schoolStat(ciF, kl).pct : null };
+  });
+  $("trenChart").innerHTML = wdata.map(w => {
+    const h = w.pct == null ? 2 : Math.max(5, (w.pct - 50) / 50 * 100);
+    const col = w.pct == null ? "#cbd5e1" : tintCls(w.pct) === "t-g" ? "var(--pri)" : tintCls(w.pct) === "t-y" ? "#d97706" : "var(--a)";
+    return '<div class="vb" title="' + weekLabel(w.mon) + " — " + (w.pct == null ? "tidak ada data" : "kehadiran " + fmtPct(w.pct)) + '">' +
+      "<b>" + (w.pct == null ? "–" : w.pct.toFixed(0)) + '</b><i style="height:' + h.toFixed(1) + "%;background:" + col + '"></i>' +
+      "<span>Mg" + isoWeek(w.mon) + "</span></div>";
+  }).join("");
+
+  /* highlight kelas */
+  let hl = "";
+  if (perKelas.length > 1) {
+    hl += '<div class="att-item"><div><div class="nm">🏆 ' + esc(D.kelas[best.ci]) + '</div><div class="mt">Kehadiran tertinggi — ' + fmtPct(best.r.pct) + " · " + fmtNum(best.r.h) + " Hadir</div></div><span class=\"pill ok\">" + fmtPct(best.r.pct) + "</span></div>";
+    hl += '<div class="att-item"><div><div class="nm">📉 ' + esc(D.kelas[worst.ci]) + '</div><div class="mt">Kehadiran terendah — perlu pendampingan</div></div><span class="pill ' + (tintCls(worst.r.pct) === "t-g" ? "warn" : "bad") + '">' + fmtPct(worst.r.pct) + "</span></div>";
+    const worstTk = [...perKelas].sort((a, b) => b.r.tk - a.r.tk)[0];
+    if (worstTk.r.tk > 0) hl += '<div class="att-item"><div><div class="nm">⚪ ' + esc(D.kelas[worstTk.ci]) + '</div><div class="mt">Presensi hilang terbanyak: ' + fmtNum(worstTk.r.tk) + " catatan (siswa lupa mengisi)</div></div><span class=\"pill mut\">" + fmtNum(worstTk.r.tk) + "</span></div>";
+  }
+  if (tot.a > 0) {
+    const alpaRows = D.absen.filter(x => x[2] === 3 && ciF.includes(D.siswa[x[1]][3]));
+    const byKelas = {};
+    alpaRows.forEach(x => { const ci = D.siswa[x[1]][3]; byKelas[ci] = (byKelas[ci] || 0) + 1; });
+    Object.entries(byKelas).sort((a, b) => b[1] - a[1]).slice(0, 3).forEach(([ci, n]) => {
+      hl += '<div class="att-item"><div><div class="nm">🔴 Alpa di ' + esc(D.kelas[ci]) + '</div><div class="mt">' + n + " kejadian alpa tercatat — cek tab Rekap Siswa</div></div><span class=\"pill bad\">" + n + "×</span></div>";
+    });
+  }
+  $("kelasHighlight").innerHTML = hl || '<div style="color:var(--mut)">Belum ada data.</div>';
+
+  /* siswa perlu perhatian */
+  const items = [];
+  D.siswa.forEach((s, si) => {
+    if (!ciF.includes(s[3])) return;
+    const st = stuStat(si, IDX.daySet);
+    const reasons = [];
+    if (st.a >= 2) reasons.push("Alpa " + st.a + "×");
+    if (st.tk >= 5) reasons.push("Tanpa catatan " + st.tk + " hari");
+    if (st.pct != null && st.pct < 60) reasons.push("Kehadiran " + fmtPct(st.pct));
+    if (reasons.length) items.push({ si, st, reasons });
+  });
+  items.sort((x, y) => (y.st.a - x.st.a) || (y.st.tk - x.st.tk) || (x.st.pct - y.st.pct));
+  $("siswaPerhatian").innerHTML = items.length
+    ? items.slice(0, 8).map(x =>
+        '<div class="att-item" onclick="showSiswaModal(' + x.si + ')" style="cursor:pointer"><div><div class="nm">' + esc(D.siswa[x.si][1]) + '</div><div class="mt">' + esc(D.kelas[D.siswa[x.si][3]].replace("Kelas ", "")) + " · Hadir " + fmtPct(x.st.pct) + "</div></div>" +
+        '<div class="chips">' + x.reasons.map(r => '<span class="pill ' + (r.startsWith("Alpa") ? "bad" : "warn") + '">' + r + "</span>").join("") + "</div></div>").join("") +
+      (items.length > 8 ? '<div style="color:var(--mut);font-size:12px">…dan ' + (items.length - 8) + " siswa lain. Lihat tab Rekap Siswa.</div>" : "")
+    : '<div style="color:var(--mut)">🎉 Tidak ada siswa yang memenuhi kriteria perhatian.</div>';
+}
+
+/* ================= RENDER: MINGGUAN ================= */
+function dayCellHTML(ci, k) {
+  const cm = IDX.byDC.get(k) && IDX.byDC.get(k).get(ci);
+  const nS = countSiswa(ci);
+  const tipBase = esc(D.kelas[ci]) + " · " + fmtDL(k);
+  if (!cm) return '<td><div class="daycell na" title="' + tipBase + ' — tidak ada presensi tercatat">—</div></td>';
+  const pct = cm.h / nS * 100;
+  const tk = nS - cm.rows.length;
+  const tip = tipBase + " — Hadir " + cm.h + ", Izin " + cm.i + ", Sakit " + cm.s + ", Alpa " + cm.a + ", tanpa catatan " + tk + " (klik untuk rincian)";
+  return '<td><div class="daycell ' + tintCls(pct) + '" data-k="' + k + '" data-ci="' + ci + '" title="' + tip + '">' +
+    "<b>" + fmtPct(pct) + "</b><small>" + cm.h + "·" + cm.i + "·" + cm.s + "·" + cm.a + (tk ? ' · ⚪' + tk : "") + "</small></div></td>";
+}
+function chipCell(st, k, si) {
+  if (st == null) return "";
+  const s = D.siswa[si];
+  const meja = st[2] ? " · Meja " + st[2] : "";
+  const nm = ["Hadir", "Izin", "Sakit", "Alpa"][st[1]];
+  return '<span class="chip ' + ST_CLS[st[1]] + '" title="' + fmtDL(st[0]) + " — " + nm + meja + '">' +
+    (st[1] === 0 ? "✔" : st[1] === 3 ? "✖" : nm[0]) + "</span>";
+}
+function renderMingguan() {
+  const weeks = allWeeks();
+  if (!state.week || !weeks.includes(state.week)) state.week = weeks[weeks.length - 1];
+  const sel = $("selWeek");
+  sel.innerHTML = weeks.map(m => '<option value="' + m + '"' + (m === state.week ? " selected" : "") + ">" + weekLabel(m) + "</option>").join("");
+  const kl = weekDays(state.week).filter(k => IDX.daySet.has(k));
+  $("infoWeek").textContent = kl.length + " hari tercatat · " + fmtDM(weekDays(state.week)[0]) + " – " + fmtDM(weekDays(state.week)[5]);
+
+  const ciF = state.kelas === "ALL" ? D.kelas.map((_, i) => i) : [kelasIdx(state.kelas)];
+  const tbl = $("weekTable");
+  if (!kl.length) {
+    tbl.innerHTML = '<div style="color:var(--mut);padding:8px 2px">Tidak ada presensi pada minggu ini (kemungkinan libur). Pilih minggu lain.</div>';
+    $("weekStudentTable").innerHTML = "";
+    return;
+  }
+  const dayHeads = kl.map(k => {
+    const dt = kToDate(k);
+    return "<th>" + DAY_MIN[dt.getDay()] + "<br><span style='font-weight:600;text-transform:none'>" + fmtDM(k) + "</span></th>";
+  }).join("");
+  let html = '<div class="scroll"><table class="tbl"><thead><tr><th style="min-width:120px">Kelas</th>' + dayHeads +
+    "<th>H</th><th>I</th><th>S</th><th>A</th><th>⚪ Hilang</th><th>% Kehadiran</th></tr></thead><tbody>";
+  ciF.forEach(ci => {
+    const r = classStat(ci, kl);
+    html += "<tr><td><span class='kl'><span class='kdot' style='background:" + KELAS_CLR[ci % KELAS_CLR.length] + "'></span>" + esc(D.kelas[ci]) + " <span style='color:var(--mut);font-weight:400'>(" + r.nS + ")</span></span></td>";
+    kl.forEach(k => { html += dayCellHTML(ci, k); });
+    html += "<td class='num'" + (r.h > 0 ? " style='color:var(--h);font-weight:700'" : "") + ">" + r.h + "</td><td class='num'>" + r.i + "</td><td class='num'>" + r.s + "</td><td class='num'" + (r.a > 0 ? " style='color:var(--a);font-weight:700'" : "") + ">" + r.a + "</td><td class='num'>" + r.tk + "</td><td style='min-width:110px'><b>" + fmtPct(r.pct) + '</b><span class="bar ' + barCls(r.pct) + '" style="margin-top:4px"><i style="width:' + Math.max(2, r.pct) + '%"></i></span></td></tr>';
+  });
+  const tot = schoolStat(ciF, kl);
+  html += "</tbody><tfoot><tr><td>TOTAL " + (ciF.length > 1 ? " (" + ciF.length + " kelas)" : "") + "</td>" +
+    kl.map(k => {
+      let h = 0, t = 0;
+      ciF.forEach(ci => { const cm = IDX.byDC.get(k) && IDX.byDC.get(k).get(ci); if (cm) { h += cm.h; t += countSiswa(ci); } });
+      const p = t ? h / t * 100 : null;
+      return "<td>" + (p == null ? "—" : '<span style="font-weight:800">' + fmtPct(p, 0) + "</span>") + "</td>";
+    }).join("") +
+    "<td>" + tot.h + "</td><td>" + tot.i + "</td><td>" + tot.s + "</td><td>" + tot.a + "</td><td>" + tot.tk + "</td><td><b>" + fmtPct(tot.pct) + "</b></td></tr></tfoot></table></div>";
+  tbl.innerHTML = html;
+
+  /* rincian siswa saat kelas dipilih */
+  const wrap = $("weekStudentTable");
+  if (state.kelas === "ALL") {
+    wrap.innerHTML = '<div style="color:var(--mut)">Pilih salah satu kelas pada dropdown di atas untuk melihat rincian presensi per siswa.</div>';
+  } else {
+    const ci = kelasIdx(state.kelas);
+    const siswaCI = D.siswa.map((s, si) => ({ s, si })).filter(x => x.s[3] === ci).sort((a, b) => a.s[0] - b.s[0]);
+    let h2 = '<div class="scroll"><table class="tbl"><thead><tr><th style="min-width:60px">No</th><th style="min-width:190px">Nama</th><th>L/P</th>';
+    kl.forEach(k => { const dt = kToDate(k); h2 += "<th>" + DAY_MIN[dt.getDay()] + "<br><span style='font-weight:600;text-transform:none'>" + dt.getDate() + "</span></th>"; });
+    h2 += "<th>H</th><th>I</th><th>S</th><th>A</th><th>⚪</th><th>% Hadir</th></tr></thead><tbody>";
+    siswaCI.forEach(x => {
+      const stt = stuStat(x.si, new Set(kl));
+      h2 += "<tr><td>" + x.s[0] + "</td><td onclick=\"showSiswaModal(" + x.si + ')" style="cursor:pointer;text-align:left">' + esc(x.s[1]) + '</td><td><span class="jk ' + x.s[2] + '">' + x.s[2] + "</span></td>";
+      kl.forEach(k => {
+        const rec = IDX.byDS.get(k) && IDX.byDS.get(k).get(x.si);
+        const eff = IDX.byDC.get(k) && IDX.byDC.get(k).get(ci);
+        if (rec != null) h2 += "<td>" + chipCell([k, rec, null], k, x.si) + "</td>";
+        else if (eff) h2 += '<td><span class="chip tk" title="' + fmtDL(k) + ' — tidak mengisi presensi">·</span></td>';
+        else h2 += "<td style='color:#cbd5e1'>–</td>";
+      });
+      h2 += "<td class='num' style='color:var(--h);font-weight:700'>" + stt.h + "</td><td class='num'>" + stt.i + "</td><td class='num'>" + stt.s + "</td><td class='num' style='color:var(--a);font-weight:700'>" + stt.a + "</td><td class='num'>" + stt.tk + "</td><td><b>" + fmtPct(stt.pct) + "</b></td></tr>";
+    });
+    h2 += "</tbody></table></div>";
+    wrap.innerHTML = h2;
+  }
+}
+
+/* ================= RENDER: BULANAN ================= */
+function renderBulanan() {
+  const months = allMonths();
+  if (!state.month || !months.includes(state.month)) state.month = months[months.length - 1];
+  $("selMonth").innerHTML = months.map(m => '<option value="' + m + '"' + (m === state.month ? " selected" : "") + ">" + fmtMY(m) + "</option>").join("");
+  const mws = monthWeeks(state.month);
+  const kList = monthDays(state.month);
+  $("infoMonth").textContent = fmtMY(state.month) + " · " + kList.length + " hari tercatat · " + mws.length + " minggu";
+  const tbl = $("monthTable");
+  if (!kList.length) {
+    tbl.innerHTML = '<div style="color:var(--mut);padding:8px 2px">Tidak ada data pada bulan ini.</div>';
+    $("monthStudentTable").innerHTML = "";
+    return;
+  }
+  const wkHeads = mws.map(g => "<th>Mg " + isoWeek(g.mon) + "<br><span style='font-weight:600;text-transform:none'>" + fmtDM(g.days[0]) + " – " + fmtDM(g.days[g.days.length - 1]) + "</span></th>").join("");
+  const ciF = state.kelas === "ALL" ? D.kelas.map((_, i) => i) : [kelasIdx(state.kelas)];
+  const prevK = monthDays(prevMonth(state.month));
+  let html = '<div class="scroll"><table class="tbl"><thead><tr><th style="min-width:120px">Kelas</th>' + wkHeads +
+    "<th>H</th><th>I</th><th>S</th><th>A</th><th>⚪ Hilang</th><th>% Kehadiran</th><th>Δ vs " + fmtMY(prevMonth(state.month)).split(" ")[0] + "</th></tr></thead><tbody>";
+  ciF.forEach(ci => {
+    const r = classStat(ci, kList);
+    html += "<tr><td><span class='kl'><span class='kdot' style='background:" + KELAS_CLR[ci % KELAS_CLR.length] + "'></span>" + esc(D.kelas[ci]) + " <span style='color:var(--mut);font-weight:400'>(" + r.nS + ")</span></span></td>";
+    mws.forEach(g => {
+      const rw = classStat(ci, g.days);
+      if (!rw.total) { html += '<td><div class="daycell na">—</div></td>'; return; }
+      const tip = esc(D.kelas[ci]) + " · " + weekLabel(g.mon) + " (" + fmtMY(state.month) + ") — Hadir " + rw.h + ", Izin " + rw.i + ", Sakit " + rw.s + ", Alpa " + rw.a + ", hilang " + rw.tk + ", hari efektif " + rw.he;
+      html += '<td><div class="daycell ' + tintCls(rw.pct) + '" title="' + tip + '"><b>' + fmtPct(rw.pct) + "</b><small>" + rw.h + "·" + rw.i + "·" + rw.s + "·" + rw.a + (rw.tk ? " · ⚪" + rw.tk : "") + "</small></div></td>";
+    });
+    let delta = "";
+    if (prevK.length) {
+      const rp = classStat(ci, prevK);
+      if (rp.total && r.pct != null) {
+        const d = r.pct - rp.pct;
+        const up = d >= 0;
+        delta = '<span style="font-weight:800;color:' + (up ? "var(--h)" : "var(--a)") + '">' + (up ? "▲ +" : "▼ ") + d.toFixed(1).replace(".", ",") + "</span>";
+      }
+    }
+    html += "<td class='num'" + (r.h > 0 ? " style='color:var(--h);font-weight:700'" : "") + ">" + r.h + "</td><td class='num'>" + r.i + "</td><td class='num'>" + r.s + "</td><td class='num'" + (r.a > 0 ? " style='color:var(--a);font-weight:700'" : "") + ">" + r.a + "</td><td class='num'>" + r.tk + "</td><td><b>" + fmtPct(r.pct) + '</b><span class="bar ' + barCls(r.pct) + '" style="margin-top:4px"><i style="width:' + Math.max(2, r.pct) + '%"></i></span></td><td>' + delta + "</td></tr>";
+  });
+  const tot = schoolStat(ciF, kList);
+  const totP = prevK.length ? schoolStat(ciF, prevK).pct : null;
+  let totDelta = "";
+  if (totP != null && tot.pct != null) {
+    const d = tot.pct - totP;
+    totDelta = '<span style="font-weight:800;color:' + (d >= 0 ? "var(--h)" : "var(--a)") + '">' + (d >= 0 ? "▲ +" : "▼ ") + d.toFixed(1).replace(".", ",") + "</span>";
+  }
+  html += "</tbody><tfoot><tr><td>TOTAL</td>" + mws.map(g => {
+    const rt = schoolStat(ciF, g.days);
+    return "<td>" + (rt.total ? fmtPct(rt.pct, 0) : "—") + "</td>";
+  }).join("") + "<td>" + tot.h + "</td><td>" + tot.i + "</td><td>" + tot.s + "</td><td>" + tot.a + "</td><td>" + tot.tk + "</td><td><b>" + fmtPct(tot.pct) + "</b></td><td>" + totDelta + "</td></tr></tfoot></table></div>";
+  tbl.innerHTML = html;
+
+  /* rincian siswa bulanan */
+  const wrap = $("monthStudentTable");
+  if (state.kelas === "ALL") {
+    wrap.innerHTML = '<div style="color:var(--mut)">Pilih salah satu kelas pada dropdown di atas untuk melihat rincian per siswa selama ' + fmtMY(state.month) + ".</div>";
+  } else {
+    const ci = kelasIdx(state.kelas);
+    const siswaCI = D.siswa.map((s, si) => ({ s, si })).filter(x => x.s[3] === ci).sort((a, b) => a.s[0] - b.s[0]);
+    let h2 = '<div class="scroll"><table class="tbl"><thead><tr><th style="min-width:60px">No</th><th style="min-width:190px">Nama</th><th>L/P</th>' + wkHeads + "<th>H</th><th>I</th><th>S</th><th>A</th><th>⚪</th><th>% Hadir</th></tr></thead><tbody>";
+    siswaCI.forEach(x => {
+      const stt = stuStat(x.si, new Set(kList));
+      h2 += "<tr><td>" + x.s[0] + "</td><td onclick=\"showSiswaModal(" + x.si + ')" style="cursor:pointer;text-align:left">' + esc(x.s[1]) + '</td><td><span class="jk ' + x.s[2] + '">' + x.s[2] + "</span></td>";
+      mws.forEach(g => {
+        const sw = stuStat(x.si, new Set(g.days));
+        if (!sw.he) { h2 += '<td><div class="daycell na">—</div></td>'; return; }
+        h2 += '<td><div class="daycell ' + tintCls(sw.pct) + '" title="' + esc(x.s[1]) + " · " + weekLabel(g.mon) + " — H" + sw.h + " I" + sw.i + " S" + sw.s + " A" + sw.a + ", tanpa catatan " + sw.tk + '"><b>' + fmtPct(sw.pct, 0) + "</b></div></td>";
+      });
+      h2 += "<td class='num' style='color:var(--h);font-weight:700'>" + stt.h + "</td><td class='num'>" + stt.i + "</td><td class='num'>" + stt.s + "</td><td class='num' style='color:var(--a);font-weight:700'>" + stt.a + "</td><td class='num'>" + stt.tk + "</td><td><b>" + fmtPct(stt.pct) + "</b></td></tr>";
+    });
+    h2 += "</tbody></table></div>";
+    wrap.innerHTML = h2;
+  }
+}
+
+/* modal rincian satu hari per kelas (dipanggil dari klik daycell) */
+function showDayModal(k, ci) {
+  const cm = IDX.byDC.get(k) && IDX.byDC.get(k).get(ci);
+  if (!cm) return;
+  const nS = countSiswa(ci);
+  const recorded = new Set(cm.rows.map(r => r[0]));
+  const belum = D.siswa.map((s, si) => ({ s, si })).filter(x => x.s[3] === ci && !recorded.has(x.si)).map(x => x.s[1]);
+  const rows = cm.rows.slice().sort((a, b) => (a[1] - b[1]) || D.siswa[a[0]][1].localeCompare(D.siswa[b[0]][1]));
+  openModal("<h3>📅 " + esc(D.kelas[ci]) + " — " + fmtDL(k) + "</h3>" +
+    '<div class="sub">Hadir ' + cm.h + " · Izin " + cm.i + " · Sakit " + cm.s + " · Alpa " + cm.a + " · tanpa catatan " + belum.length + " dari " + nS + " siswa</div>" +
+    '<div class="chips" style="margin-bottom:12px">' + rows.map(r => {
+      const s = D.siswa[r[0]];
+      const meja = r[2] ? " · Meja " + r[2] : "";
+      const nm = ["Hadir", "Izin", "Sakit", "Alpa"][r[1]];
+      return '<span class="chip ' + ST_CLS[r[1]] + '" style="font-size:11.5px;padding:4px 9px" title="' + nm + meja + '">' + esc(s[1]) + " · " + nm + "</span>";
+    }).join("") + "</div>" +
+    (belum.length ? '<div style="margin-top:6px;padding:10px 12px;background:var(--a-soft);border-radius:10px;font-size:12.5px"><b style="color:#991b1b">⚪ Belum mengisi presensi (' + belum.length + "):</b><br>" + esc(belum.join(", ")) + "</div>" : '<div style="margin-top:6px;padding:10px 12px;background:var(--h-soft);border-radius:10px;font-size:12.5px;color:#166534"><b>✅ Semua siswa sudah mengisi presensi.</b></div>'));
+}
+
+/* ================= RENDER: SISWA ================= */
+function statusPill(st) {
+  if (st.a >= 2 || (st.pct != null && st.pct < 45)) return '<span class="pill bad">🔴 Perlu Tindakan</span>';
+  if ((st.pct != null && st.pct < 60) || st.tk >= 5) return '<span class="pill warn">🟡 Perhatian</span>';
+  return '<span class="pill ok">🟢 Aman</span>';
+}
+function renderSiswa() {
+  const ci = kelasIdx(state.kelasSiswa);
+  if (ci < 0) return;
+  const rCls = classStat(ci, IDX.days);
+  $("siswaHint").innerHTML = esc(state.kelasSiswa) + " · " + rCls.nS + " siswa · " + rCls.he + " hari efektif (kelas tercatat memiliki presensi) · periode " + fmtDMY(IDX.minDate) + " – " + fmtDMY(IDX.maxDate);
+  let rows = D.siswa.map((s, si) => ({ s, si, st: stuStat(si, IDX.daySet) })).filter(x => x.s[3] === ci);
+  if (state.search) {
+    const q = state.search.toLowerCase();
+    rows = rows.filter(x => x.s[1].toLowerCase().includes(q));
+  }
+  const cmp = {
+    pctAsc: (a, b) => (a.st.pct ?? 0) - (b.st.pct ?? 0),
+    pctDesc: (a, b) => (b.st.pct ?? 0) - (a.st.pct ?? 0),
+    nama: (a, b) => a.s[1].localeCompare(b.s[1]),
+    alpa: (a, b) => b.st.a - a.st.a,
+    tk: (a, b) => b.st.tk - a.st.tk
+  }[state.sort];
+  rows.sort(cmp);
+  const avg = rows.length ? rows.reduce((s, x) => s + (x.st.pct || 0), 0) / rows.length : null;
+  let html = '<div class="scroll"><table class="tbl"><thead><tr>' +
+    '<th style="min-width:56px">No</th><th style="min-width:200px">Nama</th><th>L/P</th><th>🟢 Hadir</th><th>🟡 Izin</th><th>🟣 Sakit</th><th>🔴 Alpa</th><th>⚪ Hilang</th><th>Hari Efektif</th><th style="min-width:110px">% Hadir</th><th>Status</th></tr></thead><tbody>';
+  rows.forEach(x => {
+    html += '<tr onclick="showSiswaModal(' + x.si + ')" style="cursor:pointer"><td>' + x.s[0] + "</td><td style='text-align:left;font-weight:600'>" + esc(x.s[1]) + '</td><td><span class="jk ' + x.s[2] + '">' + x.s[2] + "</span></td>" +
+      "<td class='num' style='color:var(--h);font-weight:700'>" + x.st.h + "</td><td class='num'>" + x.st.i + "</td><td class='num'>" + x.st.s + "</td><td class='num' style='color:var(--a);font-weight:700'>" + x.st.a + "</td><td class='num'>" + x.st.tk + "</td><td class='num'>" + x.st.he + "</td>" +
+      "<td><b>" + fmtPct(x.st.pct) + '</b><span class="bar ' + barCls(x.st.pct) + '" style="margin-top:4px"><i style="width:' + Math.max(2, x.st.pct || 0) + '%"></i></span></td><td>' + statusPill(x.st) + "</td></tr>";
+  });
+  html += "</tbody></table></div>";
+  if (rows.length) html += '<div style="color:var(--mut);font-size:12px;margin-top:8px">Rata-rata kehadiran kelas: <b>' + fmtPct(avg) + "</b> · ⚪ Hilang = hari efektif tanpa pengisian presensi (bukan alpa resmi).</div>";
+  else html = '<div style="color:var(--mut);padding:8px 2px">Tidak ada siswa yang cocok dengan pencarian.</div>';
+  $("siswaTable").innerHTML = html;
+}
+
+function showSiswaModal(si) {
+  const s = D.siswa[si];
+  const st = stuStat(si, IDX.daySet);
+  const logs = IDX.byStu.get(si).slice().reverse();
+  const mejaTerakhir = (logs.find(l => l[2]) || [0, 0, 0])[2];
+  openModal("<h3>👤 " + esc(s[1]) + "</h3>" +
+    '<div class="sub">' + esc(D.kelas[s[3]]) + " · No. absen " + s[0] + " · " + (s[2] === "L" ? "Laki-laki" : "Perempuan") + (mejaTerakhir ? " · Meja " + mejaTerakhir : "") + "</div>" +
+    '<div class="chips" style="margin-bottom:10px">' +
+    '<span class="pill ok">Hadir ' + st.h + "</span>" +
+    '<span class="pill warn">Izin ' + st.i + "</span>" +
+    '<span class="pill info">Sakit ' + st.s + "</span>" +
+    '<span class="pill bad">Alpa ' + st.a + "</span>" +
+    '<span class="pill mut">Tanpa catatan ' + st.tk + "</span></div>" +
+    '<div style="display:flex;align-items:center;gap:10px;margin:10px 0 4px 0"><b style="font-size:22px;color:var(--pri-dark)">' + fmtPct(st.pct) + '</b><span style="color:var(--mut);font-size:12.5px">kehadiran dari ' + st.he + " hari efektif " + esc(D.kelas[s[3]].replace("Kelas ", "kelas ")) + "</span></div>" +
+    statusPill(st) +
+    '<div style="margin-top:14px;font-weight:800;font-size:13px">🗓️ Riwayat presensi (' + logs.length + " catatan, terbaru dulu)</div>" +
+    '<div class="log-chips">' + (logs.length ? logs.map(l => {
+      const nm = ["Hadir", "Izin", "Sakit", "Alpa"][l[1]];
+      return '<span class="lg ' + ST_CLS[l[1]] + '" style="background:var(--' + ST_CLS[l[1]] + '-soft);color:var(--' + ST_CLS[l[1]] + ')" title="' + fmtDL(l[0]) + (l[2] ? " · Meja " + l[2] : "") + '">' + fmtDM(l[0]) + " · " + nm + "</span>";
+    }).join("") : '<span style="color:var(--mut)">Belum ada catatan.</span>') + "</div>");
+}
+
+/* ================= RENDER: HARI INI ================= */
+function renderHariIni() {
+  const inp = $("inpToday");
+  if (!inp.value) {
+    const now = new Date();
+    inp.value = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0");
+  }
+  const k = parseInt(inp.value.replace(/-/g, ""), 10);
+  const hasData = IDX.daySet.has(k);
+  $("todayTitle").textContent = "📌 Presensi " + fmtDL(k);
+  const grid = $("todayGrid");
+  const empty = $("todayEmpty");
+  if (!hasData) {
+    grid.innerHTML = "";
+    empty.style.display = "block";
+    empty.innerHTML = "Tidak ada presensi tercatat pada <b>" + fmtDL(k) + "</b>." +
+      (k > IDX.maxDate && !state.live ? " Data snapshot berakhir pada " + fmtDMY(IDX.maxDate) + " — klik <b>🔄 Muat Data Live</b> di kanan atas untuk menarik data terbaru dari Google Sheet." : "") +
+      " Gunakan tombol ◀ ▶ untuk memilih tanggal lain.";
+    return;
+  }
+  empty.style.display = "none";
+  let html = "";
+  D.kelas.forEach((kn, ci) => {
+    const cm = IDX.byDC.get(k) && IDX.byDC.get(k).get(ci);
+    const nS = countSiswa(ci);
+    const hadir = cm ? cm.h : 0;
+    const pct = hadir / nS * 100;
+    const recorded = new Set(cm ? cm.rows.map(r => r[0]) : []);
+    const belum = D.siswa.filter((s, si) => s[3] === ci && !recorded.has(si)).map(s => s[1]);
+    const liveB = state.liveBelum && state.liveBelum.k === k ? state.liveBelum.map[kn] : null;
+    html += '<div class="today-card"><div class="hd"><b><span class="kdot" style="display:inline-block;background:' + KELAS_CLR[ci % KELAS_CLR.length] + '"></span> ' + esc(kn) + "</b>" +
+      '<span class="pct" style="color:' + (pct >= 85 ? "var(--h)" : pct >= 75 ? "#d97706" : "var(--a)") + '">' + fmtPct(pct, 0) + "</span></div>" +
+      '<div class="bar ' + (pct >= 85 ? "g" : pct >= 75 ? "y" : "r") + '"><i style="width:' + Math.max(2, pct) + '%"></i></div>' +
+      '<div class="chips" style="margin-top:9px">' +
+      '<span class="pill ok">🟢 ' + hadir + "/" + nS + "</span>" +
+      '<span class="pill warn">🟡 ' + (cm ? cm.i : 0) + "</span>" +
+      '<span class="pill info">🟣 ' + (cm ? cm.s : 0) + "</span>" +
+      '<span class="pill bad">🔴 ' + (cm ? cm.a : 0) + "</span>" +
+      '<span class="pill mut">⚪ ' + (nS - (cm ? cm.rows.length : 0)) + "</span></div>" +
+      (cm ? '<div class="belum"><b>Belum mengisi (' + belum.length + "):</b> " + (belum.length ? '<span class="nm">' + esc(belum.join(", ")) + "</span>" : "✅ tidak ada — semua siswa sudah presensi") + "</div>" : '<div class="belum">Tidak ada presensi tercatat untuk kelas ini pada tanggal ini.</div>') +
+      (liveB ? (liveB.totalSiswa
+        ? '<div class="belum" style="margin-top:6px;padding:8px 10px;background:#eff6ff;border-radius:9px"><b>🛰️ Live Google Sheet — sudah absen ' + liveB.sudahAbsen + "/" + liveB.totalSiswa + "</b>" + (liveB.daftarBelum && liveB.daftarBelum.length ? "<br>Belum: <span class='nm'>" + esc(liveB.daftarBelum.join(", ")) + "</span>" : "<br>✅ Semua sudah absen (menurut Sheet)") + "</div>"
+        : '<div class="belum" style="margin-top:6px;padding:8px 10px;background:#fef3c7;border-radius:9px"><b>🛰️ Live Google Sheet:</b> kelas ini tidak ditemukan pada sheet DATA saat ini — roster di Google Sheet mungkin sudah ganti angkatan/kelas.</div>')
+        : "") +
+      "</div>";
+  });
+  grid.innerHTML = html;
+}
+
+async function cekBelumLive() {
+  const btn = $("btnLiveBelum");
+  btn.disabled = true; btn.textContent = "⏳ Memeriksa…";
+  const todayK = dateToK(new Date());
+  const map = {};
+  try {
+    for (const kn of D.kelas) {
+      const r = await fetch(API_URL + "?action=getBelumAbsen&rombel=" + encodeURIComponent(kn)).then(x => x.json());
+      map[kn] = r;
+    }
+    state.liveBelum = { k: todayK, map };
+    renderHariIni();
+    openModal("<h3>🛰️ Cek Live Selesai</h3><div class='sub'>Data langsung dari Google Sheet untuk " + fmtDL(todayK) + " (endpoint getBelumAbsen yang sudah ada di Apps Script Anda).</div><div class='chips'>" + Object.entries(map).map(([kn, r]) => "<span class='pill " + (r.totalSiswa ? (r.belumAbsen ? "warn" : "ok") : "mut") + "'>" + esc(kn) + ": " + (r.totalSiswa ? "belum " + r.belumAbsen + " dari " + r.totalSiswa : "roster kosong") + "</span>").join("") + "</div><div style='margin-top:10px;font-size:12px;color:var(--mut)'>\"Roster kosong\" = kelas tidak ada pada sheet DATA Google Sheet saat ini (mis. roster sudah ganti angkatan). Data snapshot kelas 9 tetap tersedia di aplikasi ini.</div>");
+  } catch (e) {
+    alert("Gagal mengambil data live: " + e.message);
+  }
+  btn.disabled = false; btn.textContent = "🛰️ Cek Live per Kelas";
+}
+
+/* ================= CSV EXPORT ================= */
+function csvCell(v) { const s = String(v == null ? "" : v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+function downloadCsv(name, header, rows) {
+  const csv = "\uFEFF" + [header, ...rows].map(r => r.map(csvCell).join(";")).join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function exportCsv() {
+  const t = state.tab;
+  if (t === "ringkasan") {
+    const ciF = state.kelas === "ALL" ? D.kelas.map((_, i) => i) : [kelasIdx(state.kelas)];
+    const rows = ciF.map(ci => { const r = classStat(ci, IDX.days); return [D.kelas[ci], r.nS, r.he, r.h, r.i, r.s, r.a, r.tk, (r.pct ?? 0).toFixed(1).replace(".", ",")]; });
+    const tot = schoolStat(ciF, IDX.days);
+    rows.push(["TOTAL", tot.nS, tot.he, tot.h, tot.i, tot.s, tot.a, tot.tk, (tot.pct ?? 0).toFixed(1).replace(".", ",")]);
+    downloadCsv("rekap-keseluruhan.csv", ["Kelas", "Jumlah Siswa", "Hari Efektif", "Hadir", "Izin", "Sakit", "Alpa", "Tanpa Catatan", "% Kehadiran"], rows);
+  } else if (t === "mingguan") {
+    const weeks = allWeeks();
+    const mon = weeks.includes(state.week) ? state.week : weeks[weeks.length - 1];
+    const kl = weekDays(mon).filter(k => IDX.daySet.has(k));
+    const dayLbl = kl.map(k => { const dt = kToDate(k); return DAY_MIN[dt.getDay()] + " " + dt.getDate(); });
+    if (state.kelas === "ALL") {
+      const rows = D.kelas.map((kn, ci) => { const r = classStat(ci, kl); return [kn, ...kl.map(k => { const cm = IDX.byDC.get(k) && IDX.byDC.get(k).get(ci); return cm ? cm.h + "/" + countSiswa(ci) : "-"; }), r.h, r.i, r.s, r.a, r.tk, (r.pct ?? 0).toFixed(1).replace(".", ",")]; });
+      downloadCsv("rekap-mingguan-" + mon + ".csv", ["Kelas", ...dayLbl, "Hadir", "Izin", "Sakit", "Alpa", "Tanpa Catatan", "% Kehadiran"], rows);
+    } else {
+      const ci = kelasIdx(state.kelas);
+      const rows = D.siswa.filter(s => s[3] === ci).map(s => {
+        const si = D.siswa.indexOf(s); const st = stuStat(si, new Set(kl));
+        return [s[0], s[1], s[2], ...kl.map(k => { const rec = IDX.byDS.get(k) && IDX.byDS.get(k).get(si); return rec == null ? "-" : ST[rec]; }), st.h, st.i, st.s, st.a, st.tk, (st.pct ?? 0).toFixed(1).replace(".", ",")];
+      });
+      downloadCsv("rekap-mingguan-" + state.kelas.replace(" ", "") + "-" + mon + ".csv", ["No", "Nama", "JK", ...dayLbl, "Hadir", "Izin", "Sakit", "Alpa", "Tanpa Catatan", "% Hadir"], rows);
+    }
+  } else if (t === "bulanan") {
+    const mws = monthWeeks(state.month);
+    const kList = monthDays(state.month);
+    const wkLbl = mws.map(g => "Mg" + isoWeek(g.mon));
+    if (state.kelas === "ALL") {
+      const rows = D.kelas.map((kn, ci) => { const r = classStat(ci, kList); return [kn, ...mws.map(g => { const rw = classStat(ci, g.days); return rw.total ? rw.pct.toFixed(1).replace(".", ",") : "-"; }), r.h, r.i, r.s, r.a, r.tk, (r.pct ?? 0).toFixed(1).replace(".", ",")]; });
+      downloadCsv("rekap-bulanan-" + state.month + ".csv", ["Kelas", ...wkLbl, "Hadir", "Izin", "Sakit", "Alpa", "Tanpa Catatan", "% Kehadiran"], rows);
+    } else {
+      const ci = kelasIdx(state.kelas);
+      const rows = D.siswa.filter(s => s[3] === ci).map(s => {
+        const si = D.siswa.indexOf(s); const st = stuStat(si, new Set(kList));
+        return [s[0], s[1], s[2], ...mws.map(g => { const sw = stuStat(si, new Set(g.days)); return sw.he ? sw.pct.toFixed(1).replace(".", ",") : "-"; }), st.h, st.i, st.s, st.a, st.tk, (st.pct ?? 0).toFixed(1).replace(".", ",")];
+      });
+      downloadCsv("rekap-bulanan-" + state.kelas.replace(" ", "") + "-" + state.month + ".csv", ["No", "Nama", "JK", ...wkLbl, "Hadir", "Izin", "Sakit", "Alpa", "Tanpa Catatan", "% Hadir"], rows);
+    }
+  } else if (t === "siswa") {
+    const ci = kelasIdx(state.kelasSiswa);
+    const rows = D.siswa.filter(s => s[3] === ci).map(s => {
+      const si = D.siswa.indexOf(s); const st = stuStat(si, IDX.daySet);
+      const pil = st.a >= 2 || (st.pct != null && st.pct < 45) ? "Perlu Tindakan" : ((st.pct != null && st.pct < 60) || st.tk >= 5) ? "Perhatian" : "Aman";
+      return [s[0], s[1], s[2], st.h, st.i, st.s, st.a, st.tk, st.he, (st.pct ?? 0).toFixed(1).replace(".", ","), pil];
+    });
+    downloadCsv("rekap-siswa-" + state.kelasSiswa.replace(" ", "") + ".csv", ["No", "Nama", "JK", "Hadir", "Izin", "Sakit", "Alpa", "Tanpa Catatan", "Hari Efektif", "% Hadir", "Status"], rows);
+  } else if (t === "hariini") {
+    const k = parseInt($("inpToday").value.replace(/-/g, ""), 10);
+    const rows = D.kelas.map((kn, ci) => {
+      const cm = IDX.byDC.get(k) && IDX.byDC.get(k).get(ci);
+      const nS = countSiswa(ci);
+      const recorded = new Set(cm ? cm.rows.map(r => r[0]) : []);
+      const belum = D.siswa.filter((s, si) => s[3] === ci && !recorded.has(si)).map(s => s[1]);
+      return [kn, nS, cm ? cm.h : 0, cm ? cm.i : 0, cm ? cm.s : 0, cm ? cm.a : 0, belum.length, belum.join(", ")];
+    });
+    downloadCsv("presensi-" + k + ".csv", ["Kelas", "Jumlah Siswa", "Hadir", "Izin", "Sakit", "Alpa", "Belum Mengisi", "Daftar Belum Mengisi"], rows);
+  }
+}
+
+/* ================= LIVE MODE ================= */
+function updateBadge() {
+  if (state.live) {
+    const ts = D.meta.live && D.meta.live.tsLocal ? D.meta.live.tsLocal : "";
+    $("srcBadge").textContent = "🟢 Live Google Sheet" + (ts ? " · " + ts : "") + " · " + fmtNum(D.absen.length) + " presensi";
+  } else {
+    $("srcBadge").textContent = "📦 Snapshot Excel · " + fmtNum(D.absen.length) + " presensi · s.d. " + fmtDMY(IDX.maxDate);
+  }
+}
+function mergeLiveRows(rows) {
+  const nameIdx = new Map(D.siswa.map((s, i) => [s[1], i]));
+  const out = []; let skip = 0;
+  rows.forEach(r => {
+    const st = ST.findIndex(x => x.toLowerCase() === String(r.status).toLowerCase());
+    if (st < 0 || !r.t) { skip++; return; }
+    const k = parseInt(String(r.t).slice(0, 10).replace(/-/g, ""), 10);
+    if (!k) { skip++; return; }
+    const nama = String(r.nama).trim();
+    let si = nameIdx.get(nama);
+    if (si == null) {
+      let ci = D.kelas.indexOf(String(r.rombel).trim());
+      if (ci < 0) { D.kelas.push(String(r.rombel).trim()); ci = D.kelas.length - 1; }
+      D.siswa.push([0, nama, String(r.jk || "").toUpperCase().startsWith("P") ? "P" : "L", ci]);
+      si = D.siswa.length - 1;
+      nameIdx.set(nama, si);
+    }
+    const m = r.meja ? (parseInt(String(r.meja).replace(/\D+/g, ""), 10) || 0) : 0;
+    out.push([k, si, st, m]);
+  });
+  out.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  return { out, skip };
+}
+async function loadLive() {
+  const btn = $("btnLive");
+  btn.disabled = true; btn.textContent = "⏳ Mengambil…";
+  try {
+    const res = await fetch(API_URL + "?action=getAbsensiAll");
+    const txt = await res.text();
+    let j;
+    try { j = JSON.parse(txt); } catch (e) {
+      throw new Error("Endpoint getAbsensiAll belum tersedia di Apps Script Anda. Buka ❓ Panduan — tambahkan kode dari file 'Kode GAS guru.txt' ke editor Apps Script, lalu deploy ulang.");
+    }
+    if (!j.rows) throw new Error("Respons tidak dikenal: " + txt.slice(0, 120));
+    const { out, skip } = mergeLiveRows(j.rows);
+    D.absen = out;
+    D.meta.live = { tsLocal: new Date().toLocaleString("id-ID"), jumlah: j.jumlah, skip };
+    state.live = true;
+    buildIndexes();
+    state.week = null; state.month = null;
+    buildAllSelects();
+    renderAll();
+    try { localStorage.setItem("guruLiveCache", JSON.stringify({ kelas: D.kelas, siswa: D.siswa, absen: D.absen, live: D.meta.live })); } catch (e) {}
+    openModal("<h3>🟢 Data Live Berhasil Dimuat</h3><div class='sub'>Data presensi terbaru langsung dari Google Sheet.</div><div style='font-size:13px;line-height:1.7'>• Total presensi: <b>" + fmtNum(out.length) + "</b>" + (skip ? "<br>• Baris dilewati (status/tanggal tidak valid): " + skip : "") + "<br>• Rentang data: <b>" + fmtDMY(IDX.minDate) + " – " + fmtDMY(IDX.maxDate) + "</b><br>• Data juga disimpan sementara di browser (cache), sehingga saat dibuka ulang masih ada.</div>");
+  } catch (e) {
+    alert("❌ " + e.message);
+  }
+  btn.disabled = false; btn.textContent = "🔄 Muat Data Live";
+}
+
+/* ================= PANDUAN ================= */
+function showHelp() {
+  openModal("<h3>❓ Panduan Aplikasi Rekap Guru</h3><div class='sub'>Semua angka dihitung otomatis dari data presensi (aplikasi absensi siswa).</div>" +
+    "<div style='font-size:13px;line-height:1.75'>" +
+    "<b>📚 Tab yang tersedia</b><br>" +
+    "• <b>📊 Ringkasan</b> — narasi otomatis, 8 kartu statistik, komposisi status (donut), perbandingan kelas, tren mingguan, serta daftar kelas &amp; siswa yang perlu perhatian.<br>" +
+    "• <b>📅 Rekap Mingguan</b> — tabel kelas × hari (Senin–Sabtu) pada minggu terpilih + rincian per siswa. Klik sel tanggal untuk melihat nama siswa &amp; statusnya.<br>" +
+    "• <b>🗓️ Rekap Bulanan</b> — tabel kelas × minggu dalam bulan terpilih, lengkap dengan kolom Δ (perbandingan dengan bulan sebelumnya) + rincian per siswa.<br>" +
+    "• <b>👤 Rekap Siswa</b> — statistik individual seluruh periode, pencarian nama, pengurutan, dan kartu detail riwayat per siswa (klik baris).<br>" +
+    "• <b>📌 Hari Ini</b> — kartu kehadiran per kelas pada tanggal tertentu, daftar siswa yang belum mengisi, dan tombol cek langsung ke Google Sheet.<br><br>" +
+    "<b>📐 Definisi angka</b><br>" +
+    "• <b>Hari efektif</b> = hari di mana kelas tersebut memiliki minimal 1 catatan presensi (diasumsikan hari itu kelasnya berjalan).<br>" +
+    "• <b>% Kehadiran kelas</b> = total Hadir ÷ (jumlah siswa × hari efektif).<br>" +
+    "• <b>% Kehadiran siswa</b> = Hadir siswa ÷ hari efektif kelasnya.<br>" +
+    "• <b>⚪ Hilang / Tanpa catatan</b> = siswa tidak mengisi presensi pada hari kelasnya tercatat ada aktivitas presensi. Ini <i>tidak sama</i> dengan Alpa resmi — gunakan sebagai indikator kedisiplinan pengisian.<br><br>" +
+    "<b>🛰️ Mode Live (opsional)</b><br>" +
+    "1. Tombol <b>🛰️ Cek Live per Kelas</b> (tab Hari Ini) langsung berfungsi dengan Apps Script yang sudah ada (endpoint <code>getBelumAbsen</code>).<br>" +
+    "2. Tombol <b>🔄 Muat Data Live</b> (kanan atas) membutuhkan tambahan kode dari file <code>Kode GAS guru.txt</code> yang disertakan: salin isinya ke bagian bawah editor Apps Script (script yang sama), simpan, lalu Deploy → Manage deployments → Edit → New version → Deploy.<br>" +
+    "3. Setelah live dimuat, data tersimpan di cache browser dan dipakai saat aplikasi dibuka berikutnya.<br><br>" +
+    "<b>💾 Ekspor &amp; cetak</b><br>" +
+    "• <b>⬇️ CSV</b> mengunduh tabel pada tab aktif (dipisah titik-koma, siap dibuka Excel Indonesia).<br>" +
+    "• <b>🖨️ Cetak</b> mencetak tab aktif saja — rapi untuk lampiran laporan mingguan/bulanan.</div>");
+}
+
+/* ================= INIT ================= */
+function buildAllSelects() {
+  const opts = '<option value="ALL">Semua Kelas</option>' + D.kelas.map(k => '<option value="' + esc(k) + '">' + esc(k) + "</option>").join("");
+  ["selKelasR", "selKelasM", "selKelasB"].forEach(id => { $(id).innerHTML = opts; $(id).value = state.kelas; });
+  $("selKelasS").innerHTML = D.kelas.map(k => '<option value="' + esc(k) + '">' + esc(k) + "</option>").join("");
+  if (!state.kelasSiswa || !D.kelas.includes(state.kelasSiswa)) state.kelasSiswa = D.kelas[0];
+  $("selKelasS").value = state.kelasSiswa;
+}
+function renderActive() {
+  ({ ringkasan: renderRingkasan, mingguan: renderMingguan, bulanan: renderBulanan, siswa: renderSiswa, hariini: renderHariIni })[state.tab]();
+}
+function renderAll() { updateBadge(); $("footSrc").textContent = D.meta.source + (state.live ? " (live)" : ""); renderActive(); }
+
+function init() {
+  buildIndexes();
+  /* restore cache live bila ada dan lebih besar dari snapshot */
+  try {
+    const c = JSON.parse(localStorage.getItem("guruLiveCache") || "null");
+    if (c && c.absen && c.absen.length > SNAP.absen.length) {
+      D = { meta: Object.assign({}, SNAP.meta, { live: c.live, source: SNAP.meta.source }), kelas: c.kelas, siswa: c.siswa, absen: c.absen };
+      state.live = true;
+    }
+  } catch (e) {}
+  state.kelasSiswa = D.kelas[0];
+  buildAllSelects();
+
+  /* tab */
+  $("tabs").addEventListener("click", e => {
+    const b = e.target.closest("button[data-tab]");
+    if (!b) return;
+    state.tab = b.dataset.tab;
+    document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("active", x === b));
+    document.querySelectorAll(".tab-pane").forEach(x => x.classList.toggle("active", x.id === "tab-" + state.tab));
+    renderAll();
+  });
+  /* filter kelas bersama */
+  ["selKelasR", "selKelasM", "selKelasB"].forEach(id => {
+    $(id).addEventListener("change", e => {
+      state.kelas = e.target.value;
+      ["selKelasR", "selKelasM", "selKelasB"].forEach(x => { $(x).value = state.kelas; });
+      renderActive();
+    });
+  });
+  /* mingguan */
+  $("selWeek").addEventListener("change", e => { state.week = +e.target.value; renderMingguan(); });
+  $("wkPrev").addEventListener("click", () => { const w = allWeeks(); const i = w.indexOf(state.week); if (i > 0) { state.week = w[i - 1]; renderMingguan(); } });
+  $("wkNext").addEventListener("click", () => { const w = allWeeks(); const i = w.indexOf(state.week); if (i < w.length - 1) { state.week = w[i + 1]; renderMingguan(); } });
+  /* bulanan */
+  $("selMonth").addEventListener("change", e => { state.month = e.target.value; renderBulanan(); });
+  $("moPrev").addEventListener("click", () => { const m = allMonths(); const i = m.indexOf(state.month); if (i > 0) { state.month = m[i - 1]; renderBulanan(); } });
+  $("moNext").addEventListener("click", () => { const m = allMonths(); const i = m.indexOf(state.month); if (i < m.length - 1) { state.month = m[i + 1]; renderBulanan(); } });
+  /* siswa */
+  $("selKelasS").addEventListener("change", e => { state.kelasSiswa = e.target.value; state.search = ""; $("inpCari").value = ""; renderSiswa(); });
+  $("inpCari").addEventListener("input", e => { state.search = e.target.value.trim(); renderSiswa(); });
+  $("selSort").addEventListener("change", e => { state.sort = e.target.value; renderSiswa(); });
+  /* hari ini */
+  $("inpToday").addEventListener("change", renderHariIni);
+  $("todayPrev").addEventListener("click", () => { const k = dateToK(kToDate(parseInt($("inpToday").value.replace(/-/g, ""), 10) || dateToK(new Date()))); const d = kToDate(addDays(k, -1)); $("inpToday").value = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); renderHariIni(); });
+  $("todayNext").addEventListener("click", () => { const k = dateToK(kToDate(parseInt($("inpToday").value.replace(/-/g, ""), 10) || dateToK(new Date()))); const d = kToDate(addDays(k, 1)); $("inpToday").value = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); renderHariIni(); });
+  $("btnLiveBelum").addEventListener("click", cekBelumLive);
+  /* aksi atas */
+  $("btnLive").addEventListener("click", loadLive);
+  $("btnCsv").addEventListener("click", exportCsv);
+  $("btnPrint").addEventListener("click", () => window.print());
+  $("btnHelp").addEventListener("click", showHelp);
+  /* klik daycell (rincian harian) */
+  document.addEventListener("click", e => {
+    const c = e.target.closest(".daycell[data-k]");
+    if (c) showDayModal(+c.dataset.k, +c.dataset.ci);
+  });
+
+  renderAll();
+}
+init();
+</script>
+</body>
+</html>
